@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel Administrativo | Estefany Paiva Nails</title>
+  
+  <meta name="theme-color" content="#171719">
+  <link rel="icon" type="image/jpeg" href="assets/images/perfil-julia.jpg">
+
+  <!-- Google Fonts: Editorial Serif + Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Estilos do Admin Expansivo -->
+  <link rel="stylesheet" href="assets/css/admin.css">
+</head>
+<body>
+
+  <!-- ========================================================
+       TELA 6: LOGIN ADMINISTRATIVO (MODAL EXPANSIVO)
+       ======================================================== -->
+  <div class="screen-admin-login" id="screenAdminLogin">
+    <div class="admin-login-box">
+      <div class="admin-login-head">
+        <i class="fa-solid fa-heart"></i>
+        <h2>ESTEFANY PAIVA</h2>
+        <span>NAILS</span>
+      </div>
+
+      <div class="admin-login-card">
+        <h3>Área Administrativa</h3>
+        <p>Acesse sua conta para gerenciar seus agendamentos, clientes e finanças.</p>
+
+        <form id="adminLoginForm">
+          <div class="admin-input-group">
+            <i class="fa-regular fa-user"></i>
+            <input type="text" id="adminUserLogin" value="estefany@paivanails.com" placeholder="Digite seu usuário" required>
+          </div>
+
+          <div class="admin-input-group">
+            <i class="fa-solid fa-lock"></i>
+            <input type="password" id="adminUserPassword" placeholder="Digite sua senha (admin123)" required autofocus>
+            <button type="button" onclick="const p = document.getElementById('adminUserPassword'); p.type = p.type === 'password' ? 'text' : 'password';" style="color:#777176;">
+              <i class="fa-regular fa-eye"></i>
+            </button>
+          </div>
+
+          <div id="adminLoginErrorMsg" style="display:none; color:#EF4444; font-size:0.8rem; margin-bottom:12px;"></div>
+
+          <button type="submit" class="btn-admin-enter">Entrar no Painel</button>
+
+          <a href="#" class="admin-forgot-pwd" onclick="alert('Dica de acesso rápido: Senha padrão = admin123'); return false;">
+            Esqueceu a senha?
+          </a>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ESTRUTURA PRINCIPAL EXPANSIVA DO ADMIN -->
+  <div class="admin-site-wrapper">
+
+    <!-- Topbar Superior Expansiva -->
+    <header class="admin-topbar-header">
+      <div class="admin-topbar-inner">
+        <div class="admin-greeting-text">
+          <h2>Olá, Estefany!</h2>
+          <p>Aqui está o resumo e gestão do seu salão.</p>
+        </div>
+
+        <!-- Abas Desktop (Visíveis em Computadores e Tablets) -->
+        <nav class="admin-desktop-tabs">
+          <li class="admin-desktop-tab-btn active" data-tab="dashboard">
+            <i class="fa-solid fa-calendar-day"></i>
+            <span>Dashboard / Hoje</span>
+          </li>
+          <li class="admin-desktop-tab-btn" data-tab="clients">
+            <i class="fa-regular fa-user"></i>
+            <span>Clientes</span>
+          </li>
+          <li class="admin-desktop-tab-btn" data-tab="services">
+            <i class="fa-regular fa-calendar-check"></i>
+            <span>Serviços</span>
+          </li>
+          <li class="admin-desktop-tab-btn" data-tab="finance">
+            <i class="fa-regular fa-chart-bar"></i>
+            <span>Financeiro</span>
+          </li>
+        </nav>
+
+        <div class="admin-topbar-right">
+          <a href="index.html" class="btn-view-public-site" target="_blank">
+            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+            <span>Ver Site da Cliente</span>
+          </a>
+
+          <div class="admin-profile-badge" title="Estefany Paiva Nails">
+            <img src="assets/images/perfil-julia.jpg" alt="Estefany Paiva">
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- CONTEÚDO PRINCIPAL EXPANSIVO DO ADMIN -->
+    <main class="admin-main-content-area">
+
+      <!-- ========================================================
+           TELA 7: DASHBOARD & AGENDAMENTOS DE HOJE
+           ======================================================== -->
+      <section class="admin-view-section active" id="adminView_dashboard">
+        
+        <!-- 4 Cartões KPIs (Tela 7) -->
+        <div class="admin-kpi-grid-2x2">
+          <div class="kpi-dark-card">
+            <span class="kpi-num" id="kpiTodayCount">5</span>
+            <span class="kpi-lbl">Agendamentos hoje</span>
+          </div>
+
+          <div class="kpi-dark-card">
+            <span class="kpi-num" id="kpiTodayRevenue">R$ 640,00</span>
+            <span class="kpi-lbl">Faturamento do dia</span>
+          </div>
+
+          <div class="kpi-dark-card">
+            <span class="kpi-num" id="kpiActiveClients">12</span>
+            <span class="kpi-lbl">Clientes ativas</span>
+          </div>
+
+          <div class="kpi-dark-card">
+            <span class="kpi-num" id="kpiServicesDone">6</span>
+            <span class="kpi-lbl">Serviços realizados</span>
+          </div>
+        </div>
+
+        <!-- Lista de Agendamentos de Hoje -->
+        <div class="today-slots-header">
+          <h3>Agendamentos de hoje</h3>
+          <a href="#" onclick="switchAdminTab('clients'); return false;">Ver todos os clientes &gt;</a>
+        </div>
+
+        <div class="today-slots-list" id="adminTodaySlotsList">
+          <!-- Injetado dinamicamente via admin.js -->
+        </div>
+
+      </section>
+
+      <!-- ========================================================
+           TELA 8: GESTÃO DE CLIENTES (GRADE EXPANSIVA)
+           ======================================================== -->
+      <section class="admin-view-section" id="adminView_clients">
+        <div class="today-slots-header">
+          <h3>Gestão de Clientes</h3>
+          <button style="color:var(--color-rose); font-size:1.1rem; font-weight:600; display:flex; align-items:center; gap:6px;" onclick="const n = prompt('Nome da nova cliente:'); if(n){ window.EPStore.saveCustomer({ id:'c_'+Date.now(), name:n, phone:'(61) 99999-0000', totalAppointments:1, totalSpent:150, notes:'' }); renderClientsList(); }">
+            <i class="fa-solid fa-circle-plus"></i> Cadastrar Cliente
+          </button>
+        </div>
+
+        <div class="admin-search-bar">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="adminClientSearchInput" placeholder="Buscar por nome ou WhatsApp...">
+        </div>
+
+        <div class="admin-clients-list" id="adminClientsList">
+          <!-- Injetado dinamicamente via admin.js -->
+        </div>
+      </section>
+
+      <!-- ========================================================
+           TELA 9: GESTÃO DE SERVIÇOS (GRADE EXPANSIVA)
+           ======================================================== -->
+      <section class="admin-view-section" id="adminView_services">
+        <div class="today-slots-header">
+          <h3>Catálogo de Serviços & Procedimentos</h3>
+          <button style="color:var(--color-rose); font-size:1.1rem; font-weight:600; display:flex; align-items:center; gap:6px;" onclick="const n = prompt('Nome do novo serviço:'); if(n){ const p = parseFloat(prompt('Preço (R$):', '90')||'90'); window.EPStore.saveService({ id:'srv_'+Date.now(), name:n, price:p, duration:60, active:true }); renderServicesAdmin(); }">
+            <i class="fa-solid fa-circle-plus"></i> Novo Serviço
+          </button>
+        </div>
+
+        <div class="admin-services-list" id="adminServicesList">
+          <!-- Injetado dinamicamente via admin.js -->
+        </div>
+      </section>
+
+      <!-- ========================================================
+           TELA 10: FINANCEIRO & RELATÓRIOS EXPANSIVO
+           ======================================================== -->
+      <section class="admin-view-section" id="adminView_finance">
+        <div class="today-slots-header">
+          <h3>Financeiro & Receitas</h3>
+          <span style="font-size:0.9rem; color:#A39D9E;">&lt; Maio 2025 &gt;</span>
+        </div>
+
+        <!-- 3 KPIs Financeiros -->
+        <div class="finance-kpis-row">
+          <div class="finance-kpi-card">
+            <h4 id="finTotalRevenue">R$ 3.480,00</h4>
+            <p>Receita total</p>
+          </div>
+          <div class="finance-kpi-card">
+            <h4 id="finInProgressRevenue">R$ 640,00</h4>
+            <p>Em andamento</p>
+          </div>
+          <div class="finance-kpi-card">
+            <h4 id="finPreviousMonthRevenue">R$ 12.540,00</h4>
+            <p>Mês anterior</p>
+          </div>
+        </div>
+
+        <!-- Vendas por Serviço com Barras -->
+        <div class="finance-breakdown-box">
+          <h4>Vendas por serviço</h4>
+
+          <div class="breakdown-row">
+            <div class="breakdown-labels">
+              <span>Alongamento em gel</span>
+              <span>40%</span>
+            </div>
+            <div class="breakdown-bar-track">
+              <div class="breakdown-bar-fill" style="width:40%;"></div>
+            </div>
+          </div>
+
+          <div class="breakdown-row">
+            <div class="breakdown-labels">
+              <span>Manutenção</span>
+              <span>25%</span>
+            </div>
+            <div class="breakdown-bar-track">
+              <div class="breakdown-bar-fill" style="width:25%;"></div>
+            </div>
+          </div>
+
+          <div class="breakdown-row">
+            <div class="breakdown-labels">
+              <span>Banho de gel</span>
+              <span>20%</span>
+            </div>
+            <div class="breakdown-bar-track">
+              <div class="breakdown-bar-fill" style="width:20%;"></div>
+            </div>
+          </div>
+
+          <div class="breakdown-row">
+            <div class="breakdown-labels">
+              <span>Esmaltação em gel</span>
+              <span>15%</span>
+            </div>
+            <div class="breakdown-bar-track">
+              <div class="breakdown-bar-fill" style="width:15%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex; gap:12px; flex-wrap:wrap;">
+          <button class="btn-pink-primary" id="btnExportFullReport" style="width:auto; padding:14px 28px;">
+            <span>Ver relatório completo (CSV Excel)</span>
+            <i class="fa-solid fa-download"></i>
+          </button>
+
+          <button id="btnAdminLogout" style="color:#EF4444; font-size:0.9rem; display:flex; align-items:center; gap:8px; padding:10px 16px; border:1px solid rgba(239, 68, 68, 0.3); border-radius:9999px;">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i> Encerrar Sessão
+          </button>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- BARRA INFERIOR (APENAS CELULAR / TABLET) -->
+    <nav class="admin-bottom-nav">
+      <button class="admin-nav-tab active" data-tab="dashboard">
+        <i class="fa-solid fa-house"></i>
+        <span>Início</span>
+      </button>
+
+      <button class="admin-nav-tab" data-tab="clients">
+        <i class="fa-regular fa-user"></i>
+        <span>Clientes</span>
+      </button>
+
+      <button class="admin-nav-tab" data-tab="services">
+        <i class="fa-regular fa-calendar-check"></i>
+        <span>Serviços</span>
+      </button>
+
+      <button class="admin-nav-tab" data-tab="finance">
+        <i class="fa-regular fa-chart-bar"></i>
+        <span>Financeiro</span>
+      </button>
+
+      <button class="admin-nav-tab" onclick="window.location.href='index.html'">
+        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+        <span>Ver Site</span>
+      </button>
+    </nav>
+
+  </div>
+
+  <!-- Drawer / Modal de Ações no Agendamento -->
+  <div class="admin-action-drawer" id="adminActionDrawer">
+    <div class="drawer-sheet">
+      <div class="drawer-header">
+        <h3 id="drawerClientName">Juliana Santos</h3>
+        <button id="btnDrawerClose" style="color:#A39D9E; font-size:1.5rem;">&times;</button>
+      </div>
+      <p id="drawerServiceDetails" style="font-size:0.9rem; color:#A39D9E;"></p>
+
+      <div class="drawer-actions-grid">
+        <button class="btn-drawer-action confirm" id="btnDrawerConfirm">
+          <i class="fa-solid fa-check"></i> Confirmar
+        </button>
+        <button class="btn-drawer-action whatsapp" id="btnDrawerWhatsApp">
+          <i class="fa-brands fa-whatsapp"></i> Chamar WhatsApp
+        </button>
+        <button class="btn-drawer-action cancel" id="btnDrawerCancel">
+          <i class="fa-solid fa-xmark"></i> Cancelar
+        </button>
+        <button class="btn-drawer-action close" onclick="document.getElementById('adminActionDrawer').classList.remove('active');">
+          Fechar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="assets/js/store.js"></script>
+  <script src="assets/js/admin.js"></script>
+  <script>
+    // Conectar abas desktop do admin
+    document.querySelectorAll('.admin-desktop-tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.admin-desktop-tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const tab = btn.getAttribute('data-tab');
+        if (tab && window.switchAdminTab) window.switchAdminTab(tab);
+      });
+    });
+  </script>
+</body>
+</html>

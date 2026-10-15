@@ -1,0 +1,795 @@
+/* ========================================================
+   ESTEFANY PAIVA NAILS - ESTILOS DO PAINEL ADMIN
+   Design 100% Expansivo & Responsivo (Sem moldura de celular)
+   Tema Escuro de Luxo: #171719, Cartões #222022, Detalhes Rosé #E9A3B5
+   ======================================================== */
+
+@import url('./variables.css');
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  background-color: var(--admin-bg);
+  color: var(--admin-text-main);
+  font-family: var(--font-sans);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+button, input, select {
+  font-family: inherit;
+  border: none;
+  background: none;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* ========================================================
+   CONTAINER DO APP ADMIN EXPANSIVO
+   ======================================================== */
+.admin-site-wrapper {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--admin-bg);
+}
+
+.admin-main-content-area {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.5rem 1.5rem 6rem;
+  flex: 1;
+}
+
+@media (max-width: 768px) {
+  .admin-main-content-area {
+    padding: 1rem 1rem 6rem;
+  }
+}
+
+/* ========================================================
+   TELA 6: LOGIN ADMINISTRATIVO (MODAL/TELA EXPANSIVA)
+   ======================================================== */
+.screen-admin-login {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: var(--admin-bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1.5rem;
+  color: #FFFFFF;
+}
+
+.screen-admin-login.hidden {
+  display: none !important;
+}
+
+.admin-login-box {
+  width: 100%;
+  max-width: 440px;
+  background: var(--admin-card-bg);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--radius-lg);
+  padding: 2.5rem 2rem;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+  text-align: center;
+}
+
+.admin-login-head {
+  margin-bottom: 1.8rem;
+}
+
+.admin-login-head i {
+  color: var(--color-rose);
+  font-size: 1.4rem;
+  margin-bottom: 8px;
+}
+
+.admin-login-head h2 {
+  font-family: var(--font-serif);
+  font-size: 1.35rem;
+  letter-spacing: 0.14em;
+  font-weight: 600;
+}
+
+.admin-login-head span {
+  font-size: 0.72rem;
+  letter-spacing: 0.25em;
+  color: #A39D9E;
+  display: block;
+  margin-top: 4px;
+}
+
+.admin-login-card h3 {
+  font-family: var(--font-serif);
+  font-size: 1.45rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+  text-align: left;
+}
+
+.admin-login-card p {
+  font-size: 0.88rem;
+  color: var(--admin-text-muted);
+  line-height: 1.5;
+  margin-bottom: 24px;
+  text-align: left;
+}
+
+.admin-input-group {
+  background: #171719;
+  border: 1.5px solid var(--admin-border);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+  transition: var(--transition-fast);
+}
+
+.admin-input-group:focus-within {
+  border-color: var(--color-rose);
+  box-shadow: 0 0 0 3px rgba(233, 163, 181, 0.15);
+}
+
+.admin-input-group i {
+  color: #777176;
+  font-size: 1rem;
+}
+
+.admin-input-group input {
+  flex: 1;
+  color: #FFFFFF;
+  font-size: 0.95rem;
+  outline: none;
+}
+
+.admin-input-group input::placeholder {
+  color: #645F63;
+}
+
+.btn-admin-enter {
+  width: 100%;
+  background: var(--color-pink-btn);
+  color: var(--color-preto);
+  font-weight: 700;
+  font-size: 1rem;
+  padding: 14px;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  margin-top: 10px;
+  box-shadow: 0 4px 15px rgba(233, 163, 181, 0.25);
+  transition: var(--transition-fast);
+}
+
+.btn-admin-enter:hover {
+  background: var(--color-pink-btn-hover);
+  transform: translateY(-2px);
+}
+
+.admin-forgot-pwd {
+  display: block;
+  text-align: center;
+  font-size: 0.82rem;
+  color: var(--admin-text-muted);
+  margin-top: 16px;
+}
+
+/* ========================================================
+   TOPBAR DO ADMIN EXPANSIVA
+   ======================================================== */
+.admin-topbar-header {
+  background: #1B191B;
+  border-bottom: 1px solid var(--admin-border);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  width: 100%;
+}
+
+.admin-topbar-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 14px 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.admin-greeting-text h2 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #FFFFFF;
+}
+
+.admin-greeting-text p {
+  font-size: 0.82rem;
+  color: var(--admin-text-muted);
+  margin-top: 2px;
+}
+
+/* Menu de Abas Desktop */
+.admin-desktop-tabs {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  list-style: none;
+}
+
+.admin-desktop-tab-btn {
+  font-size: 0.92rem;
+  color: #A39D9E;
+  font-weight: 500;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: var(--transition-fast);
+}
+
+.admin-desktop-tab-btn:hover, .admin-desktop-tab-btn.active {
+  color: #FFFFFF;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.admin-desktop-tab-btn.active {
+  color: var(--color-rose);
+  font-weight: 600;
+}
+
+.admin-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.btn-view-public-site {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--admin-border);
+  color: #FFFFFF;
+  padding: 8px 16px;
+  border-radius: var(--radius-pill);
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: var(--transition-fast);
+}
+
+.btn-view-public-site:hover {
+  background: var(--color-rose);
+  color: var(--color-preto);
+}
+
+.admin-profile-badge {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 1.5px solid var(--color-rose);
+  position: relative;
+}
+
+.admin-profile-badge img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+@media (max-width: 850px) {
+  .admin-desktop-tabs, .btn-view-public-site {
+    display: none;
+  }
+}
+
+/* ========================================================
+   TELA 7: DASHBOARD & AGENDAMENTOS DE HOJE EXPANSIVO
+   ======================================================== */
+.admin-view-section {
+  display: none;
+  flex-direction: column;
+  width: 100%;
+}
+
+.admin-view-section.active {
+  display: flex;
+}
+
+/* 4 KPIs em 4 colunas no Desktop e 2 no Mobile */
+.admin-kpi-grid-2x2 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.2rem;
+  margin-bottom: 2rem;
+}
+
+@media (max-width: 900px) {
+  .admin-kpi-grid-2x2 {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+}
+
+.kpi-dark-card {
+  background: var(--admin-card-bg);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--radius-md);
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.kpi-dark-card .kpi-num {
+  font-family: var(--font-serif);
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  margin-bottom: 4px;
+}
+
+.kpi-dark-card .kpi-lbl {
+  font-size: 0.85rem;
+  color: var(--admin-text-muted);
+}
+
+/* Lista de Agendamentos de Hoje (Tela 7) */
+.today-slots-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.today-slots-header h3 {
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #FFFFFF;
+}
+
+.today-slots-header a {
+  font-size: 0.85rem;
+  color: var(--color-rose);
+  font-weight: 600;
+}
+
+.today-slots-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.today-slot-row-card {
+  background: var(--admin-card-bg);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--radius-sm);
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.today-slot-row-card:hover {
+  background: var(--admin-card-hover);
+  border-color: #4A464A;
+  transform: translateY(-2px);
+}
+
+.slot-time-bold {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  width: 65px;
+  flex-shrink: 0;
+}
+
+.slot-client-info {
+  flex: 1;
+  padding: 0 16px;
+}
+
+.slot-client-info h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #FFFFFF;
+}
+
+.slot-client-info p {
+  font-size: 0.82rem;
+  color: var(--admin-text-muted);
+  margin-top: 2px;
+}
+
+.slot-status-badge {
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+}
+
+.slot-status-badge.confirmado {
+  background: rgba(221, 242, 225, 0.15);
+  color: #34D399;
+}
+
+.slot-status-badge.pendente {
+  background: rgba(255, 240, 206, 0.15);
+  color: #FBBF24;
+}
+
+/* ========================================================
+   TELA 8: GESTÃO DE CLIENTES (GRADE EXPANSIVA)
+   ======================================================== */
+.admin-search-bar {
+  background: var(--admin-card-bg);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--radius-pill);
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  max-width: 500px;
+}
+
+.admin-search-bar i {
+  color: #777176;
+  font-size: 1rem;
+}
+
+.admin-search-bar input {
+  flex: 1;
+  color: #FFFFFF;
+  font-size: 0.95rem;
+  outline: none;
+}
+
+.admin-clients-list {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+@media (max-width: 1024px) {
+  .admin-clients-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .admin-clients-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+.admin-client-item {
+  background: var(--admin-card-bg);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.admin-client-item:hover {
+  background: var(--admin-card-hover);
+  border-color: #4A464A;
+}
+
+.client-item-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.client-avatar-circle {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #333033;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: var(--color-rose);
+  font-size: 1rem;
+}
+
+.client-item-left h4 {
+  font-size: 0.98rem;
+  font-weight: 600;
+  color: #FFFFFF;
+}
+
+.client-item-left p {
+  font-size: 0.82rem;
+  color: var(--admin-text-muted);
+  margin-top: 3px;
+}
+
+/* ========================================================
+   TELA 9: GESTÃO DE SERVIÇOS (GRADE EXPANSIVA)
+   ======================================================== */
+.admin-services-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 768px) {
+  .admin-services-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+.admin-service-row {
+  background: var(--admin-card-bg);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.service-row-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.service-row-left .thumb {
+  width: 52px;
+  height: 52px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #333033;
+}
+
+.service-row-left .thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.service-row-left h4 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #FFFFFF;
+}
+
+.service-row-left p {
+  font-size: 0.85rem;
+  color: var(--admin-text-muted);
+  margin-top: 3px;
+}
+
+.service-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.btn-icon-admin {
+  color: #A39D9E;
+  font-size: 1.1rem;
+  padding: 8px;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.btn-icon-admin:hover {
+  color: var(--color-rose);
+}
+
+/* ========================================================
+   TELA 10: FINANCEIRO & RELATÓRIOS EXPANSIVO
+   ======================================================== */
+.finance-kpis-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.2rem;
+  margin-bottom: 2rem;
+}
+
+@media (max-width: 768px) {
+  .finance-kpis-row {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+}
+
+.finance-kpi-card {
+  background: var(--admin-card-bg);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  text-align: center;
+}
+
+.finance-kpi-card h4 {
+  font-family: var(--font-serif);
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  margin-bottom: 6px;
+}
+
+.finance-kpi-card p {
+  font-size: 0.85rem;
+  color: var(--admin-text-muted);
+}
+
+.finance-breakdown-box {
+  background: var(--admin-card-bg);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--radius-md);
+  padding: 24px;
+  margin-bottom: 2rem;
+}
+
+.finance-breakdown-box h4 {
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #FFFFFF;
+  margin-bottom: 20px;
+}
+
+.breakdown-row {
+  margin-bottom: 16px;
+}
+
+.breakdown-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  color: #FFFFFF;
+  margin-bottom: 8px;
+}
+
+.breakdown-bar-track {
+  width: 100%;
+  height: 8px;
+  background: #333033;
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
+
+.breakdown-bar-fill {
+  height: 100%;
+  background: var(--color-rose);
+  border-radius: var(--radius-pill);
+}
+
+/* ========================================================
+   BARRA DE NAVEGAÇÃO INFERIOR DO ADMIN (APENAS CELULAR)
+   ======================================================== */
+.admin-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: var(--admin-bg);
+  border-top: 1px solid var(--admin-border);
+  display: none; /* Oculta no Desktop */
+  align-items: center;
+  justify-content: space-around;
+  padding: 8px 10px 12px;
+  z-index: 1000;
+}
+
+@media (max-width: 850px) {
+  .admin-bottom-nav {
+    display: flex; /* Exibe apenas no celular/tablet */
+  }
+}
+
+.admin-nav-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  color: #777176;
+  font-size: 0.72rem;
+  font-weight: 500;
+  flex: 1;
+}
+
+.admin-nav-tab i {
+  font-size: 1.15rem;
+}
+
+.admin-nav-tab.active {
+  color: var(--color-rose);
+  font-weight: 600;
+}
+
+/* Modal Drawer de Ações */
+.admin-action-drawer {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(6px);
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.admin-action-drawer.active {
+  display: flex;
+}
+
+.drawer-sheet {
+  width: 100%;
+  max-width: 500px;
+  background: #1F1D1F;
+  border-radius: var(--radius-lg);
+  padding: 24px 24px 30px;
+  border: 1px solid #333033;
+  color: #FFFFFF;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+}
+
+.drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.drawer-header h3 {
+  font-family: var(--font-serif);
+  font-size: 1.35rem;
+}
+
+.drawer-actions-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.btn-drawer-action {
+  padding: 14px;
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.btn-drawer-action.confirm { background: #226E3A; color: #FFF; }
+.btn-drawer-action.whatsapp { background: #25D366; color: #FFF; }
+.btn-drawer-action.cancel { background: #B02A37; color: #FFF; }
+.btn-drawer-action.close { background: #333033; color: #FFF; }
