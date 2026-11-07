@@ -2,18 +2,20 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Estefany Paiva &bull; Nail Designer | Agendamento & Portfólio</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Estefany Paiva &bull; Nail Designer</title>
   
   <meta name="theme-color" content="#350B19">
-  <meta name="description" content="Plataforma de agendamento online de nail design de luxo para Estefany Paiva Nails. Cuidados, beleza e autoestima em cada detalhe.">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="description" content="Plataforma de agendamento online de nail design de luxo para Estefany Paiva Nails. Cuidado, beleza e autoestima em cada detalhe.">
 
-  <!-- Manifest PWA -->
+  <!-- Manifest PWA & Favicons -->
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/jpeg" href="assets/images/capa-estefany-paiva.jpg">
   <link rel="apple-touch-icon" href="assets/images/capa-estefany-paiva.jpg">
 
-  <!-- Fontes Oficiais: Editorial Serif + Modern Sans -->
+  <!-- Google Fonts: Editorial Serif + Modern Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -25,401 +27,329 @@
   <link rel="stylesheet" href="assets/css/variables.css">
   <link rel="stylesheet" href="assets/css/client.css">
 </head>
-<body style="background: #FAF5F4; color: #171719; padding-bottom: 5rem;">
+<body>
 
-  <!-- ESTRUTURA PRINCIPAL EXPANSIVA DO SITE -->
-  <div class="site-wrapper">
+  <!-- CONTAINER PRINCIPAL DO APLICATIVO DO CLIENTE (EXPANSIVO E CENTRADO) -->
+  <div class="client-app-shell">
 
     <!-- ========================================================
          1. CABEÇALHO VINHO DE LUXO COM ONDAS ORGÂNICAS (MOCKUP)
          ======================================================== -->
-    <header class="wine-luxury-header">
-      <div class="wine-header-inner">
-        
-        <!-- Status Bar do Celular (Apenas Telas Compactas) -->
-        <div class="mobile-status-bar">
-          <span>9:41</span>
-          <div class="mobile-status-icons">
-            <i class="fa-solid fa-signal"></i>
-            <i class="fa-solid fa-wifi"></i>
-            <i class="fa-solid fa-battery-full"></i>
-          </div>
+    <header class="client-header-wine">
+      
+      <!-- Status Bar Compacta (9:41 e bateria) -->
+      <div class="status-bar-row">
+        <span>9:41</span>
+        <div class="status-bar-icons">
+          <i class="fa-solid fa-signal"></i>
+          <i class="fa-solid fa-wifi"></i>
+          <i class="fa-solid fa-battery-full"></i>
         </div>
-
-        <!-- Barra Superior: Menu, Logo Assinatura e Sino de Notificação -->
-        <div class="wine-topbar">
-          <button class="btn-wine-icon" id="btnOpenMenu" aria-label="Abrir Menu" onclick="document.getElementById('secMeusAgendamentos').scrollIntoView({behavior:'smooth'})">
-            <i class="fa-solid fa-bars"></i>
-          </button>
-
-          <!-- Logo Assinatura Ep ESTEFANY PAIVA NAIL DESIGNER -->
-          <div class="brand-signature-logo" onclick="window.scrollTo({top:0, behavior:'smooth'})">
-            <span class="sig-cursive-ep">Ep</span>
-            <div class="sig-text-block">
-              <span class="sig-name">ESTEFANY PAIVA</span>
-              <span class="sig-subtitle">NAIL DESIGNER</span>
-            </div>
-          </div>
-
-          <button class="btn-wine-icon btn-notification" id="btnNotificationBell" aria-label="Notificações" onclick="document.getElementById('secMeusAgendamentos').scrollIntoView({behavior:'smooth'})">
-            <i class="fa-regular fa-bell"></i>
-            <span class="notification-badge-pink">1</span>
-          </button>
-        </div>
-
-        <!-- Linha de Saudação da Cliente -->
-        <div class="user-greeting-card">
-          <div class="greeting-avatar-wrap">
-            <img src="assets/images/trabalho-amendoada-ouro.png" alt="Unhas da Cliente">
-          </div>
-          <div class="greeting-text-wrap">
-            <h2>Olá, Mariana! <i class="fa-regular fa-heart"></i></h2>
-            <p>Bem-vinda de volta!</p>
-          </div>
-        </div>
-
       </div>
+
+      <!-- Barra Superior: Menu, Assinatura Ep e Sino de Notificação -->
+      <div class="topbar-nav-row">
+        <button class="btn-header-icon" id="btnOpenMenu" aria-label="Menu" onclick="document.getElementById('secMeusAgendamentos').scrollIntoView({behavior:'smooth'})">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+
+        <!-- Logo Assinatura Oficial Ep ESTEFANY PAIVA NAIL DESIGNER -->
+        <div class="signature-logo-wrap" onclick="window.scrollTo({top:0, behavior:'smooth'})">
+          <span class="sig-script-ep">Ep</span>
+          <div class="sig-script-text">
+            <span class="sig-script-title">ESTEFANY PAIVA</span>
+            <span class="sig-script-sub">NAIL DESIGNER</span>
+          </div>
+        </div>
+
+        <button class="btn-header-icon" id="btnNotificationBell" aria-label="Notificações" onclick="document.getElementById('secMeusAgendamentos').scrollIntoView({behavior:'smooth'})">
+          <i class="fa-regular fa-bell"></i>
+          <span class="badge-bell-count">1</span>
+        </button>
+      </div>
+
+      <!-- Linha de Saudação à Cliente -->
+      <div class="greeting-user-box">
+        <div class="greeting-avatar-ring">
+          <img src="assets/images/trabalho-amendoada-ouro.png" alt="Unhas da Cliente">
+        </div>
+        <div class="greeting-text-area">
+          <h2>Olá, Mariana! <i class="fa-regular fa-heart"></i></h2>
+          <p>Bem-vinda de volta!</p>
+        </div>
+      </div>
+
     </header>
 
-    <!-- ÁREA PRINCIPAL EXPANSIVA -->
-    <main class="main-content-area" style="max-width:1100px; margin:0 auto;">
-
-      <!-- ========================================================
-           2. GRADE DE 4 AÇÕES RÁPIDAS (CARDS ROSÉ PASTEL)
-           ======================================================== -->
-      <section class="quick-actions-section">
-        <div class="quick-actions-grid">
-          
-          <div class="quick-action-card" onclick="document.getElementById('bookingSection').scrollIntoView({behavior:'smooth'})">
-            <div class="icon-circle">
-              <i class="fa-regular fa-calendar-check"></i>
-            </div>
-            <span>Agendar Horário</span>
+    <!-- ========================================================
+         2. GRADE DE 4 AÇÕES RÁPIDAS (CARDS ROSÉ PASTEL)
+         ======================================================== -->
+    <section class="quick-actions-bar">
+      <div class="quick-actions-grid">
+        
+        <button class="card-action-squircle" onclick="document.getElementById('bookingSection').scrollIntoView({behavior:'smooth'})">
+          <div class="action-icon-wrap">
+            <i class="fa-regular fa-calendar-check"></i>
           </div>
+          <span>Agendar<br>Horário</span>
+        </button>
 
-          <div class="quick-action-card" onclick="document.getElementById('secMeusAgendamentos').scrollIntoView({behavior:'smooth'})">
-            <div class="icon-circle">
-              <i class="fa-regular fa-clock-rotate-left"></i>
-            </div>
-            <span>Meus Agendamentos</span>
+        <button class="card-action-squircle" onclick="document.getElementById('secMeusAgendamentos').scrollIntoView({behavior:'smooth'})">
+          <div class="action-icon-wrap">
+            <i class="fa-regular fa-clock-rotate-left"></i>
           </div>
+          <span>Meus<br>Agendamentos</span>
+        </button>
 
-          <div class="quick-action-card" onclick="document.getElementById('secNossosServicos').scrollIntoView({behavior:'smooth'})">
-            <div class="icon-circle">
-              <i class="fa-regular fa-gem"></i>
-            </div>
-            <span>Serviços</span>
+        <button class="card-action-squircle" onclick="document.getElementById('secNossosServicos').scrollIntoView({behavior:'smooth'})">
+          <div class="action-icon-wrap">
+            <i class="fa-regular fa-gem"></i>
           </div>
+          <span>Serviços</span>
+        </button>
 
-          <div class="quick-action-card" onclick="openProfileContactModal()">
-            <div class="icon-circle">
-              <i class="fa-regular fa-user"></i>
-            </div>
-            <span>Meu Perfil</span>
+        <button class="card-action-squircle" onclick="openProfileContactModal()">
+          <div class="action-icon-wrap">
+            <i class="fa-regular fa-user"></i>
           </div>
+          <span>Meu<br>Perfil</span>
+        </button>
 
-        </div>
-      </section>
-
-      <!-- ========================================================
-           3. BANNER PROMOCIONAL DESTAQUE COM ONDAS
-           ======================================================== -->
-      <section class="promo-banner-section">
-        <div class="promo-banner-card">
-          <div class="promo-banner-text">
-            <h3>Cuidado, beleza e autoestima em cada detalhe ♡</h3>
-            <button class="btn-promo-wine" onclick="document.getElementById('bookingSection').scrollIntoView({behavior:'smooth'})">
-              <span>Agendar agora</span>
-              <i class="fa-solid fa-arrow-right"></i>
-            </button>
-          </div>
-          <div class="promo-banner-img-wrap">
-            <img src="assets/images/trabalho-tons-terrosos.png" alt="Unhas com acabamento rosé e nude impecável">
-          </div>
-        </div>
-      </section>
-
-      <!-- ========================================================
-           4. SEÇÃO "✦ MEUS AGENDAMENTOS" (DESTAQUE PRÓXIMO ATENDIMENTO)
-           ======================================================== -->
-      <section class="section-meus-agendamentos" id="secMeusAgendamentos">
-        <div class="section-wine-title-bar">
-          <h3>✦ Meus Agendamentos</h3>
-          <a href="#" onclick="openAppointmentsFullModal(); return false;">Ver todos &gt;</a>
-        </div>
-
-        <div class="next-appointment-card" id="nextAppointmentCardPreview">
-          <div class="appointment-date-badge">
-            <span class="week-day" id="appPreviewWeekDay">Sáb</span>
-            <span class="day-num" id="appPreviewDayNum">08</span>
-            <span class="month-name" id="appPreviewMonth">Nov</span>
-          </div>
-
-          <div class="appointment-details-col">
-            <h4 id="appPreviewServiceName">Alongamento em Gel</h4>
-            <div class="slot-meta">
-              <span><i class="fa-regular fa-clock"></i> <strong id="appPreviewTime">14:00</strong></span>
-              <span><i class="fa-regular fa-user"></i> com Estefany Paiva</span>
-            </div>
-          </div>
-
-          <button class="btn-view-details-pill" onclick="openAppointmentsFullModal()">
-            <span>Ver detalhes</span>
-            <i class="fa-solid fa-chevron-right" style="font-size:0.75rem;"></i>
-          </button>
-        </div>
-      </section>
-
-      <!-- ========================================================
-           5. SEÇÃO "♡ NOSSOS SERVIÇOS" (CARROSSEL DE PROCEDIMENTOS)
-           ======================================================== -->
-      <section class="section-nossos-servicos" id="secNossosServicos">
-        <div class="section-wine-title-bar">
-          <h3>♡ Nossos Serviços</h3>
-          <span style="font-size:0.82rem; color:#8A2D4E;">Toque para assistir aos Stories em vídeo</span>
-        </div>
-
-        <div class="service-mock-row">
-          
-          <!-- Card 1: Alongamento em Gel -->
-          <div class="service-mock-card" onclick="openStoryForService('srv_alongamento')">
-            <div class="service-mock-thumb">
-              <img src="assets/images/trabalho-alongamento-chocolate.png" alt="Alongamento em Gel">
-              <div class="story-play-pill-badge" style="position:absolute; bottom:8px; right:8px; background:rgba(0,0,0,0.6); color:#FFF; padding:4px 8px; border-radius:9999px; font-size:0.75rem;">
-                <i class="fa-solid fa-play"></i> Stories
-              </div>
-            </div>
-            <div class="service-mock-info">
-              <h4>Alongamento em Gel</h4>
-              <span class="saiba-mais-link">Saiba mais &gt;</span>
-            </div>
-          </div>
-
-          <!-- Card 2: Manicure Clássica -->
-          <div class="service-mock-card" onclick="openStoryForService('srv_esmalte')">
-            <div class="service-mock-thumb">
-              <img src="assets/images/trabalho-tons-terrosos.png" alt="Manicure Clássica & Esmaltação">
-              <div class="story-play-pill-badge" style="position:absolute; bottom:8px; right:8px; background:rgba(0,0,0,0.6); color:#FFF; padding:4px 8px; border-radius:9999px; font-size:0.75rem;">
-                <i class="fa-solid fa-play"></i> Stories
-              </div>
-            </div>
-            <div class="service-mock-info">
-              <h4>Manicure Clássica</h4>
-              <span class="saiba-mais-link">Saiba mais &gt;</span>
-            </div>
-          </div>
-
-          <!-- Card 3: Spa das Mãos & Blindagem -->
-          <div class="service-mock-card" onclick="openStoryForService('srv_blindagem')">
-            <div class="service-mock-thumb">
-              <img src="assets/images/trabalho-perolada-glaze.png" alt="Spa das Mãos & Blindagem Diamante">
-              <div class="story-play-pill-badge" style="position:absolute; bottom:8px; right:8px; background:rgba(0,0,0,0.6); color:#FFF; padding:4px 8px; border-radius:9999px; font-size:0.75rem;">
-                <i class="fa-solid fa-play"></i> Stories
-              </div>
-            </div>
-            <div class="service-mock-info">
-              <h4>Spa das Mãos</h4>
-              <span class="saiba-mais-link">Saiba mais &gt;</span>
-            </div>
-          </div>
-
-          <!-- Card 4: Nail Art & Encapsuladas -->
-          <div class="service-mock-card" onclick="openStoryForService('srv_nailart')">
-            <div class="service-mock-thumb">
-              <img src="assets/images/trabalho-amendoada-ouro.png" alt="Nail Art & Encapsuladas">
-              <div class="story-play-pill-badge" style="position:absolute; bottom:8px; right:8px; background:rgba(0,0,0,0.6); color:#FFF; padding:4px 8px; border-radius:9999px; font-size:0.75rem;">
-                <i class="fa-solid fa-play"></i> Stories
-              </div>
-            </div>
-            <div class="service-mock-info">
-              <h4>Nail Art & Foil de Ouro</h4>
-              <span class="saiba-mais-link">Saiba mais &gt;</span>
-            </div>
-          </div>
-
-        </div>
-      </section>
-
-      <!-- ========================================================
-           6. CATÁLOGO EXPANSIVO COM FILTROS DE CATEGORIA E PREÇOS
-           ======================================================== -->
-      <section class="services-section-wrapper" id="secCatalogoServicos" style="margin-top:1rem;">
-        <div style="margin-bottom:1.5rem;">
-          <h2 style="font-family:var(--font-serif); font-size:1.6rem; color:#350B19; margin-bottom:4px;">
-            Catálogo Completo de Procedimentos
-          </h2>
-          <p style="color:var(--color-cinza); font-size:0.92rem;">
-            Selecione o procedimento desejado para visualizar a duração, valor e escolher seu horário.
-          </p>
-        </div>
-
-        <!-- Filtro por Categorias (Abas Horizontais) -->
-        <div class="category-filter-bar" id="categoryFilterBar">
-          <!-- Injetado dinamicamente via client.js -->
-        </div>
-
-        <!-- Grade de Serviços com Stories -->
-        <div class="services-catalog-grid" id="servicesCatalogGrid">
-          <!-- Injetado dinamicamente via client.js -->
-        </div>
-      </section>
-
-      <!-- ========================================================
-           7. FLUXO DE AGENDAMENTO ENXUTO (100% CONFORME LGPD)
-           ======================================================== -->
-      <section class="booking-section-wrapper" id="bookingSection" style="margin-top:2rem;">
-        <div class="booking-card-main">
-          
-          <div style="margin-bottom:1.8rem; border-bottom:1px solid var(--color-nude-light); padding-bottom:1rem;">
-            <span class="lgpd-badge-notice">
-              <i class="fa-solid fa-shield-halved"></i> 100% Seguro &bull; Minimização LGPD (Art. 6º, III)
-            </span>
-            <h2 style="font-family:var(--font-serif); font-size:1.65rem; color:#350B19; margin-top:6px;">
-              Escolha seu Horário e Agende
-            </h2>
-            <p style="color:var(--color-cinza); font-size:0.92rem;">
-              Sem formulários longos, senhas ou dados desnecessários. Apenas data, horário, seu nome e WhatsApp.
-            </p>
-          </div>
-
-          <div class="booking-split-grid">
-            
-            <!-- Coluna 1: Procedimento Selecionado & Calendário -->
-            <div class="booking-left-col">
-              
-              <div class="service-selected-pill" id="selectedServicePreviewBox">
-                <div class="srv-pill-thumb">
-                  <img src="assets/images/trabalho-alongamento-chocolate.png" id="previewSrvThumb" alt="Serviço">
-                </div>
-                <div class="srv-pill-text">
-                  <h4 id="previewSrvName">Alongamento em Gel Formato Coffin</h4>
-                  <p><span id="previewSrvDuration">2h</span> &bull; <strong id="previewSrvPrice">R$ 150,00</strong></p>
-                </div>
-              </div>
-
-              <!-- Calendário Mensal Estilo Editorial -->
-              <div class="calendar-component-box">
-                <div class="calendar-header-nav">
-                  <h4 id="calendarMonthYearDisplay">Maio 2025</h4>
-                  <div class="calendar-nav-buttons">
-                    <button type="button" id="btnPrevMonth" aria-label="Mês Anterior">&lt;</button>
-                    <button type="button" id="btnNextMonth" aria-label="Próximo Mês">&gt;</button>
-                  </div>
-                </div>
-
-                <div class="calendar-weekdays-row">
-                  <span>D</span>
-                  <span>S</span>
-                  <span>T</span>
-                  <span>Q</span>
-                  <span>Q</span>
-                  <span>S</span>
-                  <span>S</span>
-                </div>
-
-                <div class="calendar-days-grid" id="calendarDaysGrid">
-                  <!-- Dias gerados via client.js -->
-                </div>
-              </div>
-
-            </div>
-
-            <!-- Coluna 2: Horários Livres & Formulário Minimalista -->
-            <div class="booking-right-col">
-              
-              <div class="time-slots-container">
-                <label class="time-slots-label">
-                  <i class="fa-regular fa-clock" style="color:var(--color-rose);"></i>
-                  Horários Disponíveis para <span id="selectedDateHumanDisplay" style="color:var(--color-preto); font-weight:700;">Hoje</span>:
-                </label>
-                
-                <div class="time-slots-grid" id="timeSlotsGrid">
-                  <!-- Horários injetados via client.js -->
-                </div>
-              </div>
-
-              <!-- Formulário Estrito LGPD: Nome + WhatsApp -->
-              <form id="leanBookingForm" class="lean-booking-form">
-                
-                <div class="form-field-lgpd">
-                  <label for="clientNameInput">
-                    Seu Nome Completo:
-                  </label>
-                  <div class="input-icon-wrap">
-                    <i class="fa-regular fa-user"></i>
-                    <input type="text" id="clientNameInput" placeholder="Ex: Mariana Silva" required autocomplete="name">
-                  </div>
-                </div>
-
-                <div class="form-field-lgpd">
-                  <label for="clientPhoneInput">
-                    Seu Celular / WhatsApp:
-                  </label>
-                  <div class="input-icon-wrap">
-                    <i class="fa-brands fa-whatsapp" style="color:#25D366;"></i>
-                    <input type="tel" id="clientPhoneInput" placeholder="(DD) 9XXXX-XXXX" maxlength="15" required autocomplete="tel">
-                  </div>
-                  <span class="field-hint-text">Utilizado exclusivamente para confirmação do horário via WhatsApp.</span>
-                </div>
-
-                <button type="submit" class="btn-confirm-booking-lgpd" id="btnSubmitBooking">
-                  <span>Confirmar Agendamento</span>
-                  <i class="fa-solid fa-arrow-right"></i>
-                </button>
-
-              </form>
-
-            </div>
-
-          </div>
-
-        </div>
-      </section>
-
-    </main>
+      </div>
+    </section>
 
     <!-- ========================================================
-         8. BARRA DE NAVEGAÇÃO INFERIOR VINHO PROFUNDO (MOCKUP)
+         3. BANNER PROMOCIONAL DESTAQUE COM ONDAS
          ======================================================== -->
-    <nav class="wine-bottom-nav">
-      
-      <div class="wine-nav-item active" onclick="window.scrollTo({top:0, behavior:'smooth'})">
+    <section class="promo-card-wrapper">
+      <div class="promo-highlight-card">
+        <div class="promo-text-side">
+          <h3>Cuidado, beleza e autoestima em cada detalhe ♡</h3>
+          <button class="btn-promo-wine-pill" onclick="document.getElementById('bookingSection').scrollIntoView({behavior:'smooth'})">
+            <span>Agendar agora</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </div>
+        <div class="promo-photo-side">
+          <img src="assets/images/trabalho-tons-terrosos.png" alt="Unhas com acabamento rosé impecável">
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================
+         4. SEÇÃO "✦ MEUS AGENDAMENTOS"
+         ======================================================== -->
+    <section class="section-client-block" id="secMeusAgendamentos">
+      <div class="section-head-title-row">
+        <h3>✦ Meus Agendamentos</h3>
+        <a href="#" onclick="openAppointmentsFullModal(); return false;">Ver todos &gt;</a>
+      </div>
+
+      <div class="next-booking-banner" id="nextAppointmentCardPreview">
+        <div class="booking-date-block">
+          <span class="date-day-week" id="appPreviewWeekDay">Sáb</span>
+          <span class="date-day-number" id="appPreviewDayNum">08</span>
+          <span class="date-month-name" id="appPreviewMonth">Nov</span>
+        </div>
+
+        <div class="booking-info-mid">
+          <h4 id="appPreviewServiceName">Alongamento em Gel</h4>
+          <div class="booking-time-meta">
+            <span><i class="fa-regular fa-clock"></i> <strong id="appPreviewTime">14:00</strong></span>
+            <span><i class="fa-regular fa-user"></i> com Estefany Paiva</span>
+          </div>
+        </div>
+
+        <button class="btn-details-pink-pill" onclick="openAppointmentsFullModal()">
+          <span>Ver detalhes</span>
+          <i class="fa-solid fa-chevron-right"></i>
+        </button>
+      </div>
+    </section>
+
+    <!-- ========================================================
+         5. SEÇÃO "♡ NOSSOS SERVIÇOS" (CARROSSEL DE PROCEDIMENTOS)
+         ======================================================== -->
+    <section class="section-client-block" id="secNossosServicos">
+      <div class="section-head-title-row">
+        <h3>♡ Nossos Serviços</h3>
+      </div>
+
+      <div class="services-scroll-track">
+        
+        <!-- Card 1: Alongamento em Gel -->
+        <div class="service-card-mock" onclick="openStoryForService('srv_alongamento')">
+          <div class="service-thumb-wrap">
+            <img src="assets/images/trabalho-alongamento-chocolate.png" alt="Alongamento em Gel">
+          </div>
+          <div class="service-info-footer">
+            <h4>Alongamento<br>em Gel</h4>
+            <span class="saiba-mais-label">Saiba mais &gt;</span>
+          </div>
+        </div>
+
+        <!-- Card 2: Manicure Clássica -->
+        <div class="service-card-mock" onclick="openStoryForService('srv_esmalte')">
+          <div class="service-thumb-wrap">
+            <img src="assets/images/trabalho-tons-terrosos.png" alt="Manicure Clássica">
+          </div>
+          <div class="service-info-footer">
+            <h4>Manicure<br>Clássica</h4>
+            <span class="saiba-mais-label">Saiba mais &gt;</span>
+          </div>
+        </div>
+
+        <!-- Card 3: Spa das Mãos -->
+        <div class="service-card-mock" onclick="openStoryForService('srv_blindagem')">
+          <div class="service-thumb-wrap">
+            <img src="assets/images/trabalho-perolada-glaze.png" alt="Spa das Mãos">
+          </div>
+          <div class="service-info-footer">
+            <h4>Spa das<br>Mãos</h4>
+            <span class="saiba-mais-label">Saiba mais &gt;</span>
+          </div>
+        </div>
+
+        <!-- Card 4: Nail Art & Foil de Ouro -->
+        <div class="service-card-mock" onclick="openStoryForService('srv_nailart')">
+          <div class="service-thumb-wrap">
+            <img src="assets/images/trabalho-amendoada-ouro.png" alt="Nail Art & Foil de Ouro">
+          </div>
+          <div class="service-info-footer">
+            <h4>Nail Art<br>& Ouro 24k</h4>
+            <span class="saiba-mais-label">Saiba mais &gt;</span>
+          </div>
+        </div>
+
+        <!-- Card 5: Francesa Celestial -->
+        <div class="service-card-mock" onclick="openStoryForService('srv_francesa_celestial')">
+          <div class="service-thumb-wrap">
+            <img src="assets/images/trabalho-francesa-estrela.png" alt="Francesa Celestial">
+          </div>
+          <div class="service-info-footer">
+            <h4>Francesa<br>Celestial</h4>
+            <span class="saiba-mais-label">Saiba mais &gt;</span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========================================================
+         6. FLUXO DE AGENDAMENTO COMPLETO (100% LGPD)
+         ======================================================== -->
+    <section class="booking-section-container" id="bookingSection">
+      <div class="booking-clean-card">
+        
+        <div class="booking-header-title">
+          <h3>Agende seu Horário</h3>
+          <p>Selecione a data, horário e preencha apenas seu Nome e WhatsApp.</p>
+        </div>
+
+        <!-- Card do Serviço Selecionado -->
+        <div class="service-selected-banner" id="selectedServicePreviewBox">
+          <img src="assets/images/trabalho-alongamento-chocolate.png" id="previewSrvThumb" alt="Serviço">
+          <div>
+            <h5 id="previewSrvName">Alongamento em Gel Formato Coffin</h5>
+            <p><span id="previewSrvDuration">2h</span> &bull; <strong id="previewSrvPrice">R$ 150,00</strong></p>
+          </div>
+        </div>
+
+        <!-- Calendário Mensal Estilo Editorial -->
+        <div class="calendar-card-inline">
+          <div class="calendar-top-nav">
+            <h4 id="calendarMonthYearDisplay">Novembro 2026</h4>
+            <div class="calendar-nav-btn-group">
+              <button type="button" id="btnPrevMonth" aria-label="Mês Anterior">&lt;</button>
+              <button type="button" id="btnNextMonth" aria-label="Próximo Mês">&gt;</button>
+            </div>
+          </div>
+
+          <div class="calendar-weekdays-bar">
+            <span>D</span>
+            <span>S</span>
+            <span>T</span>
+            <span>Q</span>
+            <span>Q</span>
+            <span>S</span>
+            <span>S</span>
+          </div>
+
+          <div class="calendar-days-matrix" id="calendarDaysGrid">
+            <!-- Dias injetados via client.js -->
+          </div>
+        </div>
+
+        <!-- Horários Disponíveis -->
+        <div class="time-slots-wrap">
+          <label class="time-slots-label">
+            <i class="fa-regular fa-clock"></i>
+            Horários Disponíveis para <span id="selectedDateHumanDisplay" style="font-weight:700;">Hoje</span>:
+          </label>
+          <div class="time-slots-scroll-grid" id="timeSlotsGrid">
+            <!-- Horários injetados via client.js -->
+          </div>
+        </div>
+
+        <!-- Formulário Enxuto LGPD (Nome + WhatsApp) -->
+        <form id="leanBookingForm">
+          <div class="form-input-box">
+            <label for="clientNameInput">Seu Nome Completo:</label>
+            <input type="text" id="clientNameInput" placeholder="Ex: Mariana Silva" required autocomplete="name">
+          </div>
+
+          <div class="form-input-box">
+            <label for="clientPhoneInput">Seu WhatsApp com DDD:</label>
+            <input type="tel" id="clientPhoneInput" placeholder="(DD) 9XXXX-XXXX" maxlength="15" required autocomplete="tel">
+          </div>
+
+          <button type="submit" class="btn-confirm-booking-wine" id="btnSubmitBooking">
+            <span>Confirmar Agendamento</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </form>
+
+      </div>
+    </section>
+
+    <!-- ========================================================
+         7. BARRA DE NAVEGAÇÃO INFERIOR VINHO PROFUNDO (MOCKUP)
+         ======================================================== -->
+    <nav class="bottom-nav-wine-fixed">
+      <button class="nav-item-wine active" onclick="window.scrollTo({top:0, behavior:'smooth'})">
         <i class="fa-solid fa-house"></i>
         <span>Início</span>
-      </div>
+      </button>
 
-      <div class="wine-nav-item" onclick="document.getElementById('bookingSection').scrollIntoView({behavior:'smooth'})">
+      <button class="nav-item-wine" onclick="document.getElementById('bookingSection').scrollIntoView({behavior:'smooth'})">
         <i class="fa-regular fa-calendar-check"></i>
         <span>Agendamentos</span>
-      </div>
+      </button>
 
-      <div class="wine-nav-item" onclick="document.getElementById('secNossosServicos').scrollIntoView({behavior:'smooth'})">
+      <button class="nav-item-wine" onclick="document.getElementById('secNossosServicos').scrollIntoView({behavior:'smooth'})">
         <i class="fa-regular fa-gem"></i>
         <span>Serviços</span>
-      </div>
+      </button>
 
-      <div class="wine-nav-item" onclick="openWhatsAppChatDirect()">
+      <button class="nav-item-wine" onclick="openWhatsAppChatDirect()">
         <i class="fa-regular fa-comment-dots"></i>
         <span>Contato</span>
-      </div>
+      </button>
 
-      <div class="wine-nav-item" onclick="openProfileContactModal()">
+      <button class="nav-item-wine" onclick="openProfileContactModal()">
         <i class="fa-regular fa-user"></i>
         <span>Perfil</span>
-      </div>
-
+      </button>
     </nav>
 
     <!-- ========================================================
-         9. MODAL STORIES ESTILO INSTAGRAM (VÍDEOS SEQUENCIAIS)
+         8. MODAL STORIES ESTILO INSTAGRAM (3 VÍDEOS EM SEQUÊNCIA)
          ======================================================== -->
-    <div class="story-modal-overlay" id="storyModalOverlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="story-modal-overlay" id="storyModalOverlay" role="dialog" aria-modal="true" aria-hidden="true" style="display:none;">
       <div class="story-modal-viewport" id="storyModalViewport">
         
-        <!-- 3 Barras de Progresso Superiores Animadas -->
         <div class="story-progress-bars-container" id="storyProgressBarsContainer"></div>
 
-        <!-- Topbar do Story com Perfil e Fechar -->
         <div class="story-top-profile-bar">
           <div class="story-profile-left">
             <div class="story-avatar-small">
@@ -433,21 +363,17 @@
           <button class="btn-close-story" id="btnCloseStory" aria-label="Fechar Story">&times;</button>
         </div>
 
-        <!-- Display da Mídia (Vídeo ou Slide) -->
         <div class="story-media-display" id="storyMediaDisplay"></div>
 
-        <!-- Áreas de Toque Invisíveis (Navegar Esquerda / Direita) -->
         <div class="story-touch-areas">
           <div class="story-touch-tap left" id="storyTapLeft" title="Voltar Story"></div>
           <div class="story-touch-tap right" id="storyTapRight" title="Avançar Story"></div>
         </div>
 
-        <!-- Legenda Inferior -->
         <div class="story-bottom-caption" id="storyBottomCaption">
           <p id="storyCaptionText">Acabamento ultra natural e simetria perfeita ✨</p>
         </div>
 
-        <!-- Botão de Ação Rápida Fixo no Rodapé do Story -->
         <div class="story-fixed-footer-cta">
           <button class="btn-story-book-now" id="btnStoryBookNow">
             <i class="fa-regular fa-calendar-check"></i>
@@ -459,54 +385,54 @@
     </div>
 
     <!-- ========================================================
-         10. MODAL DE SUCESSO DO AGENDAMENTO (CALENDÁRIO & .ICS)
+         9. MODAL DE SUCESSO DO AGENDAMENTO (GOOGLE CALENDAR & .ICS)
          ======================================================== -->
-    <div class="booking-success-modal-overlay" id="bookingSuccessModalOverlay">
+    <div class="booking-success-modal-overlay" id="bookingSuccessModalOverlay" style="display:none;">
       <div class="success-modal-sheet">
-        <div class="success-check-icon">
+        <div class="success-check-icon" style="background:#DDF2E1; color:#226E3A; width:56px; height:56px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 12px; font-size:1.6rem;">
           <i class="fa-solid fa-check"></i>
         </div>
 
-        <h3>Horário Agendado com Sucesso!</h3>
-        <p class="success-subtitle" id="successClientGreet">Estamos te esperando para transformar suas unhas ✨</p>
+        <h3 style="font-family:var(--font-serif); font-size:1.35rem; color:#350B19; margin-bottom:4px;">Horário Agendado com Sucesso!</h3>
+        <p class="success-subtitle" id="successClientGreet" style="font-size:0.85rem; color:#777176; margin-bottom:14px;">Estamos te esperando para transformar suas unhas ✨</p>
 
-        <div class="success-summary-box">
-          <div class="success-summary-row">
-            <span>Procedimento:</span>
-            <strong id="successServiceName">Alongamento em Gel</strong>
+        <div class="success-summary-box" style="background:#FAF4F5; border-radius:14px; padding:12px; font-size:0.85rem; margin-bottom:14px;">
+          <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+            <span style="color:#777;">Procedimento:</span>
+            <strong id="successServiceName" style="color:#350B19;">Alongamento em Gel</strong>
           </div>
-          <div class="success-summary-row">
-            <span>Data & Horário:</span>
-            <strong id="successDateTime">Sexta, 23 de Maio às 14:00h</strong>
+          <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+            <span style="color:#777;">Data & Horário:</span>
+            <strong id="successDateTime" style="color:#350B19;">Sábado, 08 de Nov às 14:00h</strong>
           </div>
-          <div class="success-summary-row">
-            <span>Valor:</span>
-            <strong id="successServicePrice">R$ 150,00</strong>
+          <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+            <span style="color:#777;">Valor:</span>
+            <strong id="successServicePrice" style="color:#4D1328;">R$ 150,00</strong>
           </div>
-          <div class="success-summary-row">
-            <span>Cliente:</span>
-            <strong id="successClientName">Mariana</strong>
+          <div style="display:flex; justify-content:space-between;">
+            <span style="color:#777;">Cliente:</span>
+            <strong id="successClientName" style="color:#350B19;">Mariana</strong>
           </div>
         </div>
 
-        <div class="success-actions-col">
-          <button class="btn-add-google-calendar" id="btnSuccessGoogleCalendar">
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <button class="btn-confirm-booking-wine" id="btnSuccessGoogleCalendar" style="background:#4285F4; margin:0;">
             <i class="fa-brands fa-google"></i>
             <span>Adicionar ao Google Agenda</span>
           </button>
 
-          <button class="btn-download-ics" id="btnSuccessIcsDownload">
+          <button class="btn-confirm-booking-wine" id="btnSuccessIcsDownload" style="background:#5E1A33; margin:0;">
             <i class="fa-regular fa-calendar-arrow-down"></i>
             <span>Baixar Arquivo de Lembrete (.ICS)</span>
           </button>
 
-          <button class="btn-confirm-booking-lgpd" id="btnSuccessWhatsApp" style="background:#25D366; color:#FFF; margin-top:4px;">
+          <button class="btn-confirm-booking-wine" id="btnSuccessWhatsApp" style="background:#25D366; margin:0;">
             <i class="fa-brands fa-whatsapp"></i>
             <span>Abrir WhatsApp da Estefany</span>
           </button>
 
-          <button class="btn-close-success" id="btnSuccessClose">
-            <span>Concluir</span>
+          <button onclick="document.getElementById('bookingSuccessModalOverlay').style.display='none'" style="padding:10px; background:transparent; border:none; color:#777; font-weight:600; cursor:pointer;">
+            Fechar
           </button>
         </div>
       </div>
@@ -547,7 +473,7 @@
       }
     }
 
-    // Carregar informações do próximo agendamento dinamicamente
+    // Inicialização dinâmica dos dados do próximo agendamento
     document.addEventListener('DOMContentLoaded', () => {
       if (window.EPStore) {
         const apps = window.EPStore.getAppointments();

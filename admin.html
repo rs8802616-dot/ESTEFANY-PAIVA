@@ -2,478 +2,884 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Painel da Administradora | Estefany Paiva Nails</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Estefany Paiva &bull; Painel Administrativo</title>
   
-  <meta name="theme-color" content="#171719">
-  <link rel="icon" type="image/jpeg" href="assets/images/capa-estefany-paiva.jpg">
+  <meta name="theme-color" content="#350B19">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-  <!-- Google Fonts: Editorial Serif + Sans -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/jpeg" href="assets/images/capa-estefany-paiva.jpg">
+  <link rel="apple-touch-icon" href="assets/images/capa-estefany-paiva.jpg">
+
+  <!-- Google Fonts: Editorial Serif + Modern Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-  <!-- Font Awesome -->
+  <!-- Font Awesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-  <!-- Estilos do Admin Expansivo -->
+  <!-- Estilos do Painel Administrativo -->
+  <link rel="stylesheet" href="assets/css/variables.css">
   <link rel="stylesheet" href="assets/css/admin.css">
 </head>
 <body>
 
-  <!-- ========================================================
-       TELA DE BLOQUEIO POR TOKEN CRIPTOGRÁFICO ÚNICO (PRD ITEM 2)
-       ======================================================== -->
-  <div class="screen-token-lock" id="screenTokenLock">
-    <div class="token-lock-card">
-      <div class="token-lock-icon">
-        <i class="fa-solid fa-shield-halved"></i>
-      </div>
-      <h2>Acesso Administrativo Restrito</h2>
-      <p>Este painel requer o <strong>Token Único da Administradora</strong> validado via hash criptográfico SHA-256 para prevenir acessos não autorizados.</p>
+  <!-- CONTAINER PRINCIPAL DO APLICATIVO ADMINISTRATIVO (EXPANSIVO E CENTRADO) -->
+  <div class="admin-app-shell">
 
-      <input type="password" id="adminTokenInput" class="token-input-field" placeholder="Cole seu Token Único (adm_sec_...)" autofocus>
+    <!-- ========================================================
+         CABEÇALHO VINHO DE LUXO COM ONDAS ORGÂNICAS
+         ======================================================== -->
+    <header class="admin-header-wine">
       
-      <div id="tokenErrorMsg" style="display:none; color:#EF4444; font-size:0.85rem; margin-bottom:12px; font-weight:600;"></div>
-
-      <button type="button" class="btn-unlock" id="btnUnlockAdmin">
-        <i class="fa-solid fa-key"></i>
-        <span>Validar Token e Acessar</span>
-      </button>
-
-      <div class="token-hint-badge">
-        <i class="fa-solid fa-circle-info" style="color:var(--color-rose);"></i>
-        Token Padrão de Fábrica: <code>adm_sec_4c781d9e5b20</code>
-      </div>
-    </div>
-  </div>
-
-  <!-- ESTRUTURA PRINCIPAL EXPANSIVA DO ADMIN -->
-  <div class="admin-site-wrapper">
-
-    <!-- Topbar Superior Expansiva -->
-    <header class="admin-topbar-header">
-      <div class="admin-topbar-inner">
-        <div class="admin-greeting-text">
-          <h2 id="adminHeaderTitle">Olá, Estefany!</h2>
-          <p>Painel de Gestão & Bull; Estefany Paiva Nails</p>
-        </div>
-
-        <!-- Abas Desktop (Visíveis em Computadores e Tablets) -->
-        <nav class="admin-desktop-tabs">
-          <li class="admin-desktop-tab-btn active" data-tab="dashboard">
-            <i class="fa-solid fa-calendar-day"></i>
-            <span>Dashboard</span>
-          </li>
-          <li class="admin-desktop-tab-btn" data-tab="appointments">
-            <i class="fa-solid fa-layer-group"></i>
-            <span>Agenda & Categorias</span>
-          </li>
-          <li class="admin-desktop-tab-btn" data-tab="clients">
-            <i class="fa-regular fa-user"></i>
-            <span>Clientes</span>
-          </li>
-          <li class="admin-desktop-tab-btn" data-tab="services">
-            <i class="fa-solid fa-wand-magic-sparkles"></i>
-            <span>Serviços & Stories</span>
-          </li>
-          <li class="admin-desktop-tab-btn" data-tab="finance">
-            <i class="fa-regular fa-chart-bar"></i>
-            <span>Financeiro</span>
-          </li>
-          <li class="admin-desktop-tab-btn" data-tab="whitelabel">
-            <i class="fa-solid fa-palette"></i>
-            <span>Identidade Visual</span>
-          </li>
-        </nav>
-
-        <div class="admin-topbar-right">
-          <a href="index.html" class="btn-view-public-site" target="_blank" title="Abrir link do cliente">
-            <i class="fa-solid fa-arrow-up-right-from-square"></i>
-            <span>Portal da Cliente</span>
-          </a>
-
-          <div class="admin-profile-badge" title="Estefany Paiva Nails">
-            <img src="assets/images/capa-estefany-paiva.jpg" alt="Estefany Paiva">
-          </div>
+      <!-- Status Bar Compacta (9:41 e bateria) -->
+      <div class="status-bar-row">
+        <span>9:41</span>
+        <div class="status-bar-icons">
+          <i class="fa-solid fa-signal"></i>
+          <i class="fa-solid fa-wifi"></i>
+          <i class="fa-solid fa-battery-full"></i>
         </div>
       </div>
-    </header>
 
-    <!-- CONTEÚDO PRINCIPAL EXPANSIVO DO ADMIN -->
-    <main class="admin-main-content-area">
+      <!-- Barra Superior: Menu, Assinatura Ep e Notificação com Badge 2 -->
+      <div class="admin-topbar-row">
+        <button class="btn-admin-icon" aria-label="Menu" onclick="switchAdminTab('agenda')">
+          <i class="fa-solid fa-bars"></i>
+        </button>
 
-      <!-- Barra de Teste de Alerta Sonoro com Web Audio API (PRD 3.2) -->
-      <div class="sound-test-bar">
-        <div class="sound-test-info">
-          <i class="fa-solid fa-bell"></i>
-          <div>
-            <h4>Alerta Sonoro de Agendamento (Push & Chime)</h4>
-            <p>O sintetizador Web Audio API e vibração PWA disparam a cada novo agendamento de cliente.</p>
+        <!-- Logo Assinatura Oficial Ep ESTEFANY PAIVA NAIL DESIGNER -->
+        <div class="signature-logo-wrap" onclick="switchAdminTab('dashboard')">
+          <span class="sig-script-ep">Ep</span>
+          <div class="sig-script-text">
+            <span class="sig-script-title">ESTEFANY PAIVA</span>
+            <span class="sig-script-sub">NAIL DESIGNER</span>
           </div>
         </div>
-        <button class="btn-sound-trigger" id="btnSoundTest">
-          <i class="fa-solid fa-volume-high"></i>
-          <span>Testar Alerta Sonoro</span>
+
+        <button class="btn-admin-icon" aria-label="Notificações" onclick="switchAdminTab('agenda')">
+          <i class="fa-regular fa-bell"></i>
+          <span class="badge-bell-count">2</span>
         </button>
       </div>
 
-      <!-- ========================================================
-           1. DASHBOARD & KPIs DE HOJE
-           ======================================================== -->
-      <section class="admin-view-section active" id="adminView_dashboard">
+      <!-- Saudação à Profissional e Seletor de Período -->
+      <div class="admin-greeting-row">
+        <div class="admin-greeting-left">
+          <div class="admin-avatar-ring">
+            <img src="assets/images/trabalho-amendoada-ouro.png" alt="Estefany Paiva">
+          </div>
+          <div class="admin-greeting-text">
+            <h2>Olá, Estefany! 👋</h2>
+            <p>Aqui está um resumo do seu negócio hoje.</p>
+          </div>
+        </div>
+
+        <div class="period-select-pill">
+          <span>Hoje</span>
+          <i class="fa-solid fa-chevron-down" style="font-size:0.65rem;"></i>
+        </div>
+      </div>
+
+    </header>
+
+    <!-- ========================================================
+         TELA 1: DASHBOARD PRINCIPAL (TELA 1 DO MOCKUP)
+         ======================================================== -->
+    <main class="admin-view-screen active" id="viewScreen_dashboard">
+
+      <!-- 4 KPIs em Cards Rosé -->
+      <div class="admin-kpis-grid">
+        <div class="kpi-pink-card">
+          <i class="fa-regular fa-calendar-check"></i>
+          <span class="kpi-num">12</span>
+          <span class="kpi-lbl">Agendamentos</span>
+          <span class="kpi-growth"><i class="fa-solid fa-arrow-up"></i> 12%</span>
+        </div>
+
+        <div class="kpi-pink-card">
+          <i class="fa-solid fa-users"></i>
+          <span class="kpi-num">248</span>
+          <span class="kpi-lbl">Clientes ativas</span>
+          <span class="kpi-growth"><i class="fa-solid fa-arrow-up"></i> 8%</span>
+        </div>
+
+        <div class="kpi-pink-card">
+          <i class="fa-solid fa-dollar-sign"></i>
+          <span class="kpi-num" style="font-size:1.15rem;">R$ 3.420</span>
+          <span class="kpi-lbl">Faturamento</span>
+          <span class="kpi-growth"><i class="fa-solid fa-arrow-up"></i> 15%</span>
+        </div>
+
+        <div class="kpi-pink-card">
+          <i class="fa-solid fa-star"></i>
+          <span class="kpi-num">4.9</span>
+          <span class="kpi-lbl">Avaliação média</span>
+          <span class="kpi-growth"><i class="fa-solid fa-arrow-up"></i> 0.2</span>
+        </div>
+      </div>
+
+      <!-- Card "Seu crescimento" (Gráfico de Linha em Curva SVG) -->
+      <div class="admin-chart-card">
+        <div class="chart-header-row">
+          <h3><i class="fa-solid fa-chart-line"></i> Seu crescimento</h3>
+          <div class="period-select-pill" style="background:#FFF; color:#4D1328; border-color:rgba(77,19,40,0.15);">
+            <span>Últimos 4 meses</span>
+            <i class="fa-solid fa-chevron-down" style="font-size:0.65rem;"></i>
+          </div>
+        </div>
+
+        <div style="position:relative; width:100%; height:160px; margin-top:14px;">
+          <div class="chart-badge-highlight">
+            R$ 3.420
+          </div>
+          <!-- Gráfico SVG com curva suave -->
+          <svg viewBox="0 0 340 130" style="width:100%; height:100%; overflow:visible;">
+            <defs>
+              <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#D83F79" stop-opacity="0.25"/>
+                <stop offset="100%" stop-color="#D83F79" stop-opacity="0.0"/>
+              </linearGradient>
+            </defs>
+            <!-- Linhas horizontais de grade -->
+            <line x1="25" y1="20" x2="330" y2="20" stroke="rgba(77,19,40,0.06)" stroke-width="1"/>
+            <line x1="25" y1="50" x2="330" y2="50" stroke="rgba(77,19,40,0.06)" stroke-width="1"/>
+            <line x1="25" y1="80" x2="330" y2="80" stroke="rgba(77,19,40,0.06)" stroke-width="1"/>
+            <line x1="25" y1="110" x2="330" y2="110" stroke="rgba(77,19,40,0.06)" stroke-width="1"/>
+
+            <!-- Rótulos verticais -->
+            <text x="5" y="24" font-size="9" fill="#8A2D4E">4k</text>
+            <text x="5" y="54" font-size="9" fill="#8A2D4E">3k</text>
+            <text x="5" y="84" font-size="9" fill="#8A2D4E">2k</text>
+            <text x="5" y="114" font-size="9" fill="#8A2D4E">0</text>
+
+            <!-- Área preenchida -->
+            <path d="M 35 105 C 100 80, 160 70, 220 65 C 260 62, 290 35, 315 35 L 315 110 L 35 110 Z" fill="url(#chartGradient)"/>
+            <!-- Curva suave -->
+            <path d="M 35 105 C 100 80, 160 70, 220 65 C 260 62, 290 35, 315 35" fill="none" stroke="#A82A52" stroke-width="3" stroke-linecap="round"/>
+
+            <!-- Pontos -->
+            <circle cx="35" cy="105" r="4.5" fill="#4D1328"/>
+            <circle cx="130" cy="75" r="4.5" fill="#4D1328"/>
+            <circle cx="220" cy="65" r="4.5" fill="#4D1328"/>
+            <circle cx="315" cy="35" r="6" fill="#D83F79" stroke="#FFF" stroke-width="2"/>
+
+            <!-- Rótulos meses -->
+            <text x="30" y="125" font-size="9.5" fill="#8A2D4E" font-weight="600">Jul</text>
+            <text x="120" y="125" font-size="9.5" fill="#8A2D4E" font-weight="600">Ago</text>
+            <text x="212" y="125" font-size="9.5" fill="#8A2D4E" font-weight="600">Set</text>
+            <text x="305" y="125" font-size="9.5" fill="#8A2D4E" font-weight="600">Out</text>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Dupla de Cards: Próximos Agendamentos & Serviços Mais Realizados -->
+      <div class="admin-cards-duo">
         
-        <!-- 4 Cartões KPIs -->
-        <div class="admin-kpi-grid-2x2">
-          <div class="kpi-dark-card">
-            <span class="kpi-num" id="kpiTodayCount">5</span>
-            <span class="kpi-lbl">Agendamentos hoje</span>
+        <!-- Card Próximos Agendamentos -->
+        <div class="admin-sub-card">
+          <div class="admin-sub-card-header">
+            <h4><i class="fa-regular fa-calendar-check"></i> Próximos agendamentos</h4>
+            <a href="#" onclick="switchAdminTab('agenda'); return false;">Ver todos &gt;</a>
           </div>
 
-          <div class="kpi-dark-card">
-            <span class="kpi-num" id="kpiTodayRevenue">R$ 640,00</span>
-            <span class="kpi-lbl">Faturamento do dia</span>
+          <div class="slot-client-row" onclick="switchAdminTab('agenda')">
+            <div class="client-avatar-badge">MS</div>
+            <div class="slot-client-info">
+              <h5>Mariana Silva</h5>
+              <p>Hoje &bull; 14:00</p>
+            </div>
+            <i class="fa-solid fa-chevron-right" style="color:#8A2D4E; font-size:0.75rem;"></i>
           </div>
 
-          <div class="kpi-dark-card">
-            <span class="kpi-num" id="kpiActiveClients">12</span>
-            <span class="kpi-lbl">Clientes ativas</span>
+          <div class="slot-client-row" onclick="switchAdminTab('agenda')">
+            <div class="client-avatar-badge" style="background:#F2CDD4;">JS</div>
+            <div class="slot-client-info">
+              <h5>Juliana Souza</h5>
+              <p>Hoje &bull; 16:00</p>
+            </div>
+            <i class="fa-solid fa-chevron-right" style="color:#8A2D4E; font-size:0.75rem;"></i>
           </div>
 
-          <div class="kpi-dark-card">
-            <span class="kpi-num" id="kpiServicesDone">6</span>
-            <span class="kpi-lbl">Serviços realizados</span>
-          </div>
-        </div>
-
-        <!-- Lista de Agendamentos de Hoje -->
-        <div class="today-slots-header">
-          <h3>Agendamentos de hoje</h3>
-          <a href="#" onclick="switchAdminTab('appointments'); return false;">Ver agenda completa por categorias &gt;</a>
-        </div>
-
-        <div class="today-slots-list" id="adminTodaySlotsList">
-          <!-- Injetado dinamicamente via admin.js -->
-        </div>
-
-      </section>
-
-      <!-- ========================================================
-           2. AGENDA & VISÃO POR CATEGORIA (PRD 3.2)
-           ======================================================== -->
-      <section class="admin-view-section" id="adminView_appointments" style="display:none;">
-        <div class="today-slots-header">
-          <h3>Gestão de Agendamentos por Categoria</h3>
-          <span style="font-size:0.85rem; color:#A39D9E;">Filtros dinâmicos em tempo real</span>
-        </div>
-
-        <!-- Pílulas de Categoria -->
-        <div class="admin-category-filter-bar" id="adminCategoryFilterPills">
-          <!-- Injetado via JS -->
-        </div>
-
-        <!-- Filtros de Status -->
-        <div class="admin-status-filter-bar">
-          <button class="admin-status-btn active" data-status="all">Todos os Status</button>
-          <button class="admin-status-btn" data-status="Pendente">Pendentes</button>
-          <button class="admin-status-btn" data-status="Confirmado">Confirmados</button>
-          <button class="admin-status-btn" data-status="Concluído">Concluídos</button>
-          <button class="admin-status-btn" data-status="Cancelado">Cancelados</button>
-        </div>
-
-        <div class="today-slots-list" id="adminAppointmentsCategoryList">
-          <!-- Injetado via JS -->
-        </div>
-      </section>
-
-      <!-- ========================================================
-           3. GESTÃO DE CLIENTES (LGPD MINIMALISTA)
-           ======================================================== -->
-      <section class="admin-view-section" id="adminView_clients" style="display:none;">
-        <div class="today-slots-header">
-          <h3>Gestão de Clientes (Conforme LGPD)</h3>
-          <button style="color:var(--color-rose); font-size:1rem; font-weight:600; display:flex; align-items:center; gap:6px; cursor:pointer;" onclick="const n = prompt('Nome da nova cliente:'); if(n){ const p = prompt('WhatsApp (DD 9XXXX-XXXX):', '(61) 99999-0000'); window.EPStore.saveCustomer({ id:'c_'+Date.now(), name:n, phone:p||'(61) 99999-0000', totalAppointments:1, totalSpent:150 }); renderClientsList(); }">
-            <i class="fa-solid fa-circle-plus"></i> Nova Cliente
-          </button>
-        </div>
-
-        <p style="font-size:0.8rem; color:#777176; margin-bottom:1rem;">
-          <i class="fa-solid fa-lock" style="color:var(--color-rose);"></i> Dados estritamente limitados a Nome e WhatsApp, armazenados localmente e protegidos.
-        </p>
-
-        <div class="admin-search-bar">
-          <i class="fa-solid fa-magnifying-glass"></i>
-          <input type="text" id="adminClientSearchInput" placeholder="Buscar por nome ou WhatsApp...">
-        </div>
-
-        <div class="admin-clients-list" id="adminClientsList">
-          <!-- Injetado dinamicamente via admin.js -->
-        </div>
-      </section>
-
-      <!-- ========================================================
-           4. SERVIÇOS & STORIES (PRD 3.1 & 3.2)
-           ======================================================== -->
-      <section class="admin-view-section" id="adminView_services" style="display:none;">
-        <div class="today-slots-header">
-          <h3>Catálogo de Procedimentos & Vídeos dos Stories</h3>
-          <button style="color:var(--color-rose); font-size:1rem; font-weight:600; display:flex; align-items:center; gap:6px; cursor:pointer;" onclick="const n = prompt('Nome do serviço:'); if(n){ const p = parseFloat(prompt('Preço (R$):', '120')||'120'); const c = prompt('Categoria (ex: Alongamento em Gel, Esmaltação em Gel):', 'Alongamento em Gel'); window.EPStore.saveService({ id:'srv_'+Date.now(), name:n, category:c, price:p, duration:90, active:true, image:'assets/images/service-alongamento.jpg', storiesVideos:['assets/videos/stories-alongamento-1.mp4'] }); renderServicesAdmin(); }">
-            <i class="fa-solid fa-circle-plus"></i> Novo Serviço
-          </button>
-        </div>
-
-        <p style="font-size:0.8rem; color:#A39D9E; margin-bottom:1rem;">
-          Cada serviço pode ter até <strong>3 vídeos curtos em sequência</strong> para exibição no player estilo Stories do Instagram.
-        </p>
-
-        <div class="admin-services-list" id="adminServicesList">
-          <!-- Injetado dinamicamente via admin.js -->
-        </div>
-      </section>
-
-      <!-- ========================================================
-           5. FINANCEIRO & RELATÓRIOS (PRD 3.2)
-           ======================================================== -->
-      <section class="admin-view-section" id="adminView_finance" style="display:none;">
-        <div class="today-slots-header">
-          <h3>Financeiro & Relatórios por Categoria</h3>
-          <span style="font-size:0.9rem; color:#A39D9E;">Consolidado Geral</span>
-        </div>
-
-        <!-- 3 KPIs Financeiros -->
-        <div class="finance-kpis-row">
-          <div class="finance-kpi-card">
-            <h4 id="finTotalRevenue">R$ 0,00</h4>
-            <p>Faturamento Confirmado</p>
-          </div>
-          <div class="finance-kpi-card">
-            <h4 id="finInProgressRevenue">R$ 0,00</h4>
-            <p>Faturamento Previsto</p>
-          </div>
-          <div class="finance-kpi-card">
-            <h4 id="finAvgTicket">R$ 0,00</h4>
-            <p>Ticket Médio Geral</p>
+          <div class="slot-client-row" onclick="switchAdminTab('agenda')">
+            <div class="client-avatar-badge" style="background:#E6BAC3;">AC</div>
+            <div class="slot-client-info">
+              <h5>Ana Costa</h5>
+              <p>Hoje &bull; 18:00</p>
+            </div>
+            <i class="fa-solid fa-chevron-right" style="color:#8A2D4E; font-size:0.75rem;"></i>
           </div>
         </div>
 
-        <!-- Gráfico de Faturamento por Categoria -->
-        <div class="finance-breakdown-box">
-          <h4>Faturamento & Volume por Categoria de Procedimento</h4>
-          <div id="financeCategoryBars" style="margin-top:1rem;">
-            <!-- Injetado via JS -->
+        <!-- Card Serviços Mais Realizados (Donut Chart) -->
+        <div class="admin-sub-card">
+          <div class="admin-sub-card-header">
+            <h4><i class="fa-solid fa-star"></i> Serviços mais realizados</h4>
           </div>
-        </div>
 
-        <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:1.5rem;">
-          <button class="btn-pink-primary" id="btnExportFullReport" style="width:auto; padding:14px 28px;">
-            <i class="fa-solid fa-file-excel"></i>
-            <span>Exportar Relatório Completo (CSV)</span>
-          </button>
-
-          <button id="btnAdminLogout" style="color:#EF4444; font-size:0.9rem; display:flex; align-items:center; gap:8px; padding:10px 18px; border:1px solid rgba(239, 68, 68, 0.3); border-radius:9999px; cursor:pointer;">
-            <i class="fa-solid fa-arrow-right-from-bracket"></i> Bloquear Painel
-          </button>
-        </div>
-      </section>
-
-      <!-- ========================================================
-           6. PERSONALIZADOR WHITE-LABEL COMPLETO (PRD 3.2)
-           ======================================================== -->
-      <section class="admin-view-section" id="adminView_whitelabel" style="display:none;">
-        <div class="today-slots-header">
-          <h3>Personalização de Identidade Visual (White-Label)</h3>
-          <button class="btn-pink-primary" id="btnSaveThemeConfig" style="width:auto; padding:10px 22px; font-size:0.85rem;">
-            <i class="fa-solid fa-floppy-disk"></i> Salvar e Aplicar Tema
-          </button>
-        </div>
-
-        <p style="font-size:0.82rem; color:#A39D9E; margin-bottom:1.5rem;">
-          Personalize as cores, tipografia, nome do salão e fotos do carrossel do Portal da Cliente em tempo real.
-        </p>
-
-        <div class="wl-grid-layout">
-          <!-- Coluna 1: Textos & Tipografia & Tema -->
-          <div class="wl-card">
-            <h4><i class="fa-solid fa-sliders"></i> Marca & Tipografia</h4>
-            <p class="subtitle">Nome do estúdio, slogan e estilo de fonte principal.</p>
-
-            <div class="wl-form-group">
-              <label>Nome do Studio / Nail Designer</label>
-              <input type="text" id="wlStudioName" value="Estefany Paiva Nails">
+          <div class="donut-chart-container">
+            <div class="donut-svg-wrap">
+              <svg viewBox="0 0 36 36" style="width:100%; height:100%; transform: rotate(-90deg);">
+                <!-- Alongamento (45%) -->
+                <circle cx="18" cy="18" r="14" fill="none" stroke="#E9A3B5" stroke-width="5" stroke-dasharray="45 55" stroke-dashoffset="0"/>
+                <!-- Manicure (35%) -->
+                <circle cx="18" cy="18" r="14" fill="none" stroke="#8A2D4E" stroke-width="5" stroke-dasharray="35 65" stroke-dashoffset="-45"/>
+                <!-- Spa (20%) -->
+                <circle cx="18" cy="18" r="14" fill="none" stroke="#350B19" stroke-width="5" stroke-dasharray="20 80" stroke-dashoffset="-80"/>
+              </svg>
             </div>
 
-            <div class="wl-form-group">
-              <label>Slogan ou Frase de Destaque</label>
-              <input type="text" id="wlStudioSlogan" value="Mais que unhas, é autoestima.">
-            </div>
-
-            <div class="wl-form-group">
-              <label>Tipografia de Títulos</label>
-              <select id="wlFontSelect">
-                <option value="Playfair Display">Playfair Display (Elegante Clássica)</option>
-                <option value="Cinzel">Cinzel (Editorial de Luxo)</option>
-                <option value="Montserrat">Montserrat (Contemporânea)</option>
-                <option value="Plus Jakarta Sans">Plus Jakarta Sans (Minimalista)</option>
-              </select>
-            </div>
-
-            <div class="wl-form-group">
-              <label>Modo de Exibição do Portal da Cliente</label>
-              <select id="wlModeSelect">
-                <option value="light">Modo Claro (Creme & Nude Suave)</option>
-                <option value="dark">Modo Escuro (Noturno de Luxo)</option>
-              </select>
-            </div>
-
-            <div style="margin-top:1.2rem;">
-              <label style="font-size:0.8rem; font-weight:600; color:#CCC; display:block; margin-bottom:8px;">Paleta de Cores Primárias</label>
-              <div class="wl-color-row">
-                <div class="wl-color-item">
-                  <span>Creme Fundo</span>
-                  <input type="color" id="wlColorCreme" value="#F8F2ED">
-                </div>
-                <div class="wl-color-item">
-                  <span>Nude Delicado</span>
-                  <input type="color" id="wlColorNude" value="#E9D7CE">
-                </div>
-                <div class="wl-color-item">
-                  <span>Rosé Destaque</span>
-                  <input type="color" id="wlColorRose" value="#E9A3B5">
-                </div>
-                <div class="wl-color-item">
-                  <span>Rosa Choque</span>
-                  <input type="color" id="wlColorRoseDeep" value="#D83F79">
-                </div>
+            <div class="donut-legend-list">
+              <div class="donut-legend-item">
+                <span><span class="bullet" style="background:#E9A3B5;"></span>Alongamento em Gel</span>
+                <strong>45%</strong>
+              </div>
+              <div class="donut-legend-item">
+                <span><span class="bullet" style="background:#8A2D4E;"></span>Manicure Clássica</span>
+                <strong>35%</strong>
+              </div>
+              <div class="donut-legend-item">
+                <span><span class="bullet" style="background:#350B19;"></span>Spa das Mãos</span>
+                <strong>20%</strong>
               </div>
             </div>
           </div>
-
-          <!-- Coluna 2: Portfólio Vivo (Carrossel Superior) -->
-          <div class="wl-card">
-            <h4><i class="fa-solid fa-images"></i> Portfólio Vivo (Carrossel Superior)</h4>
-            <p class="subtitle">Adicione ou remova fotos dos trabalhos do topo do portal.</p>
-
-            <div class="portfolio-manager-list" id="portfolioManagerList">
-              <!-- Injetado via JS -->
-            </div>
-
-            <button class="btn-drawer-action" id="btnAddPortfolioItem" style="background:#2A272A; border:1px dashed #555; color:#FFF; width:100%;">
-              <i class="fa-solid fa-plus" style="color:var(--color-rose);"></i> Adicionar Foto ao Carrossel
-            </button>
-          </div>
         </div>
-      </section>
+
+      </div>
+
+      <!-- 6 Ações de Gestão Rápida -->
+      <div class="admin-6-actions-grid">
+        <button class="admin-action-btn-squircle" onclick="switchAdminTab('agenda')">
+          <i class="fa-regular fa-calendar-check"></i>
+          <span>Agenda</span>
+        </button>
+
+        <button class="admin-action-btn-squircle" onclick="switchAdminTab('clientes')">
+          <i class="fa-solid fa-users"></i>
+          <span>Clientes</span>
+        </button>
+
+        <button class="admin-action-btn-squircle" onclick="switchAdminTab('servicos')">
+          <i class="fa-regular fa-gem"></i>
+          <span>Serviços</span>
+        </button>
+
+        <button class="admin-action-btn-squircle" onclick="switchAdminTab('relatorios')">
+          <i class="fa-solid fa-chart-simple"></i>
+          <span>Relatórios</span>
+        </button>
+
+        <button class="admin-action-btn-squircle" onclick="switchAdminTab('configuracoes')">
+          <i class="fa-solid fa-gear"></i>
+          <span>Configurações</span>
+        </button>
+
+        <button class="admin-action-btn-squircle" onclick="switchAdminTab('avaliacoes')">
+          <i class="fa-regular fa-user"></i>
+          <span>Perfil</span>
+        </button>
+      </div>
 
     </main>
 
-    <!-- BARRA INFERIOR (APENAS CELULAR / TABLET) -->
-    <nav class="admin-bottom-nav">
-      <button class="admin-nav-tab active" data-tab="dashboard">
+    <!-- ========================================================
+         TELA 2: CONTROLE DE AGENDAMENTOS (AGENDA)
+         ======================================================== -->
+    <section class="admin-view-screen" id="viewScreen_agenda">
+      <div class="section-head-title-row" style="margin-top:10px;">
+        <h3 style="font-family:var(--font-serif); font-size:1.35rem; color:#4D1328;"><i class="fa-regular fa-calendar-check"></i> Controle de Agendamentos</h3>
+      </div>
+
+      <!-- Filtros Todos, Confirmados, Pendentes -->
+      <div class="filter-pills-row">
+        <button class="filter-pill active" onclick="filterAppointmentsAdmin('all', this)">Todos</button>
+        <button class="filter-pill" onclick="filterAppointmentsAdmin('confirmado', this)">Confirmados</button>
+        <button class="filter-pill" onclick="filterAppointmentsAdmin('pendente', this)">Pendentes</button>
+      </div>
+
+      <!-- Barra de Busca -->
+      <div class="search-input-box">
+        <i class="fa-solid fa-magnifying-glass" style="color:#8A2D4E;"></i>
+        <input type="text" placeholder="Buscar agendamentos..." oninput="searchAppointmentsAdmin(this.value)">
+      </div>
+
+      <!-- Lista de Agendamentos -->
+      <div id="adminAppointmentsList">
+        <div class="card-list-item" onclick="openAdminSlotAction('Mariana Silva', '(11) 98765-4321', 'Alongamento em Gel', '14:00', 'Confirmado')">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <div class="client-avatar-badge">MS</div>
+            <div>
+              <h5 style="font-size:0.92rem; font-weight:700; color:#350B19;">Mariana Silva</h5>
+              <p style="font-size:0.78rem; color:#6A1D39;">Alongamento em Gel &bull; Hoje &bull; 14:00</p>
+            </div>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span class="badge-status-pill confirmado">Confirmado</span>
+            <i class="fa-solid fa-chevron-right" style="color:#8A2D4E; font-size:0.75rem;"></i>
+          </div>
+        </div>
+
+        <div class="card-list-item" onclick="openAdminSlotAction('Juliana Souza', '(11) 98765-8765', 'Manicure Clássica', '16:00', 'Confirmado')">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <div class="client-avatar-badge" style="background:#F2CDD4;">JS</div>
+            <div>
+              <h5 style="font-size:0.92rem; font-weight:700; color:#350B19;">Juliana Souza</h5>
+              <p style="font-size:0.78rem; color:#6A1D39;">Manicure Clássica &bull; Hoje &bull; 16:00</p>
+            </div>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span class="badge-status-pill confirmado">Confirmado</span>
+            <i class="fa-solid fa-chevron-right" style="color:#8A2D4E; font-size:0.75rem;"></i>
+          </div>
+        </div>
+
+        <div class="card-list-item" onclick="openAdminSlotAction('Ana Costa', '(11) 98765-1111', 'Spa das Mãos', '18:00', 'Confirmado')">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <div class="client-avatar-badge" style="background:#E6BAC3;">AC</div>
+            <div>
+              <h5 style="font-size:0.92rem; font-weight:700; color:#350B19;">Ana Costa</h5>
+              <p style="font-size:0.78rem; color:#6A1D39;">Spa das Mãos &bull; Hoje &bull; 18:00</p>
+            </div>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span class="badge-status-pill confirmado">Confirmado</span>
+            <i class="fa-solid fa-chevron-right" style="color:#8A2D4E; font-size:0.75rem;"></i>
+          </div>
+        </div>
+
+        <div class="card-list-item" onclick="openAdminSlotAction('Raquel Ferreira', '(11) 98765-2222', 'Blindagem Diamante', '09:00', 'Pendente')">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <div class="client-avatar-badge" style="background:#F6DCE2;">RF</div>
+            <div>
+              <h5 style="font-size:0.92rem; font-weight:700; color:#350B19;">Raquel Ferreira</h5>
+              <p style="font-size:0.78rem; color:#6A1D39;">Blindagem Diamante &bull; Amanhã &bull; 09:00</p>
+            </div>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span class="badge-status-pill pendente">Pendente</span>
+            <i class="fa-solid fa-chevron-right" style="color:#8A2D4E; font-size:0.75rem;"></i>
+          </div>
+        </div>
+
+        <div class="card-list-item" onclick="openAdminSlotAction('Camila Lima', '(11) 98765-3333', 'Alongamento em Gel', '11:00', 'Confirmado')">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <div class="client-avatar-badge">CL</div>
+            <div>
+              <h5 style="font-size:0.92rem; font-weight:700; color:#350B19;">Camila Lima</h5>
+              <p style="font-size:0.78rem; color:#6A1D39;">Alongamento em Gel &bull; Amanhã &bull; 11:00</p>
+            </div>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span class="badge-status-pill confirmado">Confirmado</span>
+            <i class="fa-solid fa-chevron-right" style="color:#8A2D4E; font-size:0.75rem;"></i>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-admin-bottom-action" onclick="alert('Abrindo formulário de agendamento manual');">
+        <i class="fa-solid fa-plus"></i> Novo Agendamento
+      </button>
+    </section>
+
+    <!-- ========================================================
+         TELA 3: CLIENTES
+         ======================================================== -->
+    <section class="admin-view-screen" id="viewScreen_clientes">
+      <div class="section-head-title-row" style="margin-top:10px;">
+        <h3 style="font-family:var(--font-serif); font-size:1.35rem; color:#4D1328;"><i class="fa-solid fa-users"></i> Clientes</h3>
+        <button onclick="prompt('Nome da nova cliente:');" style="background:#4D1328; color:#FFF; width:30px; height:30px; border-radius:50%; border:none; cursor:pointer;"><i class="fa-solid fa-plus"></i></button>
+      </div>
+
+      <div class="search-input-box">
+        <i class="fa-solid fa-magnifying-glass" style="color:#8A2D4E;"></i>
+        <input type="text" placeholder="Buscar cliente..." oninput="searchCustomersAdmin(this.value)">
+      </div>
+
+      <div id="adminClientsList">
+        <div class="card-list-item" onclick="callClientWhatsApp('(11) 98765-4321', 'Mariana Silva')">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <div class="client-avatar-badge">MS</div>
+            <div>
+              <h5 style="font-size:0.92rem; font-weight:700; color:#350B19;">Mariana Silva</h5>
+              <p style="font-size:0.76rem; color:#6A1D39;">(11) 98765-4321 &bull; Último: 15/11/2026</p>
+            </div>
+          </div>
+          <i class="fa-solid fa-chevron-right" style="color:#8A2D4E; font-size:0.75rem;"></i>
+        </div>
+
+        <div class="card-list-item" onclick="callClientWhatsApp('(11) 98765-8765', 'Juliana Souza')">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <div class="client-avatar-badge" style="background:#F2CDD4;">JS</div>
+            <div>
+              <h5 style="font-size:0.92rem; font-weight:700; color:#350B19;">Juliana Souza</h5>
+              <p style="font-size:0.76rem; color:#6A1D39;">(11) 98765-8765 &bull; Último: 12/11/2026</p>
+            </div>
+          </div>
+          <i class="fa-solid fa-chevron-right" style="color:#8A2D4E; font-size:0.75rem;"></i>
+        </div>
+
+        <div class="card-list-item" onclick="callClientWhatsApp('(11) 98765-1111', 'Ana Costa')">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <div class="client-avatar-badge" style="background:#E6BAC3;">AC</div>
+            <div>
+              <h5 style="font-size:0.92rem; font-weight:700; color:#350B19;">Ana Costa</h5>
+              <p style="font-size:0.76rem; color:#6A1D39;">(11) 98765-1111 &bull; Último: 10/11/2026</p>
+            </div>
+          </div>
+          <i class="fa-solid fa-chevron-right" style="color:#8A2D4E; font-size:0.75rem;"></i>
+        </div>
+
+        <div class="card-list-item" onclick="callClientWhatsApp('(11) 98765-2222', 'Raquel Ferreira')">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <div class="client-avatar-badge" style="background:#F6DCE2;">RF</div>
+            <div>
+              <h5 style="font-size:0.92rem; font-weight:700; color:#350B19;">Raquel Ferreira</h5>
+              <p style="font-size:0.76rem; color:#6A1D39;">(11) 98765-2222 &bull; Último: 08/11/2026</p>
+            </div>
+          </div>
+          <i class="fa-solid fa-chevron-right" style="color:#8A2D4E; font-size:0.75rem;"></i>
+        </div>
+
+        <div class="card-list-item" onclick="callClientWhatsApp('(11) 98765-3333', 'Camila Lima')">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <div class="client-avatar-badge">CL</div>
+            <div>
+              <h5 style="font-size:0.92rem; font-weight:700; color:#350B19;">Camila Lima</h5>
+              <p style="font-size:0.76rem; color:#6A1D39;">(11) 98765-3333 &bull; Último: 05/11/2026</p>
+            </div>
+          </div>
+          <i class="fa-solid fa-chevron-right" style="color:#8A2D4E; font-size:0.75rem;"></i>
+        </div>
+      </div>
+
+      <button class="btn-admin-bottom-action" onclick="alert('Cadastro de novo cliente');">
+        Adicionar Cliente +
+      </button>
+    </section>
+
+    <!-- ========================================================
+         TELA 4: SERVIÇOS & TOGGLES
+         ======================================================== -->
+    <section class="admin-view-screen" id="viewScreen_servicos">
+      <div class="section-head-title-row" style="margin-top:10px;">
+        <h3 style="font-family:var(--font-serif); font-size:1.35rem; color:#4D1328;"><i class="fa-regular fa-gem"></i> Serviços</h3>
+        <button onclick="prompt('Nome do novo serviço:');" style="background:#4D1328; color:#FFF; width:30px; height:30px; border-radius:50%; border:none; cursor:pointer;"><i class="fa-solid fa-plus"></i></button>
+      </div>
+
+      <div class="card-list-item">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <img src="assets/images/trabalho-alongamento-chocolate.png" style="width:48px; height:48px; border-radius:12px; object-fit:cover;" alt="Alongamento">
+          <div>
+            <h5 style="font-size:0.92rem; font-weight:700; color:#350B19;">Alongamento em Gel</h5>
+            <p style="font-size:0.76rem; color:#6A1D39;">Unhas longas e resistentes...</p>
+            <strong style="font-size:0.85rem; color:#4D1328;">R$ 180,00</strong>
+          </div>
+        </div>
+        <label class="switch-toggle-custom">
+          <input type="checkbox" checked>
+          <span class="switch-slider"></span>
+        </label>
+      </div>
+
+      <div class="card-list-item">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <img src="assets/images/trabalho-tons-terrosos.png" style="width:48px; height:48px; border-radius:12px; object-fit:cover;" alt="Manicure">
+          <div>
+            <h5 style="font-size:0.92rem; font-weight:700; color:#350B19;">Manicure Clássica</h5>
+            <p style="font-size:0.76rem; color:#6A1D39;">Cuidado e beleza para suas unhas...</p>
+            <strong style="font-size:0.85rem; color:#4D1328;">R$ 70,00</strong>
+          </div>
+        </div>
+        <label class="switch-toggle-custom">
+          <input type="checkbox" checked>
+          <span class="switch-slider"></span>
+        </label>
+      </div>
+
+      <div class="card-list-item">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <img src="assets/images/trabalho-perolada-glaze.png" style="width:48px; height:48px; border-radius:12px; object-fit:cover;" alt="Spa">
+          <div>
+            <h5 style="font-size:0.92rem; font-weight:700; color:#350B19;">Spa das Mãos</h5>
+            <p style="font-size:0.76rem; color:#6A1D39;">Hidratação e bem-estar...</p>
+            <strong style="font-size:0.85rem; color:#4D1328;">R$ 90,00</strong>
+          </div>
+        </div>
+        <label class="switch-toggle-custom">
+          <input type="checkbox" checked>
+          <span class="switch-slider"></span>
+        </label>
+      </div>
+
+      <div class="card-list-item">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <img src="assets/images/trabalho-amendoada-ouro.png" style="width:48px; height:48px; border-radius:12px; object-fit:cover;" alt="Blindagem">
+          <div>
+            <h5 style="font-size:0.92rem; font-weight:700; color:#350B19;">Blindagem Diamante</h5>
+            <p style="font-size:0.76rem; color:#6A1D39;">Proteção e brilho intenso...</p>
+            <strong style="font-size:0.85rem; color:#4D1328;">R$ 120,00</strong>
+          </div>
+        </div>
+        <label class="switch-toggle-custom">
+          <input type="checkbox" checked>
+          <span class="switch-slider"></span>
+        </label>
+      </div>
+
+      <div class="card-list-item">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <img src="assets/images/trabalho-francesa-estrela.png" style="width:48px; height:48px; border-radius:12px; object-fit:cover;" alt="Esmaltação">
+          <div>
+            <h5 style="font-size:0.92rem; font-weight:700; color:#350B19;">Esmaltação em Gel</h5>
+            <p style="font-size:0.76rem; color:#6A1D39;">Cor perfeita por mais tempo...</p>
+            <strong style="font-size:0.85rem; color:#4D1328;">R$ 100,00</strong>
+          </div>
+        </div>
+        <label class="switch-toggle-custom">
+          <input type="checkbox" checked>
+          <span class="switch-slider"></span>
+        </label>
+      </div>
+    </section>
+
+    <!-- ========================================================
+         TELA 5: RELATÓRIOS FINANCEIROS
+         ======================================================== -->
+    <section class="admin-view-screen" id="viewScreen_relatorios">
+      <div class="section-head-title-row" style="margin-top:10px;">
+        <h3 style="font-family:var(--font-serif); font-size:1.35rem; color:#4D1328;"><i class="fa-solid fa-chart-simple"></i> Relatórios</h3>
+      </div>
+
+      <div class="filter-pills-row">
+        <button class="filter-pill active">Faturamento</button>
+        <button class="filter-pill">Clientes</button>
+        <button class="filter-pill">Serviços</button>
+      </div>
+
+      <div class="admin-chart-card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+          <div>
+            <span style="font-size:0.78rem; color:#8A2D4E; font-weight:600;">Faturamento Total</span>
+            <h3 style="font-family:var(--font-serif); font-size:1.6rem; color:#350B19; margin:2px 0;">R$ 34.860,00</h3>
+          </div>
+          <span class="kpi-growth" style="font-size:0.85rem;"><i class="fa-solid fa-arrow-up"></i> 18%</span>
+        </div>
+
+        <div style="position:relative; width:100%; height:130px; margin-top:10px;">
+          <svg viewBox="0 0 340 100" style="width:100%; height:100%;">
+            <path d="M 20 85 C 80 80, 140 70, 200 60 C 260 55, 290 25, 325 20 L 325 95 L 20 95 Z" fill="rgba(216, 63, 121, 0.2)"/>
+            <path d="M 20 85 C 80 80, 140 70, 200 60 C 260 55, 290 25, 325 20" fill="none" stroke="#D83F79" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="325" cy="20" r="5" fill="#D83F79"/>
+            <text x="15" y="105" font-size="9" fill="#8A2D4E">Mai</text>
+            <text x="75" y="105" font-size="9" fill="#8A2D4E">Jun</text>
+            <text x="135" y="105" font-size="9" fill="#8A2D4E">Jul</text>
+            <text x="195" y="105" font-size="9" fill="#8A2D4E">Ago</text>
+            <text x="255" y="105" font-size="9" fill="#8A2D4E">Set</text>
+            <text x="315" y="105" font-size="9" fill="#8A2D4E">Out</text>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Donut Chart -->
+      <div class="admin-sub-card">
+        <h4 style="font-family:var(--font-serif); font-size:1.05rem; color:#4D1328; margin-bottom:12px;">★ Serviços mais realizados</h4>
+        <div class="donut-chart-container">
+          <div class="donut-svg-wrap">
+            <svg viewBox="0 0 36 36" style="width:100%; height:100%; transform: rotate(-90deg);">
+              <circle cx="18" cy="18" r="14" fill="none" stroke="#E9A3B5" stroke-width="5" stroke-dasharray="45 55" stroke-dashoffset="0"/>
+              <circle cx="18" cy="18" r="14" fill="none" stroke="#8A2D4E" stroke-width="5" stroke-dasharray="35 65" stroke-dashoffset="-45"/>
+              <circle cx="18" cy="18" r="14" fill="none" stroke="#350B19" stroke-width="5" stroke-dasharray="20 80" stroke-dashoffset="-80"/>
+            </svg>
+          </div>
+          <div class="donut-legend-list">
+            <div class="donut-legend-item">
+              <span><span class="bullet" style="background:#E9A3B5;"></span>Alongamento em Gel</span>
+              <strong>45%</strong>
+            </div>
+            <div class="donut-legend-item">
+              <span><span class="bullet" style="background:#8A2D4E;"></span>Manicure Clássica</span>
+              <strong>35%</strong>
+            </div>
+            <div class="donut-legend-item">
+              <span><span class="bullet" style="background:#350B19;"></span>Spa das Mãos</span>
+              <strong>20%</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-admin-bottom-action" onclick="alert('Relatório consolidado pronto para download!');">
+        <i class="fa-solid fa-download"></i> Baixar Relatório em PDF
+      </button>
+    </section>
+
+    <!-- ========================================================
+         TELA 6: CONFIGURAÇÕES
+         ======================================================== -->
+    <section class="admin-view-screen" id="viewScreen_configuracoes">
+      <div class="section-head-title-row" style="margin-top:10px;">
+        <h3 style="font-family:var(--font-serif); font-size:1.35rem; color:#4D1328;"><i class="fa-solid fa-gear"></i> Configurações</h3>
+      </div>
+
+      <div class="card-list-item" onclick="alert('Editar perfil do salão');">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <i class="fa-regular fa-user" style="font-size:1.2rem; color:#4D1328;"></i>
+          <div>
+            <h5 style="font-size:0.9rem; font-weight:700; color:#350B19;">Perfil do Salão</h5>
+            <p style="font-size:0.75rem; color:#6A1D39;">Edite as informações do seu salão</p>
+          </div>
+        </div>
+        <i class="fa-solid fa-chevron-right" style="color:#8A2D4E; font-size:0.75rem;"></i>
+      </div>
+
+      <div class="card-list-item">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <i class="fa-regular fa-bell" style="font-size:1.2rem; color:#4D1328;"></i>
+          <div>
+            <h5 style="font-size:0.9rem; font-weight:700; color:#350B19;">Notificações</h5>
+            <p style="font-size:0.75rem; color:#6A1D39;">Gerencie as notificações do app</p>
+          </div>
+        </div>
+        <label class="switch-toggle-custom">
+          <input type="checkbox" checked>
+          <span class="switch-slider"></span>
+        </label>
+      </div>
+
+      <div class="card-list-item" onclick="alert('Defina o horário de atendimento');">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <i class="fa-regular fa-clock" style="font-size:1.2rem; color:#4D1328;"></i>
+          <div>
+            <h5 style="font-size:0.9rem; font-weight:700; color:#350B19;">Horários de Funcionamento</h5>
+            <p style="font-size:0.75rem; color:#6A1D39;">Defina o horário de atendimento</p>
+          </div>
+        </div>
+        <i class="fa-solid fa-chevron-right" style="color:#8A2D4E; font-size:0.75rem;"></i>
+      </div>
+
+      <div class="card-list-item" onclick="alert('Configure as opções de pagamento');">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <i class="fa-regular fa-credit-card" style="font-size:1.2rem; color:#4D1328;"></i>
+          <div>
+            <h5 style="font-size:0.9rem; font-weight:700; color:#350B19;">Formas de Pagamento</h5>
+            <p style="font-size:0.75rem; color:#6A1D39;">Configure as opções de pagamento</p>
+          </div>
+        </div>
+        <i class="fa-solid fa-chevron-right" style="color:#8A2D4E; font-size:0.75rem;"></i>
+      </div>
+
+      <div class="card-list-item" onclick="alert('Proteja seus dados com LGPD');">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <i class="fa-solid fa-lock" style="font-size:1.2rem; color:#4D1328;"></i>
+          <div>
+            <h5 style="font-size:0.9rem; font-weight:700; color:#350B19;">Privacidade e Segurança</h5>
+            <p style="font-size:0.75rem; color:#6A1D39;">Proteja seus dados</p>
+          </div>
+        </div>
+        <i class="fa-solid fa-chevron-right" style="color:#8A2D4E; font-size:0.75rem;"></i>
+      </div>
+
+      <div class="card-list-item" onclick="window.open('https://wa.me/5561985543452', '_blank');">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <i class="fa-regular fa-circle-question" style="font-size:1.2rem; color:#4D1328;"></i>
+          <div>
+            <h5 style="font-size:0.9rem; font-weight:700; color:#350B19;">Suporte</h5>
+            <p style="font-size:0.75rem; color:#6A1D39;">Precisa de ajuda? Fale conosco</p>
+          </div>
+        </div>
+        <i class="fa-solid fa-chevron-right" style="color:#8A2D4E; font-size:0.75rem;"></i>
+      </div>
+    </section>
+
+    <!-- ========================================================
+         TELA 7: AVALIAÇÕES (MOCKUP)
+         ======================================================== -->
+    <section class="admin-view-screen" id="viewScreen_avaliacoes">
+      <div class="section-head-title-row" style="margin-top:10px;">
+        <h3 style="font-family:var(--font-serif); font-size:1.35rem; color:#4D1328;"><i class="fa-solid fa-star"></i> Avaliações</h3>
+      </div>
+
+      <div class="admin-sub-card" style="text-align:center; padding:20px;">
+        <h2 style="font-family:var(--font-serif); font-size:2.8rem; color:#350B19; line-height:1;">⭐ 4.9</h2>
+        <span style="font-size:0.85rem; color:#8A2D4E; font-weight:600;">de 5 estrelas</span>
+        <div style="color:#EAB308; font-size:1.2rem; margin:8px 0;">★★★★★</div>
+        <p style="font-size:0.78rem; color:#6A1D39;">Baseado em 248 avaliações</p>
+
+        <!-- Barras de Estrelas -->
+        <div style="margin-top:16px; font-size:0.78rem;">
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:5px;">
+            <span style="width:60px; text-align:left;">5 estrelas</span>
+            <div style="flex:1; height:8px; background:#FAF4F5; border-radius:4px; overflow:hidden;">
+              <div style="width:92%; height:100%; background:#4D1328;"></div>
+            </div>
+            <span style="width:30px; text-align:right;">92%</span>
+          </div>
+
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:5px;">
+            <span style="width:60px; text-align:left;">4 estrelas</span>
+            <div style="flex:1; height:8px; background:#FAF4F5; border-radius:4px; overflow:hidden;">
+              <div style="width:6%; height:100%; background:#4D1328;"></div>
+            </div>
+            <span style="width:30px; text-align:right;">6%</span>
+          </div>
+
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:5px;">
+            <span style="width:60px; text-align:left;">3 estrelas</span>
+            <div style="flex:1; height:8px; background:#FAF4F5; border-radius:4px; overflow:hidden;">
+              <div style="width:1%; height:100%; background:#4D1328;"></div>
+            </div>
+            <span style="width:30px; text-align:right;">1%</span>
+          </div>
+
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:5px;">
+            <span style="width:60px; text-align:left;">2 estrelas</span>
+            <div style="flex:1; height:8px; background:#FAF4F5; border-radius:4px; overflow:hidden;">
+              <div style="width:1%; height:100%; background:#4D1328;"></div>
+            </div>
+            <span style="width:30px; text-align:right;">1%</span>
+          </div>
+
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span style="width:60px; text-align:left;">1 estrela</span>
+            <div style="flex:1; height:8px; background:#FAF4F5; border-radius:4px; overflow:hidden;">
+              <div style="width:0%; height:100%; background:#4D1328;"></div>
+            </div>
+            <span style="width:30px; text-align:right;">0%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Comentários Recentes -->
+      <div style="margin-top:16px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+          <h4 style="font-family:var(--font-serif); font-size:1.05rem; color:#4D1328;">Comentários Recentes</h4>
+          <span style="font-size:0.8rem; color:#8A2D4E;">Ver todas &gt;</span>
+        </div>
+
+        <div class="card-list-item" style="flex-direction:column; align-items:flex-start; gap:6px;">
+          <div style="display:flex; justify-content:space-between; width:100%;">
+            <strong style="color:#350B19; font-size:0.88rem;">Mariana Silva <span style="color:#EAB308;">★★★★★</span></strong>
+            <span style="font-size:0.75rem; color:#8A2D4E;">Há 2 dias</span>
+          </div>
+          <p style="font-size:0.82rem; color:#6A1D39;">"Atendimento impecável! 💜 Minhas unhas ficaram perfeitas!"</p>
+        </div>
+
+        <div class="card-list-item" style="flex-direction:column; align-items:flex-start; gap:6px;">
+          <div style="display:flex; justify-content:space-between; width:100%;">
+            <strong style="color:#350B19; font-size:0.88rem;">Juliana Souza <span style="color:#EAB308;">★★★★★</span></strong>
+            <span style="font-size:0.75rem; color:#8A2D4E;">Há 4 dias</span>
+          </div>
+          <p style="font-size:0.82rem; color:#6A1D39;">"Amei o resultado! Super recomendo! ❤️"</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================
+         BARRA DE NAVEGAÇÃO INFERIOR VINHO PROFUNDO (ADMIN)
+         ======================================================== -->
+    <nav class="bottom-nav-wine-admin">
+      <button class="admin-nav-tab-btn active" data-tab="dashboard" onclick="switchAdminTab('dashboard')">
         <i class="fa-solid fa-house"></i>
         <span>Início</span>
       </button>
 
-      <button class="admin-nav-tab" data-tab="appointments">
-        <i class="fa-solid fa-layer-group"></i>
+      <button class="admin-nav-tab-btn" data-tab="agenda" onclick="switchAdminTab('agenda')">
+        <i class="fa-regular fa-calendar-check"></i>
         <span>Agenda</span>
       </button>
 
-      <button class="admin-nav-tab" data-tab="clients">
-        <i class="fa-regular fa-user"></i>
+      <button class="admin-nav-tab-btn" data-tab="clientes" onclick="switchAdminTab('clientes')">
+        <i class="fa-solid fa-users"></i>
         <span>Clientes</span>
       </button>
 
-      <button class="admin-nav-tab" data-tab="services">
-        <i class="fa-solid fa-film"></i>
-        <span>Stories</span>
+      <button class="admin-nav-tab-btn" data-tab="relatorios" onclick="switchAdminTab('relatorios')">
+        <i class="fa-solid fa-chart-simple"></i>
+        <span>Relatórios</span>
       </button>
 
-      <button class="admin-nav-tab" data-tab="finance">
-        <i class="fa-regular fa-chart-bar"></i>
-        <span>Finanças</span>
-      </button>
-
-      <button class="admin-nav-tab" data-tab="whitelabel">
-        <i class="fa-solid fa-palette"></i>
-        <span>Tema</span>
+      <button class="admin-nav-tab-btn" data-tab="avaliacoes" onclick="switchAdminTab('avaliacoes')">
+        <i class="fa-regular fa-user"></i>
+        <span>Perfil</span>
       </button>
     </nav>
 
   </div>
 
-  <!-- Modal / Drawer de Ações no Agendamento -->
-  <div class="admin-action-drawer" id="adminActionDrawer">
-    <div class="drawer-sheet">
-      <div class="drawer-header">
-        <h3 id="drawerClientName">Juliana Santos</h3>
-        <button id="btnDrawerClose" style="color:#A39D9E; font-size:1.5rem; cursor:pointer;">&times;</button>
-      </div>
-      <p id="drawerServiceDetails" style="font-size:0.9rem; color:#A39D9E; line-height:1.5; margin-bottom:12px;"></p>
-
-      <div class="drawer-actions-grid">
-        <button class="btn-drawer-action confirm" id="btnDrawerConfirm">
-          <i class="fa-solid fa-check"></i> Confirmar
-        </button>
-        <button class="btn-drawer-action confirm" id="btnDrawerComplete" style="background:#1E40AF;">
-          <i class="fa-solid fa-flag-checkered"></i> Concluir
-        </button>
-        <button class="btn-drawer-action whatsapp" id="btnDrawerWhatsApp">
-          <i class="fa-brands fa-whatsapp"></i> Chamar WhatsApp
-        </button>
-        <button class="btn-drawer-action cancel" id="btnDrawerCancel">
-          <i class="fa-solid fa-ban"></i> Cancelar Vaga
-        </button>
-        <button class="btn-drawer-action" id="btnDrawerGoogleCal" style="background:#4285F4; color:#FFF;">
-          <i class="fa-brands fa-google"></i> Google Calendar
-        </button>
-        <button class="btn-drawer-action" id="btnDrawerIcs" style="background:#555055; color:#FFF;">
-          <i class="fa-solid fa-file-arrow-down"></i> Baixar .ICS
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal do Editor de Stories (Até 3 vídeos sequenciais por serviço) -->
-  <div class="admin-action-drawer" id="storiesEditorModal">
-    <div class="drawer-sheet" style="max-width:550px;">
-      <div class="drawer-header">
-        <h3>Editor de Stories: <span id="storiesServiceName" style="color:var(--color-rose);"></span></h3>
-        <button onclick="document.getElementById('storiesEditorModal').classList.remove('active');" style="color:#A39D9E; font-size:1.5rem; cursor:pointer;">&times;</button>
-      </div>
-      <p style="font-size:0.85rem; color:#A39D9E; margin-bottom:1rem;">
-        Cadastre até <strong>3 vídeos curtos em MP4 ou WebM</strong> para reprodução automática no player de Stories do Instagram.
-      </p>
-
-      <div class="stories-editor-box">
-        <div style="margin-bottom:10px;">
-          <label style="font-size:0.8rem; font-weight:600; color:var(--color-rose); display:block; margin-bottom:4px;">Vídeo Story 1 (Capa / Visão Geral):</label>
-          <input type="text" id="storyVideo1" placeholder="Ex: assets/videos/stories-alongamento-1.mp4" style="width:100%; padding:8px 10px; background:#1F1D1F; border:1px solid #3E393E; color:#FFF; border-radius:4px;">
-        </div>
-
-        <div style="margin-bottom:10px;">
-          <label style="font-size:0.8rem; font-weight:600; color:var(--color-rose); display:block; margin-bottom:4px;">Vídeo Story 2 (Detalhes da Técnica / Curvatura):</label>
-          <input type="text" id="storyVideo2" placeholder="Ex: assets/videos/stories-alongamento-2.mp4" style="width:100%; padding:8px 10px; background:#1F1D1F; border:1px solid #3E393E; color:#FFF; border-radius:4px;">
-        </div>
-
-        <div style="margin-bottom:10px;">
-          <label style="font-size:0.8rem; font-weight:600; color:var(--color-rose); display:block; margin-bottom:4px;">Vídeo Story 3 (Resultado Final com Brilho):</label>
-          <input type="text" id="storyVideo3" placeholder="Ex: assets/videos/stories-alongamento-3.mp4" style="width:100%; padding:8px 10px; background:#1F1D1F; border:1px solid #3E393E; color:#FFF; border-radius:4px;">
-        </div>
-      </div>
-
-      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:1.2rem;">
-        <button class="btn-drawer-action close" onclick="document.getElementById('storiesEditorModal').classList.remove('active');">
-          Cancelar
-        </button>
-        <button class="btn-drawer-action confirm" id="btnSaveStories">
-          <i class="fa-solid fa-check"></i> Salvar Vídeos
-        </button>
-      </div>
-    </div>
-  </div>
-
   <!-- Scripts -->
   <script src="assets/js/store.js"></script>
-  <script src="assets/js/admin.js"></script>
+  <script>
+    function switchAdminTab(tabName) {
+      document.querySelectorAll('.admin-view-screen').forEach(sec => {
+        sec.classList.remove('active');
+      });
+
+      document.querySelectorAll('.admin-nav-tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.getAttribute('data-tab') === tabName) {
+          btn.classList.add('active');
+        }
+      });
+
+      const target = document.getElementById(`viewScreen_${tabName}`);
+      if (target) {
+        target.classList.add('active');
+        window.scrollTo({top:0, behavior:'smooth'});
+      }
+    }
+
+    function filterAppointmentsAdmin(status, btn) {
+      document.querySelectorAll('.filter-pill').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const items = document.querySelectorAll('#adminAppointmentsList .card-list-item');
+      items.forEach(card => {
+        if (status === 'all') {
+          card.style.display = 'flex';
+        } else {
+          const badge = card.querySelector('.badge-status-pill');
+          if (badge && badge.classList.contains(status)) {
+            card.style.display = 'flex';
+          } else {
+            card.style.display = 'none';
+          }
+        }
+      });
+    }
+
+    function searchAppointmentsAdmin(q) {
+      const query = q.toLowerCase();
+      const items = document.querySelectorAll('#adminAppointmentsList .card-list-item');
+      items.forEach(card => {
+        const text = card.textContent.toLowerCase();
+        card.style.display = text.includes(query) ? 'flex' : 'none';
+      });
+    }
+
+    function searchCustomersAdmin(q) {
+      const query = q.toLowerCase();
+      const items = document.querySelectorAll('#adminClientsList .card-list-item');
+      items.forEach(card => {
+        const text = card.textContent.toLowerCase();
+        card.style.display = text.includes(query) ? 'flex' : 'none';
+      });
+    }
+
+    function callClientWhatsApp(phone, name) {
+      const clean = phone.replace(/\D/g, '');
+      const msg = encodeURIComponent(`Olá, ${name}! Tudo bem? Aqui é a Estefany Paiva Nails ✨`);
+      window.open(`https://wa.me/55${clean}?text=${msg}`, '_blank');
+    }
+
+    function openAdminSlotAction(client, phone, srv, time, status) {
+      const opt = confirm(`Agendamento de ${client} (${srv} às ${time}):\n\nDeseja abrir o WhatsApp da cliente?`);
+      if (opt) {
+        callClientWhatsApp(phone, client);
+      }
+    }
+  </script>
 </body>
 </html>
