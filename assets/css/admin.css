@@ -993,3 +993,401 @@ input:checked + .switch-slider:before {
   font-size: 0.76rem !important;
   color: #6A1D39 !important;
 }
+
+
+/* ========================================================
+   CABEÇALHO DE SEÇÃO E RELATÓRIOS GERENCIAIS INTERATIVOS
+   ======================================================== */
+.section-head-title-row {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+  gap: 12px !important;
+  margin-bottom: 18px !important;
+  width: 100% !important;
+}
+
+.reports-toolbar-wrap {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.report-period-pills {
+  display: inline-flex;
+  background: #FBECEF;
+  padding: 4px;
+  border-radius: 30px;
+  border: 1px solid rgba(77, 19, 40, 0.12);
+  gap: 4px;
+}
+
+.report-period-btn {
+  border: none;
+  background: transparent;
+  color: #6A1D39;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.report-period-btn:hover {
+  color: #350B19;
+  background: rgba(77, 19, 40, 0.06);
+}
+
+.report-period-btn.active {
+  background: #4D1328;
+  color: #FFFFFF;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(77, 19, 40, 0.25);
+}
+
+.report-subtabs-nav {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid rgba(77, 19, 40, 0.1);
+  scrollbar-width: none;
+}
+
+.report-subtabs-nav::-webkit-scrollbar {
+  display: none;
+}
+
+.report-subtab-btn {
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: #8A2D4E;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 8px 14px;
+  cursor: pointer;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.report-subtab-btn:hover {
+  color: #350B19;
+}
+
+.report-subtab-btn.active {
+  color: #350B19;
+  border-bottom-color: #D83F79;
+  font-weight: 700;
+}
+
+/* KPIs Gerenciais do Relatório */
+.reports-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+@media (min-width: 768px) {
+  .reports-kpi-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+  }
+}
+
+.report-kpi-box {
+  background: #FFFFFF;
+  border: 1px solid rgba(77, 19, 40, 0.1);
+  border-radius: 20px;
+  padding: 16px;
+  box-shadow: 0 4px 16px rgba(53, 11, 25, 0.04);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+}
+
+.report-kpi-box:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(53, 11, 25, 0.09);
+  border-color: rgba(216, 63, 121, 0.3);
+}
+
+.report-kpi-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.report-kpi-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  background: #FBECEF;
+  color: #4D1328;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+}
+
+.report-kpi-val {
+  font-family: var(--font-serif);
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: #350B19;
+  margin: 2px 0;
+}
+
+.report-kpi-label {
+  font-size: 0.78rem;
+  color: #6A1D39;
+  font-weight: 600;
+}
+
+.report-kpi-sub {
+  font-size: 0.72rem;
+  color: #8A2D4E;
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Gráfico de Barras Interativo */
+.interactive-bars-stage {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  height: 185px;
+  padding: 24px 10px 8px;
+  gap: 10px;
+  border-bottom: 1px solid rgba(77, 19, 40, 0.1);
+  margin-top: 10px;
+}
+
+.bar-col-interactive {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  justify-content: flex-end;
+  cursor: pointer;
+  position: relative;
+  group: bar;
+}
+
+.bar-value-tooltip {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #350B19;
+  background: #FBECEF;
+  padding: 3px 7px;
+  border-radius: 8px;
+  margin-bottom: 6px;
+  opacity: 0.85;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.bar-col-interactive:hover .bar-value-tooltip,
+.bar-col-interactive.selected .bar-value-tooltip {
+  background: #350B19;
+  color: #FFFFFF;
+  opacity: 1;
+  transform: translateY(-2px);
+}
+
+.bar-fill-pillar {
+  width: 100%;
+  max-width: 42px;
+  border-radius: 10px 10px 4px 4px;
+  background: linear-gradient(180deg, #D83F79 0%, #8A2D4E 100%);
+  transition: height 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.2s, background 0.2s;
+  min-height: 12px;
+}
+
+.bar-col-interactive:hover .bar-fill-pillar {
+  filter: brightness(1.12);
+}
+
+.bar-col-interactive.selected .bar-fill-pillar {
+  background: linear-gradient(180deg, #350B19 0%, #6A1D39 100%);
+  box-shadow: 0 4px 14px rgba(53, 11, 25, 0.35);
+}
+
+.bar-month-lbl {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: #6A1D39;
+  margin-top: 8px;
+}
+
+.bar-col-interactive.selected .bar-month-lbl {
+  color: #350B19;
+  font-weight: 800;
+}
+
+/* Detalhe do Ponto Selecionado no Gráfico */
+.chart-selected-insight-banner {
+  background: #FAF4F5;
+  border: 1px solid rgba(77, 19, 40, 0.1);
+  border-radius: 14px;
+  padding: 12px 16px;
+  margin-top: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* Categorias Interativas com Barra de Progresso */
+.category-interactive-item {
+  background: #FFFFFF;
+  border: 1px solid rgba(77, 19, 40, 0.08);
+  border-radius: 16px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.category-interactive-item:hover,
+.category-interactive-item.active {
+  border-color: #D83F79;
+  background: #FFF9FA;
+  transform: translateX(3px);
+  box-shadow: 0 4px 12px rgba(216, 63, 121, 0.1);
+}
+
+.cat-progress-track {
+  width: 100%;
+  height: 8px;
+  background: #F3E5E8;
+  border-radius: 6px;
+  overflow: hidden;
+  margin: 8px 0 6px;
+}
+
+.cat-progress-fill {
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.5s ease;
+}
+
+/* Simulador de Metas */
+.simulator-box-card {
+  background: linear-gradient(135deg, #350B19 0%, #58152C 100%);
+  color: #FFFFFF;
+  border-radius: 22px;
+  padding: 20px;
+  margin-top: 18px;
+  box-shadow: 0 8px 28px rgba(53, 11, 25, 0.22);
+}
+
+.sim-range-slider {
+  width: 100%;
+  accent-color: #E9A3B5;
+  cursor: pointer;
+  height: 6px;
+  margin: 8px 0;
+}
+
+/* Tabela de Extrato de Atendimentos no Relatório */
+.report-transactions-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  margin-top: 12px;
+}
+
+.report-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.84rem;
+}
+
+.report-table th {
+  text-align: left;
+  padding: 10px 12px;
+  color: #6A1D39;
+  font-weight: 700;
+  border-bottom: 2px solid rgba(77, 19, 40, 0.1);
+  white-space: nowrap;
+}
+
+.report-table td {
+  padding: 11px 12px;
+  border-bottom: 1px solid rgba(77, 19, 40, 0.06);
+  color: #350B19;
+  vertical-align: middle;
+}
+
+.report-table tr:hover td {
+  background: rgba(251, 236, 239, 0.55);
+}
+
+
+/* Garantir zero corte lateral no painel admin em telas mobile (360px - 480px) */
+.admin-site-wrapper-expansive,
+.admin-header-wine,
+.admin-header-container,
+.admin-main-content-expansive,
+.admin-view-screen,
+.admin-dashboard-split-row,
+.admin-chart-card,
+.admin-sub-card {
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
+@media (max-width: 899px) {
+  /* No celular não precisa exibir o card de 6 botões de Acesso Rápido pois já existe a barra fixa inferior */
+  .admin-quick-access-card {
+    display: none !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .admin-header-container,
+  .admin-main-content-expansive {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  .admin-greeting-row {
+    flex-wrap: wrap !important;
+    gap: 10px !important;
+  }
+
+  .reports-kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+
+  .report-kpi-box {
+    padding: 12px 10px !important;
+    min-width: 0 !important;
+  }
+
+  .report-kpi-val {
+    font-size: 1.15rem !important;
+  }
+
+  .report-period-btn {
+    padding: 5px 10px !important;
+    font-size: 0.72rem !important;
+  }
+}

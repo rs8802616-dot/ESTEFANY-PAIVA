@@ -1241,3 +1241,56 @@ html, body {
   color: #FFFFFF !important;
   font-weight: 700 !important;
 }
+
+
+/* No celular não exibe os 4 botões de ação rápida do topo (já existe a barra inferior) */
+@media (max-width: 899px) {
+  .quick-actions-bar {
+    display: none !important;
+  }
+  .promo-card-wrapper {
+    margin-top: 6px !important;
+  }
+}
+
+
+/* Garantir zero corte lateral em telas pequenas (360px - 480px) */
+.site-wrapper-expansive,
+.client-header-wine,
+.wine-header-inner-expansive,
+.client-main-content-expansive,
+.client-desktop-grid,
+.client-col-left,
+.client-col-right,
+.section-client-block,
+.promo-card-wrapper,
+.promo-highlight-card,
+.next-booking-banner {
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
+@media (max-width: 600px) {
+  .wine-header-inner-expansive,
+  .client-main-content-expansive {
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+  }
+
+  .greeting-text-area p {
+    font-size: 0.78rem !important;
+    white-space: normal !important;
+  }
+
+  .next-booking-banner {
+    padding: 12px !important;
+    gap: 10px !important;
+  }
+
+  .btn-details-soft-pill {
+    padding: 6px 10px !important;
+    font-size: 0.72rem !important;
+    flex-shrink: 0 !important;
+  }
+}
