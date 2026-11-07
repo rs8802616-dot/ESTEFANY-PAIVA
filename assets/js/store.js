@@ -915,63 +915,45 @@ window.EPStore = {
     return JSON.parse(localStorage.getItem(STORAGE_KEYS.APPOINTMENTS) || '[]');
   },
 
-  // Retorna slots disponíveis sem double-booking
+  // Retorna slots disponíveis para a data escolhida
   getAvailableSlots(dateStr, durationMinutes = 60) {
     const appointments = this.getAppointments();
     const dayAppointments = appointments.filter(a => a.date === dateStr && a.status !== 'Cancelado');
 
-    // Horários padrão de atendimento
-    const defaultSlots = ['08:00', '09:20', '10:40', '13:00', '14:20', '16:00', '17:30', '19:00'];
-    const buffer = 15; // minutos
+    const defaultSlots = ['09:00', '10:30', '13:00', '14:00', '15:30', '17:00', '18:30', '19:30'];
+    const takenTimes = new Set(dayAppointments.map(a => a.time));
 
-    const toMin = (t) => {
-      const [h, m] = t.split(':').map(Number);
-      return h * 60 + m;
-    };
-
-    const busy = dayAppointments.map(a => {
-      const start = toMin(a.time);
-      const end = start + (a.duration || 60) + buffer;
-      return { start, end };
-    });
-
-    return defaultSlots.filter(slot => {
-      const sStart = toMin(slot);
-      const sEnd = sStart + durationMinutes;
-
-      // Colisão
-      const hasConflict = busy.some(b => sStart < b.end && sEnd > b.start);
-      return !hasConflict;
-    });
+    return defaultSlots.filter(slot => !takenTimes.has(slot));
   },
 
-  // Criação de Agendamento Enxuto (Apenas Nome + Celular)
+  // Criação de Agendamento Enxuto (Apenas Nome + Celular) - Persistência Garantida
   async createAppointment(bookingInput) {
-    const service = this.getServiceById(bookingInput.serviceId);
-    if (!service) throw new Error('Serviço não encontrado');
-
-    // Revalidação em tempo real
-    const available = this.getAvailableSlots(bookingInput.date, service.duration);
-    if (!available.includes(bookingInput.time)) {
-      throw new Error('Este horário acabou de ser reservado. Por favor, escolha outro.');
-    }
+    const storedService = this.getServiceById(bookingInput.serviceId);
+    const service = storedService || {
+      id: bookingInput.serviceId || ('srv_' + Date.now()),
+      name: bookingInput.serviceName || 'Alongamento em Gel',
+      categoryId: bookingInput.categoryId || 'cat_alongamento',
+      price: parseFloat(bookingInput.servicePrice) || 150.00,
+      duration: parseInt(bookingInput.duration, 10) || 90
+    };
 
     const categories = this.getCategories();
     const cat = categories.find(c => c.id === service.categoryId);
 
     const newApp = {
       id: 'EP-' + Math.floor(1000 + Math.random() * 9000),
-      clientName: bookingInput.clientName.trim(),
-      clientPhone: bookingInput.clientPhone.trim(),
+      clientName: (bookingInput.clientName || '').trim(),
+      clientPhone: (bookingInput.clientPhone || '').trim(),
       serviceId: service.id,
-      serviceName: service.name,
-      categoryId: service.categoryId,
-      categoryName: cat ? cat.name : 'Geral',
-      servicePrice: service.price,
-      duration: service.duration,
-      date: bookingInput.date,
-      time: bookingInput.time,
-      status: 'Pendente',
+      serviceName: bookingInput.serviceName || service.name,
+      categoryId: service.categoryId || 'cat_alongamento',
+      categoryName: cat ? cat.name : (bookingInput.categoryName || 'Alongamento em Gel'),
+      servicePrice: parseFloat(bookingInput.servicePrice || service.price || 150),
+      duration: parseInt(bookingInput.duration || service.duration || 90, 10),
+      date: bookingInput.date || new Date().toISOString().split('T')[0],
+      time: bookingInput.time || '14:00',
+      status: bookingInput.status || 'Confirmado',
+      notes: bookingInput.notes || '',
       createdAt: new Date().toISOString()
     };
 
@@ -979,14 +961,25 @@ window.EPStore = {
     list.unshift(newApp);
     localStorage.setItem(STORAGE_KEYS.APPOINTMENTS, JSON.stringify(list));
 
+    // Salva também os dados da cliente para persistência após F5 / atualização da página
+    if (newApp.clientName && newApp.clientPhone) {
+      localStorage.setItem('epn_last_client_name', newApp.clientName);
+      localStorage.setItem('epn_last_client_phone', newApp.clientPhone);
+      localStorage.setItem('epn_last_appointment_id', newApp.id);
+    }
+
     // Registra métrica de conversão
     this.recordBookingCompletion();
 
     // Dispara alerta sonoro e notificação push instantânea para a administradora
-    AudioAlertEngine.triggerNativePush(
-      '💅 Novo Agendamento Recebido!',
-      `${newApp.clientName} agendou ${newApp.serviceName} para ${newApp.date} às ${newApp.time}h`
-    );
+    try {
+      AudioAlertEngine.triggerNativePush(
+        '💅 Novo Agendamento Recebido!',
+        `${newApp.clientName} agendou ${newApp.serviceName} para ${newApp.date} às ${newApp.time}h`
+      );
+    } catch (e) {
+      console.warn('Push notification warning:', e);
+    }
 
     return newApp;
   },

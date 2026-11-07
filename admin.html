@@ -402,337 +402,177 @@
       </section>
 
       <!-- ========================================================
-           TELA 5: RELATÓRIOS GERENCIAIS 100% INTERATIVOS
+           TELA 5: RELATÓRIOS FINANCEIROS (100% HARMÔNICO COM O TEMA VINHO & ROSÉ)
            ======================================================== -->
       <section class="admin-view-screen" id="viewScreen_relatorios">
 
-        <!-- Cabeçalho + Barra de Ferramentas Interativa -->
+        <!-- Cabeçalho da Seção -->
         <div class="section-head-title-row" style="margin-top:10px;">
-          <div>
-            <h3 style="font-family:var(--font-serif); font-size:1.4rem; color:#4D1328;">
-              <i class="fa-solid fa-chart-pie"></i> Relatórios & Inteligência Financeira
-            </h3>
-            <p style="font-size:0.8rem; color:#8A2D4E;">Clique nos períodos, barras, categorias ou use o simulador para explorar seus resultados em tempo real.</p>
-          </div>
+          <h3 style="font-family:var(--font-serif); font-size:1.35rem; color:#4D1328;">
+            <i class="fa-solid fa-chart-simple"></i> Relatórios Financeiros
+          </h3>
 
-          <div class="reports-toolbar-wrap no-print">
-            <!-- Seletor de Período Interativo -->
-            <div class="report-period-pills">
-              <button type="button" class="report-period-btn" onclick="setReportPeriod('7d', this)">7 Dias</button>
-              <button type="button" class="report-period-btn active" onclick="setReportPeriod('30d', this)">Este Mês</button>
-              <button type="button" class="report-period-btn" onclick="setReportPeriod('6m', this)">6 Meses</button>
-              <button type="button" class="report-period-btn" onclick="setReportPeriod('1y', this)">Ano</button>
-            </div>
-
-            <!-- Filtro de Categoria -->
-            <select id="reportCategorySelect" onchange="setReportCategoryFilter(this.value)" style="padding:7px 14px; border-radius:20px; border:1px solid rgba(77,19,40,0.15); background:#FFF; color:#350B19; font-size:0.8rem; font-weight:600; cursor:pointer;">
-              <option value="all">Todas as Categorias</option>
-              <option value="Alongamento em Gel">Alongamento em Gel</option>
-              <option value="Manicure Clássica">Manicure Clássica</option>
-              <option value="Nail Art">Nail Art & Ouro</option>
-              <option value="Spa das Mãos">Spa das Mãos & Blindagem</option>
-              <option value="Esmaltação em Gel">Esmaltação em Gel</option>
-            </select>
-
-            <!-- Exportações -->
-            <button class="btn-open-client-pill" onclick="exportReportCSV()" style="background:#FFF; border:1px solid rgba(77,19,40,0.18);">
-              <i class="fa-solid fa-file-csv" style="color:#16A34A;"></i> Exportar CSV
+          <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;" class="no-print">
+            <button type="button" class="filter-pill" onclick="exportReportCSV()">
+              <i class="fa-solid fa-file-excel" style="margin-right:4px;"></i> Exportar Planilha
             </button>
-            <button class="btn-open-client-pill" onclick="printAdminReport()" style="background:#4D1328; color:#FFF;">
-              <i class="fa-solid fa-print"></i> Imprimir / PDF
+            <button type="button" class="filter-pill active" onclick="printAdminReport()">
+              <i class="fa-solid fa-download" style="margin-right:4px;"></i> Baixar PDF
             </button>
           </div>
+        </div>
+
+        <!-- Pílulas de Período (Mesmo estilo da Agenda) -->
+        <div class="filter-pills-row no-print">
+          <button type="button" class="filter-pill" onclick="setReportPeriod('7d', this)">Últimos 7 Dias</button>
+          <button type="button" class="filter-pill active" onclick="setReportPeriod('30d', this)">Este Mês</button>
+          <button type="button" class="filter-pill" onclick="setReportPeriod('6m', this)">Últimos 6 Meses</button>
+          <button type="button" class="filter-pill" onclick="setReportPeriod('1y', this)">Acumulado do Ano</button>
         </div>
 
         <div id="printableReportArea">
 
-          <!-- 4 KPIs Interativos de Gestão -->
-          <div class="reports-kpi-grid">
-            <!-- KPI 1: Receita Confirmada + Meta -->
-            <div class="report-kpi-box" onclick="openGoalEditorPrompt()">
-              <div>
-                <div class="report-kpi-top">
-                  <div class="report-kpi-icon"><i class="fa-solid fa-sack-dollar"></i></div>
-                  <span class="kpi-growth" id="repKpiGrowth1"><i class="fa-solid fa-arrow-up"></i> 18.4%</span>
-                </div>
-                <span class="report-kpi-label">Receita Confirmada</span>
-                <div class="report-kpi-val" id="repKpiReceitaConfirmada">R$ 8.420,00</div>
-              </div>
-              <div>
-                <div class="cat-progress-track" style="height:6px; margin:6px 0 4px;">
-                  <div class="cat-progress-fill" id="repGoalProgressBar" style="width:84%; background:linear-gradient(90deg, #D83F79, #4D1328);"></div>
-                </div>
-                <div class="report-kpi-sub">
-                  <span id="repGoalText">84% da Meta (R$ 10.000)</span>
-                  <span style="text-decoration:underline; font-weight:700; color:#D83F79;">Editar Meta</span>
-                </div>
-              </div>
+          <!-- 4 KPIs no Padrão Oficial Rosé (.admin-kpis-grid / .kpi-pink-card) -->
+          <div class="admin-kpis-grid" style="margin-top:4px;">
+            <div class="kpi-pink-card" onclick="filterReportTableByStatus('Confirmado')" style="cursor:pointer;">
+              <i class="fa-solid fa-dollar-sign"></i>
+              <span class="kpi-num" style="font-size:1.12rem;" id="repKpiReceitaConfirmada">R$ 8.420</span>
+              <span class="kpi-lbl">Receita Confirmada</span>
+              <span class="kpi-growth" id="repKpiGrowth1"><i class="fa-solid fa-arrow-up"></i> 18%</span>
             </div>
 
-            <!-- KPI 2: Receita Prevista -->
-            <div class="report-kpi-box" onclick="filterReportTableByStatus('Pendente')">
-              <div>
-                <div class="report-kpi-top">
-                  <div class="report-kpi-icon"><i class="fa-regular fa-calendar-check"></i></div>
-                  <span class="kpi-growth" style="color:#CA8A04;" id="repKpiBadgePrevista">Em agenda</span>
-                </div>
-                <span class="report-kpi-label">Receita Prevista (Futura)</span>
-                <div class="report-kpi-val" id="repKpiReceitaPrevista">R$ 2.890,00</div>
-              </div>
-              <div class="report-kpi-sub">
-                <span id="repKpiCountPrevista">16 atendimentos agendados</span>
-                <i class="fa-solid fa-filter" style="color:#8A2D4E;"></i>
-              </div>
+            <div class="kpi-pink-card" onclick="filterReportTableByStatus('Pendente')" style="cursor:pointer;">
+              <i class="fa-regular fa-calendar-check"></i>
+              <span class="kpi-num" style="font-size:1.12rem;" id="repKpiReceitaPrevista">R$ 2.890</span>
+              <span class="kpi-lbl">Previsão na Agenda</span>
+              <span class="kpi-growth" id="repKpiCountPrevista"><i class="fa-regular fa-clock"></i> 16 horários</span>
             </div>
 
-            <!-- KPI 3: Ticket Médio -->
-            <div class="report-kpi-box" onclick="switchReportChartMode('bars')">
-              <div>
-                <div class="report-kpi-top">
-                  <div class="report-kpi-icon"><i class="fa-solid fa-receipt"></i></div>
-                  <span class="kpi-growth" id="repKpiGrowthTicket"><i class="fa-solid fa-arrow-up"></i> +R$ 18</span>
-                </div>
-                <span class="report-kpi-label">Ticket Médio por Cliente</span>
-                <div class="report-kpi-val" id="repKpiTicketMedio">R$ 145,17</div>
-              </div>
-              <div class="report-kpi-sub">
-                <span id="repKpiTotalAtendimentos">58 atendimentos no período</span>
-                <i class="fa-solid fa-chart-simple" style="color:#8A2D4E;"></i>
-              </div>
+            <div class="kpi-pink-card">
+              <i class="fa-solid fa-receipt"></i>
+              <span class="kpi-num" style="font-size:1.12rem;" id="repKpiTicketMedio">R$ 145</span>
+              <span class="kpi-lbl">Ticket Médio</span>
+              <span class="kpi-growth" id="repKpiTotalAtendimentos"><i class="fa-solid fa-check"></i> 58 atend.</span>
             </div>
 
-            <!-- KPI 4: Taxa de Comparecimento -->
-            <div class="report-kpi-box" onclick="filterReportTableByStatus('Confirmado')">
-              <div>
-                <div class="report-kpi-top">
-                  <div class="report-kpi-icon"><i class="fa-solid fa-user-check"></i></div>
-                  <span class="kpi-growth"><i class="fa-solid fa-check"></i> Excelente</span>
-                </div>
-                <span class="report-kpi-label">Taxa de Comparecimento</span>
-                <div class="report-kpi-val" id="repKpiComparecimento">94,8%</div>
-              </div>
-              <div class="report-kpi-sub">
-                <span id="repKpiCancelamentos">Apenas 3 desmarcações</span>
-                <span style="font-weight:700; color:#16A34A;">78% fiéis</span>
-              </div>
+            <div class="kpi-pink-card" onclick="openGoalEditorPrompt()" style="cursor:pointer;" title="Clique para alterar sua meta">
+              <i class="fa-solid fa-bullseye"></i>
+              <span class="kpi-num" id="repKpiGoalPct">84%</span>
+              <span class="kpi-lbl">Meta Atingida</span>
+              <span class="kpi-growth" style="text-decoration:underline;">Ajustar Meta</span>
             </div>
           </div>
 
-          <!-- Linha Principal: Gráfico Interativo + Detalhamento por Categoria Clicável -->
+          <!-- Linha Principal em 2 Colunas Idêntica ao Dashboard -->
           <div class="admin-dashboard-split-row">
 
-            <!-- Card Esquerdo: Gráfico de Evolução Interativo (Barras & Curva) -->
-            <div class="admin-chart-card" style="display:flex; flex-direction:column; justify-content:space-between;">
-              <div>
-                <div class="chart-header-row" style="flex-wrap:wrap; gap:8px;">
-                  <div>
-                    <span style="font-size:0.75rem; color:#8A2D4E; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;" id="repChartSubtitle">Evolução de Receita</span>
-                    <h3 style="font-family:var(--font-serif); font-size:1.35rem; color:#350B19; margin-top:2px;" id="repChartMainValue">R$ 8.420,00</h3>
-                  </div>
-
-                  <div class="report-period-pills no-print">
-                    <button type="button" class="report-period-btn active" id="btnModeBars" onclick="switchReportChartMode('bars')">
-                      <i class="fa-solid fa-chart-column"></i> Barras
-                    </button>
-                    <button type="button" class="report-period-btn" id="btnModeLine" onclick="switchReportChartMode('line')">
-                      <i class="fa-solid fa-wave-square"></i> Curva
-                    </button>
-                  </div>
+            <!-- Coluna 1: Gráfico de Evolução de Faturamento & Meta -->
+            <div class="admin-chart-card">
+              <div class="chart-header-row">
+                <div>
+                  <h3 id="repChartSubtitle"><i class="fa-solid fa-chart-line"></i> Evolução do Faturamento</h3>
+                  <p style="font-size:0.76rem; color:#8A2D4E; margin-top:2px;" id="insightPointTitle">Clique nos pontos do gráfico para ver detalhes do período</p>
                 </div>
-
-                <!-- Palco de Barras Clicáveis -->
-                <div class="interactive-bars-stage" id="repInteractiveBarsStage">
-                  <!-- Renderizado via JS -->
+                <div class="period-select-pill" style="background:#FFF; color:#4D1328; border-color:rgba(77,19,40,0.15); cursor:pointer;" onclick="toggleReportChartView()">
+                  <span id="repToggleModeLabel">Ver em Barras</span>
+                  <i class="fa-solid fa-repeat" style="font-size:0.68rem;"></i>
                 </div>
+              </div>
 
-                <!-- Palco SVG de Linha (Oculto por padrão, alternável) -->
-                <div id="repInteractiveLineStage" style="display:none; position:relative; width:100%; height:185px; padding-top:20px;">
-                  <svg viewBox="0 0 360 135" style="width:100%; height:100%; overflow:visible;" id="repDynamicSvgLine">
-                    <!-- Renderizado via JS -->
+              <!-- Modo 1: Gráfico SVG de Curva Suave (Padrão igual ao Início) -->
+              <div id="repInteractiveLineStage" style="position:relative; width:100%; height:170px; margin-top:14px;">
+                <div class="chart-badge-highlight" id="repChartMainValue">
+                  R$ 8.420
+                </div>
+                <svg viewBox="0 0 340 135" style="width:100%; height:100%; overflow:visible;" id="repDynamicSvgLine">
+                  <!-- Populado via JS -->
+                </svg>
+              </div>
+
+              <!-- Modo 2: Gráfico de Barras Rosé & Vinho (Alternável) -->
+              <div class="interactive-bars-stage" id="repInteractiveBarsStage" style="display:none; height:170px; margin-top:14px;">
+                <!-- Populado via JS -->
+              </div>
+
+              <!-- Barra de Progresso da Meta Mensal Integrada -->
+              <div style="margin-top:16px; padding-top:12px; border-top:1px solid rgba(77,19,40,0.08);">
+                <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.78rem; color:#4D1328; margin-bottom:6px;">
+                  <span style="font-weight:700;"><i class="fa-solid fa-trophy" style="color:#C59B6D;"></i> <span id="repGoalText">Progresso da Meta: R$ 8.420 de R$ 10.000 (84%)</span></span>
+                  <button type="button" onclick="openGoalEditorPrompt()" class="no-print" style="background:none; border:none; color:#8A2D4E; font-weight:700; font-size:0.75rem; cursor:pointer; text-decoration:underline;">Editar Meta</button>
+                </div>
+                <div style="width:100%; height:9px; background:#FAF4F5; border-radius:10px; overflow:hidden; border:1px solid rgba(77,19,40,0.08);">
+                  <div id="repGoalProgressBar" style="width:84%; height:100%; background:linear-gradient(90deg, #8A2D4E 0%, #D83F79 100%); border-radius:10px; transition:width 0.4s ease;"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Coluna 2: Receita por Categoria (Donut + Barras Harmônicas) -->
+            <div class="admin-sub-card">
+              <div class="sub-card-header-row">
+                <h4 style="font-family:var(--font-serif); font-size:1.05rem; color:#4D1328; font-weight:700;">
+                  <i class="fa-solid fa-star" style="color:#C59B6D;"></i> Faturamento por Procedimento
+                </h4>
+                <a href="#" onclick="setReportCategoryFilter('all'); return false;" class="view-all-link no-print" id="btnResetCategoryFilter" style="display:none;">Mostrar todos</a>
+              </div>
+
+              <div class="donut-chart-container" style="margin-top:10px; margin-bottom:14px;">
+                <div class="donut-svg-wrap">
+                  <svg viewBox="0 0 100 100" class="donut-svg">
+                    <circle cx="50" cy="50" r="36" fill="transparent" stroke="#FAF4F5" stroke-width="16"/>
+                    <circle cx="50" cy="50" r="36" fill="transparent" stroke="#350B19" stroke-width="16" stroke-dasharray="226.2" stroke-dashoffset="180.9" transform="rotate(-90 50 50)"/>
+                    <circle cx="50" cy="50" r="36" fill="transparent" stroke="#8A2D4E" stroke-width="16" stroke-dasharray="226.2" stroke-dashoffset="147.0" transform="rotate(18 50 50)"/>
+                    <circle cx="50" cy="50" r="36" fill="transparent" stroke="#E9A3B5" stroke-width="16" stroke-dasharray="226.2" stroke-dashoffset="124.4" transform="rotate(144 50 50)"/>
                   </svg>
                 </div>
-              </div>
 
-              <!-- Painel de Insight do Ponto Clicado no Gráfico -->
-              <div class="chart-selected-insight-banner" id="repChartInsightBanner">
-                <div>
-                  <span style="font-size:0.72rem; color:#8A2D4E; font-weight:700; text-transform:uppercase;">Período Selecionado no Gráfico</span>
-                  <h4 style="font-size:0.98rem; color:#350B19; font-weight:700; margin-top:2px;" id="insightPointTitle">Outubro / Novembro — R$ 8.420,00</h4>
-                  <p style="font-size:0.78rem; color:#6A1D39;" id="insightPointMeta">58 procedimentos realizados &bull; Maior procura: Alongamento em Gel</p>
-                </div>
-                <span class="badge-status-pill confirmado" id="insightPointBadge">Pico do Período</span>
-              </div>
-            </div>
-
-            <!-- Card Direito: Detalhamento Interativo por Categoria -->
-            <div class="admin-sub-card">
-              <div class="sub-card-header-row" style="margin-bottom:6px;">
-                <div>
-                  <h4 style="font-family:var(--font-serif); font-size:1.1rem; color:#4D1328; font-weight:700;">
-                    <i class="fa-solid fa-layer-group" style="color:#D83F79;"></i> Receita por Categoria de Serviço
-                  </h4>
-                  <p style="font-size:0.75rem; color:#8A2D4E;">Clique em uma categoria abaixo para filtrar o extrato financeiro</p>
-                </div>
-                <button onclick="setReportCategoryFilter('all')" class="btn-open-client-pill no-print" style="font-size:0.72rem; padding:4px 10px;">
-                  Limpar Filtro
-                </button>
-              </div>
-
-              <div id="repCategoriesInteractiveList" style="margin-top:12px;">
-                <!-- Renderizado dinamicamente via JS com barras de progresso e clique -->
-              </div>
-            </div>
-
-          </div>
-
-          <!-- Segunda Linha: Simulador Interativo de Lucro + Mapa de Horários de Pico -->
-          <div class="admin-dashboard-split-row" style="margin-top:18px;">
-
-            <!-- Card Esquerdo: Simulador Interativo de Faturamento -->
-            <div class="simulator-box-card no-print" style="margin-top:0;">
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                <div>
-                  <span style="font-size:0.72rem; text-transform:uppercase; letter-spacing:0.8px; color:#E9A3B5; font-weight:700;">Ferramenta Interativa</span>
-                  <h4 style="font-family:var(--font-serif); font-size:1.2rem; color:#FFFFFF;">
-                    <i class="fa-solid fa-wand-magic-sparkles" style="color:#E9A3B5;"></i> Simulador de Crescimento & Metas
-                  </h4>
-                </div>
-                <span style="background:rgba(255,255,255,0.14); padding:4px 10px; border-radius:20px; font-size:0.75rem; font-weight:600;">Ao Vivo</span>
-              </div>
-
-              <p style="font-size:0.8rem; color:rgba(255,255,255,0.82); margin-bottom:14px;">
-                Arraste os controles abaixo para simular quanto você faturaria a mais adicionando clientes na semana ou ajustando seu ticket médio:
-              </p>
-
-              <div style="margin-bottom:12px;">
-                <div style="display:flex; justify-content:space-between; font-size:0.82rem; margin-bottom:4px;">
-                  <span>+ Clientes extras por semana:</span>
-                  <strong style="color:#E9A3B5;" id="simExtraClientsLabel">+4 clientes/sem</strong>
-                </div>
-                <input type="range" min="1" max="20" value="4" class="sim-range-slider" id="simExtraClientsSlider" oninput="updateProfitSimulator()">
-              </div>
-
-              <div style="margin-bottom:16px;">
-                <div style="display:flex; justify-content:space-between; font-size:0.82rem; margin-bottom:4px;">
-                  <span>Valor médio do procedimento (R$):</span>
-                  <strong style="color:#E9A3B5;" id="simAvgPriceLabel">R$ 150,00</strong>
-                </div>
-                <input type="range" min="70" max="280" step="10" value="150" class="sim-range-slider" id="simAvgPriceSlider" oninput="updateProfitSimulator()">
-              </div>
-
-              <div style="background:rgba(0,0,0,0.28); border:1px solid rgba(255,255,255,0.14); border-radius:16px; padding:14px; display:grid; grid-template-columns:1fr 1fr; gap:12px;">
-                <div>
-                  <span style="font-size:0.72rem; color:rgba(255,255,255,0.7);">Ganho Extra no Mês</span>
-                  <div style="font-family:var(--font-serif); font-size:1.35rem; font-weight:700; color:#4ADE80;" id="simMonthlyGainResult">+ R$ 2.400,00</div>
-                </div>
-                <div>
-                  <span style="font-size:0.72rem; color:rgba(255,255,255,0.7);">Ganho Extra no Ano</span>
-                  <div style="font-family:var(--font-serif); font-size:1.35rem; font-weight:700; color:#FBBF24;" id="simYearlyGainResult">+ R$ 28.800,00</div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Card Direito: Horários de Pico & Dias Mais Lucrativos -->
-            <div class="admin-sub-card" style="margin-bottom:0;">
-              <div class="sub-card-header-row">
-                <div>
-                  <h4 style="font-family:var(--font-serif); font-size:1.1rem; color:#4D1328; font-weight:700;">
-                    <i class="fa-solid fa-fire" style="color:#E11D48;"></i> Mapa de Calor: Dias & Horários de Pico
-                  </h4>
-                  <p style="font-size:0.75rem; color:#8A2D4E;">Clique no dia da semana para inspecionar a taxa de ocupação</p>
-                </div>
-              </div>
-
-              <div class="report-period-pills" style="margin:10px 0 14px; width:100%; justify-content:space-between;">
-                <button type="button" class="report-period-btn" onclick="selectPeakDay('Terça', 62, 75, 50, 'R$ 980', this)">Ter</button>
-                <button type="button" class="report-period-btn" onclick="selectPeakDay('Quarta', 70, 82, 65, 'R$ 1.240', this)">Qua</button>
-                <button type="button" class="report-period-btn" onclick="selectPeakDay('Quinta', 80, 90, 85, 'R$ 1.650', this)">Qui</button>
-                <button type="button" class="report-period-btn" onclick="selectPeakDay('Sexta', 92, 98, 94, 'R$ 2.180', this)">Sex</button>
-                <button type="button" class="report-period-btn active" onclick="selectPeakDay('Sábado', 98, 100, 92, 'R$ 2.370', this)">Sáb</button>
-              </div>
-
-              <div id="peakDayDetailBox" style="background:#FAF4F5; border-radius:16px; padding:14px; border:1px solid rgba(77,19,40,0.08);">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                  <strong style="color:#350B19; font-size:0.92rem;" id="peakDayTitle">Sábado (Dia Campeão 🏆)</strong>
-                  <span style="font-weight:700; color:#4D1328; font-size:0.9rem;" id="peakDayRevenue">Média: R$ 2.370 / dia</span>
-                </div>
-
-                <div style="font-size:0.78rem; color:#6A1D39; margin-bottom:8px;">
-                  <div style="display:flex; justify-content:space-between; margin-bottom:3px;">
-                    <span>Manhã (08h às 12h)</span>
-                    <strong id="peakMorningPct">98% ocupado</strong>
-                  </div>
-                  <div class="cat-progress-track"><div class="cat-progress-fill" id="peakMorningBar" style="width:98%; background:#8A2D4E;"></div></div>
-                </div>
-
-                <div style="font-size:0.78rem; color:#6A1D39; margin-bottom:8px;">
-                  <div style="display:flex; justify-content:space-between; margin-bottom:3px;">
-                    <span>Tarde (13h às 17h)</span>
-                    <strong id="peakAfternoonPct">100% ocupado</strong>
-                  </div>
-                  <div class="cat-progress-track"><div class="cat-progress-fill" id="peakAfternoonBar" style="width:100%; background:#D83F79;"></div></div>
-                </div>
-
-                <div style="font-size:0.78rem; color:#6A1D39;">
-                  <div style="display:flex; justify-content:space-between; margin-bottom:3px;">
-                    <span>Final de Tarde / Noite (17h às 20h)</span>
-                    <strong id="peakEveningPct">92% ocupado</strong>
-                  </div>
-                  <div class="cat-progress-track"><div class="cat-progress-fill" id="peakEveningBar" style="width:92%; background:#350B19;"></div></div>
-                </div>
-              </div>
-            </div>
-
-          </div>
-
-          <!-- Terceira Linha: Extrato Financeiro Detalhado & Interativo -->
-          <div class="admin-sub-card" style="margin-top:18px;">
-            <div class="sub-card-header-row" style="flex-wrap:wrap; gap:10px;">
-              <div>
-                <h4 style="font-family:var(--font-serif); font-size:1.15rem; color:#4D1328; font-weight:700;">
-                  <i class="fa-solid fa-table-list"></i> Extrato Detalhado de Atendimentos & Receitas
-                </h4>
-                <p style="font-size:0.76rem; color:#8A2D4E;" id="repTableActiveFilterLabel">Exibindo todos os lançamentos do período</p>
-              </div>
-
-              <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;" class="no-print">
-                <div class="filter-pills-row" style="margin-bottom:0;">
-                  <button type="button" class="filter-pill active" onclick="filterReportTableByStatus('all', this)">Todos</button>
-                  <button type="button" class="filter-pill" onclick="filterReportTableByStatus('Confirmado', this)">Confirmados / Pagos</button>
-                  <button type="button" class="filter-pill" onclick="filterReportTableByStatus('Pendente', this)">Pendentes</button>
-                </div>
-                <button class="btn-open-client-pill" onclick="openModalNovoAgendamento()" style="background:#4D1328; color:#FFF;">
-                  <i class="fa-solid fa-plus"></i> Novo Lançamento
-                </button>
-              </div>
-            </div>
-
-            <div class="search-input-box no-print" style="margin-top:10px; margin-bottom:10px;">
-              <i class="fa-solid fa-magnifying-glass" style="color:#8A2D4E;"></i>
-              <input type="text" id="repTransactionSearchInput" placeholder="Filtrar lançamentos por cliente, serviço, data ou valor..." oninput="renderReportTransactionsTable()">
-            </div>
-
-            <div class="report-transactions-table-wrap">
-              <table class="report-table">
-                <thead>
-                  <tr>
-                    <th>Cliente</th>
-                    <th>Serviço / Categoria</th>
-                    <th>Data & Hora</th>
-                    <th>Pagamento</th>
-                    <th>Status</th>
-                    <th>Valor</th>
-                    <th class="no-print">Ação</th>
-                  </tr>
-                </thead>
-                <tbody id="repTransactionsTableBody">
+                <div class="donut-legend-wrap" id="repCategoriesInteractiveList" style="gap:8px;">
                   <!-- Populado dinamicamente via JS -->
-                </tbody>
-              </table>
+                </div>
+              </div>
+
+              <!-- Resumo Rápido da Categoria Selecionada -->
+              <div style="background:#FAF4F5; border-radius:14px; padding:10px 14px; border:1px solid rgba(77,19,40,0.06); display:flex; justify-content:space-between; align-items:center; font-size:0.78rem; color:#6A1D39;">
+                <span id="insightPointMeta"><i class="fa-solid fa-hand-pointer" style="color:#8A2D4E;"></i> Toque em um procedimento acima para filtrar a lista</span>
+                <strong style="color:#350B19;" id="insightPointBadge">100% da Receita</strong>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Extrato de Atendimentos e Entradas (Mesmo Padrão Visual da Aba Agenda) -->
+          <div style="margin-top:20px;">
+            <div class="section-head-title-row" style="margin-bottom:10px !important;">
+              <div>
+                <h4 style="font-family:var(--font-serif); font-size:1.2rem; color:#4D1328;">
+                  <i class="fa-regular fa-calendar-check"></i> Histórico Financeiro de Atendimentos
+                </h4>
+                <p style="font-size:0.78rem; color:#8A2D4E;" id="repTableActiveFilterLabel">Exibindo todos os lançamentos registrados</p>
+              </div>
+
+              <div class="filter-pills-row no-print" style="margin-bottom:0;">
+                <button type="button" class="filter-pill active" onclick="filterReportTableByStatus('all', this)">Todos</button>
+                <button type="button" class="filter-pill" onclick="filterReportTableByStatus('Confirmado', this)">Confirmados</button>
+                <button type="button" class="filter-pill" onclick="filterReportTableByStatus('Pendente', this)">Pendentes</button>
+              </div>
+            </div>
+
+            <!-- Barra de Busca -->
+            <div class="search-input-box no-print">
+              <i class="fa-solid fa-magnifying-glass" style="color:#8A2D4E;"></i>
+              <input type="text" id="repTransactionSearchInput" placeholder="Buscar lançamento por nome da cliente, procedimento ou data..." oninput="renderReportTransactionsTable()">
+            </div>
+
+            <!-- Grade de Cards Rosé (Idêntica à Agenda e Clientes) -->
+            <div class="admin-items-responsive-grid" id="repTransactionsCardsGrid">
+              <!-- Populado dinamicamente via JS -->
             </div>
           </div>
 
         </div>
+
+        <button class="btn-admin-bottom-action no-print" onclick="printAdminReport()">
+          <i class="fa-solid fa-download"></i> Baixar Relatório Completo em PDF
+        </button>
 
       </section>
 
@@ -1745,38 +1585,36 @@
     }
 
     // ========================================================
-    // MOTOR DE RELATÓRIOS GERENCIAIS INTERATIVOS
+    // MOTOR DE RELATÓRIOS FINANCEIROS HARMÔNICOS & INTERATIVOS
     // ========================================================
     let currentReportPeriod = '30d';
     let currentReportCategory = 'all';
     let currentReportStatusFilter = 'all';
-    let currentReportChartMode = 'bars';
+    let currentReportChartMode = 'line';
     let currentSelectedBarIndex = -1;
     let monthlyGoalValue = parseFloat(localStorage.getItem('epn_monthly_goal') || '10000');
 
     const REPORT_DATASETS = {
       '7d': {
         label: 'Últimos 7 Dias',
-        growth: '14.2%',
+        growth: '14%',
         series: [
-          { label: 'Seg', val: 680, count: 5, top: 'Manicure Clássica' },
-          { label: 'Ter', val: 920, count: 7, top: 'Alongamento em Gel' },
-          { label: 'Qua', val: 1150, count: 8, top: 'Alongamento em Gel' },
-          { label: 'Qui', val: 1380, count: 10, top: 'Nail Art & Ouro' },
-          { label: 'Sex', val: 1890, count: 13, top: 'Alongamento em Gel' },
-          { label: 'Sáb', val: 2400, count: 15, top: 'Alongamento em Gel' }
+          { label: 'Ter', val: 680, count: 5, top: 'Manicure Clássica' },
+          { label: 'Qua', val: 920, count: 7, top: 'Alongamento em Gel' },
+          { label: 'Qui', val: 1180, count: 8, top: 'Nail Art & Ouro' },
+          { label: 'Sex', val: 1650, count: 11, top: 'Alongamento em Gel' },
+          { label: 'Sáb', val: 2190, count: 14, top: 'Alongamento em Gel' }
         ],
         categories: [
-          { name: 'Alongamento em Gel', val: 3789, pct: 45, count: 21, color: '#D83F79' },
-          { name: 'Manicure Clássica', val: 2105, pct: 25, count: 30, color: '#8A2D4E' },
-          { name: 'Nail Art', val: 1263, pct: 15, count: 8, color: '#350B19' },
-          { name: 'Spa das Mãos', val: 842, pct: 10, count: 9, color: '#C59B6D' },
-          { name: 'Esmaltação em Gel', val: 421, pct: 5, count: 6, color: '#E9A3B5' }
+          { name: 'Alongamento em Gel', val: 2979, pct: 45, count: 17, color: '#E9A3B5' },
+          { name: 'Manicure Clássica', val: 1986, pct: 30, count: 28, color: '#8A2D4E' },
+          { name: 'Spa das Mãos', val: 993, pct: 15, count: 11, color: '#350B19' },
+          { name: 'Nail Art & Ouro', val: 662, pct: 10, count: 4, color: '#C59B6D' }
         ]
       },
       '30d': {
-        label: 'Este Mês (Novembro)',
-        growth: '18.4%',
+        label: 'Este Mês',
+        growth: '18%',
         series: [
           { label: 'Sem 1', val: 1850, count: 13, top: 'Alongamento em Gel' },
           { label: 'Sem 2', val: 2120, count: 15, top: 'Manicure Clássica' },
@@ -1784,52 +1622,51 @@
           { label: 'Sem 4', val: 2470, count: 16, top: 'Alongamento em Gel' }
         ],
         categories: [
-          { name: 'Alongamento em Gel', val: 3789, pct: 45, count: 21, color: '#D83F79' },
-          { name: 'Manicure Clássica', val: 2105, pct: 25, count: 30, color: '#8A2D4E' },
-          { name: 'Nail Art', val: 1263, pct: 15, count: 8, color: '#350B19' },
-          { name: 'Spa das Mãos', val: 842, pct: 10, count: 9, color: '#C59B6D' },
-          { name: 'Esmaltação em Gel', val: 421, pct: 5, count: 6, color: '#E9A3B5' }
+          { name: 'Alongamento em Gel', val: 3789, pct: 45, count: 21, color: '#E9A3B5' },
+          { name: 'Manicure Clássica', val: 2526, pct: 30, count: 36, color: '#8A2D4E' },
+          { name: 'Spa das Mãos', val: 1263, pct: 15, count: 14, color: '#350B19' },
+          { name: 'Nail Art & Ouro', val: 842, pct: 10, count: 6, color: '#C59B6D' }
         ]
       },
       '6m': {
         label: 'Últimos 6 Meses',
-        growth: '24.6%',
+        growth: '24%',
         series: [
-          { label: 'Jun', val: 5400, count: 39, top: 'Manicure Clássica' },
           { label: 'Jul', val: 6100, count: 44, top: 'Alongamento em Gel' },
           { label: 'Ago', val: 6850, count: 48, top: 'Alongamento em Gel' },
           { label: 'Set', val: 7290, count: 51, top: 'Nail Art & Ouro' },
-          { label: 'Out', val: 7980, count: 55, top: 'Alongamento em Gel' },
-          { label: 'Nov', val: 8420, count: 58, top: 'Alongamento em Gel' }
+          { label: 'Out', val: 8420, count: 58, top: 'Alongamento em Gel' }
         ],
         categories: [
-          { name: 'Alongamento em Gel', val: 18918, pct: 45, count: 105, color: '#D83F79' },
-          { name: 'Manicure Clássica', val: 10510, pct: 25, count: 150, color: '#8A2D4E' },
-          { name: 'Nail Art', val: 6306, pct: 15, count: 42, color: '#350B19' },
-          { name: 'Spa das Mãos', val: 4204, pct: 10, count: 46, color: '#C59B6D' },
-          { name: 'Esmaltação em Gel', val: 2102, pct: 5, count: 30, color: '#E9A3B5' }
+          { name: 'Alongamento em Gel', val: 12897, pct: 45, count: 72, color: '#E9A3B5' },
+          { name: 'Manicure Clássica', val: 8598, pct: 30, count: 122, color: '#8A2D4E' },
+          { name: 'Spa das Mãos', val: 4299, pct: 15, count: 48, color: '#350B19' },
+          { name: 'Nail Art & Ouro', val: 2866, pct: 10, count: 19, color: '#C59B6D' }
         ]
       },
       '1y': {
-        label: 'Acumulado Anual 2026',
-        growth: '32.0%',
+        label: 'Ano 2026',
+        growth: '32%',
         series: [
           { label: '1º Tri', val: 18400, count: 132, top: 'Manicure Clássica' },
           { label: '2º Tri', val: 22600, count: 158, top: 'Alongamento em Gel' },
           { label: '3º Tri', val: 26800, count: 184, top: 'Alongamento em Gel' },
-          { label: '4º Tri', val: 31400, count: 212, top: 'Alongamento & Nail Art' }
+          { label: '4º Tri', val: 31400, count: 212, top: 'Alongamento em Gel' }
         ],
         categories: [
-          { name: 'Alongamento em Gel', val: 44640, pct: 45, count: 248, color: '#D83F79' },
-          { name: 'Manicure Clássica', val: 24800, pct: 25, count: 354, color: '#8A2D4E' },
-          { name: 'Nail Art', val: 14880, pct: 15, count: 99, color: '#350B19' },
-          { name: 'Spa das Mãos', val: 9920, pct: 10, count: 110, color: '#C59B6D' },
-          { name: 'Esmaltação em Gel', val: 4960, pct: 5, count: 70, color: '#E9A3B5' }
+          { name: 'Alongamento em Gel', val: 44640, pct: 45, count: 248, color: '#E9A3B5' },
+          { name: 'Manicure Clássica', val: 29760, pct: 30, count: 425, color: '#8A2D4E' },
+          { name: 'Spa das Mãos', val: 14880, pct: 15, count: 165, color: '#350B19' },
+          { name: 'Nail Art & Ouro', val: 9920, pct: 10, count: 66, color: '#C59B6D' }
         ]
       }
     };
 
     function formatBRL(v) {
+      return 'R$ ' + Number(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+    }
+
+    function formatBRLFull(v) {
       return 'R$ ' + Number(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 
@@ -1838,29 +1675,29 @@
       currentSelectedBarIndex = -1;
       if (btn) {
         const parent = btn.parentElement;
-        parent.querySelectorAll('.report-period-btn').forEach(b => b.classList.remove('active'));
+        parent.querySelectorAll('.filter-pill').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
       }
       renderInteractiveReports();
-      showToast(`Relatório atualizado: ${REPORT_DATASETS[periodKey].label}`);
+      showToast(`Período selecionado: ${REPORT_DATASETS[periodKey].label}`);
     }
 
     function setReportCategoryFilter(catName) {
       currentReportCategory = catName;
-      const sel = document.getElementById('reportCategorySelect');
-      if (sel && sel.value !== catName) sel.value = catName;
+      const resetBtn = document.getElementById('btnResetCategoryFilter');
+      if (resetBtn) resetBtn.style.display = catName === 'all' ? 'none' : 'inline';
       renderInteractiveReports();
       if (catName !== 'all') {
         showToast(`Filtrando por: ${catName}`);
       }
     }
 
-    function switchReportChartMode(mode) {
-      currentReportChartMode = mode;
-      document.getElementById('btnModeBars').classList.toggle('active', mode === 'bars');
-      document.getElementById('btnModeLine').classList.toggle('active', mode === 'line');
-      document.getElementById('repInteractiveBarsStage').style.display = mode === 'bars' ? 'flex' : 'none';
-      document.getElementById('repInteractiveLineStage').style.display = mode === 'line' ? 'block' : 'none';
+    function toggleReportChartView() {
+      currentReportChartMode = currentReportChartMode === 'line' ? 'bars' : 'line';
+      const lbl = document.getElementById('repToggleModeLabel');
+      if (lbl) lbl.innerText = currentReportChartMode === 'line' ? 'Ver em Barras' : 'Ver em Curva';
+      document.getElementById('repInteractiveLineStage').style.display = currentReportChartMode === 'line' ? 'block' : 'none';
+      document.getElementById('repInteractiveBarsStage').style.display = currentReportChartMode === 'bars' ? 'flex' : 'none';
     }
 
     function selectReportBarPoint(idx) {
@@ -1877,9 +1714,10 @@
       const adjVal = pt.val * factor;
       const adjCount = Math.max(1, Math.round(pt.count * factor));
 
-      document.getElementById('insightPointTitle').innerText = `${pt.label} (${data.label}) — ${formatBRL(adjVal)}`;
-      document.getElementById('insightPointMeta').innerText = `${adjCount} atendimentos realizados • Destaque: ${ currentReportCategory === 'all' ? pt.top : currentReportCategory }`;
-      document.getElementById('insightPointBadge').innerText = `Ticket: ${formatBRL(adjVal / adjCount)}`;
+      const titleEl = document.getElementById('insightPointTitle');
+      if (titleEl) {
+        titleEl.innerHTML = `<strong>${pt.label}:</strong> ${formatBRLFull(adjVal)} (${adjCount} atendimentos • Destaque: ${currentReportCategory === 'all' ? pt.top : currentReportCategory})`;
+      }
     }
 
     function getCategoryFactor() {
@@ -1895,37 +1733,12 @@
         monthlyGoalValue = Math.max(500, parseFloat(novo));
         localStorage.setItem('epn_monthly_goal', String(monthlyGoalValue));
         renderInteractiveReports();
-        showToast(`Nova meta definida: ${formatBRL(monthlyGoalValue)}`);
+        showToast(`Meta atualizada para ${formatBRL(monthlyGoalValue)}`);
       }
     }
 
     function updateProfitSimulator() {
-      const extraClients = parseInt(document.getElementById('simExtraClientsSlider').value, 10) || 4;
-      const avgPrice = parseFloat(document.getElementById('simAvgPriceSlider').value) || 150;
-
-      document.getElementById('simExtraClientsLabel').innerText = `+${extraClients} clientes/sem`;
-      document.getElementById('simAvgPriceLabel').innerText = formatBRL(avgPrice);
-
-      const monthlyExtra = extraClients * 4 * avgPrice;
-      const yearlyExtra = monthlyExtra * 12;
-
-      document.getElementById('simMonthlyGainResult').innerText = '+ ' + formatBRL(monthlyExtra);
-      document.getElementById('simYearlyGainResult').innerText = '+ ' + formatBRL(yearlyExtra);
-    }
-
-    function selectPeakDay(dayName, morning, afternoon, evening, avgRev, btn) {
-      if (btn) {
-        btn.parentElement.querySelectorAll('.report-period-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-      }
-      document.getElementById('peakDayTitle').innerText = `${dayName} ${afternoon >= 95 ? '(Alta Demanda 🔥)' : ''}`;
-      document.getElementById('peakDayRevenue').innerText = `Média: ${avgRev} / dia`;
-      document.getElementById('peakMorningPct').innerText = `${morning}% ocupado`;
-      document.getElementById('peakMorningBar').style.width = `${morning}%`;
-      document.getElementById('peakAfternoonPct').innerText = `${afternoon}% ocupado`;
-      document.getElementById('peakAfternoonBar').style.width = `${afternoon}%`;
-      document.getElementById('peakEveningPct').innerText = `${evening}% ocupado`;
-      document.getElementById('peakEveningBar').style.width = `${evening}%`;
+      // No-op for legacy hook compatibility
     }
 
     function renderInteractiveReports() {
@@ -1938,44 +1751,89 @@
       const baseSum = data.series.reduce((acc, s) => acc + s.val, 0);
       const baseCount = data.series.reduce((acc, s) => acc + s.count, 0);
 
-      // Soma também agendamentos reais criados na sessão
       const storeConfirmados = appointments.filter(a => a.status !== 'Cancelado').reduce((acc, a) => acc + (parseFloat(a.servicePrice) || 0), 0);
       const totalReceita = (baseSum * factor) + (currentReportPeriod === '30d' ? storeConfirmados * factor : 0);
       const totalCount = Math.max(1, Math.round(baseCount * factor) + (currentReportPeriod === '30d' ? appointments.length : 0));
       const ticketMedio = totalReceita / totalCount;
 
-      // Atualiza KPIs
+      // Atualiza os 4 KPIs Rosé
       const elRec = document.getElementById('repKpiReceitaConfirmada');
       if (elRec) elRec.innerText = formatBRL(totalReceita);
 
       const pctGoal = Math.min(100, Math.round((totalReceita / monthlyGoalValue) * 100));
+      const elGoalPct = document.getElementById('repKpiGoalPct');
       const elGoalBar = document.getElementById('repGoalProgressBar');
       const elGoalTxt = document.getElementById('repGoalText');
+      if (elGoalPct) elGoalPct.innerText = `${pctGoal}%`;
       if (elGoalBar) elGoalBar.style.width = `${pctGoal}%`;
-      if (elGoalTxt) elGoalTxt.innerText = `${pctGoal}% da Meta (${formatBRL(monthlyGoalValue)})`;
+      if (elGoalTxt) elGoalTxt.innerText = `Meta: ${formatBRL(totalReceita)} de ${formatBRL(monthlyGoalValue)} (${pctGoal}%)`;
 
-      const previstaVal = totalReceita * 0.34;
-      const previstaCount = Math.max(2, Math.round(totalCount * 0.28));
-      document.getElementById('repKpiReceitaPrevista').innerText = formatBRL(previstaVal);
-      document.getElementById('repKpiCountPrevista').innerText = `${previstaCount} atendimentos agendados`;
+      const previstaVal = totalReceita * 0.32;
+      const previstaCount = Math.max(2, Math.round(totalCount * 0.25));
+      const elPrev = document.getElementById('repKpiReceitaPrevista');
+      const elPrevCnt = document.getElementById('repKpiCountPrevista');
+      if (elPrev) elPrev.innerText = formatBRL(previstaVal);
+      if (elPrevCnt) elPrevCnt.innerHTML = `<i class="fa-regular fa-clock"></i> ${previstaCount} agendados`;
 
-      document.getElementById('repKpiTicketMedio').innerText = formatBRL(ticketMedio);
-      document.getElementById('repKpiTotalAtendimentos').innerText = `${totalCount} atendimentos no período`;
+      const elTicket = document.getElementById('repKpiTicketMedio');
+      const elAtend = document.getElementById('repKpiTotalAtendimentos');
+      if (elTicket) elTicket.innerText = formatBRL(ticketMedio);
+      if (elAtend) elAtend.innerHTML = `<i class="fa-solid fa-check"></i> ${totalCount} atend.`;
 
-      document.getElementById('repChartSubtitle').innerText = `Evolução (${data.label}) ${currentReportCategory !== 'all' ? '• ' + currentReportCategory : ''}`;
-      document.getElementById('repChartMainValue').innerText = formatBRL(totalReceita);
+      const elSub = document.getElementById('repChartSubtitle');
+      const elMainVal = document.getElementById('repChartMainValue');
+      if (elSub) elSub.innerHTML = `<i class="fa-solid fa-chart-line"></i> Crescimento (${data.label})`;
+      if (elMainVal) elMainVal.innerText = formatBRL(totalReceita);
 
-      // Renderiza Gráfico de Barras Interativo
-      const barsStage = document.getElementById('repInteractiveBarsStage');
       const maxVal = Math.max(...data.series.map(s => s.val * factor), 100);
+
+      // Renderiza Gráfico SVG Curva Suave (no mesmo padrão estético do Dashboard)
+      const svgLine = document.getElementById('repDynamicSvgLine');
+      if (svgLine) {
+        const pts = data.series.map((s, i) => {
+          const x = 30 + (i * (280 / Math.max(1, data.series.length - 1)));
+          const y = 105 - ((s.val * factor) / maxVal) * 75;
+          return { x, y, label: s.label, val: s.val * factor, idx: i };
+        });
+
+        let dPath = `M ${pts[0].x} ${pts[0].y}`;
+        for (let i = 0; i < pts.length - 1; i++) {
+          const xc = (pts[i].x + pts[i + 1].x) / 2;
+          dPath += ` C ${xc} ${pts[i].y}, ${xc} ${pts[i + 1].y}, ${pts[i + 1].x} ${pts[i + 1].y}`;
+        }
+        const areaPath = `${dPath} L ${pts[pts.length - 1].x} 118 L ${pts[0].x} 118 Z`;
+
+        svgLine.innerHTML = `
+          <defs>
+            <linearGradient id="repChartGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#D83F79" stop-opacity="0.35"/>
+              <stop offset="100%" stop-color="#FBECEF" stop-opacity="0.02"/>
+            </linearGradient>
+          </defs>
+          <line x1="20" y1="105" x2="320" y2="105" stroke="rgba(77,19,40,0.08)" stroke-dasharray="3,3"/>
+          <line x1="20" y1="75" x2="320" y2="75" stroke="rgba(77,19,40,0.08)" stroke-dasharray="3,3"/>
+          <line x1="20" y1="45" x2="320" y2="45" stroke="rgba(77,19,40,0.08)" stroke-dasharray="3,3"/>
+          <path d="${areaPath}" fill="url(#repChartGrad)"/>
+          <path d="${dPath}" fill="none" stroke="#8A2D4E" stroke-width="3" stroke-linecap="round"/>
+          ${pts.map((p, idx) => `
+            <g style="cursor:pointer;" onclick="selectReportBarPoint(${p.idx})">
+              <circle cx="${p.x}" cy="${p.y}" r="${idx === pts.length - 1 ? 6 : 4.5}" fill="${idx === pts.length - 1 ? '#8A2D4E' : '#4D1328'}" stroke="#FFFFFF" stroke-width="${idx === pts.length - 1 ? 2 : 0}"/>
+              <text x="${p.x}" y="128" text-anchor="middle" font-size="10" font-weight="600" fill="#6A1D39">${p.label}</text>
+            </g>
+          `).join('')}
+        `;
+      }
+
+      // Renderiza Gráfico de Barras Alternativo
+      const barsStage = document.getElementById('repInteractiveBarsStage');
       if (barsStage) {
         const activeIdx = currentSelectedBarIndex >= 0 ? currentSelectedBarIndex : data.series.length - 1;
         barsStage.innerHTML = data.series.map((s, idx) => {
           const v = s.val * factor;
-          const heightPct = Math.max(14, Math.round((v / maxVal) * 100));
+          const heightPct = Math.max(16, Math.round((v / maxVal) * 100));
           return `
             <div class="bar-col-interactive ${idx === activeIdx ? 'selected' : ''}" onclick="selectReportBarPoint(${idx})">
-              <span class="bar-value-tooltip">R$ ${Math.round(v).toLocaleString('pt-BR')}</span>
+              <span class="bar-value-tooltip">${formatBRL(v)}</span>
               <div class="bar-fill-pillar" style="height:${heightPct}%;"></div>
               <span class="bar-month-lbl">${s.label}</span>
             </div>
@@ -1984,57 +1842,30 @@
         selectReportBarPoint(activeIdx);
       }
 
-      // Renderiza SVG Curva
-      const svgLine = document.getElementById('repDynamicSvgLine');
-      if (svgLine) {
-        const pts = data.series.map((s, i) => {
-          const x = 30 + (i * (300 / Math.max(1, data.series.length - 1)));
-          const y = 110 - ((s.val * factor) / maxVal) * 85;
-          return { x, y, label: s.label, val: s.val * factor, idx: i };
-        });
-        const polyPoints = pts.map(p => `${p.x},${p.y}`).join(' ');
-        const areaPoints = `${pts[0].x},115 ` + polyPoints + ` ${pts[pts.length - 1].x},115`;
-        svgLine.innerHTML = `
-          <polygon points="${areaPoints}" fill="rgba(216, 63, 121, 0.18)" />
-          <polyline fill="none" stroke="#D83F79" stroke-width="3.5" points="${polyPoints}" stroke-linecap="round" stroke-linejoin="round" />
-          ${pts.map(p => `
-            <g style="cursor:pointer;" onclick="selectReportBarPoint(${p.idx})">
-              <circle cx="${p.x}" cy="${p.y}" r="6" fill="#350B19" stroke="#FFF" stroke-width="2" />
-              <text x="${p.x}" y="${p.y - 12}" text-anchor="middle" font-size="9" font-weight="700" fill="#350B19">R$${Math.round(p.val)}</text>
-              <text x="${p.x}" y="130" text-anchor="middle" font-size="10" font-weight="600" fill="#6A1D39">${p.label}</text>
-            </g>
-          `).join('')}
-        `;
-      }
-
-      // Renderiza Lista Interativa de Categorias
+      // Renderiza Lista de Categorias no Donut Legend
       const catContainer = document.getElementById('repCategoriesInteractiveList');
       if (catContainer) {
         catContainer.innerHTML = data.categories.map(c => {
           const isSelected = currentReportCategory !== 'all' && c.name.toLowerCase().includes(currentReportCategory.toLowerCase());
-          const ticketCat = c.val / Math.max(1, c.count);
           return `
-            <div class="category-interactive-item ${isSelected ? 'active' : ''}" onclick="setReportCategoryFilter('${isSelected ? 'all' : c.name}')">
-              <div style="display:flex; justify-content:space-between; align-items:center;">
-                <div style="display:flex; align-items:center; gap:8px;">
-                  <span style="width:12px; height:12px; border-radius:50%; background:${c.color}; display:inline-block;"></span>
-                  <strong style="font-size:0.9rem; color:#350B19;">${c.name}</strong>
-                </div>
-                <div style="text-align:right;">
-                  <strong style="font-size:0.92rem; color:#4D1328;">${formatBRL(c.val)}</strong>
-                  <span style="font-size:0.75rem; color:#8A2D4E; font-weight:700; margin-left:4px;">(${c.pct}%)</span>
-                </div>
-              </div>
-              <div class="cat-progress-track">
-                <div class="cat-progress-fill" style="width:${c.pct}%; background:${c.color};"></div>
-              </div>
-              <div style="display:flex; justify-content:space-between; font-size:0.74rem; color:#6A1D39;">
-                <span><i class="fa-regular fa-user"></i> ${c.count} procedimentos realizados</span>
-                <span>Ticket Médio: <strong>${formatBRL(ticketCat)}</strong></span>
-              </div>
+            <div class="donut-legend-item" onclick="setReportCategoryFilter('${isSelected ? 'all' : c.name}')" style="cursor:pointer; padding:6px 8px; border-radius:10px; background:${isSelected ? '#FFFFFF' : 'transparent'}; border:1px solid ${isSelected ? 'rgba(216,63,121,0.35)' : 'transparent'}; transition:all 0.2s;">
+              <span><span class="bullet" style="background:${c.color};"></span>${c.name}</span>
+              <strong>${formatBRL(c.val)} (${c.pct}%)</strong>
             </div>
           `;
         }).join('');
+      }
+
+      const metaEl = document.getElementById('insightPointMeta');
+      const badgeEl = document.getElementById('insightPointBadge');
+      if (metaEl && badgeEl) {
+        if (currentReportCategory === 'all') {
+          metaEl.innerHTML = '<i class="fa-solid fa-hand-pointer" style="color:#8A2D4E;"></i> Toque em um procedimento acima para filtrar';
+          badgeEl.innerText = 'Todas as Categorias';
+        } else {
+          metaEl.innerHTML = `<i class="fa-solid fa-filter" style="color:#D83F79;"></i> Filtrando por: <strong>${currentReportCategory}</strong>`;
+          badgeEl.innerText = `${Math.round(factor * 100)}% do Faturamento`;
+        }
       }
 
       renderReportTransactionsTable();
@@ -2053,15 +1884,12 @@
       const storeApps = window.EPStore ? window.EPStore.getAppointments() : [];
       const extraTransactions = [
         { id: 'FIN-101', clientName: 'Mariana Silva', clientPhone: '(11) 98765-4321', serviceName: 'Alongamento em Gel', date: '2026-11-07', time: '14:00', status: 'Confirmado', servicePrice: 180.00, payMethod: 'Pix' },
-        { id: 'FIN-102', clientName: 'Juliana Souza', clientPhone: '(11) 98765-8765', serviceName: 'Manicure Clássica', date: '2026-11-07', time: '16:00', status: 'Confirmado', servicePrice: 70.00, payMethod: 'Cartão de Crédito' },
+        { id: 'FIN-102', clientName: 'Juliana Souza', clientPhone: '(11) 98765-8765', serviceName: 'Manicure Clássica', date: '2026-11-07', time: '16:00', status: 'Confirmado', servicePrice: 70.00, payMethod: 'Cartão' },
         { id: 'FIN-103', clientName: 'Ana Costa', clientPhone: '(11) 98765-1111', serviceName: 'Spa das Mãos', date: '2026-11-06', time: '18:00', status: 'Confirmado', servicePrice: 90.00, payMethod: 'Pix' },
-        { id: 'FIN-104', clientName: 'Raquel Ferreira', clientPhone: '(11) 98765-2222', serviceName: 'Nail Art & Ouro', date: '2026-11-08', time: '09:00', status: 'Pendente', servicePrice: 150.00, payMethod: 'Pix' },
-        { id: 'FIN-105', clientName: 'Camila Lima', clientPhone: '(11) 98765-3333', serviceName: 'Alongamento em Gel', date: '2026-11-08', time: '11:00', status: 'Confirmado', servicePrice: 180.00, payMethod: 'Cartão de Débito' },
-        { id: 'FIN-106', clientName: 'Fernanda Alves', clientPhone: '(61) 99123-4567', serviceName: 'Esmaltação em Gel', date: '2026-11-05', time: '15:00', status: 'Confirmado', servicePrice: 100.00, payMethod: 'Pix' }
+        { id: 'FIN-104', clientName: 'Raquel Ferreira', clientPhone: '(11) 98765-2222', serviceName: 'Nail Art & Ouro', date: '2026-11-08', time: '09:00', status: 'Pendente', servicePrice: 150.00, payMethod: 'Pix' }
       ];
 
       const merged = [...storeApps.map(a => ({ ...a, payMethod: a.payMethod || 'Pix' })), ...extraTransactions];
-      // Remove duplicados por nome+hora
       const seen = new Set();
       return merged.filter(item => {
         const key = `${item.clientName}_${item.date}_${item.time}`;
@@ -2072,14 +1900,14 @@
     }
 
     function renderReportTransactionsTable() {
-      const tbody = document.getElementById('repTransactionsTableBody');
-      if (!tbody) return;
+      const grid = document.getElementById('repTransactionsCardsGrid');
+      if (!grid) return;
 
       const query = (document.getElementById('repTransactionSearchInput')?.value || '').toLowerCase();
       let list = getCombinedReportTransactions();
 
       if (currentReportCategory !== 'all') {
-        list = list.filter(item => item.serviceName.toLowerCase().includes(currentReportCategory.toLowerCase()));
+        list = list.filter(item => (item.serviceName || '').toLowerCase().includes(currentReportCategory.toLowerCase()));
       }
 
       if (currentReportStatusFilter !== 'all') {
@@ -2088,8 +1916,8 @@
 
       if (query) {
         list = list.filter(item =>
-          item.clientName.toLowerCase().includes(query) ||
-          item.serviceName.toLowerCase().includes(query) ||
+          (item.clientName || '').toLowerCase().includes(query) ||
+          (item.serviceName || '').toLowerCase().includes(query) ||
           (item.date || '').includes(query)
         );
       }
@@ -2097,28 +1925,34 @@
       const lbl = document.getElementById('repTableActiveFilterLabel');
       if (lbl) {
         const totalFiltered = list.reduce((acc, i) => acc + (parseFloat(i.servicePrice) || 0), 0);
-        lbl.innerText = `Exibindo ${list.length} lançamento(s) • Soma filtrada: ${formatBRL(totalFiltered)}`;
+        lbl.innerText = `${list.length} atendimento(s) listado(s) • Total: ${formatBRLFull(totalFiltered)}`;
       }
 
       if (list.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px; color:#8A2D4E;">Nenhum lançamento encontrado para os filtros aplicados.</td></tr>';
+        grid.innerHTML = '<p style="font-size:0.85rem; color:#8A2D4E; padding:16px;">Nenhum atendimento encontrado para este filtro.</p>';
         return;
       }
 
-      tbody.innerHTML = list.map(item => {
+      grid.innerHTML = list.map(item => {
+        const initials = (item.clientName || 'CL').split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
         const stClass = (item.status || 'Confirmado').toLowerCase();
         return `
-          <tr onclick="openAdminSlotAction('${item.id}', '${item.clientName}', '${item.clientPhone}', '${item.serviceName}', '${item.date}', '${item.time}', '${item.status}', '${item.servicePrice}')" style="cursor:pointer;">
-            <td><strong>${item.clientName}</strong><br><span style="font-size:0.72rem; color:#8A2D4E;">${item.clientPhone}</span></td>
-            <td>${item.serviceName}</td>
-            <td>${item.date} às ${item.time}</td>
-            <td><span style="background:#FAF4F5; padding:3px 8px; border-radius:8px; font-size:0.75rem; font-weight:600;">${item.payMethod || 'Pix'}</span></td>
-            <td><span class="badge-status-pill ${stClass}">${item.status}</span></td>
-            <td><strong style="color:#350B19;">${formatBRL(item.servicePrice)}</strong></td>
-            <td class="no-print">
-              <button class="btn-open-client-pill" style="padding:4px 10px; font-size:0.72rem;">Detalhes</button>
-            </td>
-          </tr>
+          <div class="card-list-item" onclick="openAdminSlotAction('${item.id}', '${item.clientName}', '${item.clientPhone}', '${item.serviceName}', '${item.date}', '${item.time}', '${item.status}', '${item.servicePrice}')">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <div class="client-avatar-badge">${initials}</div>
+              <div>
+                <h5 style="font-size:0.92rem; font-weight:700; color:#350B19;">${item.clientName}</h5>
+                <p style="font-size:0.78rem; color:#6A1D39;">${item.serviceName} &bull; ${item.date} às ${item.time}</p>
+              </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:10px;">
+              <div style="text-align:right;">
+                <strong style="display:block; font-size:0.88rem; color:#4D1328;">${formatBRLFull(item.servicePrice)}</strong>
+                <span class="badge-status-pill ${stClass}" style="font-size:0.68rem;">${item.status}</span>
+              </div>
+              <i class="fa-solid fa-chevron-right" style="color:#8A2D4E; font-size:0.75rem;"></i>
+            </div>
+          </div>
         `;
       }).join('');
     }
@@ -2137,7 +1971,7 @@
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-      showToast('Planilha CSV exportada com sucesso!');
+      showToast('Planilha exportada com sucesso!');
     }
 
   </script>

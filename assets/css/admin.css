@@ -1345,12 +1345,132 @@ input:checked + .switch-slider:before {
 .admin-header-container,
 .admin-main-content-expansive,
 .admin-view-screen,
+#printableReportArea,
 .admin-dashboard-split-row,
+.admin-items-responsive-grid,
 .admin-chart-card,
-.admin-sub-card {
+.admin-sub-card,
+.card-list-item {
   max-width: 100% !important;
   min-width: 0 !important;
   box-sizing: border-box !important;
+}
+
+.admin-dashboard-split-row {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+
+@media (min-width: 860px) {
+  .admin-dashboard-split-row {
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr) !important;
+  }
+}
+
+.admin-items-responsive-grid {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+
+@media (min-width: 768px) {
+  .admin-items-responsive-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+.admin-kpis-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+}
+
+.kpi-pink-card {
+  min-width: 0 !important;
+  overflow: hidden !important;
+}
+
+.chart-header-row,
+.admin-chart-header {
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
+  flex-wrap: wrap !important;
+  margin-bottom: 12px !important;
+  width: 100% !important;
+}
+
+.chart-header-row h3,
+.admin-chart-header h3 {
+  font-family: var(--font-serif) !important;
+  font-size: 1.15rem !important;
+  font-weight: 700 !important;
+  color: #4D1328 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+
+.chart-badge-highlight,
+.chart-floating-badge {
+  position: absolute !important;
+  top: 0px !important;
+  right: 8px !important;
+  background: #FFFFFF !important;
+  border: 1px solid rgba(77, 19, 40, 0.12) !important;
+  padding: 5px 12px !important;
+  border-radius: 14px !important;
+  font-size: 0.82rem !important;
+  font-weight: 700 !important;
+  color: #350B19 !important;
+  box-shadow: 0 3px 10px rgba(77, 19, 40, 0.08) !important;
+  z-index: 2 !important;
+}
+
+.sub-card-header-row,
+.admin-sub-card-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
+  margin-bottom: 12px !important;
+  width: 100% !important;
+}
+
+.sub-card-header-row a,
+.admin-sub-card-header a,
+.view-all-link {
+  font-size: 0.78rem !important;
+  font-weight: 700 !important;
+  color: #8A2D4E !important;
+  text-decoration: none !important;
+}
+
+.donut-legend-wrap,
+.donut-legend-list {
+  flex: 1 !important;
+  min-width: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+}
+
+.donut-legend-item {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
+  font-size: 0.78rem !important;
+  color: #350B19 !important;
+  padding: 5px 8px !important;
+  border-radius: 10px !important;
+  transition: background 0.15s ease !important;
+}
+
+.donut-legend-item:hover {
+  background: rgba(255, 255, 255, 0.6) !important;
+}
+
+.filter-pills-row {
+  flex-wrap: wrap !important;
+  overflow-x: visible !important;
+  padding-bottom: 4px !important;
 }
 
 @media (max-width: 899px) {
@@ -1372,22 +1492,42 @@ input:checked + .switch-slider:before {
     gap: 10px !important;
   }
 
-  .reports-kpi-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 8px !important;
+  .admin-kpis-grid {
+    gap: 6px !important;
   }
 
-  .report-kpi-box {
-    padding: 12px 10px !important;
-    min-width: 0 !important;
+  .kpi-pink-card {
+    padding: 10px 4px !important;
+    border-radius: 14px !important;
   }
 
-  .report-kpi-val {
-    font-size: 1.15rem !important;
+  .kpi-pink-card i {
+    font-size: 1.05rem !important;
   }
 
-  .report-period-btn {
-    padding: 5px 10px !important;
-    font-size: 0.72rem !important;
+  .kpi-pink-card .kpi-num {
+    font-size: 0.96rem !important;
+  }
+
+  .kpi-pink-card .kpi-lbl {
+    font-size: 0.61rem !important;
+  }
+
+  .kpi-pink-card .kpi-growth {
+    font-size: 0.58rem !important;
+  }
+
+  .donut-chart-container {
+    gap: 10px !important;
+  }
+
+  .donut-svg-wrap {
+    width: 72px !important;
+    height: 72px !important;
+  }
+
+  .donut-legend-item {
+    font-size: 0.71rem !important;
+    padding: 4px 5px !important;
   }
 }

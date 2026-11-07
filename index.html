@@ -98,7 +98,7 @@
             <img src="assets/images/trabalho-amendoada-ouro.png" alt="Mariana">
           </div>
           <div class="greeting-text-area">
-            <h2>Olá, Mariana! <i class="fa-regular fa-heart"></i></h2>
+            <h2>Olá, <span id="clientGreetingName">Mariana</span>! <i class="fa-regular fa-heart"></i></h2>
             <p>Bem-vinda de volta ao seu momento de beleza e autocuidado.</p>
           </div>
         </div>
@@ -355,7 +355,7 @@
             <form id="clientBookingForm" onsubmit="handleConfirmBooking(event)">
               <div class="form-input-box" style="margin-bottom:12px;">
                 <label style="display:block; font-size:0.8rem; font-weight:600; color:#4D1328; margin-bottom:4px;">Seu Nome Completo *</label>
-                <input type="text" id="clientNameInput" required placeholder="Ex: Mariana Silva">
+                <input type="text" id="clientNameInput" required placeholder="Ex: Mariana Silva" oninput="persistClientDraft()">
               </div>
 
               <div class="form-input-box" style="margin-bottom:14px;">
@@ -494,8 +494,8 @@
         <div class="greeting-avatar-ring" style="width:72px; height:72px; margin:0 auto 10px;">
           <img src="assets/images/trabalho-amendoada-ouro.png" alt="Perfil">
         </div>
-        <h4 style="font-family:var(--font-serif); font-size:1.2rem; color:#350B19;">Mariana Silva</h4>
-        <p style="font-size:0.8rem; color:#8A2D4E;">Cliente VIP Estefany Paiva Nails</p>
+        <h4 style="font-family:var(--font-serif); font-size:1.2rem; color:#350B19;" id="profileModalClientName">Mariana Silva</h4>
+        <p style="font-size:0.8rem; color:#8A2D4E;" id="profileModalClientPhone">Cliente VIP Estefany Paiva Nails</p>
       </div>
 
       <div style="background:#FBECEF; border-radius:16px; padding:14px; margin-bottom:16px; font-size:0.85rem; color:#6A1D39; line-height:1.6;">
@@ -617,7 +617,7 @@
   <script src="assets/js/store.js"></script>
   <script>
     let selectedService = { id: 'srv_alongamento', name: 'Alongamento em Gel', price: 180, image: 'assets/images/trabalho-alongamento-chocolate.png' };
-    let selectedSlotTime = '09:00';
+    let selectedSlotTime = '14:00';
     let selectedDate = new Date();
     let currentCalMonth = new Date().getMonth();
     let currentCalYear = new Date().getFullYear();
@@ -632,13 +632,59 @@
       'assets/images/trabalho-tons-terrosos.png'
     ];
 
+    function formatLocalYYYYMMDD(d) {
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    }
+
     document.addEventListener('DOMContentLoaded', async () => {
       if (window.EPStore) {
         await window.EPStore.init();
       }
+      restoreClientSavedData();
       renderCalendar();
+      renderDynamicSlots();
       updateNextBookingBanner();
     });
+
+    // Restaura Nome, WhatsApp e Agendamento da cliente mesmo após F5 / atualizar a página
+    function restoreClientSavedData() {
+      const savedName = localStorage.getItem('epn_last_client_name') || '';
+      const savedPhone = localStorage.getItem('epn_last_client_phone') || '';
+
+      const nameInput = document.getElementById('clientNameInput');
+      const phoneInput = document.getElementById('clientPhoneInput');
+
+      if (nameInput && savedName) nameInput.value = savedName;
+      if (phoneInput && savedPhone) phoneInput.value = savedPhone;
+
+      updateClientHeaderAndProfile(savedName, savedPhone);
+    }
+
+    function persistClientDraft() {
+      const nameInput = document.getElementById('clientNameInput');
+      const phoneInput = document.getElementById('clientPhoneInput');
+      const nameVal = nameInput ? nameInput.value.trim() : '';
+      const phoneVal = phoneInput ? phoneInput.value.trim() : '';
+
+      if (nameVal) localStorage.setItem('epn_last_client_name', nameVal);
+      if (phoneVal) localStorage.setItem('epn_last_client_phone', phoneVal);
+
+      updateClientHeaderAndProfile(nameVal, phoneVal);
+    }
+
+    function updateClientHeaderAndProfile(name, phone) {
+      const firstName = (name || 'Mariana').split(' ')[0];
+      const greetEl = document.getElementById('clientGreetingName');
+      if (greetEl) greetEl.innerText = firstName;
+
+      const profNameEl = document.getElementById('profileModalClientName');
+      const profPhoneEl = document.getElementById('profileModalClientPhone');
+      if (profNameEl) profNameEl.innerText = name || 'Cliente VIP';
+      if (profPhoneEl) profPhoneEl.innerText = phone ? `WhatsApp: ${phone}` : 'Cliente VIP Estefany Paiva Nails';
+    }
 
     function showToast(msg) {
       const toast = document.getElementById('toastClientNotification');
@@ -664,6 +710,29 @@
       showToast(`Serviço selecionado: ${name}`);
     }
 
+    function renderDynamicSlots() {
+      const grid = document.getElementById('timeSlotsGrid');
+      if (!grid) return;
+
+      const dateStr = formatLocalYYYYMMDD(selectedDate);
+      const allSlots = ['09:00', '10:30', '13:00', '14:00', '15:30', '17:00', '18:30', '19:30'];
+      const apps = window.EPStore ? window.EPStore.getAppointments() : [];
+      const busyTimes = new Set(
+        apps.filter(a => a.date === dateStr && a.status !== 'Cancelado').map(a => a.time)
+      );
+
+      // Se o horário selecionado estiver ocupado neste dia, escolhe o primeiro livre
+      if (busyTimes.has(selectedSlotTime)) {
+        const firstFree = allSlots.find(s => !busyTimes.has(s));
+        if (firstFree) selectedSlotTime = firstFree;
+      }
+
+      grid.innerHTML = allSlots.map(slot => {
+        const isActive = slot === selectedSlotTime;
+        return `<button type="button" class="slot-chip-btn ${isActive ? 'active' : ''}" onclick="selectSlot(this, '${slot}')">${slot}</button>`;
+      }).join('');
+    }
+
     function selectSlot(btn, time) {
       document.querySelectorAll('.slot-chip-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
@@ -686,9 +755,8 @@
         html += '<span class="cal-day-cell disabled"></span>';
       }
 
-      const today = new Date();
       for (let day = 1; day <= totalDays; day++) {
-        const isSelected = day === selectedDate.getDate() && currentCalMonth === selectedDate.getMonth();
+        const isSelected = day === selectedDate.getDate() && currentCalMonth === selectedDate.getMonth() && currentCalYear === selectedDate.getFullYear();
         html += `<button type="button" class="cal-day-cell ${isSelected ? 'selected' : ''}" onclick="pickDay(${day})">${day}</button>`;
       }
       grid.innerHTML = html;
@@ -704,6 +772,7 @@
     function pickDay(day) {
       selectedDate = new Date(currentCalYear, currentCalMonth, day);
       renderCalendar();
+      renderDynamicSlots();
     }
 
     function applyPhoneMask(input) {
@@ -716,65 +785,121 @@
       } else {
         input.value = v;
       }
+      persistClientDraft();
     }
 
     async function handleConfirmBooking(e) {
       e.preventDefault();
       const name = document.getElementById('clientNameInput').value.trim();
       const phone = document.getElementById('clientPhoneInput').value.trim();
+      const cleanDigits = phone.replace(/\D/g, '');
 
-      if (!name || phone.length < 14) {
-        alert('Por favor, informe seu Nome Completo e WhatsApp válido com DDD.');
+      if (!name || cleanDigits.length < 10) {
+        showToast('Informe seu Nome e WhatsApp com DDD!');
+        document.getElementById('clientPhoneInput').focus();
         return;
       }
 
-      const dateStr = selectedDate.toISOString().split('T')[0];
+      const dateStr = formatLocalYYYYMMDD(selectedDate);
       const newBooking = {
         clientName: name,
         clientPhone: phone,
         serviceId: selectedService.id,
         serviceName: selectedService.name,
         servicePrice: selectedService.price,
+        duration: 90,
         date: dateStr,
         time: selectedSlotTime,
         status: 'Confirmado'
       };
 
-      if (window.EPStore) {
-        await window.EPStore.createAppointment(newBooking);
+      let savedApp = null;
+      try {
+        if (window.EPStore) {
+          savedApp = await window.EPStore.createAppointment(newBooking);
+        }
+      } catch (err) {
+        console.warn('Fallback save triggered:', err);
+        const list = JSON.parse(localStorage.getItem('epn_appointments_lgpd') || '[]');
+        savedApp = {
+          id: 'EP-' + Math.floor(1000 + Math.random() * 9000),
+          ...newBooking,
+          createdAt: new Date().toISOString()
+        };
+        list.unshift(savedApp);
+        localStorage.setItem('epn_appointments_lgpd', JSON.stringify(list));
       }
+
+      // Garante persistência permanente dos dados da cliente
+      localStorage.setItem('epn_last_client_phone', phone);
+      localStorage.setItem('epn_last_client_name', name);
+      if (savedApp && savedApp.id) {
+        localStorage.setItem('epn_last_appointment_id', savedApp.id);
+      }
+
+      updateClientHeaderAndProfile(name, phone);
+      updateNextBookingBanner();
+      renderDynamicSlots();
 
       if (window.AudioAlertEngine) {
         window.AudioAlertEngine.playNotificationChime();
       }
-
-      localStorage.setItem('epn_last_client_phone', phone);
-      localStorage.setItem('epn_last_client_name', name);
 
       document.getElementById('successSrvName').innerText = selectedService.name;
       document.getElementById('successDateTime').innerText = `${selectedDate.toLocaleDateString('pt-BR')} às ${selectedSlotTime}`;
       document.getElementById('successClientName').innerText = name;
 
       openClientModal('modalBookingSuccess');
-      showToast('Horário agendado com sucesso!');
-      updateNextBookingBanner();
+      showToast('Agendamento confirmado e salvo!');
     }
 
     function updateNextBookingBanner() {
       if (!window.EPStore) return;
       const apps = window.EPStore.getAppointments().filter(a => a.status !== 'Cancelado');
-      if (apps.length > 0) {
-        const next = apps[0];
-        const srvEl = document.getElementById('appPreviewServiceName');
-        const timeEl = document.getElementById('appPreviewTime');
-        const dayEl = document.getElementById('appPreviewDayNum');
-        const monthEl = document.getElementById('appPreviewMonth');
+      if (apps.length === 0) return;
 
-        if (srvEl) srvEl.innerText = next.serviceName;
-        if (timeEl) timeEl.innerText = next.time;
-        if (next.date && dayEl) {
-          const parts = next.date.split('-');
-          dayEl.innerText = parts[2];
+      const lastId = localStorage.getItem('epn_last_appointment_id') || '';
+      const savedPhone = (localStorage.getItem('epn_last_client_phone') || '').replace(/\D/g, '');
+      const savedName = (localStorage.getItem('epn_last_client_name') || '').toLowerCase();
+
+      // Prioriza o agendamento da própria cliente
+      let next = apps.find(a => a.id === lastId);
+      if (!next && savedPhone.length >= 8) {
+        next = apps.find(a => (a.clientPhone || '').replace(/\D/g, '').includes(savedPhone));
+      }
+      if (!next && savedName.length >= 3) {
+        next = apps.find(a => (a.clientName || '').toLowerCase() === savedName);
+      }
+      if (!next) {
+        next = apps[0];
+      }
+
+      const srvEl = document.getElementById('appPreviewServiceName');
+      const timeEl = document.getElementById('appPreviewTime');
+      const dayEl = document.getElementById('appPreviewDayNum');
+      const monthEl = document.getElementById('appPreviewMonth');
+      const weekEl = document.getElementById('appPreviewWeekDay');
+
+      if (srvEl) srvEl.innerText = next.serviceName;
+      if (timeEl) timeEl.innerText = next.time;
+
+      if (next.date) {
+        const parts = next.date.split('-');
+        if (parts.length === 3) {
+          const dt = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+          const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+          const days = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+          if (dayEl) dayEl.innerText = parts[2];
+          if (monthEl) monthEl.innerText = months[dt.getMonth()] || 'Nov';
+          if (weekEl) weekEl.innerText = days[dt.getDay()] || 'Sáb';
+
+          // Atualiza também o modal de Detalhes do Horário
+          const detSrv = document.getElementById('detalheModalSrv');
+          const detData = document.getElementById('detalheModalData');
+          const detHora = document.getElementById('detalheModalHora');
+          if (detSrv) detSrv.innerText = next.serviceName;
+          if (detData) detData.innerText = `${days[dt.getDay()]}, ${parts[2]} de ${months[dt.getMonth()]} de ${parts[0]}`;
+          if (detHora) detHora.innerText = `${next.time} • Cliente: ${next.clientName}`;
         }
       }
     }
@@ -805,6 +930,11 @@
     }
 
     function openAppointmentsFullModal() {
+      const input = document.getElementById('inputBuscaMeusAgendamentos');
+      const savedPhone = localStorage.getItem('epn_last_client_phone') || '';
+      if (input && savedPhone && !input.value) {
+        input.value = savedPhone;
+      }
       filtrarMeusAgendamentos();
       openClientModal('modalMeusAgendamentos');
     }
@@ -813,16 +943,10 @@
       const container = document.getElementById('listaMeusAgendamentosConteudo');
       const input = document.getElementById('inputBuscaMeusAgendamentos');
       const term = (input ? input.value : '').replace(/\D/g, '');
-      const saved = (localStorage.getItem('epn_last_client_phone') || '').replace(/\D/g, '');
-
-      const filterTerm = term || saved;
-      if (input && !input.value && saved) {
-        input.value = localStorage.getItem('epn_last_client_phone');
-      }
 
       const allApps = window.EPStore ? window.EPStore.getAppointments() : [];
-      const filtered = filterTerm
-        ? allApps.filter(a => a.clientPhone.replace(/\D/g, '').includes(filterTerm))
+      const filtered = term.length >= 4
+        ? allApps.filter(a => (a.clientPhone || '').replace(/\D/g, '').includes(term))
         : allApps;
 
       if (filtered.length === 0) {
@@ -834,7 +958,8 @@
         <div style="background:#FBECEF; border-radius:14px; padding:12px 14px; display:flex; justify-content:space-between; align-items:center;">
           <div>
             <h5 style="color:#350B19; font-weight:700; font-size:0.9rem;">${item.serviceName}</h5>
-            <p style="font-size:0.75rem; color:#6A1D39;">${item.date} às ${item.time} &bull; ${item.status}</p>
+            <p style="font-size:0.76rem; color:#4D1328; font-weight:600;">Cliente: ${item.clientName}</p>
+            <p style="font-size:0.75rem; color:#6A1D39;">${item.date} às ${item.time} &bull; <strong>${item.status}</strong></p>
           </div>
           <button onclick="openWhatsAppChatDirect()" style="padding:6px 12px; border-radius:20px; border:none; background:#25D366; color:#FFF; font-size:0.75rem; font-weight:700; cursor:pointer;">
             <i class="fa-brands fa-whatsapp"></i> Falar
@@ -844,10 +969,12 @@
     }
 
     function openDetalhesModal() {
+      updateNextBookingBanner();
       openClientModal('modalDetalhesAgendamento');
     }
 
     function openProfileContactModal() {
+      restoreClientSavedData();
       openClientModal('modalMeuPerfil');
     }
 
@@ -944,7 +1071,6 @@ END:VCALENDAR`;
 
     function openMenuDrawer() {
       openAppointmentsFullModal();
-    }
-  </script>
+    }  </script>
 </body>
 </html>
