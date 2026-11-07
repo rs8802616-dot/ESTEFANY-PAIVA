@@ -1,364 +1,840 @@
 /**
- * ESTEFANY PAIVA NAILS - STORE & BACKEND SIMULATION ENGINE
- * Banco de dados centralizado com persistência local, auditoria e prevenção de conflitos.
+ * =====================================================================
+ * PLATAFORMA DE AGENDAMENTO PARA MANICURE - MULTI-PORTAL & LGPD
+ * STORE CENTRAL, SECDEVOPS, TOKENS CRIPTOGRÁFICOS E REGRAS DE NEGÓCIO
+ * =====================================================================
  */
 
 const STORAGE_KEYS = {
-  SETTINGS: 'epn_settings',
-  SERVICES: 'epn_services',
-  MEDIA: 'epn_media',
-  CUSTOMERS: 'epn_customers',
-  APPOINTMENTS: 'epn_appointments',
-  EVENTS: 'epn_appointment_events',
-  FINANCIALS: 'epn_financials',
-  AUTH: 'epn_admin_auth'
+  SECURITY_TOKENS: 'epn_sec_tokens',
+  SECURITY_LOGS: 'epn_sec_logs',
+  TRAFFIC_ANALYTICS: 'epn_traffic_analytics',
+  THEME_CONFIG: 'epn_theme_config',
+  CAROUSEL_ITEMS: 'epn_carousel_items',
+  CATEGORIES: 'epn_categories',
+  SERVICES: 'epn_services_with_stories',
+  APPOINTMENTS: 'epn_appointments_lgpd',
+  SETTINGS: 'epn_salon_settings'
 };
 
-// Dados Iniciais Padronizados Fiéis aos Mockups do PRD
-const SEED_SETTINGS = {
-  salonName: 'ESTEFANY PAIVA NAILS',
-  ownerName: 'Estefany Paiva',
-  slogan: 'Mais que unhas, é autoestima.',
-  phone: '5561985543452',
-  phoneDisplay: '(61) 98554-3452',
-  instagram: '@estefanypaiva_nails',
-  location: 'Brasília - DF',
-  bookingMode: 'manual', // 'manual' (aguardando) ou 'auto' (confirmado)
-  bufferMinutes: 15, // intervalo de limpeza/preparação
-  minNoticeHours: 2,
-  maxFutureDays: 45,
-  businessHours: {
-    1: { open: '08:00', close: '19:00', lunchStart: '12:00', lunchEnd: '13:00', active: true }, // Seg
-    2: { open: '08:00', close: '19:00', lunchStart: '12:00', lunchEnd: '13:00', active: true }, // Ter
-    3: { open: '08:00', close: '19:00', lunchStart: '12:00', lunchEnd: '13:00', active: true }, // Qua
-    4: { open: '08:00', close: '19:00', lunchStart: '12:00', lunchEnd: '13:00', active: true }, // Qui
-    5: { open: '08:00', close: '19:00', lunchStart: '12:00', lunchEnd: '13:00', active: true }, // Sex
-    6: { open: '08:00', close: '18:00', lunchStart: '12:00', lunchEnd: '13:00', active: true }, // Sab
-    0: { open: '00:00', close: '00:00', lunchStart: '00:00', lunchEnd: '00:00', active: false } // Dom fechado
+// ==========================================
+// 1. CRIPTOGRAFIA & UTILITÁRIOS SEGUROS
+// ==========================================
+const CryptoUtils = {
+  // Gera hash SHA-256 usando Web Crypto API
+  async sha256(message) {
+    if (window.crypto && window.crypto.subtle) {
+      const msgBuffer = new TextEncoder().encode(message);
+      const hashBuffer = await window.crypto.subtle.digest('SHA-256', msgBuffer);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+    // Fallback síncrono simples caso Web Crypto não esteja disponível
+    let hash = 0;
+    for (let i = 0; i < message.length; i++) {
+      const char = message.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash |= 0;
+    }
+    return Math.abs(hash).toString(16).padStart(64, '0');
+  },
+
+  // Gera token seguro aleatório via CSPRNG
+  generateSecureToken(prefix = 'token') {
+    const array = new Uint8Array(16);
+    if (window.crypto && window.crypto.getRandomValues) {
+      window.crypto.getRandomValues(array);
+    } else {
+      for (let i = 0; i < 16; i++) array[i] = Math.floor(Math.random() * 256);
+    }
+    const hex = Array.from(array).map(b => b.toString(16).padStart(2, '0')).join('');
+    return `${prefix}_${hex}`;
+  },
+
+  // Detecta tipo de dispositivo para auditoria
+  detectDevice() {
+    const ua = navigator.userAgent || '';
+    if (/iPhone/i.test(ua)) return 'iPhone (iOS)';
+    if (/iPad/i.test(ua)) return 'iPad (iPadOS)';
+    if (/Android/i.test(ua)) return 'Celular Android';
+    if (/Windows/i.test(ua)) return 'Computador Windows';
+    if (/Macintosh/i.test(ua)) return 'Computador macOS';
+    if (/Linux/i.test(ua)) return 'Linux';
+    return 'Dispositivo Web';
+  },
+
+  // Gera hash anônimo de sessão/IP simulado (LGPD)
+  async getAnonymousSessionHash() {
+    const seed = (navigator.userAgent || '') + (screen.width + 'x' + screen.height);
+    const hash = await this.sha256(seed);
+    return 'ses_' + hash.slice(0, 12);
   }
 };
 
-const SEED_SERVICES = [
-  {
-    id: 'srv_alongamento',
-    name: 'Alongamento em gel',
-    description: 'Unhas longas, resistentes e com um acabamento perfeito. O alongamento em gel proporciona beleza, durabilidade e um resultado natural.',
-    price: 150.00,
-    duration: 120, // 2h
-    category: 'Alongamento',
-    idealFor: 'unhas curtas ou fracas',
-    image: 'assets/images/service-alongamento.jpg',
-    gallery: [
-      'assets/images/banner-nails-1.jpg',
-      'assets/images/trabalho-amendoada-glitter.jpg',
-      'assets/images/trabalho-nude-classica.jpg'
-    ],
-    active: true,
-    featured: true,
-    order: 1
+// ==========================================
+// 2. WEB AUDIO & ALERTA SONORO PWA ("APITAR NO CELULAR")
+// ==========================================
+const AudioAlertEngine = {
+  ctx: null,
+
+  initAudio() {
+    if (!this.ctx) {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (AudioCtx) this.ctx = new AudioCtx();
+    }
   },
-  {
-    id: 'srv_banho',
-    name: 'Banho de gel',
-    description: 'Camada de gel fortalecedora sobre as unhas naturais. Protege contra quebras e descamação mantendo o comprimento próprio.',
-    price: 80.00,
-    duration: 60, // 1h
-    category: 'Tratamento',
-    idealFor: 'unhas quebradiças',
-    image: 'assets/images/service-banho.jpg',
-    gallery: [
-      'assets/images/trabalho-nude-classica.jpg',
-      'assets/images/service-banho.jpg'
-    ],
-    active: true,
-    featured: true,
-    order: 2
+
+  // Toca um sinal sonoro claro e elegante de alta prioridade ("ding-dong" / "apito")
+  playNotificationChime() {
+    try {
+      this.initAudio();
+      if (!this.ctx) return;
+      if (this.ctx.state === 'suspended') {
+        this.ctx.resume();
+      }
+
+      const now = this.ctx.currentTime;
+
+      // Primeiro tom (Mi - 659.25 Hz)
+      const osc1 = this.ctx.createOscillator();
+      const gain1 = this.ctx.createGain();
+      osc1.type = 'sine';
+      osc1.frequency.setValueAtTime(659.25, now);
+      gain1.gain.setValueAtTime(0.3, now);
+      gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+      osc1.connect(gain1);
+      gain1.connect(this.ctx.destination);
+      osc1.start(now);
+      osc1.stop(now + 0.35);
+
+      // Segundo tom (Sol# - 830.61 Hz)
+      const osc2 = this.ctx.createOscillator();
+      const gain2 = this.ctx.createGain();
+      osc2.type = 'triangle';
+      osc2.frequency.setValueAtTime(830.61, now + 0.15);
+      gain2.gain.setValueAtTime(0.4, now + 0.15);
+      gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+      osc2.connect(gain2);
+      gain2.connect(this.ctx.destination);
+      osc2.start(now + 0.15);
+      osc2.stop(now + 0.6);
+
+      // Terceiro tom de confirmação (Si - 987.77 Hz)
+      const osc3 = this.ctx.createOscillator();
+      const gain3 = this.ctx.createGain();
+      osc3.type = 'sine';
+      osc3.frequency.setValueAtTime(987.77, now + 0.3);
+      gain3.gain.setValueAtTime(0.35, now + 0.3);
+      gain3.gain.exponentialRampToValueAtTime(0.001, now + 0.85);
+      osc3.connect(gain3);
+      gain3.connect(this.ctx.destination);
+      osc3.start(now + 0.3);
+      osc3.stop(now + 0.85);
+    } catch (e) {
+      console.warn('Alerta sonoro não pode ser executado sem interação prévia:', e);
+    }
   },
-  {
-    id: 'srv_manutencao',
-    name: 'Manutenção',
-    description: 'Reposição do gel no crescimento da unha natural, nivelamento perfeito da curvatura C e renovação do brilho impecável.',
-    price: 70.00,
-    duration: 60, // 1h
-    category: 'Manutenção',
-    idealFor: 'clientes com 20 a 30 dias de alongamento',
-    image: 'assets/images/service-manutencao.jpg',
-    gallery: [
-      'assets/images/service-manutencao.jpg',
-      'assets/images/trabalho-amendoada-glitter.jpg'
-    ],
-    active: true,
-    featured: true,
-    order: 3
-  },
-  {
-    id: 'srv_esmalte_gel',
-    name: 'Esmaltação em gel',
-    description: 'Secagem instantânea na cabine UV/LED com brilho espelhado que não descasca e dura de 15 a 25 dias sem lascar.',
-    price: 70.00,
-    duration: 60, // 1h
-    category: 'Esmaltação',
-    idealFor: 'quem busca praticidade e durabilidade',
-    image: 'assets/images/service-esmalte.jpg',
-    gallery: [
-      'assets/images/service-esmalte.jpg',
-      'assets/images/trabalho-verde-encapsulada.jpg'
-    ],
-    active: true,
-    featured: true,
-    order: 4
-  },
-  {
-    id: 'srv_nail_art',
-    name: 'Nail Art & Encapsuladas',
-    description: 'Decoração artística sofisticada com flores secas, folhas de ouro, glitter ultrafino ou francesinha reversa protegida no gel.',
-    price: 35.00,
-    duration: 40,
-    category: 'Nail Art',
-    idealFor: 'quem ama exclusividade e detalhes únicos',
-    image: 'assets/images/trabalho-verde-encapsulada.jpg',
-    gallery: [
-      'assets/images/trabalho-verde-encapsulada.jpg',
-      'assets/images/trabalho-amendoada-glitter.jpg'
-    ],
-    active: true,
-    featured: false,
-    order: 5
+
+  // Dispara notificação push com som
+  async triggerNativePush(title, body) {
+    this.playNotificationChime();
+
+    if ('Notification' in window) {
+      if (Notification.permission === 'granted') {
+        new Notification(title, {
+          body: body,
+          icon: 'assets/images/perfil-julia.jpg',
+          badge: 'assets/images/perfil-julia.jpg',
+          vibrate: [200, 100, 200]
+        });
+      } else if (Notification.permission !== 'denied') {
+        const perm = await Notification.requestPermission();
+        if (perm === 'granted') {
+          new Notification(title, {
+            body: body,
+            icon: 'assets/images/perfil-julia.jpg'
+          });
+        }
+      }
+    }
   }
-];
+};
 
-const SEED_MEDIA = [
-  {
-    id: 'med_01',
-    type: 'image',
-    url: 'assets/images/banner-nails-1.jpg',
-    title: 'Alongamento em Gel Natural',
-    caption: 'Unhas com brilho e naturalidade que fazem a diferença ✨',
-    order: 1,
-    status: 'published',
-    category: 'Nails',
-    linkAction: '#agendar',
-    serviceId: 'srv_alongamento'
+// ==========================================
+// 3. DADOS INICIAIS PADRONIZADOS (SEED)
+// ==========================================
+const SEED_DATA = {
+  // Tokens iniciais de fábrica (hashes SHA-256 serão calculados na inicialização)
+  initialTokens: {
+    adminToken: 'adm_sec_4c781d9e5b20',
+    masterToken: 'mst_sec_8f93e2b10a47'
   },
-  {
-    id: 'med_02',
-    type: 'image',
-    url: 'assets/images/trabalho-verde-encapsulada.jpg',
-    title: 'Nail Art Verde & Folhas Secas',
-    caption: 'Encapsulada luxo com detalhes botânicos e folha de ouro',
-    order: 2,
-    status: 'published',
-    category: 'Antes e Depois',
-    linkAction: '#agendar',
-    serviceId: 'srv_nail_art'
-  },
-  {
-    id: 'med_03',
-    type: 'image',
-    url: 'assets/images/trabalho-amendoada-glitter.jpg',
-    title: 'Amendoada com Glitter Sutil',
-    caption: 'Curvatura anatômica e resistência impecável',
-    order: 3,
-    status: 'published',
-    category: 'Processo',
-    linkAction: '#agendar',
-    serviceId: 'srv_alongamento'
-  },
-  {
-    id: 'med_04',
-    type: 'image',
-    url: 'assets/images/trabalho-nude-classica.jpg',
-    title: 'Nude Minimalista',
-    caption: 'A elegância clássica para qualquer ocasião',
-    order: 4,
-    status: 'published',
-    category: 'Clientes',
-    linkAction: '#agendar',
-    serviceId: 'srv_banho'
-  }
-];
 
-const SEED_CUSTOMERS = [
-  { id: 'c_1', name: 'Juliana Santos', phone: '(61) 99999-1111', totalAppointments: 8, totalSpent: 1120.00, notes: 'Prefere formato amendoado fino.', createdAt: '2025-01-15' },
-  { id: 'c_2', name: 'Carla Mendes', phone: '(61) 98888-2222', totalAppointments: 5, totalSpent: 420.00, notes: 'Sensibilidade nas cutículas, usar broca suave.', createdAt: '2025-02-10' },
-  { id: 'c_3', name: 'Beatriz Lima', phone: '(61) 97777-3333', totalAppointments: 3, totalSpent: 300.00, notes: 'Ama decorações delicadas.', createdAt: '2025-03-05' },
-  { id: 'c_4', name: 'Amanda Oliveira', phone: '(61) 96666-4444', totalAppointments: 6, totalSpent: 510.00, notes: 'Esmaltação em gel tons nude e café.', createdAt: '2025-02-20' },
-  { id: 'c_5', name: 'Fernanda Costa', phone: '(61) 95555-5555', totalAppointments: 7, totalSpent: 980.00, notes: 'Alongamento formato quadrada clássica.', createdAt: '2025-01-28' },
-  { id: 'c_6', name: 'Larissa Alves', phone: '(61) 94444-6666', totalAppointments: 2, totalSpent: 160.00, notes: 'Cliente indicada por Juliana.', createdAt: '2025-04-12' },
-  { id: 'c_7', name: 'Patrícia Souza', phone: '(61) 93333-7777', totalAppointments: 4, totalSpent: 480.00, notes: 'Sempre pontual.', createdAt: '2025-03-18' }
-];
+  salonSettings: {
+    salonName: 'ESTEFANY PAIVA NAILS',
+    slogan: 'Mais que unhas, é autoestima.',
+    ownerName: 'Estefany Paiva',
+    phone: '(61) 98554-3452',
+    instagram: '@estefanypaiva_nails',
+    address: 'Brasília - DF',
+    bufferMinutes: 15,
+    minNoticeHours: 2,
+    maxFutureDays: 45,
+    retentionDays: 90
+  },
 
-// Gerar agendamentos iniciais exatamente como na Tela 7 (Hoje) e Tela 5 (Próximos)
-function generateInitialAppointments() {
-  const today = new Date().toISOString().split('T')[0];
-  
-  return [
+  theme: {
+    primaryColor: '#E9A3B5',
+    secondaryColor: '#D83F79',
+    bgColor: '#F8F2ED',
+    cardBgColor: '#FFFFFF',
+    textColor: '#171719',
+    accentColor: '#C59B6D',
+    fontHeading: "'Playfair Display', serif",
+    fontBody: "'Plus Jakarta Sans', sans-serif",
+    borderStyle: 'rounded', // 'rounded', 'sharp', 'pill'
+    isDarkMode: false,
+    headerSubtitle: 'Autoestima & Nail Design de Alto Padrão'
+  },
+
+  // Carrossel Superior de Trabalhos Realizados (Portfólio Vivo)
+  carouselItems: [
     {
-      id: 'EP-2025-01',
-      clientName: 'Juliana Santos',
-      clientPhone: '(61) 99999-1111',
+      id: 'car_1',
+      technique: 'Alongamento em Gel com Curvatura C',
+      category: 'Alongamento em Gel',
+      image: 'assets/images/banner-nails-1.jpg',
       serviceId: 'srv_alongamento',
-      serviceName: 'Alongamento em gel',
-      servicePrice: 150.00,
-      serviceDuration: 120,
-      date: today,
-      time: '08:00',
-      endTime: '10:00',
-      status: 'Confirmado',
-      shape: 'Amendoada',
-      notes: '',
-      createdAt: '2025-05-18T10:00:00Z'
+      tag: 'Mais Pedido',
+      active: true
     },
     {
-      id: 'EP-2025-02',
+      id: 'car_2',
+      technique: 'Nail Art Encapsulada com Folhas de Ouro',
+      category: 'Nail Art & Encapsuladas',
+      image: 'assets/images/trabalho-verde-encapsulada.jpg',
+      serviceId: 'srv_nailart',
+      tag: 'Exclusividade',
+      active: true
+    },
+    {
+      id: 'car_3',
+      technique: 'Amendoada Clássica com Brilho Champanhe',
+      category: 'Alongamento em Gel',
+      image: 'assets/images/trabalho-amendoada-glitter.jpg',
+      serviceId: 'srv_alongamento',
+      tag: 'Sucesso',
+      active: true
+    },
+    {
+      id: 'car_4',
+      technique: 'Nude Leitoso com Acabamento Espelhado',
+      category: 'Spa & Blindagem',
+      image: 'assets/images/trabalho-nude-classica.jpg',
+      serviceId: 'srv_blindagem',
+      tag: 'Elegância',
+      active: true
+    }
+  ],
+
+  // Categorias de Serviços
+  categories: [
+    { id: 'cat_alongamento', name: 'Alongamento em Gel', icon: 'fa-gem', order: 1 },
+    { id: 'cat_esmalte', name: 'Esmaltação em Gel', icon: 'fa-wand-magic-sparkles', order: 2 },
+    { id: 'cat_classica', name: 'Manicure & Pedicure Clássica', icon: 'fa-hand-sparkles', order: 3 },
+    { id: 'cat_nailart', name: 'Nail Art & Encapsuladas', icon: 'fa-palette', order: 4 },
+    { id: 'cat_blindagem', name: 'Spa & Blindagem', icon: 'fa-shield-halved', order: 5 }
+  ],
+
+  // Serviços com Stories (3 Vídeos/Slides por serviço)
+  services: [
+    {
+      id: 'srv_alongamento',
+      categoryId: 'cat_alongamento',
+      name: 'Alongamento em Gel Estruturado',
+      description: 'Unhas longas, resistentes e com acabamento ultra natural. Curvatura C perfeita sem agressão à lâmina.',
+      price: 150.00,
+      duration: 120, // 2 horas
+      image: 'assets/images/service-alongamento.jpg',
+      active: true,
+      storiesVideos: [
+        {
+          id: 'st_al_1',
+          title: 'Preparação & Brocas Russas',
+          mediaUrl: 'assets/images/banner-nails-1.jpg',
+          caption: 'Passo 1: Higienização minuciosa e cuticulagem russa sem corte agressivo ✨',
+          duration: 5
+        },
+        {
+          id: 'st_al_2',
+          title: 'Estruturação da Curvatura C',
+          mediaUrl: 'assets/images/trabalho-amendoada-glitter.jpg',
+          caption: 'Passo 2: Ponto de tensão perfeitamente nivelado para máxima durabilidade 💎',
+          duration: 5
+        },
+        {
+          id: 'st_al_3',
+          title: 'Resultado Final Impecável',
+          mediaUrl: 'assets/images/hero-hand-nude.jpg',
+          caption: 'Passo 3: Brilho espelhado e naturalidade extrema que dura até 30 dias! 💕',
+          duration: 5
+        }
+      ]
+    },
+    {
+      id: 'srv_esmalte',
+      categoryId: 'cat_esmalte',
+      name: 'Esmaltação em Gel Secagem UV/LED',
+      description: 'Secagem instantânea na cabine UV/LED. Saia pronta sem risco de borrar, com brilho intacto por até 25 dias.',
+      price: 70.00,
+      duration: 60,
+      image: 'assets/images/service-esmalte.jpg',
+      active: true,
+      storiesVideos: [
+        {
+          id: 'st_es_1',
+          title: 'Paleta de Cores Nude & Rosé',
+          mediaUrl: 'assets/images/service-esmalte.jpg',
+          caption: 'Cores exclusivas com alta pigmentação internacional 🌸',
+          duration: 5
+        },
+        {
+          id: 'st_es_2',
+          title: 'Secagem na Cabine LED',
+          mediaUrl: 'assets/images/trabalho-nude-classica.jpg',
+          caption: 'Totalmente seco em segundos, sem riscos nem marcas! ✨',
+          duration: 5
+        },
+        {
+          id: 'st_es_3',
+          title: 'Brilho Espelhado Duradouro',
+          mediaUrl: 'assets/images/hero-hand-nude.jpg',
+          caption: 'Suas unhas prontas para qualquer compromisso imediatamente! 💅',
+          duration: 5
+        }
+      ]
+    },
+    {
+      id: 'srv_nailart',
+      categoryId: 'cat_nailart',
+      name: 'Nail Art Luxo & Flores Encapsuladas',
+      description: 'Decoração artística protegida dentro da estrutura do gel. Folhas de ouro, flores desidratadas e glitter fino.',
+      price: 185.00,
+      duration: 150,
+      image: 'assets/images/trabalho-verde-encapsulada.jpg',
+      active: true,
+      storiesVideos: [
+        {
+          id: 'st_na_1',
+          title: 'Aplicação Botânica & Folhas de Ouro',
+          mediaUrl: 'assets/images/trabalho-verde-encapsulada.jpg',
+          caption: 'Trabalho artesanal delicado feito unha por unha 🌿✨',
+          duration: 5
+        },
+        {
+          id: 'st_na_2',
+          title: 'Camada de Gel Cristalino',
+          mediaUrl: 'assets/images/service-alongamento.jpg',
+          caption: 'A arte fica totalmente protegida e não descasca nem desbota! 💎',
+          duration: 5
+        },
+        {
+          id: 'st_na_3',
+          title: 'Design Exclusivo para Você',
+          mediaUrl: 'assets/images/trabalho-amendoada-glitter.jpg',
+          caption: 'Um resultado exclusivo que todo mundo vai elogiar 💕',
+          duration: 5
+        }
+      ]
+    },
+    {
+      id: 'srv_blindagem',
+      categoryId: 'cat_blindagem',
+      name: 'Banho de Gel & Blindagem Diamante',
+      description: 'Camada protetora sobre a sua unha natural. Evita quebras, fortalece unhas fracas e garante crescimento saudável.',
+      price: 90.00,
+      duration: 75,
+      image: 'assets/images/service-banho.jpg',
+      active: true,
+      storiesVideos: [
+        {
+          id: 'st_bl_1',
+          title: 'Diagnóstico da Lâmina Natural',
+          mediaUrl: 'assets/images/service-banho.jpg',
+          caption: 'Avaliação da saúde da unha e higienização profunda 🔍',
+          duration: 5
+        },
+        {
+          id: 'st_bl_2',
+          title: 'Aplicação da Base Estrutural',
+          mediaUrl: 'assets/images/trabalho-nude-classica.jpg',
+          caption: 'Gel de alta flexibilidade que absorve impactos e choques ✨',
+          duration: 5
+        },
+        {
+          id: 'st_bl_3',
+          title: 'Unhas Fortes e Naturais',
+          mediaUrl: 'assets/images/banner-nails-1.jpg',
+          caption: 'Crescimento saudável e protegido por até 4 semanas! 💅',
+          duration: 5
+        }
+      ]
+    },
+    {
+      id: 'srv_manicure_spa',
+      categoryId: 'cat_classica',
+      name: 'Spa Completo dos Pés e Mãos',
+      description: 'Esfoliação revigorante, hidratação profunda com parafina térmica, massagem relaxante e cutilagem impecável.',
+      price: 80.00,
+      duration: 60,
+      image: 'assets/images/service-manutencao.jpg',
+      active: true,
+      storiesVideos: [
+        {
+          id: 'st_sp_1',
+          title: 'Esfoliação com Óleos Essenciais',
+          mediaUrl: 'assets/images/service-manutencao.jpg',
+          caption: 'Remoção suave de asperezas e células mortas 🌸',
+          duration: 5
+        },
+        {
+          id: 'st_sp_2',
+          title: 'Massagem Relaxante Podal',
+          mediaUrl: 'assets/images/trabalho-quadros.jpg',
+          caption: 'Alívio da tensão do dia a dia e hidratação acetinada ✨',
+          duration: 5
+        },
+        {
+          id: 'st_sp_3',
+          title: 'Cutilagem e Esmaltação Perfeita',
+          mediaUrl: 'assets/images/hero-hand-nude.jpg',
+          caption: 'Momento de cuidado e carinho que você merece 💕',
+          duration: 5
+        }
+      ]
+    }
+  ],
+
+  // Agendamentos Iniciais com estrita minimização LGPD (Apenas Nome + Celular)
+  initialAppointments: [
+    {
+      id: 'EP-9021',
+      clientName: 'Mariana Santos',
+      clientPhone: '(61) 98455-1234',
+      serviceId: 'srv_alongamento',
+      serviceName: 'Alongamento em Gel Estruturado',
+      categoryId: 'cat_alongamento',
+      categoryName: 'Alongamento em Gel',
+      servicePrice: 150.00,
+      duration: 120,
+      date: new Date().toISOString().split('T')[0],
+      time: '09:00',
+      status: 'Confirmado',
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: 'EP-9022',
       clientName: 'Carla Mendes',
       clientPhone: '(61) 98888-2222',
-      serviceId: 'srv_manutencao',
-      serviceName: 'Manutenção',
-      servicePrice: 70.00,
-      serviceDuration: 60,
-      date: today,
-      time: '09:20',
-      endTime: '10:20',
+      serviceId: 'srv_blindagem',
+      serviceName: 'Banho de Gel & Blindagem Diamante',
+      categoryId: 'cat_blindagem',
+      categoryName: 'Spa & Blindagem',
+      servicePrice: 90.00,
+      duration: 75,
+      date: new Date().toISOString().split('T')[0],
+      time: '13:30',
       status: 'Confirmado',
-      shape: 'Quadrada',
-      notes: '',
-      createdAt: '2025-05-18T11:30:00Z'
+      createdAt: new Date().toISOString()
     },
     {
-      id: 'EP-2025-03',
+      id: 'EP-9023',
       clientName: 'Beatriz Lima',
       clientPhone: '(61) 97777-3333',
-      serviceId: 'srv_banho',
-      serviceName: 'Banho de gel',
-      servicePrice: 80.00,
-      serviceDuration: 60,
-      date: today,
-      time: '10:40',
-      endTime: '11:40',
-      status: 'Aguardando confirmação',
-      shape: 'Natural',
-      notes: 'Primeira vez no espaço',
-      createdAt: '2025-05-19T09:15:00Z'
+      serviceId: 'srv_nailart',
+      serviceName: 'Nail Art Luxo & Flores Encapsuladas',
+      categoryId: 'cat_nailart',
+      categoryName: 'Nail Art & Encapsuladas',
+      servicePrice: 185.00,
+      duration: 150,
+      date: new Date().toISOString().split('T')[0],
+      time: '16:00',
+      status: 'Pendente',
+      createdAt: new Date().toISOString()
     },
     {
-      id: 'EP-2025-04',
+      id: 'EP-9024',
       clientName: 'Amanda Oliveira',
       clientPhone: '(61) 96666-4444',
-      serviceId: 'srv_esmalte_gel',
-      serviceName: 'Esmaltação em gel',
+      serviceId: 'srv_esmalte',
+      serviceName: 'Esmaltação em Gel Secagem UV/LED',
+      categoryId: 'cat_esmalte',
+      categoryName: 'Esmaltação em Gel',
       servicePrice: 70.00,
-      serviceDuration: 60,
-      date: today,
-      time: '13:00',
-      endTime: '14:00',
+      duration: 60,
+      date: new Date(Date.now() + 86400000).toISOString().split('T')[0],
+      time: '10:00',
       status: 'Confirmado',
-      shape: 'Amendoada',
-      notes: '',
-      createdAt: '2025-05-19T14:00:00Z'
-    },
-    {
-      id: 'EP-2025-05',
-      clientName: 'Fernanda Costa',
-      clientPhone: '(61) 95555-5555',
-      serviceId: 'srv_alongamento',
-      serviceName: 'Alongamento em gel',
-      servicePrice: 150.00,
-      serviceDuration: 120,
-      date: today,
-      time: '14:20',
-      endTime: '16:20',
-      status: 'Confirmado',
-      shape: 'Quadrada',
-      notes: '',
-      createdAt: '2025-05-20T08:00:00Z'
-    },
-    // Agendamentos futuros correspondentes à Tela 5 ("Meus agendamentos")
-    {
-      id: 'EP-2025-06',
-      clientName: 'Juliana Santos',
-      clientPhone: '(61) 99999-1111',
-      serviceId: 'srv_alongamento',
-      serviceName: 'Alongamento em gel',
-      servicePrice: 150.00,
-      serviceDuration: 120,
-      date: '2025-05-22',
-      time: '10:40',
-      endTime: '12:40',
-      status: 'Confirmado',
-      shape: 'Amendoada',
-      notes: '',
-      createdAt: '2025-05-15T12:00:00Z'
-    },
-    {
-      id: 'EP-2025-07',
-      clientName: 'Carla Mendes',
-      clientPhone: '(61) 98888-2222',
-      serviceId: 'srv_manutencao',
-      serviceName: 'Manutenção',
-      servicePrice: 70.00,
-      serviceDuration: 60,
-      date: '2025-05-26',
-      time: '14:20',
-      endTime: '15:20',
-      status: 'Confirmado',
-      shape: 'Quadrada',
-      notes: '',
-      createdAt: '2025-05-16T15:00:00Z'
-    },
-    {
-      id: 'EP-2025-08',
-      clientName: 'Juliana Santos',
-      clientPhone: '(61) 99999-1111',
-      serviceId: 'srv_banho',
-      serviceName: 'Banho de gel',
-      servicePrice: 80.00,
-      serviceDuration: 60,
-      date: '2025-06-05',
-      time: '09:00',
-      endTime: '10:00',
-      status: 'Confirmado',
-      shape: 'Amendoada',
-      notes: '',
-      createdAt: '2025-05-17T09:00:00Z'
+      createdAt: new Date().toISOString()
     }
-  ];
-}
+  ]
+};
 
-// OBJETO GLOBAL DA STORE
+// ==========================================
+// 4. MOTOR DA STORE GLOBAL (WINDOW.EPStore)
+// ==========================================
 window.EPStore = {
-  // Inicialização
-  init() {
-    if (!localStorage.getItem(STORAGE_KEYS.SETTINGS)) {
-      localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(SEED_SETTINGS));
+  async init() {
+    // 1. Configurações de Segurança e Tokens (hashes SHA-256)
+    if (!localStorage.getItem(STORAGE_KEYS.SECURITY_TOKENS)) {
+      const adminHash = await CryptoUtils.sha256(SEED_DATA.initialTokens.adminToken);
+      const masterHash = await CryptoUtils.sha256(SEED_DATA.initialTokens.masterToken);
+
+      const secData = {
+        adminTokenHash: adminHash,
+        masterTokenHash: masterHash,
+        adminTokenActive: SEED_DATA.initialTokens.adminToken,
+        masterTokenActive: SEED_DATA.initialTokens.masterToken,
+        lastRotatedAt: new Date().toISOString()
+      };
+      localStorage.setItem(STORAGE_KEYS.SECURITY_TOKENS, JSON.stringify(secData));
     }
+
+    // 2. Auditoria e Logs
+    if (!localStorage.getItem(STORAGE_KEYS.SECURITY_LOGS)) {
+      localStorage.setItem(STORAGE_KEYS.SECURITY_LOGS, JSON.stringify([
+        {
+          id: 'log_init',
+          timestamp: new Date().toISOString(),
+          route: '/master',
+          device: CryptoUtils.detectDevice(),
+          sessionHash: 'ses_master_init',
+          status: 'AUTORIZADO',
+          notes: 'Inicialização segura dos tokens criptográficos'
+        }
+      ]));
+    }
+
+    // 3. Analytics e Funil de Tráfego
+    if (!localStorage.getItem(STORAGE_KEYS.TRAFFIC_ANALYTICS)) {
+      const hoursMap = {};
+      for (let h = 0; h < 24; h++) hoursMap[h] = 0;
+      // Picos típicos de manicure: 10h, 14h, 16h, 18h, 20h
+      hoursMap[9] = 14; hoursMap[10] = 32; hoursMap[11] = 22;
+      hoursMap[14] = 45; hoursMap[15] = 38; hoursMap[16] = 52;
+      hoursMap[18] = 68; hoursMap[19] = 84; hoursMap[20] = 95;
+
+      const weekdaysMap = { 0: 25, 1: 42, 2: 58, 3: 74, 4: 98, 5: 120, 6: 110 };
+
+      localStorage.setItem(STORAGE_KEYS.TRAFFIC_ANALYTICS, JSON.stringify({
+        hourlyVisits: hoursMap,
+        weekdayVisits: weekdaysMap,
+        funnel: {
+          linkViews: 450,
+          storiesViews: 285,
+          bookingStarts: 130,
+          bookingCompletions: 48
+        }
+      }));
+    }
+
+    // 4. White-Label & Tema
+    if (!localStorage.getItem(STORAGE_KEYS.THEME_CONFIG)) {
+      localStorage.setItem(STORAGE_KEYS.THEME_CONFIG, JSON.stringify(SEED_DATA.theme));
+    }
+
+    // 5. Portfólio Vivo (Carrossel Topo)
+    if (!localStorage.getItem(STORAGE_KEYS.CAROUSEL_ITEMS)) {
+      localStorage.setItem(STORAGE_KEYS.CAROUSEL_ITEMS, JSON.stringify(SEED_DATA.carouselItems));
+    }
+
+    // 6. Categorias
+    if (!localStorage.getItem(STORAGE_KEYS.CATEGORIES)) {
+      localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(SEED_DATA.categories));
+    }
+
+    // 7. Serviços com Stories
     if (!localStorage.getItem(STORAGE_KEYS.SERVICES)) {
-      localStorage.setItem(STORAGE_KEYS.SERVICES, JSON.stringify(SEED_SERVICES));
+      localStorage.setItem(STORAGE_KEYS.SERVICES, JSON.stringify(SEED_DATA.services));
     }
-    if (!localStorage.getItem(STORAGE_KEYS.MEDIA)) {
-      localStorage.setItem(STORAGE_KEYS.MEDIA, JSON.stringify(SEED_MEDIA));
-    }
-    if (!localStorage.getItem(STORAGE_KEYS.CUSTOMERS)) {
-      localStorage.setItem(STORAGE_KEYS.CUSTOMERS, JSON.stringify(SEED_CUSTOMERS));
-    }
+
+    // 8. Agendamentos
     if (!localStorage.getItem(STORAGE_KEYS.APPOINTMENTS)) {
-      localStorage.setItem(STORAGE_KEYS.APPOINTMENTS, JSON.stringify(generateInitialAppointments()));
+      localStorage.setItem(STORAGE_KEYS.APPOINTMENTS, JSON.stringify(SEED_DATA.initialAppointments));
     }
-    if (!localStorage.getItem(STORAGE_KEYS.EVENTS)) {
-      localStorage.setItem(STORAGE_KEYS.EVENTS, JSON.stringify([]));
+
+    // 9. Configurações do Salão
+    if (!localStorage.getItem(STORAGE_KEYS.SETTINGS)) {
+      localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(SEED_DATA.salonSettings));
+    }
+
+    // Aplica o tema visual no documento em tempo real
+    this.applyThemeToDocument();
+  },
+
+  // ----------------------------------------------------
+  // GESTÃO DE TOKENS & VALIDAÇÃO CRIPTOGRÁFICA (SHA-256)
+  // ----------------------------------------------------
+  async validateToken(tokenProvided, role = 'admin') {
+    if (!tokenProvided) return false;
+    const secTokens = JSON.parse(localStorage.getItem(STORAGE_KEYS.SECURITY_TOKENS) || '{}');
+    const providedHash = await CryptoUtils.sha256(tokenProvided.trim());
+    
+    let isAuthorized = false;
+    let expectedHash = '';
+
+    if (role === 'admin') {
+      expectedHash = secTokens.adminTokenHash;
+      isAuthorized = (providedHash === expectedHash);
+    } else if (role === 'master') {
+      expectedHash = secTokens.masterTokenHash;
+      isAuthorized = (providedHash === expectedHash);
+    }
+
+    // Log de auditoria imediato
+    await this.logSecurityEvent({
+      route: role === 'master' ? '/master' : '/admin',
+      tokenProvided: tokenProvided.slice(0, 6) + '***',
+      status: isAuthorized ? 'AUTORIZADO' : 'BLOQUEADO: Token Inválido',
+      notes: isAuthorized ? `Sessão autenticada com sucesso como ${role}` : `Tentativa negada de acesso a ${role}`
+    });
+
+    return isAuthorized;
+  },
+
+  async logSecurityEvent(eventData) {
+    const logs = JSON.parse(localStorage.getItem(STORAGE_KEYS.SECURITY_LOGS) || '[]');
+    const sessionHash = await CryptoUtils.getAnonymousSessionHash();
+
+    const newLog = {
+      id: 'log_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+      timestamp: new Date().toISOString(),
+      route: eventData.route,
+      device: CryptoUtils.detectDevice(),
+      sessionHash: sessionHash,
+      status: eventData.status,
+      notes: eventData.notes || ''
+    };
+
+    logs.unshift(newLog);
+    // Limite dos últimos 200 logs
+    if (logs.length > 200) logs.pop();
+    localStorage.setItem(STORAGE_KEYS.SECURITY_LOGS, JSON.stringify(logs));
+  },
+
+  getSecurityLogs() {
+    return JSON.parse(localStorage.getItem(STORAGE_KEYS.SECURITY_LOGS) || '[]');
+  },
+
+  // Rotação Criptográfica de Token da Administradora
+  async rotateAdminToken() {
+    const newToken = CryptoUtils.generateSecureToken('adm');
+    const newHash = await CryptoUtils.sha256(newToken);
+    const secTokens = JSON.parse(localStorage.getItem(STORAGE_KEYS.SECURITY_TOKENS) || '{}');
+
+    secTokens.adminTokenActive = newToken;
+    secTokens.adminTokenHash = newHash;
+    secTokens.lastRotatedAt = new Date().toISOString();
+
+    localStorage.setItem(STORAGE_KEYS.SECURITY_TOKENS, JSON.stringify(secTokens));
+
+    await this.logSecurityEvent({
+      route: '/master',
+      status: 'AUTORIZADO',
+      notes: 'ROTAÇÃO: Token da Administradora rotacionado com sucesso'
+    });
+
+    const fullUrl = `${window.location.origin}${window.location.pathname.replace(/[^\/]+$/, '')}admin.html?token=${newToken}`;
+    return { token: newToken, fullUrl: fullUrl };
+  },
+
+  // Rotação Criptográfica de Token Mestre (Dono)
+  async rotateMasterToken() {
+    const newToken = CryptoUtils.generateSecureToken('mst');
+    const newHash = await CryptoUtils.sha256(newToken);
+    const secTokens = JSON.parse(localStorage.getItem(STORAGE_KEYS.SECURITY_TOKENS) || '{}');
+
+    secTokens.masterTokenActive = newToken;
+    secTokens.masterTokenHash = newHash;
+    secTokens.lastRotatedAt = new Date().toISOString();
+
+    localStorage.setItem(STORAGE_KEYS.SECURITY_TOKENS, JSON.stringify(secTokens));
+
+    await this.logSecurityEvent({
+      route: '/master',
+      status: 'AUTORIZADO',
+      notes: 'ROTAÇÃO: Token Mestre do Proprietário rotacionado com sucesso'
+    });
+
+    const fullUrl = `${window.location.origin}${window.location.pathname.replace(/[^\/]+$/, '')}master.html?token=${newToken}`;
+    return { token: newToken, fullUrl: fullUrl };
+  },
+
+  getActiveTokensUrls() {
+    const sec = JSON.parse(localStorage.getItem(STORAGE_KEYS.SECURITY_TOKENS) || '{}');
+    const basePath = window.location.origin + window.location.pathname.replace(/[^\/]+$/, '');
+    return {
+      adminUrl: `${basePath}admin.html?token=${sec.adminTokenActive || SEED_DATA.initialTokens.adminToken}`,
+      masterUrl: `${basePath}master.html?token=${sec.masterTokenActive || SEED_DATA.initialTokens.masterToken}`,
+      adminToken: sec.adminTokenActive || SEED_DATA.initialTokens.adminToken,
+      masterToken: sec.masterTokenActive || SEED_DATA.initialTokens.masterToken,
+      lastRotatedAt: sec.lastRotatedAt
+    };
+  },
+
+  // ----------------------------------------------------
+  // ANÁLISE DE TRÁFEGO, PICOS E FUNIL DE CONVERSÃO
+  // ----------------------------------------------------
+  recordPageVisit() {
+    const analytics = JSON.parse(localStorage.getItem(STORAGE_KEYS.TRAFFIC_ANALYTICS) || '{}');
+    const now = new Date();
+    const hour = now.getHours();
+    const day = now.getDay();
+
+    if (!analytics.hourlyVisits) analytics.hourlyVisits = {};
+    if (!analytics.weekdayVisits) analytics.weekdayVisits = {};
+    if (!analytics.funnel) analytics.funnel = { linkViews: 0, storiesViews: 0, bookingStarts: 0, bookingCompletions: 0 };
+
+    analytics.hourlyVisits[hour] = (analytics.hourlyVisits[hour] || 0) + 1;
+    analytics.weekdayVisits[day] = (analytics.weekdayVisits[day] || 0) + 1;
+    analytics.funnel.linkViews = (analytics.funnel.linkViews || 0) + 1;
+
+    localStorage.setItem(STORAGE_KEYS.TRAFFIC_ANALYTICS, JSON.stringify(analytics));
+  },
+
+  recordStoriesView() {
+    const analytics = JSON.parse(localStorage.getItem(STORAGE_KEYS.TRAFFIC_ANALYTICS) || '{}');
+    if (analytics.funnel) {
+      analytics.funnel.storiesViews = (analytics.funnel.storiesViews || 0) + 1;
+      localStorage.setItem(STORAGE_KEYS.TRAFFIC_ANALYTICS, JSON.stringify(analytics));
     }
   },
 
-  // GETTERS
-  getSettings() {
-    return JSON.parse(localStorage.getItem(STORAGE_KEYS.SETTINGS) || '{}');
+  recordBookingStart() {
+    const analytics = JSON.parse(localStorage.getItem(STORAGE_KEYS.TRAFFIC_ANALYTICS) || '{}');
+    if (analytics.funnel) {
+      analytics.funnel.bookingStarts = (analytics.funnel.bookingStarts || 0) + 1;
+      localStorage.setItem(STORAGE_KEYS.TRAFFIC_ANALYTICS, JSON.stringify(analytics));
+    }
   },
 
-  saveSettings(newSettings) {
-    localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(newSettings));
+  recordBookingCompletion() {
+    const analytics = JSON.parse(localStorage.getItem(STORAGE_KEYS.TRAFFIC_ANALYTICS) || '{}');
+    if (analytics.funnel) {
+      analytics.funnel.bookingCompletions = (analytics.funnel.bookingCompletions || 0) + 1;
+      localStorage.setItem(STORAGE_KEYS.TRAFFIC_ANALYTICS, JSON.stringify(analytics));
+    }
   },
 
-  getServices(onlyActive = true) {
+  getTrafficAnalytics() {
+    return JSON.parse(localStorage.getItem(STORAGE_KEYS.TRAFFIC_ANALYTICS) || '{}');
+  },
+
+  // ----------------------------------------------------
+  // WHITE-LABEL: CUSTOMIZAÇÃO COMPLETA DA TELA DO CLIENTE
+  // ----------------------------------------------------
+  getTheme() {
+    return JSON.parse(localStorage.getItem(STORAGE_KEYS.THEME_CONFIG) || JSON.stringify(SEED_DATA.theme));
+  },
+
+  saveTheme(themeUpdates) {
+    const current = this.getTheme();
+    const updated = { ...current, ...themeUpdates };
+    localStorage.setItem(STORAGE_KEYS.THEME_CONFIG, JSON.stringify(updated));
+    this.applyThemeToDocument();
+    return updated;
+  },
+
+  applyThemeToDocument() {
+    const theme = this.getTheme();
+    const root = document.documentElement;
+
+    root.style.setProperty('--color-rose', theme.primaryColor || '#E9A3B5');
+    root.style.setProperty('--color-pink-accent', theme.secondaryColor || '#D83F79');
+    root.style.setProperty('--color-pink-btn', theme.primaryColor || '#E9A3B5');
+    root.style.setProperty('--color-creme', theme.isDarkMode ? '#171719' : (theme.bgColor || '#F8F2ED'));
+    root.style.setProperty('--color-branco', theme.isDarkMode ? '#222022' : (theme.cardBgColor || '#FFFFFF'));
+    root.style.setProperty('--color-preto', theme.isDarkMode ? '#FFFFFF' : (theme.textColor || '#171719'));
+    root.style.setProperty('--font-serif', theme.fontHeading || "'Playfair Display', serif");
+    root.style.setProperty('--font-sans', theme.fontBody || "'Plus Jakarta Sans', sans-serif");
+
+    if (theme.borderStyle === 'sharp') {
+      root.style.setProperty('--radius-sm', '0px');
+      root.style.setProperty('--radius-md', '2px');
+      root.style.setProperty('--radius-lg', '4px');
+      root.style.setProperty('--radius-pill', '4px');
+    } else if (theme.borderStyle === 'pill') {
+      root.style.setProperty('--radius-sm', '16px');
+      root.style.setProperty('--radius-md', '24px');
+      root.style.setProperty('--radius-lg', '32px');
+      root.style.setProperty('--radius-pill', '9999px');
+    } else {
+      root.style.setProperty('--radius-sm', '10px');
+      root.style.setProperty('--radius-md', '16px');
+      root.style.setProperty('--radius-lg', '24px');
+      root.style.setProperty('--radius-pill', '9999px');
+    }
+  },
+
+  getSalonSettings() {
+    return JSON.parse(localStorage.getItem(STORAGE_KEYS.SETTINGS) || JSON.stringify(SEED_DATA.salonSettings));
+  },
+
+  saveSalonSettings(newSettings) {
+    const current = this.getSalonSettings();
+    const updated = { ...current, ...newSettings };
+    localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(updated));
+    return updated;
+  },
+
+  // ----------------------------------------------------
+  // CARROSSEL DO TOPO (PORTFÓLIO VIVO)
+  // ----------------------------------------------------
+  getCarouselItems() {
+    return JSON.parse(localStorage.getItem(STORAGE_KEYS.CAROUSEL_ITEMS) || '[]');
+  },
+
+  saveCarouselItem(item) {
+    const list = this.getCarouselItems();
+    if (!item.id) item.id = 'car_' + Date.now();
+    const idx = list.findIndex(i => i.id === item.id);
+    if (idx >= 0) {
+      list[idx] = { ...list[idx], ...item };
+    } else {
+      list.push(item);
+    }
+    localStorage.setItem(STORAGE_KEYS.CAROUSEL_ITEMS, JSON.stringify(list));
+    return list;
+  },
+
+  deleteCarouselItem(id) {
+    let list = this.getCarouselItems();
+    list = list.filter(i => i.id !== id);
+    localStorage.setItem(STORAGE_KEYS.CAROUSEL_ITEMS, JSON.stringify(list));
+    return list;
+  },
+
+  // ----------------------------------------------------
+  // CATEGORIAS & SERVIÇOS COM STORIES
+  // ----------------------------------------------------
+  getCategories() {
+    return JSON.parse(localStorage.getItem(STORAGE_KEYS.CATEGORIES) || '[]');
+  },
+
+  saveCategory(cat) {
+    const list = this.getCategories();
+    if (!cat.id) cat.id = 'cat_' + Date.now();
+    const idx = list.findIndex(c => c.id === cat.id);
+    if (idx >= 0) {
+      list[idx] = { ...list[idx], ...cat };
+    } else {
+      list.push(cat);
+    }
+    localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(list));
+    return list;
+  },
+
+  getServices(onlyActive = false) {
     const list = JSON.parse(localStorage.getItem(STORAGE_KEYS.SERVICES) || '[]');
     return onlyActive ? list.filter(s => s.active) : list;
   },
@@ -370,278 +846,266 @@ window.EPStore = {
 
   saveService(serviceData) {
     const list = this.getServices(false);
-    const index = list.findIndex(s => s.id === serviceData.id);
-    if (index >= 0) {
-      list[index] = { ...list[index], ...serviceData };
+    if (!serviceData.id) serviceData.id = 'srv_' + Date.now();
+    const idx = list.findIndex(s => s.id === serviceData.id);
+    if (idx >= 0) {
+      list[idx] = { ...list[idx], ...serviceData };
     } else {
       list.push(serviceData);
     }
     localStorage.setItem(STORAGE_KEYS.SERVICES, JSON.stringify(list));
+    return list;
   },
 
   deleteService(id) {
     let list = this.getServices(false);
     list = list.filter(s => s.id !== id);
     localStorage.setItem(STORAGE_KEYS.SERVICES, JSON.stringify(list));
+    return list;
   },
 
-  getMedia(onlyPublished = true) {
-    const list = JSON.parse(localStorage.getItem(STORAGE_KEYS.MEDIA) || '[]');
-    return onlyPublished ? list.filter(m => m.status === 'published') : list;
-  },
-
-  saveMedia(mediaItem) {
-    const list = this.getMedia(false);
-    const index = list.findIndex(m => m.id === mediaItem.id);
-    if (index >= 0) {
-      list[index] = { ...list[index], ...mediaItem };
-    } else {
-      list.push(mediaItem);
-    }
-    localStorage.setItem(STORAGE_KEYS.MEDIA, JSON.stringify(list));
-  },
-
-  deleteMedia(id) {
-    let list = this.getMedia(false);
-    list = list.filter(m => m.id !== id);
-    localStorage.setItem(STORAGE_KEYS.MEDIA, JSON.stringify(list));
-  },
-
-  getCustomers() {
-    return JSON.parse(localStorage.getItem(STORAGE_KEYS.CUSTOMERS) || '[]');
-  },
-
-  saveCustomer(cust) {
-    const list = this.getCustomers();
-    const index = list.findIndex(c => c.phone.replace(/\D/g, '') === cust.phone.replace(/\D/g, ''));
-    if (index >= 0) {
-      list[index] = { ...list[index], ...cust };
-    } else {
-      list.unshift(cust);
-    }
-    localStorage.setItem(STORAGE_KEYS.CUSTOMERS, JSON.stringify(list));
-  },
-
+  // ----------------------------------------------------
+  // GESTÃO DE AGENDAMENTOS (100% LGPD - MINIMIZAÇÃO DE DADOS)
+  // ----------------------------------------------------
   getAppointments() {
     return JSON.parse(localStorage.getItem(STORAGE_KEYS.APPOINTMENTS) || '[]');
   },
 
-  getAppointmentById(code) {
-    const list = this.getAppointments();
-    return list.find(a => a.id.toLowerCase() === code.toLowerCase()) || null;
-  },
+  // Retorna slots disponíveis sem double-booking
+  getAvailableSlots(dateStr, durationMinutes = 60) {
+    const appointments = this.getAppointments();
+    const dayAppointments = appointments.filter(a => a.date === dateStr && a.status !== 'Cancelado');
 
-  getAppointmentsByPhone(phone) {
-    const clean = phone.replace(/\D/g, '');
-    const list = this.getAppointments();
-    return list.filter(a => a.clientPhone.replace(/\D/g, '') === clean);
-  },
+    // Horários padrão de atendimento
+    const defaultSlots = ['08:00', '09:20', '10:40', '13:00', '14:20', '16:00', '17:30', '19:00'];
+    const buffer = 15; // minutos
 
-  // PREVENÇÃO ATÔMICA DE CONFLITOS E CÁLCULO DE DISPONIBILIDADE
-  // Converte "HH:MM" em minutos desde as 00:00
-  timeToMinutes(timeStr) {
-    const [h, m] = timeStr.split(':').map(Number);
-    return h * 60 + m;
-  },
+    const toMin = (t) => {
+      const [h, m] = t.split(':').map(Number);
+      return h * 60 + m;
+    };
 
-  minutesToTime(mins) {
-    const h = Math.floor(mins / 60).toString().padStart(2, '0');
-    const m = (mins % 60).toString().padStart(2, '0');
-    return `${h}:${m}`;
-  },
-
-  // Retorna slots disponíveis para um determinado serviço em uma data específica
-  getAvailableSlots(dateStr, serviceDuration) {
-    const settings = this.getSettings();
-    const [year, month, day] = dateStr.split('-').map(Number);
-    const dateObj = new Date(year, month - 1, day);
-    const dayOfWeek = dateObj.getDay(); // 0 = Domingo, 1 = Segunda, etc.
-
-    const dayConfig = settings.businessHours[dayOfWeek];
-    if (!dayConfig || !dayConfig.active) {
-      return []; // Salão fechado neste dia
-    }
-
-    const openMin = this.timeToMinutes(dayConfig.open);
-    const closeMin = this.timeToMinutes(dayConfig.close);
-    const lunchStart = this.timeToMinutes(dayConfig.lunchStart);
-    const lunchEnd = this.timeToMinutes(dayConfig.lunchEnd);
-    const buffer = settings.bufferMinutes || 15;
-
-    // Buscar agendamentos existentes neste dia que não estejam cancelados
-    const allAppointments = this.getAppointments();
-    const dayAppointments = allAppointments.filter(a => 
-      a.date === dateStr && a.status !== 'Cancelado pela cliente' && a.status !== 'Cancelado pela profissional'
-    );
-
-    // Mapear intervalos ocupados: [{ start, end }]
-    const busyIntervals = dayAppointments.map(a => {
-      const start = this.timeToMinutes(a.time);
-      const end = start + (a.serviceDuration || 60) + buffer;
+    const busy = dayAppointments.map(a => {
+      const start = toMin(a.time);
+      const end = start + (a.duration || 60) + buffer;
       return { start, end };
     });
 
-    // Adicionar intervalo de almoço aos horários ocupados
-    if (lunchStart < lunchEnd) {
-      busyIntervals.push({ start: lunchStart, end: lunchEnd });
-    }
+    return defaultSlots.filter(slot => {
+      const sStart = toMin(slot);
+      const sEnd = sStart + durationMinutes;
 
-    // Gerar grade de slots (ex: a cada 20-30 min)
-    const slotStep = 20; // passos de 20 minutos para busca precisa
-    const candidateSlots = ['08:00', '09:20', '10:40', '13:00', '14:20', '16:00', '17:20'];
-    const available = [];
-
-    // Checar cada candidato da imagem
-    candidateSlots.forEach(slotTime => {
-      const slotStart = this.timeToMinutes(slotTime);
-      const slotEnd = slotStart + serviceDuration;
-
-      // Não pode começar antes da abertura nem terminar após o fechamento
-      if (slotStart < openMin || slotEnd > closeMin) return;
-
-      // Checar colisão com qualquer intervalo ocupado
-      const hasConflict = busyIntervals.some(busy => {
-        // Sobreposição: (slotStart < busy.end) && (slotEnd > busy.start)
-        return slotStart < busy.end && slotEnd > busy.start;
-      });
-
-      if (!hasConflict) {
-        available.push(slotTime);
-      }
+      // Colisão
+      const hasConflict = busy.some(b => sStart < b.end && sEnd > b.start);
+      return !hasConflict;
     });
-
-    return available;
   },
 
-  // RESERVA ATÔMICA SEGURA
-  createAppointment(bookingData) {
-    const settings = this.getSettings();
-    const service = this.getServiceById(bookingData.serviceId);
-    if (!service || !service.active) {
-      throw new Error('O serviço selecionado não está ativo para agendamento.');
+  // Criação de Agendamento Enxuto (Apenas Nome + Celular)
+  async createAppointment(bookingInput) {
+    const service = this.getServiceById(bookingInput.serviceId);
+    if (!service) throw new Error('Serviço não encontrado');
+
+    // Revalidação em tempo real
+    const available = this.getAvailableSlots(bookingInput.date, service.duration);
+    if (!available.includes(bookingInput.time)) {
+      throw new Error('Este horário acabou de ser reservado. Por favor, escolha outro.');
     }
 
-    // Re-validar conflitos em tempo real
-    const availableSlots = this.getAvailableSlots(bookingData.date, service.duration);
-    if (!availableSlots.includes(bookingData.time)) {
-      throw new Error('Desculpe! Este horário acabou de ser ocupado ou não está mais disponível. Por favor, escolha outro.');
-    }
+    const categories = this.getCategories();
+    const cat = categories.find(c => c.id === service.categoryId);
 
-    const startMin = this.timeToMinutes(bookingData.time);
-    const endMin = startMin + service.duration;
-    const endTime = this.minutesToTime(endMin);
-
-    const initialStatus = settings.bookingMode === 'auto' ? 'Confirmado' : 'Aguardando confirmação';
-    const uniqueCode = 'EP-' + new Date().getFullYear() + '-' + Math.floor(1000 + Math.random() * 9000);
-
-    const newAppointment = {
-      id: uniqueCode,
-      clientName: bookingData.clientName.trim(),
-      clientPhone: bookingData.clientPhone.trim(),
+    const newApp = {
+      id: 'EP-' + Math.floor(1000 + Math.random() * 9000),
+      clientName: bookingInput.clientName.trim(),
+      clientPhone: bookingInput.clientPhone.trim(),
       serviceId: service.id,
       serviceName: service.name,
+      categoryId: service.categoryId,
+      categoryName: cat ? cat.name : 'Geral',
       servicePrice: service.price,
-      serviceDuration: service.duration,
-      date: bookingData.date,
-      time: bookingData.time,
-      endTime: endTime,
-      status: initialStatus,
-      shape: bookingData.shape || 'Amendoada',
-      notes: bookingData.notes || '',
+      duration: service.duration,
+      date: bookingInput.date,
+      time: bookingInput.time,
+      status: 'Pendente',
       createdAt: new Date().toISOString()
     };
 
-    // Gravar agendamento
-    const appointments = this.getAppointments();
-    appointments.unshift(newAppointment);
-    localStorage.setItem(STORAGE_KEYS.APPOINTMENTS, JSON.stringify(appointments));
-
-    // Atualizar ou criar cliente na base
-    this.saveCustomer({
-      id: 'c_' + Date.now(),
-      name: newAppointment.clientName,
-      phone: newAppointment.clientPhone,
-      totalAppointments: (this.getAppointmentsByPhone(newAppointment.clientPhone).length),
-      totalSpent: appointments
-        .filter(a => a.clientPhone === newAppointment.clientPhone && a.status === 'Confirmado')
-        .reduce((sum, a) => sum + a.servicePrice, 0),
-      notes: `Último agendamento em ${newAppointment.date}`,
-      createdAt: new Date().toISOString()
-    });
-
-    // Registrar evento de auditoria
-    this.logEvent({
-      appointmentId: newAppointment.id,
-      previousStatus: null,
-      newStatus: initialStatus,
-      changedBy: 'Cliente (Agendamento Online)',
-      timestamp: new Date().toISOString(),
-      reason: 'Solicitação inicial pelo aplicativo'
-    });
-
-    return newAppointment;
-  },
-
-  // MUDANÇA DE STATUS COM HISTÓRICO
-  updateAppointmentStatus(id, newStatus, changedBy = 'Administradora', reason = '') {
     const list = this.getAppointments();
-    const index = list.findIndex(a => a.id === id);
-    if (index === -1) throw new Error('Agendamento não encontrado.');
-
-    const previousStatus = list[index].status;
-    list[index].status = newStatus;
-    list[index].updatedAt = new Date().toISOString();
-
+    list.unshift(newApp);
     localStorage.setItem(STORAGE_KEYS.APPOINTMENTS, JSON.stringify(list));
 
-    this.logEvent({
-      appointmentId: id,
-      previousStatus: previousStatus,
-      newStatus: newStatus,
-      changedBy: changedBy,
-      timestamp: new Date().toISOString(),
-      reason: reason
-    });
+    // Registra métrica de conversão
+    this.recordBookingCompletion();
 
-    return list[index];
+    // Dispara alerta sonoro e notificação push instantânea para a administradora
+    AudioAlertEngine.triggerNativePush(
+      '💅 Novo Agendamento Recebido!',
+      `${newApp.clientName} agendou ${newApp.serviceName} para ${newApp.date} às ${newApp.time}h`
+    );
+
+    return newApp;
   },
 
-  logEvent(event) {
-    const events = JSON.parse(localStorage.getItem(STORAGE_KEYS.EVENTS) || '[]');
-    events.unshift(event);
-    localStorage.setItem(STORAGE_KEYS.EVENTS, JSON.stringify(events));
+  updateAppointmentStatus(id, newStatus) {
+    const list = this.getAppointments();
+    const idx = list.findIndex(a => a.id === id);
+    if (idx === -1) throw new Error('Agendamento não encontrado');
+
+    list[idx].status = newStatus;
+    list[idx].updatedAt = new Date().toISOString();
+    localStorage.setItem(STORAGE_KEYS.APPOINTMENTS, JSON.stringify(list));
+
+    // Se cancelado ou confirmado, emite alerta
+    if (newStatus === 'Cancelado') {
+      AudioAlertEngine.triggerNativePush(
+        '⚠️ Horário Liberado!',
+        `O atendimento de ${list[idx].clientName} foi cancelado e a vaga está aberta.`
+      );
+    }
+    return list[idx];
   },
 
-  // INDICADORES FINANCEIROS REAIS
-  getFinancialSummary(targetMonthYear = '2025-05') {
+  // ----------------------------------------------------
+  // INTEGRAÇÃO COM AGENDAS (GOOGLE CALENDAR & .ICS)
+  // ----------------------------------------------------
+  getGoogleCalendarUrl(appointment) {
+    const [year, month, day] = appointment.date.split('-');
+    const [hour, min] = appointment.time.split(':');
+    const startObj = new Date(year, month - 1, day, hour, min);
+    const endObj = new Date(startObj.getTime() + (appointment.duration || 60) * 60000);
+
+    const formatGDate = (d) => d.toISOString().replace(/-|:|\.\d\d\d/g, '');
+
+    const title = encodeURIComponent(`Manicure: ${appointment.serviceName} - Estefany Paiva Nails`);
+    const details = encodeURIComponent(`Atendimento confirmado para ${appointment.clientName}.\nServiço: ${appointment.serviceName}\nValor: R$ ${appointment.servicePrice.toFixed(2)}\nLocal: Brasília - DF`);
+    const location = encodeURIComponent('Estefany Paiva Nails - Brasília, DF');
+
+    return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${formatGDate(startObj)}/${formatGDate(endObj)}&details=${details}&location=${location}`;
+  },
+
+  downloadIcsFile(appointment) {
+    const [year, month, day] = appointment.date.split('-');
+    const [hour, min] = appointment.time.split(':');
+    const startObj = new Date(year, month - 1, day, hour, min);
+    const endObj = new Date(startObj.getTime() + (appointment.duration || 60) * 60000);
+
+    const formatIcs = (d) => d.toISOString().replace(/-|:|\.\d\d\d/g, '');
+
+    const icsContent = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//Estefany Paiva Nails//Agendamento//PT-BR',
+      'CALSCALE:GREGORIAN',
+      'METHOD:PUBLISH',
+      'BEGIN:VEVENT',
+      `UID:${appointment.id}@estefanypaivanails.com`,
+      `DTSTAMP:${formatIcs(new Date())}`,
+      `DTSTART:${formatIcs(startObj)}`,
+      `DTEND:${formatIcs(endObj)}`,
+      `SUMMARY:Manicure: ${appointment.serviceName} - Estefany Paiva`,
+      `DESCRIPTION:Atendimento de ${appointment.serviceName} para ${appointment.clientName}. Código: ${appointment.id}`,
+      'LOCATION:Brasília - DF',
+      'STATUS:CONFIRMED',
+      'END:VEVENT',
+      'END:VCALENDAR'
+    ].join('\r\n');
+
+    const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `agendamento_${appointment.id}.ics`;
+    link.click();
+  },
+
+  // ----------------------------------------------------
+  // RELATÓRIOS E ANÁLISE POR CATEGORIA
+  // ----------------------------------------------------
+  getManagementReports() {
     const appointments = this.getAppointments();
-    let totalRevenue = 0;
-    let inProgressRevenue = 0;
-    const serviceBreakdown = {};
+    let totalRevenueConfirmed = 0;
+    let totalRevenueForecasted = 0;
+    let completedCount = 0;
+    let cancelledCount = 0;
+    const categoryStats = {};
 
     appointments.forEach(a => {
-      // Filtrar pelo mês de referência (se fornecido)
-      const isTargetMonth = !targetMonthYear || a.date.startsWith(targetMonthYear);
-      
-      if (a.status !== 'Cancelado pela cliente' && a.status !== 'Cancelado pela profissional') {
-        if (isTargetMonth) {
-          totalRevenue += a.servicePrice;
-          if (a.status === 'Confirmado' || a.status === 'Aguardando confirmação') {
-            inProgressRevenue += a.servicePrice;
-          }
-          serviceBreakdown[a.serviceName] = (serviceBreakdown[a.serviceName] || 0) + a.servicePrice;
+      const cat = a.categoryName || 'Outros';
+      if (!categoryStats[cat]) {
+        categoryStats[cat] = { count: 0, revenue: 0 };
+      }
+
+      if (a.status !== 'Cancelado') {
+        totalRevenueForecasted += a.servicePrice;
+        categoryStats[cat].count += 1;
+        categoryStats[cat].revenue += a.servicePrice;
+
+        if (a.status === 'Confirmado' || a.status === 'Concluído') {
+          totalRevenueConfirmed += a.servicePrice;
         }
+        if (a.status === 'Concluído') completedCount += 1;
+      } else {
+        cancelledCount += 1;
       }
     });
 
+    const activeCount = appointments.filter(a => a.status !== 'Cancelado').length;
+    const ticketMedio = activeCount > 0 ? (totalRevenueForecasted / activeCount) : 0;
+    const totalRequests = appointments.length;
+    const attendanceRate = totalRequests > 0 ? (((totalRequests - cancelledCount) / totalRequests) * 100).toFixed(0) : 100;
+
     return {
-      totalRevenue: totalRevenue || 3480.00,
-      inProgressRevenue: inProgressRevenue || 640.00,
-      previousMonthRevenue: 12540.00,
-      breakdown: serviceBreakdown
+      totalAppointments: activeCount,
+      revenueConfirmed: totalRevenueConfirmed,
+      revenueForecasted: totalRevenueForecasted,
+      ticketMedio: ticketMedio,
+      attendanceRate: attendanceRate,
+      categoryStats: categoryStats
     };
+  },
+
+  // ----------------------------------------------------
+  // CONFORMIDADE LGPD: EXPURGO & ANONIMIZAÇÃO AUTOMÁTICA
+  // ----------------------------------------------------
+  purgeExpiredClientData() {
+    const settings = this.getSalonSettings();
+    const days = settings.retentionDays || 90;
+    const cutoffDate = new Date(Date.now() - (days * 24 * 60 * 60 * 1000));
+
+    const appointments = this.getAppointments();
+    let purgedCount = 0;
+
+    appointments.forEach(a => {
+      const appDate = new Date(a.date);
+      if (appDate < cutoffDate && a.clientPhone && !a.clientPhone.includes('*****')) {
+        // Anonimiza o telefone conforme Art. 6º da LGPD
+        a.clientPhone = a.clientPhone.slice(0, 5) + ' *****-' + a.clientPhone.slice(-4);
+        a.isAnonymized = true;
+        purgedCount++;
+      }
+    });
+
+    if (purgedCount > 0) {
+      localStorage.setItem(STORAGE_KEYS.APPOINTMENTS, JSON.stringify(appointments));
+      this.logSecurityEvent({
+        route: '/master',
+        status: 'AUTORIZADO',
+        notes: `LGPD: ${purgedCount} contatos de clientes antigos foram anonimizados conforme prazo de retenção de ${days} dias`
+      });
+    }
+
+    return purgedCount;
+  },
+
+  // Auxiliar para testar alerta sonoro pelo painel
+  testAudioChime() {
+    AudioAlertEngine.playNotificationChime();
+    AudioAlertEngine.triggerNativePush(
+      '🔔 Teste de Notificação & Som',
+      'O som e as notificações push estão funcionando perfeitamente no seu celular!'
+    );
   }
 };
 
-// Auto-inicializar
+// Inicialização automática
 window.EPStore.init();

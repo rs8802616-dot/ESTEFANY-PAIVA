@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portal Mestre (Owner) | Governança & Segurança</title>
+  
+  <meta name="theme-color" content="#111011">
+  <link rel="icon" type="image/jpeg" href="assets/images/perfil-julia.jpg">
+
+  <!-- Google Fonts: Editorial Serif + Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Estilos do Admin & Master Expansivo -->
+  <link rel="stylesheet" href="assets/css/admin.css">
+  <style>
+    .master-crown-icon {
+      color: #EAB308;
+      font-size: 1.4rem;
+      margin-right: 8px;
+    }
+  </style>
+</head>
+<body style="background:#111011;">
+
+  <!-- ========================================================
+       TELA DE BLOQUEIO POR TOKEN CRIPTOGRÁFICO MESTRE (PRD ITEM 2)
+       ======================================================== -->
+  <div class="screen-token-lock" id="screenMasterTokenLock">
+    <div class="token-lock-card" style="border-color: rgba(234, 179, 8, 0.35);">
+      <div class="token-lock-icon" style="border-color: #EAB308; background: rgba(234, 179, 8, 0.15); color: #EAB308;">
+        <i class="fa-solid fa-crown"></i>
+      </div>
+      <h2>Portal Mestre (Owner)</h2>
+      <p>Área exclusiva do proprietário da plataforma para monitoramento de horários de pico, logs de auditoria e rotação de tokens de segurança.</p>
+
+      <input type="password" id="masterTokenInput" class="token-input-field" placeholder="Cole seu Token Mestre (mst_sec_...)" autofocus>
+      
+      <div id="masterTokenErrorMsg" style="display:none; color:#EF4444; font-size:0.85rem; margin-bottom:12px; font-weight:600;"></div>
+
+      <button type="button" class="btn-unlock" id="btnUnlockMaster" style="background: linear-gradient(135deg, #CA8A04, #EAB308);">
+        <i class="fa-solid fa-shield-check"></i>
+        <span>Validar Token Mestre</span>
+      </button>
+
+      <div class="token-hint-badge">
+        <i class="fa-solid fa-key" style="color:#EAB308;"></i>
+        Token Mestre Padrão: <code>mst_sec_8f93e2b10a47</code>
+      </div>
+    </div>
+  </div>
+
+  <!-- ESTRUTURA EXPANSIVA DO PORTAL MESTRE -->
+  <div class="admin-site-wrapper" id="masterMainWrapper" style="display:none;">
+
+    <!-- Topbar Superior -->
+    <header class="admin-topbar-header" style="background: #171517; border-bottom: 1px solid #2B282B;">
+      <div class="admin-topbar-inner">
+        <div class="admin-greeting-text">
+          <h2 style="display:flex; align-items:center;">
+            <i class="fa-solid fa-crown master-crown-icon"></i>
+            Portal Mestre &bull; Governança do Sistema
+          </h2>
+          <p>Auditoria de Segurança, Gestão de Tokens Criptográficos e Métricas de Pico</p>
+        </div>
+
+        <div class="admin-topbar-right">
+          <a href="admin.html" id="linkToAdminPanel" class="btn-view-public-site" target="_blank" style="background:#222022; border-color:#383438;">
+            <i class="fa-solid fa-user-shield"></i>
+            <span>Painel Administradora</span>
+          </a>
+          <a href="index.html" class="btn-view-public-site" target="_blank">
+            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+            <span>Portal da Cliente</span>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <!-- CONTEÚDO PRINCIPAL EXPANSIVO -->
+    <main class="admin-main-content-area">
+
+      <!-- ========================================================
+           1. CARDS DE RESUMO DO SISTEMA & FUNIL
+           ======================================================== -->
+      <div class="master-stats-grid">
+        <div class="master-stat-card">
+          <h5>Total de Acessos ao Link</h5>
+          <div class="val" id="masterTotalViews">0</div>
+          <span style="font-size:0.75rem; color:#A39D9E;">Portal da Cliente</span>
+        </div>
+
+        <div class="master-stat-card" style="border-left-color: #EAB308;">
+          <h5>Visualizações de Stories</h5>
+          <div class="val" id="masterStoriesViews">0</div>
+          <span style="font-size:0.75rem; color:#A39D9E;">Vídeos assistidos</span>
+        </div>
+
+        <div class="master-stat-card" style="border-left-color: #3B82F6;">
+          <h5>Início de Agendamento</h5>
+          <div class="val" id="masterBookingStarts">0</div>
+          <span style="font-size:0.75rem; color:#A39D9E;">Seleção de data/hora</span>
+        </div>
+
+        <div class="master-stat-card" style="border-left-color: #10B981;">
+          <h5>Agendamentos Concluídos</h5>
+          <div class="val" id="masterBookingsDone">0</div>
+          <span style="font-size:0.75rem; color:#A39D9E;">Taxa de conversão: <strong id="masterConvRate" style="color:#10B981;">0%</strong></span>
+        </div>
+      </div>
+
+      <!-- ========================================================
+           2. MONITORAMENTO DE HORÁRIOS DE PICO (PRD 3.3)
+           ======================================================== -->
+      <div class="traffic-chart-box">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem; flex-wrap:wrap; gap:10px;">
+          <div>
+            <h3 style="font-family:var(--font-serif); font-size:1.3rem; color:#FFF; display:flex; align-items:center; gap:8px;">
+              <i class="fa-solid fa-chart-line" style="color:var(--color-rose);"></i>
+              Distribuição de Tráfego por Horário do Dia (Horários de Pico)
+            </h3>
+            <p style="font-size:0.82rem; color:#A39D9E;">Identifique os momentos de maior procura para campanhas e disponibilidade de vagas.</p>
+          </div>
+          <span style="padding:4px 10px; background:rgba(216, 63, 121, 0.2); border-radius:9999px; color:var(--color-rose); font-size:0.75rem; font-weight:700;">
+            <i class="fa-solid fa-fire"></i> Pico Estimado: 18h às 21h
+          </span>
+        </div>
+
+        <div class="traffic-bar-chart" id="trafficHourlyChart">
+          <!-- Injetado via JS: 24 barras de horas (0h a 23h) -->
+        </div>
+
+        <!-- Funil Visual -->
+        <h4 style="font-size:0.95rem; color:#FFF; margin-top:2rem; margin-bottom:0.8rem; font-family:var(--font-serif);">
+          Funil de Conversão do Portal da Cliente
+        </h4>
+        <div class="funnel-container" id="funnelContainer">
+          <!-- Injetado via JS -->
+        </div>
+      </div>
+
+      <!-- ========================================================
+           3. GESTÃO E ROTAÇÃO DE TOKENS CRIPTOGRÁFICOS (PRD 3.3)
+           ======================================================== -->
+      <div class="token-rotator-card">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.2rem; flex-wrap:wrap; gap:10px;">
+          <div>
+            <h3 style="font-family:var(--font-serif); font-size:1.3rem; color:#FFF; display:flex; align-items:center; gap:8px;">
+              <i class="fa-solid fa-key" style="color:#EAB308;"></i>
+              Gerenciador e Rotacionador de Tokens de Segurança
+            </h3>
+            <p style="font-size:0.82rem; color:#A39D9E;">
+              Gere novos tokens criptográficos SHA-256 e revogue imediatamente os links antigos em caso de perda ou suspeita.
+            </p>
+          </div>
+        </div>
+
+        <!-- Card Token Administradora -->
+        <div class="token-row-item">
+          <div class="info">
+            <h5><i class="fa-solid fa-user-shield" style="color:var(--color-rose);"></i> Link do Painel da Administradora:</h5>
+            <code id="adminFullLinkDisplay">Carregando...</code>
+          </div>
+          <div class="token-row-actions">
+            <button class="btn-token-act copy" id="btnCopyAdminLink">
+              <i class="fa-regular fa-copy"></i> Copiar Link
+            </button>
+            <button class="btn-token-act rotate" id="btnRotateAdminToken">
+              <i class="fa-solid fa-arrows-rotate"></i> Rotacionar Token Admin
+            </button>
+          </div>
+        </div>
+
+        <!-- Card Token Mestre -->
+        <div class="token-row-item">
+          <div class="info">
+            <h5><i class="fa-solid fa-crown" style="color:#EAB308;"></i> Link do Portal Mestre (Owner):</h5>
+            <code id="masterFullLinkDisplay">Carregando...</code>
+          </div>
+          <div class="token-row-actions">
+            <button class="btn-token-act copy" id="btnCopyMasterLink">
+              <i class="fa-regular fa-copy"></i> Copiar Link
+            </button>
+            <button class="btn-token-act rotate" id="btnRotateMasterToken" style="border-color:#EAB308; color:#EAB308; background:rgba(234, 179, 8, 0.15);">
+              <i class="fa-solid fa-arrows-rotate"></i> Rotacionar Token Mestre
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========================================================
+           4. LOGS DE AUDITORIA DE SEGURANÇA EM TEMPO REAL (PRD 3.3)
+           ======================================================== -->
+      <div class="traffic-chart-box">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem; flex-wrap:wrap; gap:10px;">
+          <div>
+            <h3 style="font-family:var(--font-serif); font-size:1.3rem; color:#FFF; display:flex; align-items:center; gap:8px;">
+              <i class="fa-solid fa-shield-virus" style="color:#10B981;"></i>
+              Logs de Auditoria de Acesso e Tentativas de Invasão
+            </h3>
+            <p style="font-size:0.82rem; color:#A39D9E;">Registro cronológico de acessos às rotas protegidas por tokens.</p>
+          </div>
+
+          <button class="btn-token-act copy" id="btnClearAuditLogs" style="font-size:0.75rem;">
+            <i class="fa-solid fa-trash-can"></i> Limpar Histórico
+          </button>
+        </div>
+
+        <div class="audit-table-wrapper">
+          <table class="audit-table">
+            <thead>
+              <tr>
+                <th>Data e Hora</th>
+                <th>Rota</th>
+                <th>Dispositivo / Navegador</th>
+                <th>Sessão Anônima</th>
+                <th>Resultado</th>
+              </tr>
+            </thead>
+            <tbody id="auditLogsTableBody">
+              <!-- Injetado via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ========================================================
+           5. GOVERNANÇA LGPD & EXPURGO DE DADOS (PRD ITEM 1 & 3.3)
+           ======================================================== -->
+      <div class="traffic-chart-box" style="border-left: 4px solid #10B981;">
+        <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+          <div>
+            <h3 style="font-family:var(--font-serif); font-size:1.2rem; color:#FFF; display:flex; align-items:center; gap:8px;">
+              <i class="fa-solid fa-scale-balanced" style="color:#10B981;"></i>
+              Conformidade LGPD & Expurgo Programado
+            </h3>
+            <p style="font-size:0.82rem; color:#A39D9E; max-width:700px; margin-top:4px;">
+              O sistema adota o princípio de <em>Privacy by Design</em> e minimização estrita de dados: coleta exclusivamente Nome e WhatsApp. Nenhuma informação financeira, CPF ou documento é armazenado.
+            </p>
+          </div>
+
+          <button class="btn-drawer-action" id="btnPurgeLgpdData" style="background:#2A272A; border:1px solid #10B981; color:#10B981; padding:10px 18px; border-radius:8px; font-size:0.82rem; cursor:pointer;">
+            <i class="fa-solid fa-broom"></i>
+            <span>Executar Expurgo (+30 dias)</span>
+          </button>
+        </div>
+      </div>
+
+    </main>
+
+  </div>
+
+  <!-- Scripts -->
+  <script src="assets/js/store.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const lockScreen = document.getElementById('screenMasterTokenLock');
+      const tokenInput = document.getElementById('masterTokenInput');
+      const btnUnlock = document.getElementById('btnUnlockMaster');
+      const errorMsg = document.getElementById('masterTokenErrorMsg');
+      const mainWrapper = document.getElementById('masterMainWrapper');
+
+      let currentMasterToken = null;
+
+      // 1. Verificação do Token Mestre
+      async function checkMasterAuth() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('token') || sessionStorage.getItem('epn_master_token');
+
+        if (token) {
+          const isValid = await window.EPStore.validateToken(token, 'master');
+          if (isValid) {
+            currentMasterToken = token;
+            sessionStorage.setItem('epn_master_token', token);
+            if (lockScreen) lockScreen.classList.add('hidden');
+            if (mainWrapper) mainWrapper.style.display = 'flex';
+            initMasterDashboard();
+            return;
+          }
+        }
+
+        if (lockScreen) lockScreen.classList.remove('hidden');
+        if (mainWrapper) mainWrapper.style.display = 'none';
+        if (token && errorMsg) {
+          errorMsg.textContent = 'Token Mestre inválido ou revogado!';
+          errorMsg.style.display = 'block';
+        }
+      }
+
+      if (btnUnlock) {
+        btnUnlock.onclick = async () => {
+          const val = tokenInput ? tokenInput.value.trim() : '';
+          if (!val) {
+            errorMsg.textContent = 'Informe o Token Único Mestre.';
+            errorMsg.style.display = 'block';
+            return;
+          }
+
+          const isValid = await window.EPStore.validateToken(val, 'master');
+          if (isValid) {
+            currentMasterToken = val;
+            sessionStorage.setItem('epn_master_token', val);
+            errorMsg.style.display = 'none';
+            lockScreen.classList.add('hidden');
+            mainWrapper.style.display = 'flex';
+            const newUrl = `${window.location.pathname}?token=${encodeURIComponent(val)}`;
+            window.history.replaceState({}, '', newUrl);
+            initMasterDashboard();
+          } else {
+            errorMsg.textContent = 'Token Mestre incorreto!';
+            errorMsg.style.display = 'block';
+          }
+        };
+      }
+
+      // 2. Inicialização do Painel Mestre
+      function initMasterDashboard() {
+        renderTrafficMetrics();
+        renderHourlyChart();
+        renderTokensManagement();
+        renderAuditLogs();
+      }
+
+      // 3. Renderização de Métricas de Tráfego e Funil
+      function renderTrafficMetrics() {
+        const traffic = window.EPStore.getTrafficAnalytics();
+        const bookings = window.EPStore.getAppointments().length;
+
+        document.getElementById('masterTotalViews').textContent = traffic.totalViews;
+        document.getElementById('masterStoriesViews').textContent = traffic.storiesViews;
+        document.getElementById('masterBookingStarts').textContent = traffic.bookingStarts;
+        document.getElementById('masterBookingsDone').textContent = traffic.bookingCompletions || bookings;
+
+        const rate = traffic.totalViews > 0 
+          ? (((traffic.bookingCompletions || bookings) / traffic.totalViews) * 100).toFixed(1)
+          : '0.0';
+        document.getElementById('masterConvRate').textContent = `${rate}%`;
+
+        // Funil
+        const funnelEl = document.getElementById('funnelContainer');
+        if (funnelEl) {
+          funnelEl.innerHTML = `
+            <div class="funnel-step-row">
+              <span class="name">1. Acessos ao Link do Cliente (Topo do Funil)</span>
+              <span class="num">${traffic.totalViews} visitas (100%)</span>
+            </div>
+            <div class="funnel-step-row" style="border-left-color: #EAB308;">
+              <span class="name">2. Interações com Vídeos nos Stories (Engajamento)</span>
+              <span class="num">${traffic.storiesViews} visualizações (${traffic.totalViews ? Math.round((traffic.storiesViews/traffic.totalViews)*100) : 0}%)</span>
+            </div>
+            <div class="funnel-step-row" style="border-left-color: #3B82F6;">
+              <span class="name">3. Aberturas do Calendário de Agendamento</span>
+              <span class="num">${traffic.bookingStarts} intenções (${traffic.totalViews ? Math.round((traffic.bookingStarts/traffic.totalViews)*100) : 0}%)</span>
+            </div>
+            <div class="funnel-step-row" style="border-left-color: #10B981;">
+              <span class="name">4. Agendamentos Concluídos com Nome & WhatsApp</span>
+              <span class="num">${traffic.bookingCompletions || bookings} finalizados (${rate}%)</span>
+            </div>
+          `;
+        }
+      }
+
+      // 4. Gráfico das 24 horas
+      function renderHourlyChart() {
+        const chartEl = document.getElementById('trafficHourlyChart');
+        if (!chartEl) return;
+
+        const traffic = window.EPStore.getTrafficAnalytics();
+        const hourly = traffic.hourlyDistribution || {};
+
+        let maxCount = 1;
+        for (let h = 0; h < 24; h++) {
+          if ((hourly[h] || 0) > maxCount) maxCount = hourly[h];
+        }
+
+        chartEl.innerHTML = '';
+        for (let h = 0; h < 24; h++) {
+          const count = hourly[h] || 0;
+          const pct = Math.max(Math.round((count / maxCount) * 100), 6);
+          const isPeak = h >= 18 && h <= 21;
+
+          const col = document.createElement('div');
+          col.className = 'traffic-bar-col';
+          col.title = `${h}h:00 - ${count} acessos`;
+          col.innerHTML = `
+            <div class="traffic-bar-fill" style="height:${pct}%; ${isPeak ? 'background: linear-gradient(180deg, #F43F5E, #E11D48);' : ''}"></div>
+            <span class="traffic-bar-lbl" style="${isPeak ? 'color:var(--color-rose); font-weight:700;' : ''}">${h}h</span>
+          `;
+          chartEl.appendChild(col);
+        }
+      }
+
+      // 5. Gestão de Links e Rotação de Tokens
+      function renderTokensManagement() {
+        const baseUrl = window.location.origin + window.location.pathname.replace('master.html', '');
+        
+        // Obter tokens ativos
+        const storedTokens = JSON.parse(localStorage.getItem('epn_sec_tokens') || '{}');
+        const adminTok = storedTokens.admin_raw || 'adm_sec_4c781d9e5b20';
+        const masterTok = storedTokens.master_raw || 'mst_sec_8f93e2b10a47';
+
+        const adminFullUrl = `${baseUrl}admin.html?token=${adminTok}`;
+        const masterFullUrl = `${baseUrl}master.html?token=${masterTok}`;
+
+        document.getElementById('adminFullLinkDisplay').textContent = adminFullUrl;
+        document.getElementById('masterFullLinkDisplay').textContent = masterFullUrl;
+
+        // Atualizar link rápido para o admin no topo
+        const adminBtn = document.getElementById('linkToAdminPanel');
+        if (adminBtn) adminBtn.href = adminFullUrl;
+
+        // Copiar Link Admin
+        document.getElementById('btnCopyAdminLink').onclick = () => {
+          navigator.clipboard.writeText(adminFullUrl);
+          alert('Link do Painel da Administradora copiado com sucesso!');
+        };
+
+        // Copiar Link Mestre
+        document.getElementById('btnCopyMasterLink').onclick = () => {
+          navigator.clipboard.writeText(masterFullUrl);
+          alert('Link do Portal Mestre copiado com sucesso!');
+        };
+
+        // Rotacionar Token Admin
+        document.getElementById('btnRotateAdminToken').onclick = async () => {
+          if (confirm('Atenção: A rotação gerará um novo token e REVOGARÁ imediatamente o acesso anterior da administradora. Deseja prosseguir?')) {
+            const newTok = await window.EPStore.rotateToken('admin');
+            alert(`Novo Token da Administradora gerado com sucesso: ${newTok}`);
+            renderTokensManagement();
+          }
+        };
+
+        // Rotacionar Token Mestre
+        document.getElementById('btnRotateMasterToken').onclick = async () => {
+          if (confirm('Atenção: A rotação do Token Mestre exigirá que você use o novo link gerado para acessar esta tela. Deseja rotacionar?')) {
+            const newTok = await window.EPStore.rotateToken('master');
+            sessionStorage.setItem('epn_master_token', newTok);
+            const newUrl = `${baseUrl}master.html?token=${newTok}`;
+            window.history.replaceState({}, '', newUrl);
+            alert(`Novo Token Mestre gerado com sucesso: ${newTok}`);
+            renderTokensManagement();
+          }
+        };
+      }
+
+      // 6. Logs de Auditoria
+      function renderAuditLogs() {
+        const logs = window.EPStore.getSecurityLogs();
+        const tbody = document.getElementById('auditLogsTableBody');
+        if (!tbody) return;
+
+        tbody.innerHTML = '';
+        if (logs.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:1.5rem; color:#777;">Nenhum registro de auditoria gravado.</td></tr>';
+          return;
+        }
+
+        logs.forEach(log => {
+          const tr = document.createElement('tr');
+          const isAuth = log.status === 'AUTORIZADO';
+          const badgeClass = isAuth ? 'auth' : 'blocked';
+
+          tr.innerHTML = `
+            <td>${log.timestamp}</td>
+            <td><code>${log.route}</code></td>
+            <td>${log.device}</td>
+            <td><code style="font-size:0.75rem; color:#A39D9E;">${log.sessionHash}</code></td>
+            <td><span class="audit-badge ${badgeClass}">${log.status}</span></td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+
+      // Limpar Auditoria
+      document.getElementById('btnClearAuditLogs').onclick = () => {
+        if (confirm('Deseja limpar todos os registros de auditoria gravados?')) {
+          localStorage.removeItem('epn_security_logs');
+          renderAuditLogs();
+        }
+      };
+
+      // Expurgo LGPD
+      document.getElementById('btnPurgeLgpdData').onclick = () => {
+        const count = window.EPStore.purgeExpiredClientData();
+        alert(`Conformidade LGPD executada: ${count} registros com mais de 30 dias foram expurgados com sucesso.`);
+      };
+
+      checkMasterAuth();
+    });
+  </script>
+</body>
+</html>

@@ -1,8 +1,9 @@
-const CACHE_NAME = 'estefany-nails-v2';
+const CACHE_NAME = 'estefany-nails-v3-multi-portal';
 const STATIC_ASSETS = [
   './',
   './index.html',
   './admin.html',
+  './master.html',
   './manifest.json',
   './assets/css/variables.css',
   './assets/css/client.css',
@@ -33,13 +34,11 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // Never cache POST requests or Firebase/dynamic booking requests
   if (event.request.method !== 'GET') return;
 
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) {
-        // Fetch in background for fresh content
         fetch(event.request).then((networkResponse) => {
           if (networkResponse && networkResponse.status === 200) {
             caches.open(CACHE_NAME).then(cache => cache.put(event.request, networkResponse));
@@ -48,11 +47,29 @@ self.addEventListener('fetch', (event) => {
         return cachedResponse;
       }
       return fetch(event.request).catch(() => {
-        // Fallback for navigation requests
         if (event.request.mode === 'navigate') {
           return caches.match('./index.html');
         }
       });
+    })
+  );
+});
+
+// Suporte a push notifications e abertura direta da notificação
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      if (clientList.length > 0) {
+        let client = clientList[0];
+        for (let i = 0; i < clientList.length; i++) {
+          if (clientList[i].focused) {
+            client = clientList[i];
+          }
+        }
+        return client.focus();
+      }
+      return clients.openWindow('./admin.html');
     })
   );
 });

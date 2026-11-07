@@ -1,112 +1,82 @@
-# ✨ Estefany Paiva Nails — PWA de Agendamento, Portfólio & Gestão
+# ✨ Estefany Paiva Nails — Plataforma Multi-Portal, LGPD & Push PWA
 
-Aplicativo web progressivo (PWA) instalável, moderno, minimalista e feminino desenvolvido para **Estefany Paiva Nails**, implementado **estritamente de acordo com o PRD completo e os modelos visuais da imagem de referência**.
-
----
-
-## 🎨 Paleta de Cores & Design (Fiel ao PRD)
-
-- **Creme:** `#F8F2ED` (Fundo da área pública)
-- **Nude:** `#E9D7CE` (Bordas e divisores delicados)
-- **Rosé:** `#E9A3B5` (Detalhes e destaques)
-- **Rosa de Destaque:** `#D83F79` / `#F1A7B7` (Botões de ação primários)
-- **Preto:** `#171719` (Textos e fundo da área administrativa)
-- **Cinza:** `#777176` (Textos secundários e ícones)
-- **Branco:** `#FFFFFF` (Superfície dos cartões)
-- **Verde Confirmado:** `#DDF2E1` (Texto `#226E3A`)
-- **Amarelo Aguardando:** `#FFF0CE` (Texto `#8C5E00`)
-- **Vermelho Cancelado:** `#FCE2E5` (Texto `#B02A37`)
+Plataforma web progressiva (PWA) instalável, responsiva e expansiva desenvolvida para **Estefany Paiva Nails**, implementada em estrita conformidade com o **PRD & Prompt Mestre: Plataforma de Agendamento para Manicure (Multi-Portal, LGPD & Push PWA)**.
 
 ---
 
-## 📱 Estrutura das 10 Telas (Exatamente como na Imagem)
+## 🏛️ Arquitetura de 3 Ambientes Isolados por Links e Tokens SHA-256
 
-### Linha 1 — Área Pública da Cliente (`index.html`)
-
-1. **Tela 1: Onboarding / Boas-Vindas (Splash)**
-   - Header com coração + `ESTEFANY PAIVA NAILS`
-   - Fotografia de destaque com mãos de unhas elegantes
-   - Slogan: *"Mais que unhas, é autoestima."*
-   - Botão rosa: `Agendar agora →`
-   - Botão transparente: `Já tenho um agendamento`
-
-2. **Tela 2: Vitrine Principal / Home**
-   - Topbar compacta com ícone de menu, marca e sininho de agendamentos
-   - **Banner carrossel dinâmico de fotos/vídeos** dos procedimentos
-   - **Atalhos circulares (Stories):** *Clientes*, *Processo*, *Antes e Depois*, *Nails*
-   - **Vitrine "Nossos serviços"** em grade 2x2: *Alongamento em gel (R$ 150)*, *Banho de gel (R$ 80)*, *Manutenção (R$ 70)*, *Esmaltação em gel (R$ 70)*
-   - Barra de navegação inferior (Bottom Bar): Início, Serviços, Agendar (botão central de destaque), Meus agendamentos, Perfil
-
-3. **Tela 3: Detalhes do Serviço**
-   - Carrossel de fotos do procedimento com contador `1/5`
-   - Título, preço (`R$ 150,00`), descrição
-   - Badges: `Tempo aproximado: 2h` e `Ideal para: unhas curtas ou fracas`
-   - Galeria de resultados reais
-   - Botão fixo no rodapé: `Agendar este serviço →`
-
-4. **Tela 4: Fluxo de Agendamento**
-   - Barra de progresso: `(1) Serviço`, `(2) Data`, `(3) Horário`, `(4) Confirmação`
-   - Card do serviço selecionado com miniatura, valor e duração
-   - **Calendário mensal interativo** (`< Maio 2025 >`) com bloqueio de datas passadas e domingos
-   - **Horários disponíveis calculados pelo backend** (`08:00`, `09:20`, `10:40`, `13:00`, `14:20`, `16:00`, `17:20`), com prevenção atômica contra duplicidade
-   - Formulário de dados da cliente (Nome e WhatsApp com máscara)
-   - Botão: `Próximo →`
-
-5. **Tela 5: Meus Agendamentos**
-   - Abas seletoras: `[ Próximos ]` e `[ Histórico ]`
-   - Cards com data/hora (ex: *Qui, 22 de Maio · 10:40*), serviço, badge de status (*Confirmado* ou *Aguardando*)
-   - Clique para consultar detalhes e solicitar cancelamento ou reagendamento no WhatsApp
+| Ambiente | Usuário Alvo | Link de Acesso | Mecanismo de Proteção e Governança |
+| :--- | :--- | :--- | :--- |
+| **Portal do Cliente** | Cliente final | `https://seudominio.com/` ou `index.html` | **100% Público, Rápido e Sem Login.** Coleta exclusivamente Nome e Celular/WhatsApp no fechamento do horário (LGPD estrita). |
+| **Painel da Administradora** | Manicure / Nail Designer | `https://seudominio.com/admin.html?token=<TOKEN_ADMIN>` | Protegido por **Token Único da Administradora** validado via hash SHA-256. Gestão de agendamentos por categoria, relatórios e White-Label. |
+| **Portal Mestre (Owner)** | Dono da Plataforma | `https://seudominio.com/master.html?token=<TOKEN_MASTER>` | Rota exclusiva do proprietário protegida por **Token Mestre**. Monitoramento de horários de pico, funil, rotação de tokens e auditoria. |
 
 ---
 
-### Linha 2 — Área Administrativa / Gestão (`admin.html`)
+## 🔑 Tokens Padrão de Inicialização (Fábrica)
 
-6. **Tela 6: Login Administrativo**
-   - Identidade visual escura de luxo
-   - Campos de Usuário e Senha com botão de visualização
-   - Botão rosa: `Entrar` *(Senha padrão: `admin123`)*
-
-7. **Tela 7: Dashboard & Agenda de Hoje**
-   - Saudação: *"Olá, Estefany! Aqui está um resumo do seu dia."* com foto de perfil
-   - 4 KPIs em grade 2x2:
-     - `5` Agendamentos hoje
-     - `R$ 640,00` Faturamento do dia
-     - `12` Clientes ativas
-     - `6` Serviços realizados
-   - Seção **Agendamentos de hoje** com horários e status:
-     - `08:00` Juliana Santos · Alongamento em gel [Confirmado >]
-     - `09:20` Carla Mendes · Manutenção [Confirmado >]
-     - `10:40` Beatriz Lima · Banho de gel [Pendente >]
-     - `13:00` Amanda Oliveira · Esmaltação em gel [Confirmado >]
-     - `14:20` Fernanda Costa · Alongamento em gel [Confirmado >]
-   - Drawer de ações rápidas: Confirmar, Chamar no WhatsApp, Cancelar
-
-8. **Tela 8: Gestão de Clientes**
-   - Campo de busca em tempo real por nome ou WhatsApp
-   - Botão `(+)` para cadastro manual
-   - Lista completa de clientes (Juliana Santos, Carla Mendes, Beatriz Lima...) com histórico e atalho WhatsApp
-
-9. **Tela 9: Gestão de Serviços**
-   - Listagem com edição rápida de preço e exclusão/desativação
-   - Botão `(+)` para novo procedimento
-
-10. **Tela 10: Financeiro & Relatórios**
-    - Seletor de mês `< Maio 2025 >`
-    - 3 KPIs financeiros:
-      - `R$ 3.480,00` Receita total
-      - `R$ 640,00` Em andamento
-      - `R$ 12.540,00` Mês anterior
-    - Barras de progresso de **Vendas por serviço**:
-      - Alongamento em gel (40%)
-      - Manutenção (25%)
-      - Banho de gel (20%)
-      - Esmaltação em gel (15%)
-    - Botão: `Ver relatório completo (CSV)` com download imediato para Excel
+> [!IMPORTANT]
+> Os tokens abaixo são gerados inicialmente para uso imediato em ambiente de desenvolvimento e testes. No **Portal Mestre**, você pode rotacionar ambos os tokens com um clique a qualquer momento:
+> - **Token da Administradora:** `adm_sec_4c781d9e5b20`
+> - **Token Mestre (Owner):** `mst_sec_8f93e2b10a47`
 
 ---
 
-## 🚀 Como Executar
+## 🚀 Funcionalidades Principais Implementadas
 
-- **Cliente / PWA Público:** Dê dois cliques em [`index.html`](file:///c:/Users/paulo/Downloads/site-manicure/index.html)
-- **Painel Administrativo:** Dê dois cliques em [`admin.html`](file:///c:/Users/paulo/Downloads/site-manicure/admin.html) *(Senha: `admin123`)*
-- Funciona 100% no navegador e pode ser instalado no celular através do recurso "Adicionar à tela inicial" (PWA via `manifest.json` e `sw.js`).
+### 1. Portal do Cliente (`index.html`)
+- **Portfólio Vivo Superior (Carrossel):** cards horizontais com rolagem suave automática e suporte a toque/arraste para exibir fotos de alta qualidade dos trabalhos recentes com atalho direto para agendar aquele estilo.
+- **Catálogo de Serviços por Categorias:** abas de filtro rápido (*Alongamento em Gel*, *Esmaltação em Gel*, *Manicure & Pedicure Clássica*, *Nail Art & Encapsuladas*, *Spa & Blindagem*).
+- **Player de Stories estilo Instagram:** ao clicar na foto da unha em qualquer card de serviço, abre modal em tela cheia com até **3 vídeos sequenciais**, 3 barras superiores animadas, toque na lateral esquerda/direita para navegar, pausar ao segurar o dedo e botão fixo *"Agendar esta unha agora"*.
+- **Fluxo de Agendamento Enxuto (LGPD by Design):** solicita estritamente **Nome** e **WhatsApp** com máscara `(DD) 9XXXX-XXXX`. Previne bloqueio de horários duplicados e gera link do **Google Calendar** + download de arquivo `.ics`.
+- **Área Meus Agendamentos:** consulta rápida por WhatsApp dos agendamentos futuros e histórico.
+
+### 2. Painel da Administradora (`admin.html?token=adm_sec_4c781d9e5b20`)
+- **Validação Criptográfica SHA-256:** acesso bloqueado sem o token válido na URL ou digitado no modal de autenticação.
+- **Visão e Filtro por Categoria:** visualização dos agendamentos segmentada por categorias e status (*Pendente*, *Confirmado*, *Concluído*, *Cancelado*).
+- **Alerta Sonoro com Web Audio API:** botão para testar a sineta sonora de alta frequência disparada automaticamente a cada novo agendamento, além de vibração PWA no celular.
+- **Relatórios Gerenciais:** comparativo de faturamento previsto vs confirmado, ticket médio geral e gráficos de barras por categoria de procedimento.
+- **Personalizador Total da Identidade Visual (White-Label):**
+  - Seletor de cores primárias (Creme, Nude, Rosé, Rosa Choque).
+  - Tipografia de títulos (Playfair Display, Cinzel, Montserrat, Plus Jakarta Sans).
+  - Modo Claro vs Noturno de Luxo.
+  - Edição do nome da marca e slogan.
+  - Gestor do Portfólio Vivo (adicionar/remover fotos do carrossel).
+  - Editor dos 3 vídeos de Stories para cada serviço cadastrado.
+- **Ações Rápidas nos Agendamentos:** confirmação com 1 clique, conclusão, cancelamento e abertura direta de conversa no WhatsApp com mensagem personalizada preenchida.
+
+### 3. Portal Mestre / Owner (`master.html?token=mst_sec_8f93e2b10a47`)
+- **Monitoramento de Horários de Pico:** gráfico com a distribuição dos acessos nas 24 horas do dia (0h às 23h) com indicação do horário nobre (18h às 21h).
+- **Funil de Conversão em Tempo Real:** métricas de Acessos ao Link → Visualizações de Stories → Aberturas de Calendário → Agendamentos Finalizados.
+- **Gerenciador e Rotacionador de Tokens Criptográficos:** geração segura via CSPRNG de novos tokens administrativos ou mestre, com revogação imediata das credenciais antigas e links prontos para copiar.
+- **Auditoria de Segurança:** tabela cronológica de acessos às rotas protegidas (Data/Hora, Rota, Dispositivo/OS, Hash anônimo de sessão e status `AUTORIZADO` ou `BLOQUEADO`).
+- **Governança LGPD:** botão para expurgo automático de agendamentos e registros de contato com mais de 30 dias.
+
+---
+
+## 🔒 Política de Zero Dados Sensíveis no Repositório (Zero-Leak Git)
+
+O projeto cumpre rigorosamente as normas de segurança para versionamento:
+- Arquivo `.gitignore` pré-configurado bloqueando `.env*`, `*.db`, `*.sqlite`, uploads privados e logs.
+- Arquivo `.env.example` sem nenhuma credencial sensível real.
+- Assegurada a não inclusão de segredos ou tokens fixos no controle de versão.
+
+---
+
+## 💻 Como Executar Localmente
+
+Você pode servir a aplicação através de qualquer servidor HTTP estático:
+
+```bash
+# Com Python 3
+python -m http.server 8080
+
+# Com Node.js (npx)
+npx serve .
+```
+
+Acesse no navegador:
+- **Cliente:** `http://localhost:8080/index.html`
+- **Administradora:** `http://localhost:8080/admin.html?token=adm_sec_4c781d9e5b20`
+- **Portal Mestre:** `http://localhost:8080/master.html?token=mst_sec_8f93e2b10a47`

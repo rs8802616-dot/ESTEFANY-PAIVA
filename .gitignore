@@ -1,0 +1,51 @@
+# ==========================================
+# SEGURANÇA ZERO-LEAK & LGPD - .GITIGNORE
+# Nenhum dado sensível, chave privada, banco
+# de dados ou token real deve entrar no Git.
+# ==========================================
+
+# Variáveis de ambiente e segredos
+.env
+.env.*
+!.env.example
+
+# Bancos de dados locais e caches
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+
+# Logs e auditoria privada
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Uploads privados e arquivos temporários de clientes
+uploads/private/
+temp/
+tmp/
+.cache/
+
+# Chaves criptográficas, certificados e credenciais VAPID
+*.pem
+*.key
+*.cert
+*.pfx
+vapid_private.json
+serviceAccountKey.json
+google-credentials.json
+
+# Sistema operacional e editores
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Node / Dependências (caso venha a usar build tool)
+node_modules/
+dist/
+build/

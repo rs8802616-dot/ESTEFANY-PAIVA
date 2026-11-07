@@ -1,7 +1,6 @@
 /* ========================================================
-   ESTEFANY PAIVA NAILS - ESTILOS DO APP DA CLIENTE
-   Design 100% Expansivo, Responsivo e Moderno (Sem moldura de celular)
-   Fiel às cores do PRD: Creme #F8F2ED, Nude #E9D7CE, Rosé #E9A3B5, Preto #171719
+   ESTEFANY PAIVA NAILS - ESTILOS DO PORTAL DO CLIENTE (LGPD & PWA)
+   Design 100% Expansivo, Responsivo, Stories do Instagram e Portfólio Vivo
    ======================================================== */
 
 @import url('./variables.css');
@@ -19,6 +18,7 @@ html, body {
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 button {
@@ -40,7 +40,7 @@ img {
 }
 
 /* ========================================================
-   CONTAINER EXPANSIVO (SEM MOLDURA DE CELULAR)
+   CONTAINER EXPANSIVO PRINCIPAL
    ======================================================== */
 .site-wrapper {
   width: 100%;
@@ -52,7 +52,7 @@ img {
 
 .main-content-area {
   width: 100%;
-  max-width: 1200px;
+  max-width: 1240px;
   margin: 0 auto;
   padding: 0 1.5rem 5rem;
   flex: 1;
@@ -65,135 +65,12 @@ img {
 }
 
 /* ========================================================
-   TELA 1: ONBOARDING / BOAS-VINDAS (SPLASH MODAL)
-   ======================================================== */
-.screen-onboarding {
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  background: radial-gradient(circle at 50% 30%, #302B2A 0%, #171719 75%);
-  color: #FFFFFF;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 2.5rem 1.5rem;
-  text-align: center;
-  transition: opacity 0.4s ease, visibility 0.4s ease;
-}
-
-.screen-onboarding.hidden {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-}
-
-.onboarding-card-box {
-  width: 100%;
-  max-width: 440px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1.5rem;
-}
-
-.brand-header-chic {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-}
-
-.heart-brand-icon {
-  color: var(--color-rose);
-  font-size: 1.2rem;
-}
-
-.brand-header-chic h1 {
-  font-family: var(--font-serif);
-  font-size: 1.4rem;
-  letter-spacing: 0.16em;
-  font-weight: 600;
-  text-transform: uppercase;
-}
-
-.onboarding-hero-image {
-  width: 100%;
-  max-width: 340px;
-  aspect-ratio: 4/5;
-  border-radius: 24px;
-  overflow: hidden;
-  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.6);
-  border: 1.5px solid rgba(233, 163, 181, 0.3);
-}
-
-.onboarding-hero-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.onboarding-slogan {
-  font-family: var(--font-serif);
-  font-size: 1.6rem;
-  font-style: italic;
-  font-weight: 400;
-  color: #F8F2ED;
-  line-height: 1.35;
-}
-
-.onboarding-actions {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 0.8rem;
-}
-
-.btn-pink-primary {
-  width: 100%;
-  background: var(--color-pink-btn);
-  color: var(--color-preto);
-  font-weight: 700;
-  font-size: 0.95rem;
-  padding: 14px 24px;
-  border-radius: var(--radius-pill);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  box-shadow: var(--shadow-pink);
-  transition: var(--transition-smooth);
-}
-
-.btn-pink-primary:hover {
-  background: var(--color-pink-btn-hover);
-  transform: translateY(-2px);
-}
-
-.btn-outline-transparent {
-  width: 100%;
-  background: transparent;
-  color: #FFFFFF;
-  border: 1.5px solid rgba(255, 255, 255, 0.35);
-  font-weight: 500;
-  font-size: 0.9rem;
-  padding: 13px 20px;
-  border-radius: var(--radius-pill);
-  transition: var(--transition-fast);
-}
-
-.btn-outline-transparent:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: #FFFFFF;
-}
-
-/* ========================================================
-   CABEÇALHO EXPANSIVO (DESKTOP + MOBILE)
+   CABEÇALHO EXPANSIVO (TOPBAR)
    ======================================================== */
 .client-topbar {
   background: rgba(248, 242, 237, 0.95);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   border-bottom: 1px solid var(--color-nude);
   position: sticky;
   top: 0;
@@ -202,7 +79,7 @@ img {
 }
 
 .topbar-inner-container {
-  max-width: 1200px;
+  max-width: 1240px;
   margin: 0 auto;
   padding: 14px 1.5rem;
   display: flex;
@@ -213,46 +90,49 @@ img {
 .brand-title-center {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   cursor: pointer;
 }
 
 .brand-avatar-mini {
-  width: 38px;
-  height: 38px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   overflow: hidden;
-  border: 1.5px solid var(--color-rose);
+  padding: 2px;
+  background: linear-gradient(45deg, #F09433, #E6683C, #DC2743, #CC2366, #BC1888);
 }
 
 .brand-avatar-mini img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  border-radius: 50%;
+  background: #FFF;
 }
 
-.brand-title-text h2 {
+.brand-title-text h1 {
   font-family: var(--font-serif);
-  font-size: 1.15rem;
+  font-size: 1.2rem;
   letter-spacing: 0.12em;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--color-preto);
   line-height: 1.1;
 }
 
 .brand-title-text span {
-  font-size: 0.68rem;
-  letter-spacing: 0.2em;
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--color-cinza);
+  color: var(--color-rose);
   display: block;
+  font-weight: 600;
 }
 
-/* Menu de navegação Desktop */
 .desktop-nav-menu {
   display: flex;
   align-items: center;
-  gap: 1.8rem;
+  gap: 2rem;
   list-style: none;
 }
 
@@ -260,10 +140,10 @@ img {
   font-size: 0.92rem;
   font-weight: 500;
   color: var(--color-cinza);
-  transition: var(--transition-fast);
   padding: 6px 0;
   position: relative;
   cursor: pointer;
+  transition: var(--transition-fast);
 }
 
 .desktop-nav-link:hover, .desktop-nav-link.active {
@@ -294,7 +174,7 @@ img {
 .btn-header-cta-schedule {
   background: var(--color-preto);
   color: #FFFFFF;
-  padding: 8px 18px;
+  padding: 9px 20px;
   border-radius: var(--radius-pill);
   font-size: 0.88rem;
   font-weight: 600;
@@ -302,11 +182,13 @@ img {
   align-items: center;
   gap: 8px;
   transition: var(--transition-fast);
+  box-shadow: var(--shadow-subtle);
 }
 
 .btn-header-cta-schedule:hover {
   background: var(--color-pink-btn);
   color: var(--color-preto);
+  transform: translateY(-2px);
 }
 
 .mobile-only-btn {
@@ -326,563 +208,666 @@ img {
 }
 
 /* ========================================================
-   BANNER DE VÍDEO & FOTOS EXPANSIVO (TELA 2)
+   CARROSSEL SUPERIOR (PORTFÓLIO VIVO - TRABALHOS REALIZADOS)
    ======================================================== */
-.banner-carousel-section {
-  width: 100%;
-  margin: 1.5rem 0 2rem;
+.portfolio-vivo-section {
+  margin: 1.8rem 0 2.5rem;
 }
 
-.banner-carousel-card {
-  position: relative;
-  width: 100%;
-  height: 420px;
-  border-radius: 24px;
-  overflow: hidden;
-  box-shadow: var(--shadow-card);
-  background: #000000;
-}
-
-@media (max-width: 768px) {
-  .banner-carousel-card {
-    height: 230px;
-    border-radius: 18px;
-  }
-}
-
-.carousel-media-slide {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  transition: opacity 0.6s ease-in-out;
+.portfolio-vivo-header {
   display: flex;
   align-items: center;
-  justify-content: center;
-}
-
-.carousel-media-slide.active {
-  opacity: 1;
-  z-index: 1;
-}
-
-.carousel-media-slide img, .carousel-media-slide video {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.carousel-gradient-overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(0deg, rgba(23, 23, 25, 0.85) 0%, rgba(23, 23, 25, 0.1) 60%, transparent 100%);
-  z-index: 2;
-  pointer-events: none;
-}
-
-.carousel-caption-wrap {
-  position: absolute;
-  bottom: 24px;
-  left: 28px;
-  right: 28px;
-  z-index: 3;
-  display: flex;
-  align-items: flex-end;
   justify-content: space-between;
+  margin-bottom: 1rem;
 }
 
-@media (max-width: 768px) {
-  .carousel-caption-wrap {
-    bottom: 14px;
-    left: 16px;
-    right: 16px;
-  }
-}
-
-.carousel-text p {
-  color: #FFFFFF;
+.portfolio-vivo-header h2 {
   font-family: var(--font-serif);
-  font-size: 1.25rem;
-  font-style: italic;
-  max-width: 500px;
-  line-height: 1.4;
+  font-size: 1.35rem;
+  color: var(--color-preto);
+  font-weight: 600;
 }
 
-@media (max-width: 768px) {
-  .carousel-text p {
-    font-size: 0.95rem;
-    max-width: 230px;
-  }
-}
-
-.carousel-play-badge {
-  background: rgba(255, 255, 255, 0.25);
-  backdrop-filter: blur(8px);
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  font-size: 1rem;
-}
-
-.carousel-nav-dots {
-  position: absolute;
-  bottom: 10px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 6px;
-  z-index: 4;
-}
-
-.dot-indicator {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.4);
-  cursor: pointer;
-  transition: var(--transition-fast);
-}
-
-.dot-indicator.active {
-  background: var(--color-rose);
-  width: 20px;
-  border-radius: 4px;
-}
-
-/* ========================================================
-   ATALHOS CIRCULARES (STORIES)
-   ======================================================== */
-.stories-section-container {
-  margin: 1.5rem 0 2.5rem;
-}
-
-.stories-section {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 2.5rem;
-  overflow-x: auto;
-  padding: 10px 0;
-}
-
-@media (max-width: 768px) {
-  .stories-section {
-    justify-content: space-around;
-    gap: 1rem;
-  }
-}
-
-.story-circle-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  flex-shrink: 0;
-}
-
-.story-ring {
-  width: 70px;
-  height: 70px;
-  border-radius: 50%;
-  padding: 3px;
-  background: linear-gradient(45deg, #F09433, #E6683C, #DC2743, #CC2366, #BC1888);
-  box-shadow: 0 4px 12px rgba(220, 39, 67, 0.25);
-  transition: transform 0.3s ease;
-}
-
-.story-circle-item:hover .story-ring {
-  transform: scale(1.08);
-}
-
-@media (max-width: 768px) {
-  .story-ring {
-    width: 58px;
-    height: 58px;
-  }
-}
-
-.story-ring-inner {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  overflow: hidden;
-  background: #FFF;
-  border: 2px solid var(--color-creme);
-}
-
-.story-ring-inner img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.story-label {
+.portfolio-vivo-header span {
   font-size: 0.8rem;
-  color: var(--color-preto);
+  color: var(--color-rose);
   font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 
-/* ========================================================
-   VITRINE DE SERVIÇOS EXPANSIVA (GRADE RESPONSIVA)
-   ======================================================== */
-.section-catalog {
-  margin: 2rem 0;
-}
-
-.section-head-row {
+.carousel-vivo-track {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1.5rem;
-}
-
-.section-head-row h3 {
-  font-family: var(--font-serif);
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: var(--color-preto);
-}
-
-.link-ver-todos {
-  font-size: 0.88rem;
-  color: var(--color-cinza);
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.link-ver-todos:hover {
-  color: var(--color-pink-accent);
-}
-
-/* Grade que se expande no Desktop: 4 colunas! */
-.services-compact-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
   gap: 1.2rem;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  padding-bottom: 12px;
+  -webkit-overflow-scrolling: touch;
 }
 
-@media (max-width: 1024px) {
-  .services-compact-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
+.carousel-vivo-track::-webkit-scrollbar {
+  height: 6px;
 }
 
-@media (max-width: 768px) {
-  .services-compact-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-  }
-}
-
-.service-card-compact {
-  background: var(--color-branco);
-  border-radius: var(--radius-md);
-  padding: 12px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  box-shadow: var(--shadow-subtle);
-  border: 1.5px solid var(--color-nude);
-  cursor: pointer;
-  transition: var(--transition-fast);
-}
-
-.service-card-compact:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-card);
-  border-color: var(--color-rose);
-}
-
-.service-card-compact .thumb {
-  width: 60px;
-  height: 60px;
-  border-radius: 12px;
-  overflow: hidden;
-  flex-shrink: 0;
-  background: var(--color-nude);
-}
-
-.service-card-compact .thumb img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.service-card-compact .info {
-  flex: 1;
-  min-width: 0;
-}
-
-.service-card-compact .info h4 {
-  font-size: 0.92rem;
-  font-weight: 600;
-  color: var(--color-preto);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin-bottom: 4px;
-}
-
-.service-card-compact .info .price {
-  font-size: 0.85rem;
-  color: var(--color-cinza);
-  font-weight: 700;
-}
-
-.btn-card-heart {
-  color: #CBD5E1;
-  font-size: 1rem;
-  padding: 6px;
-}
-
-.btn-card-heart.liked {
-  color: var(--color-pink-accent);
-}
-
-/* ========================================================
-   TELA 3: DETALHES DO SERVIÇO (SPLIT NO DESKTOP)
-   ======================================================== */
-.screen-service-details {
-  display: none;
-  flex-direction: column;
-  margin-top: 1.5rem;
-}
-
-.screen-service-details.active {
-  display: flex;
-}
-
-.details-split-grid {
-  display: grid;
-  grid-template-columns: 1.1fr 1fr;
-  gap: 2.5rem;
-  background: var(--color-branco);
-  border-radius: var(--radius-lg);
-  padding: 2rem;
-  box-shadow: var(--shadow-card);
-  border: 1px solid var(--color-nude);
-}
-
-@media (max-width: 768px) {
-  .details-split-grid {
-    grid-template-columns: 1fr;
-    padding: 1rem;
-    gap: 1.5rem;
-  }
-}
-
-.details-gallery-box {
-  position: relative;
-  border-radius: 18px;
-  overflow: hidden;
-}
-
-.details-gallery-carousel {
-  position: relative;
-  width: 100%;
-  height: 380px;
-  background: #000;
-  border-radius: 18px;
-  overflow: hidden;
-}
-
-.details-gallery-carousel img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.gallery-counter-badge {
-  position: absolute;
-  bottom: 14px;
-  right: 14px;
-  background: rgba(23, 23, 25, 0.7);
-  color: #fff;
-  font-size: 0.78rem;
-  padding: 4px 10px;
+.carousel-vivo-track::-webkit-scrollbar-track {
+  background: var(--color-nude-light);
   border-radius: var(--radius-pill);
 }
 
-.results-grid-3 {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  margin-top: 14px;
+.carousel-vivo-track::-webkit-scrollbar-thumb {
+  background: var(--color-rose);
+  border-radius: var(--radius-pill);
 }
 
-.results-grid-3 img {
-  width: 100%;
-  aspect-ratio: 1;
-  border-radius: 10px;
-  object-fit: cover;
-  cursor: pointer;
+.card-vivo-item {
+  flex: 0 0 280px;
+  background: var(--color-branco);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
   border: 1px solid var(--color-nude);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
 }
 
-.details-info-column {
+.card-vivo-item:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-floating);
+  border-color: var(--color-rose);
+}
+
+.card-vivo-image-wrap {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  background: #000;
+  overflow: hidden;
+}
+
+.card-vivo-image-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.card-vivo-item:hover .card-vivo-image-wrap img {
+  transform: scale(1.06);
+}
+
+.card-vivo-tag {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(23, 23, 25, 0.75);
+  backdrop-filter: blur(8px);
+  color: #FFF;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.card-vivo-info {
+  padding: 14px 16px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  flex: 1;
 }
 
-.details-title-row {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
+.card-vivo-info h3 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-preto);
+  margin-bottom: 4px;
+  line-height: 1.35;
+}
+
+.card-vivo-info p {
+  font-size: 0.78rem;
+  color: var(--color-cinza);
   margin-bottom: 12px;
 }
 
-.details-title-row h2 {
-  font-family: var(--font-serif);
-  font-size: 1.8rem;
-  color: var(--color-preto);
-}
-
-.details-price-badge {
-  font-family: var(--font-serif);
-  font-size: 1.6rem;
-  font-weight: 700;
-  color: var(--color-preto);
-}
-
-.details-desc-text {
-  font-size: 0.95rem;
-  color: var(--color-cinza);
-  line-height: 1.65;
-  margin-bottom: 1.5rem;
-}
-
-.details-meta-pill {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+.btn-card-vivo-book {
   background: var(--color-creme);
-  padding: 12px 16px;
-  border-radius: var(--radius-md);
-  margin-bottom: 10px;
-  border: 1px solid var(--color-nude);
+  color: var(--color-preto);
+  border: 1px solid var(--color-rose);
+  padding: 8px 12px;
+  border-radius: var(--radius-pill);
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: var(--transition-fast);
 }
 
-.details-meta-pill i {
-  color: var(--color-rose);
-  font-size: 1.2rem;
+.btn-card-vivo-book:hover {
+  background: var(--color-rose);
+  color: #FFF;
 }
 
 /* ========================================================
-   TELA 4: FLUXO DE AGENDAMENTO (EXPANSIVO 2 COLUNAS)
+   FILTRO POR CATEGORIAS (ABAS HORIZONTAIS)
    ======================================================== */
-.screen-booking-flow {
-  display: none;
-  flex-direction: column;
-  margin-top: 1.5rem;
-}
-
-.screen-booking-flow.active {
-  display: flex;
-}
-
-.booking-step-indicator {
+.category-filter-bar {
   display: flex;
   align-items: center;
-  justify-content: space-around;
-  padding: 12px 20px;
-  background: var(--color-branco);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--color-nude);
-  margin-bottom: 2rem;
+  gap: 0.8rem;
+  overflow-x: auto;
+  padding: 8px 0 16px;
+  margin-bottom: 1.8rem;
+  -webkit-overflow-scrolling: touch;
 }
 
-.step-node {
-  display: flex;
+.category-filter-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.category-pill-btn {
+  background: var(--color-branco);
+  border: 1.5px solid var(--color-nude);
+  color: var(--color-cinza);
+  padding: 9px 18px;
+  border-radius: var(--radius-pill);
+  font-size: 0.88rem;
+  font-weight: 600;
+  white-space: nowrap;
+  display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-size: 0.88rem;
-  color: var(--color-cinza);
-  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition-fast);
 }
 
-.step-node.active {
-  color: var(--color-preto);
-  font-weight: 700;
-}
-
-.step-bubble {
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background: var(--color-nude);
-  color: var(--color-cinza);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.8rem;
-  font-weight: 700;
-}
-
-.step-node.active .step-bubble {
-  background: var(--color-pink-btn);
+.category-pill-btn:hover {
+  border-color: var(--color-rose);
   color: var(--color-preto);
 }
 
-/* Split layout do agendamento no Desktop */
-.booking-split-container {
+.category-pill-btn.active {
+  background: var(--color-preto);
+  color: #FFFFFF;
+  border-color: var(--color-preto);
+  box-shadow: var(--shadow-subtle);
+}
+
+/* ========================================================
+   GRADE DE SERVIÇOS & CARDS COM PREVIEW DE STORIES
+   ======================================================== */
+.services-catalog-grid {
   display: grid;
-  grid-template-columns: 1.15fr 0.85fr;
-  gap: 2rem;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
 }
 
 @media (max-width: 768px) {
-  .booking-split-container {
+  .services-catalog-grid {
     grid-template-columns: 1fr;
+    gap: 1.2rem;
   }
 }
 
-.calendar-card {
+.service-card-interactive {
   background: var(--color-branco);
   border-radius: var(--radius-md);
-  padding: 20px;
-  border: 1px solid var(--color-nude);
+  padding: 18px;
+  border: 1.5px solid var(--color-nude);
   box-shadow: var(--shadow-subtle);
-  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-.calendar-month-header {
+.service-card-interactive:hover {
+  transform: translateY(-4px);
+  border-color: var(--color-rose);
+  box-shadow: var(--shadow-card);
+}
+
+.service-card-header {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 14px;
+}
+
+/* Thumbnail com anel gradiente de Stories do Instagram */
+.service-story-trigger {
+  position: relative;
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  padding: 3px;
+  background: linear-gradient(45deg, #F09433, #E6683C, #DC2743, #CC2366, #BC1888);
+  cursor: pointer;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(220, 39, 67, 0.25);
+  transition: transform 0.25s ease;
+}
+
+.service-story-trigger:hover {
+  transform: scale(1.08);
+}
+
+.service-story-trigger-inner {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid var(--color-branco);
+  background: var(--color-nude);
+}
+
+.service-story-trigger-inner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.story-play-pill-badge {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  background: var(--color-preto);
+  color: #FFF;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  border: 2px solid #FFF;
+}
+
+.service-info-block {
+  flex: 1;
+}
+
+.service-info-block h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--color-preto);
+  margin-bottom: 4px;
+}
+
+.service-category-tag {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--color-rose);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.service-desc-text {
+  font-size: 0.85rem;
+  color: var(--color-cinza);
+  line-height: 1.5;
+  margin-bottom: 14px;
+}
+
+.service-card-footer {
+  border-top: 1px solid var(--color-nude-light);
+  padding-top: 14px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 18px;
 }
 
-.calendar-month-header h4 {
+.service-price-block {
+  display: flex;
+  flex-direction: column;
+}
+
+.service-duration-lbl {
+  font-size: 0.75rem;
+  color: var(--color-cinza);
+}
+
+.service-price-val {
   font-family: var(--font-serif);
-  font-size: 1.2rem;
+  font-size: 1.35rem;
+  font-weight: 700;
   color: var(--color-preto);
 }
 
-.calendar-weekdays-grid {
+.service-actions-pair {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-open-story-text {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-rose);
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.btn-open-story-text:hover {
+  background: var(--color-nude-light);
+}
+
+.btn-select-book-service {
+  background: var(--color-preto);
+  color: #FFFFFF;
+  padding: 9px 18px;
+  border-radius: var(--radius-pill);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-select-book-service:hover {
+  background: var(--color-pink-btn);
+  color: var(--color-preto);
+  transform: translateY(-2px);
+}
+
+/* ========================================================
+   MODAL DE STORIES ESTILO INSTAGRAM (3 VÍDEOS SEQUENCIAIS)
+   ======================================================== */
+.story-instagram-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.94);
+  backdrop-filter: blur(12px);
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.story-instagram-modal.active {
+  display: flex;
+}
+
+.story-phone-viewport {
+  width: 100%;
+  max-width: 420px;
+  height: 90vh;
+  max-height: 840px;
+  background: #171719;
+  border-radius: 24px;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  user-select: none;
+}
+
+/* 3 Barras de Progresso Superiores */
+.story-progress-bars-container {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  right: 14px;
+  z-index: 50;
+  display: flex;
+  gap: 6px;
+}
+
+.story-progress-bar-slot {
+  flex: 1;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.35);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.story-progress-bar-fill {
+  width: 0%;
+  height: 100%;
+  background: #FFFFFF;
+  border-radius: 4px;
+  transition: width 0.05s linear;
+}
+
+.story-progress-bar-fill.done {
+  width: 100% !important;
+}
+
+/* Topbar do Story */
+.story-top-profile-bar {
+  position: absolute;
+  top: 26px;
+  left: 14px;
+  right: 14px;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #FFF;
+}
+
+.story-profile-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.story-avatar-small {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 1.5px solid #FFF;
+}
+
+.story-avatar-small img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.story-author-info h4 {
+  font-size: 0.85rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.story-author-info span {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.btn-close-story {
+  color: #FFF;
+  font-size: 1.6rem;
+  cursor: pointer;
+  padding: 4px;
+}
+
+/* Mídia do Story (Imagem ou Vídeo) */
+.story-media-display {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+}
+
+.story-media-display img, .story-media-display video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Toque Esquerda / Direita para Avançar / Voltar */
+.story-tap-area {
+  position: absolute;
+  top: 60px;
+  bottom: 80px;
+  z-index: 40;
+}
+
+.story-tap-left {
+  left: 0;
+  width: 35%;
+}
+
+.story-tap-right {
+  right: 0;
+  width: 65%;
+}
+
+/* Legenda do Story */
+.story-caption-overlay {
+  position: absolute;
+  bottom: 85px;
+  left: 16px;
+  right: 16px;
+  z-index: 50;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(8px);
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  color: #FFF;
+  font-size: 0.88rem;
+  line-height: 1.4;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+/* Botão de Chamada para Ação Fixo no Rodapé do Story */
+.story-cta-footer {
+  position: absolute;
+  bottom: 14px;
+  left: 16px;
+  right: 16px;
+  z-index: 50;
+}
+
+.btn-story-schedule-now {
+  width: 100%;
+  background: var(--color-pink-btn);
+  color: var(--color-preto);
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 14px;
+  border-radius: var(--radius-pill);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.btn-story-schedule-now:hover {
+  background: var(--color-pink-btn-hover);
+  transform: scale(1.02);
+}
+
+/* ========================================================
+   FLUXO DE AGENDAMENTO ENXUTO (100% LGPD)
+   ======================================================== */
+.booking-section-wrapper {
+  margin: 2rem 0;
+}
+
+.booking-card-main {
+  background: var(--color-branco);
+  border-radius: var(--radius-lg);
+  border: 1.5px solid var(--color-nude);
+  padding: 2.2rem;
+  box-shadow: var(--shadow-card);
+}
+
+@media (max-width: 768px) {
+  .booking-card-main {
+    padding: 1.2rem;
+  }
+}
+
+.booking-split-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 2.5rem;
+}
+
+@media (max-width: 900px) {
+  .booking-split-grid {
+    grid-template-columns: 1fr;
+    gap: 1.8rem;
+  }
+}
+
+/* Calendário */
+.calendar-box-styled {
+  background: var(--color-creme);
+  border-radius: var(--radius-md);
+  padding: 18px;
+  border: 1px solid var(--color-nude);
+  margin-bottom: 1.5rem;
+}
+
+.calendar-header-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.calendar-header-nav h3 {
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  color: var(--color-preto);
+}
+
+.cal-arrow-btn {
+  font-size: 1rem;
+  color: var(--color-preto);
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+}
+
+.cal-arrow-btn:hover {
+  background: var(--color-nude);
+}
+
+.calendar-week-days {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   text-align: center;
-  font-size: 0.82rem;
+  font-size: 0.8rem;
+  font-weight: 700;
   color: var(--color-cinza);
-  font-weight: 600;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
-.calendar-days-grid {
+.calendar-grid-cells {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 6px;
   text-align: center;
 }
 
-.cal-day-cell {
+.cal-cell {
   aspect-ratio: 1;
   display: flex;
   align-items: center;
@@ -894,258 +879,247 @@ img {
   transition: var(--transition-fast);
 }
 
-.cal-day-cell:hover:not(.disabled) {
-  background: var(--color-nude-light);
+.cal-cell:hover:not(.disabled) {
+  background: var(--color-rose-light);
 }
 
-.cal-day-cell.selected {
+.cal-cell.selected {
   background: var(--color-pink-btn) !important;
   color: var(--color-preto) !important;
   font-weight: 700;
 }
 
-.cal-day-cell.disabled {
+.cal-cell.disabled {
   color: #D1CDD0;
   cursor: not-allowed;
   pointer-events: none;
 }
 
 /* Horários Disponíveis */
-.time-slots-container {
-  background: var(--color-branco);
-  border-radius: var(--radius-md);
-  padding: 20px;
-  border: 1px solid var(--color-nude);
-  box-shadow: var(--shadow-subtle);
-}
-
-.time-slots-container h4 {
-  font-size: 1rem;
+.time-slots-wrapper h4 {
+  font-size: 0.95rem;
   font-weight: 600;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
 }
 
 .time-slots-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
+  gap: 8px;
 }
 
-.time-slot-btn {
+@media (max-width: 600px) {
+  .time-slots-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.time-pill-btn {
   background: var(--color-creme);
   border: 1px solid var(--color-nude);
   border-radius: var(--radius-pill);
-  padding: 10px 6px;
+  padding: 10px 4px;
   text-align: center;
-  font-size: 0.9rem;
-  font-weight: 500;
+  font-size: 0.88rem;
+  font-weight: 600;
   color: var(--color-preto);
   transition: var(--transition-fast);
 }
 
-.time-slot-btn.selected {
+.time-pill-btn.selected {
   background: var(--color-preto);
-  color: #FFFFFF;
+  color: #FFF;
   border-color: var(--color-preto);
-  font-weight: 700;
 }
 
-/* Card Resumo do Serviço no Agendamento */
-.booking-summary-sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
-.selected-service-summary-card {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  background: var(--color-branco);
-  border-radius: var(--radius-md);
-  padding: 16px;
-  border: 1px solid var(--color-nude);
-  box-shadow: var(--shadow-subtle);
-}
-
-.selected-service-summary-card .thumb {
-  width: 60px;
-  height: 60px;
-  border-radius: 12px;
-  overflow: hidden;
-}
-
-.selected-service-summary-card .thumb img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.selected-service-summary-card h4 {
-  font-size: 1.05rem;
-  font-weight: 600;
-}
-
-.selected-service-summary-card p {
-  font-size: 0.88rem;
-  color: var(--color-cinza);
-  margin-top: 4px;
-}
-
-.client-data-form-box {
-  background: var(--color-branco);
+/* Formulário de 2 Campos Obrigatórios (LGPD) */
+.lgpd-form-box {
+  background: var(--color-creme);
   border-radius: var(--radius-md);
   padding: 20px;
   border: 1px solid var(--color-nude);
-  box-shadow: var(--shadow-subtle);
 }
 
-.client-data-form-box h4 {
-  font-size: 1rem;
-  font-weight: 600;
+.lgpd-badge-notice {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(34, 110, 58, 0.1);
+  color: #226E3A;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  margin-bottom: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.lgpd-input-group {
   margin-bottom: 14px;
 }
 
-.form-input-styled {
+.lgpd-input-group label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-preto);
+  margin-bottom: 6px;
+}
+
+.lgpd-input-styled {
   width: 100%;
   padding: 12px 16px;
-  border-radius: var(--radius-sm);
   border: 1.5px solid var(--color-nude);
+  border-radius: var(--radius-sm);
   background: #FFF;
   font-size: 0.95rem;
   color: var(--color-preto);
-  margin-top: 4px;
-  margin-bottom: 14px;
   outline: none;
   transition: var(--transition-fast);
 }
 
-.form-input-styled:focus {
+.lgpd-input-styled:focus {
   border-color: var(--color-rose);
-  box-shadow: 0 0 0 3px rgba(233, 163, 181, 0.2);
+  box-shadow: 0 0 0 3px rgba(233, 163, 181, 0.25);
 }
 
-/* ========================================================
-   TELA 5: MEUS AGENDAMENTOS (EXPANSIVO)
-   ======================================================== */
-.screen-my-appointments {
-  display: none;
-  flex-direction: column;
-  margin-top: 1.5rem;
-}
-
-.screen-my-appointments.active {
-  display: flex;
-}
-
-.appointments-tabs-switch {
-  display: flex;
-  max-width: 380px;
-  margin: 0 auto 2rem;
-  background: var(--color-nude-light);
-  padding: 5px;
-  border-radius: var(--radius-pill);
-}
-
-.tab-pill-btn {
-  flex: 1;
-  padding: 10px 18px;
-  border-radius: var(--radius-pill);
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--color-cinza);
-  text-align: center;
-}
-
-.tab-pill-btn.active {
+.btn-confirm-booking-lgpd {
+  width: 100%;
   background: var(--color-preto);
   color: #FFFFFF;
-}
-
-.appointments-cards-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-  gap: 1.2rem;
-}
-
-@media (max-width: 768px) {
-  .appointments-cards-list {
-    grid-template-columns: 1fr;
-  }
-}
-
-.appointment-card-item {
-  background: var(--color-branco);
-  border-radius: var(--radius-md);
   padding: 16px;
-  border: 1px solid var(--color-nude);
-  box-shadow: var(--shadow-subtle);
+  border-radius: var(--radius-pill);
+  font-size: 1rem;
+  font-weight: 700;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 14px;
   cursor: pointer;
   transition: var(--transition-fast);
-}
-
-.appointment-card-item:hover {
-  transform: translateY(-2px);
   box-shadow: var(--shadow-card);
 }
 
-.card-appointment-left {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-
-.card-appointment-left .thumb {
-  width: 52px;
-  height: 52px;
-  border-radius: 10px;
-  overflow: hidden;
-  background: var(--color-nude);
-}
-
-.card-appointment-left .thumb img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.card-appointment-left .meta p {
-  font-size: 0.85rem;
-  color: var(--color-cinza);
-  font-weight: 500;
-}
-
-.card-appointment-left .meta h4 {
-  font-size: 1rem;
-  font-weight: 600;
+.btn-confirm-booking-lgpd:hover {
+  background: var(--color-pink-btn);
   color: var(--color-preto);
-  margin: 2px 0 4px;
+  transform: translateY(-2px);
 }
 
-.badge-status {
-  display: inline-block;
-  padding: 3px 10px;
-  border-radius: var(--radius-pill);
-  font-size: 0.75rem;
-  font-weight: 600;
+/* ========================================================
+   CARD DE SUCESSO / CONFIRMAÇÃO COM CALENDÁRIOS
+   ======================================================== */
+.booking-success-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
 }
 
-.badge-status.confirmado {
+.booking-success-modal.active {
+  display: flex;
+}
+
+.success-card-content {
+  background: var(--color-branco);
+  border-radius: var(--radius-lg);
+  max-width: 480px;
+  width: 100%;
+  padding: 2.2rem;
+  text-align: center;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--color-nude);
+}
+
+.success-icon-ring {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
   background: var(--status-confirmado-bg);
   color: var(--status-confirmado-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  margin: 0 auto 1.2rem;
 }
 
-.badge-status.aguardando {
-  background: var(--status-aguardando-bg);
-  color: var(--status-aguardando-text);
+.success-card-content h3 {
+  font-family: var(--font-serif);
+  font-size: 1.5rem;
+  color: var(--color-preto);
+  margin-bottom: 8px;
 }
 
-.badge-status.cancelado {
-  background: var(--status-cancelado-bg);
-  color: var(--status-cancelado-text);
+.success-card-content p {
+  font-size: 0.9rem;
+  color: var(--color-cinza);
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+}
+
+.success-summary-box {
+  background: var(--color-creme);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  text-align: left;
+  font-size: 0.88rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid var(--color-nude);
+}
+
+.success-summary-box div {
+  margin-bottom: 6px;
+}
+
+.success-actions-col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.btn-add-gcalendar {
+  background: #4285F4;
+  color: #FFF;
+  padding: 12px;
+  border-radius: var(--radius-pill);
+  font-size: 0.9rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-download-ics {
+  background: var(--color-creme);
+  border: 1px solid var(--color-preto);
+  color: var(--color-preto);
+  padding: 11px;
+  border-radius: var(--radius-pill);
+  font-size: 0.88rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-close-success {
+  background: var(--color-preto);
+  color: #FFF;
+  padding: 12px;
+  border-radius: var(--radius-pill);
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-top: 6px;
 }
 
 /* ========================================================
@@ -1159,7 +1133,7 @@ img {
 }
 
 .footer-inner-grid {
-  max-width: 1200px;
+  max-width: 1240px;
   margin: 0 auto;
   padding: 0 1.5rem;
   display: grid;
@@ -1205,6 +1179,7 @@ img {
 .footer-col ul a {
   color: #A39D9E;
   font-size: 0.88rem;
+  transition: color 0.2s ease;
 }
 
 .footer-col ul a:hover {
@@ -1212,7 +1187,7 @@ img {
 }
 
 .footer-bottom-bar {
-  max-width: 1200px;
+  max-width: 1240px;
   margin: 0 auto;
   padding: 1.5rem 1.5rem 0;
   display: flex;
@@ -1228,106 +1203,4 @@ img {
     gap: 10px;
     text-align: center;
   }
-}
-
-/* ========================================================
-   BARRA DE NAVEGAÇÃO INFERIOR (APENAS CELULAR / MOBILE)
-   ======================================================== */
-.client-bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  background: var(--color-creme);
-  border-top: 1px solid var(--color-nude);
-  display: none; /* Oculta no Desktop */
-  align-items: center;
-  justify-content: space-around;
-  padding: 8px 10px 12px;
-  z-index: 1000;
-  box-shadow: 0 -4px 15px rgba(23, 23, 25, 0.08);
-}
-
-@media (max-width: 768px) {
-  .client-bottom-nav {
-    display: flex; /* Exibe apenas no celular */
-  }
-}
-
-.nav-tab-btn {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  color: var(--color-cinza);
-  font-size: 0.72rem;
-  font-weight: 500;
-  flex: 1;
-}
-
-.nav-tab-btn i {
-  font-size: 1.15rem;
-}
-
-.nav-tab-btn.active {
-  color: var(--color-pink-accent);
-  font-weight: 700;
-}
-
-.nav-tab-btn.agendar-center {
-  position: relative;
-  top: -12px;
-}
-
-.nav-tab-btn.agendar-center .circle-btn {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: var(--color-pink-btn);
-  color: var(--color-preto);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: var(--shadow-pink);
-  font-size: 1.2rem;
-}
-
-/* Modal de Stories */
-.story-viewer-modal {
-  display: none;
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  background: rgba(0, 0, 0, 0.95);
-  backdrop-filter: blur(10px);
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-.story-viewer-modal.active {
-  display: flex;
-}
-
-.story-modal-image-wrap {
-  width: 100%;
-  max-width: 520px;
-  height: 80vh;
-  position: relative;
-}
-
-.story-modal-image-wrap img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-
-.story-close-btn {
-  position: absolute;
-  top: 24px;
-  right: 28px;
-  color: #fff;
-  font-size: 2rem;
-  cursor: pointer;
-  z-index: 10;
 }
