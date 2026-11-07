@@ -221,7 +221,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const storyCaptionOverlay = document.getElementById('storyCaptionOverlay');
   const storyAuthorTitle = document.getElementById('storyAuthorTitle');
   const btnCloseStory = document.getElementById('btnCloseStory');
-  const btnStoryScheduleNow = document.getElementById('btnStoryScheduleNow');
+  const btnStoryScheduleNow = document.getElementById('btnStoryScheduleNow') || document.getElementById('btnStoryBookNow');
   const storyTapLeft = document.getElementById('storyTapLeft');
   const storyTapRight = document.getElementById('storyTapRight');
 
@@ -259,6 +259,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     state.storyService = null;
   }
+
+  window.openStoryForService = openInstagramStoriesModal;
 
   function startStoryAtIndex(index) {
     clearTimeout(state.storyTimer);

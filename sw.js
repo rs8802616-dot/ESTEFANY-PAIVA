@@ -1,4 +1,4 @@
-const CACHE_NAME = 'estefany-nails-v5-official-cover';
+const CACHE_NAME = 'estefany-nails-v6-luxury-wine';
 const STATIC_ASSETS = [
   './',
   './index.html',

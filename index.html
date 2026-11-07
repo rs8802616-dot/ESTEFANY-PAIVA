@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Estefany Paiva Nails | Agendamento, Stories & Portfólio Vivo</title>
+  <title>Estefany Paiva &bull; Nail Designer | Agendamento & Portfólio</title>
   
-  <meta name="description" content="Plataforma de agendamento online de nail design de alto padrão para Estefany Paiva Nails. Stories de trabalhos, catálogo por categorias e agendamento seguro LGPD.">
-  <meta name="theme-color" content="#F8F2ED">
+  <meta name="theme-color" content="#350B19">
+  <meta name="description" content="Plataforma de agendamento online de nail design de luxo para Estefany Paiva Nails. Cuidados, beleza e autoestima em cada detalhe.">
 
   <!-- Manifest PWA -->
   <link rel="manifest" href="manifest.json">
@@ -16,115 +16,240 @@
   <!-- Fontes Oficiais: Editorial Serif + Modern Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <!-- Font Awesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
   <!-- Estilos do Portal do Cliente -->
+  <link rel="stylesheet" href="assets/css/variables.css">
   <link rel="stylesheet" href="assets/css/client.css">
 </head>
-<body>
+<body style="background: #FAF5F4; color: #171719; padding-bottom: 5rem;">
 
   <!-- ESTRUTURA PRINCIPAL EXPANSIVA DO SITE -->
   <div class="site-wrapper">
 
     <!-- ========================================================
-         CABEÇALHO EXPANSIVO (TOPBAR)
+         1. CABEÇALHO VINHO DE LUXO COM ONDAS ORGÂNICAS (MOCKUP)
          ======================================================== -->
-    <header class="client-topbar">
-      <div class="topbar-inner-container">
+    <header class="wine-luxury-header">
+      <div class="wine-header-inner">
         
-        <!-- Logo e Identidade Visual -->
-        <div class="brand-title-center" onclick="window.scrollTo({top:0, behavior:'smooth'})">
-          <div class="brand-avatar-mini">
-            <img src="assets/images/capa-estefany-paiva.jpg" alt="Estefany Paiva Nails">
-          </div>
-          <div class="brand-title-text">
-            <h1 id="brandNameDisplay">ESTEFANY PAIVA</h1>
-            <span id="brandSubtitleDisplay">NAILS &bull; AUTOESTIMA</span>
+        <!-- Status Bar do Celular (Apenas Telas Compactas) -->
+        <div class="mobile-status-bar">
+          <span>9:41</span>
+          <div class="mobile-status-icons">
+            <i class="fa-solid fa-signal"></i>
+            <i class="fa-solid fa-wifi"></i>
+            <i class="fa-solid fa-battery-full"></i>
           </div>
         </div>
 
-        <!-- Menu Desktop -->
-        <nav class="desktop-nav-menu">
-          <li class="desktop-nav-link active" onclick="window.scrollTo({top:0, behavior:'smooth'})">Início</li>
-          <li class="desktop-nav-link" onclick="document.getElementById('secPortfolioVivo').scrollIntoView({behavior:'smooth'})">Portfólio Vivo</li>
-          <li class="desktop-nav-link" onclick="document.getElementById('secCatalogoServicos').scrollIntoView({behavior:'smooth'})">Serviços & Stories</li>
-          <li class="desktop-nav-link" onclick="document.getElementById('bookingSection').scrollIntoView({behavior:'smooth'})">Agendar Horário</li>
-        </nav>
+        <!-- Barra Superior: Menu, Logo Assinatura e Sino de Notificação -->
+        <div class="wine-topbar">
+          <button class="btn-wine-icon" id="btnOpenMenu" aria-label="Abrir Menu" onclick="document.getElementById('secMeusAgendamentos').scrollIntoView({behavior:'smooth'})">
+            <i class="fa-solid fa-bars"></i>
+          </button>
 
-        <!-- Botão de Ação Rápida -->
-        <div class="topbar-actions-right">
-          <button class="btn-header-cta-schedule" onclick="document.getElementById('bookingSection').scrollIntoView({behavior:'smooth'})">
-            <i class="fa-regular fa-calendar-plus"></i>
-            <span>Agendar Horário</span>
+          <!-- Logo Assinatura Ep ESTEFANY PAIVA NAIL DESIGNER -->
+          <div class="brand-signature-logo" onclick="window.scrollTo({top:0, behavior:'smooth'})">
+            <span class="sig-cursive-ep">Ep</span>
+            <div class="sig-text-block">
+              <span class="sig-name">ESTEFANY PAIVA</span>
+              <span class="sig-subtitle">NAIL DESIGNER</span>
+            </div>
+          </div>
+
+          <button class="btn-wine-icon btn-notification" id="btnNotificationBell" aria-label="Notificações" onclick="document.getElementById('secMeusAgendamentos').scrollIntoView({behavior:'smooth'})">
+            <i class="fa-regular fa-bell"></i>
+            <span class="notification-badge-pink">1</span>
           </button>
-          <button class="mobile-only-btn" onclick="document.getElementById('bookingSection').scrollIntoView({behavior:'smooth'})" aria-label="Agendar">
-            <i class="fa-regular fa-calendar-check"></i>
-          </button>
+        </div>
+
+        <!-- Linha de Saudação da Cliente -->
+        <div class="user-greeting-card">
+          <div class="greeting-avatar-wrap">
+            <img src="assets/images/trabalho-amendoada-ouro.png" alt="Unhas da Cliente">
+          </div>
+          <div class="greeting-text-wrap">
+            <h2>Olá, Mariana! <i class="fa-regular fa-heart"></i></h2>
+            <p>Bem-vinda de volta!</p>
+          </div>
         </div>
 
       </div>
     </header>
 
-    <!-- ÁREA DE CONTEÚDO PRINCIPAL EXPANSIVA -->
-    <main class="main-content-area">
+    <!-- ÁREA PRINCIPAL EXPANSIVA -->
+    <main class="main-content-area" style="max-width:1100px; margin:0 auto;">
 
       <!-- ========================================================
-           CAPA OFICIAL DO APLICATIVO / HERO DE ENTRADA
+           2. GRADE DE 4 AÇÕES RÁPIDAS (CARDS ROSÉ PASTEL)
            ======================================================== -->
-      <section class="app-hero-cover-section">
-        <div class="hero-cover-card">
-          <div class="hero-cover-image-box">
-            <img src="assets/images/capa-estefany-paiva.jpg" alt="Estefany Paiva Nail Designer - Capa do Aplicativo" class="hero-cover-img">
+      <section class="quick-actions-section">
+        <div class="quick-actions-grid">
+          
+          <div class="quick-action-card" onclick="document.getElementById('bookingSection').scrollIntoView({behavior:'smooth'})">
+            <div class="icon-circle">
+              <i class="fa-regular fa-calendar-check"></i>
+            </div>
+            <span>Agendar Horário</span>
           </div>
-          <div class="hero-cover-text-content">
-            <span class="hero-badge-tag"><i class="fa-solid fa-sparkles"></i> Atendimento Exclusivo com Hora Marcada</span>
-            <h2>ESTEFANY PAIVA</h2>
-            <h3 class="hero-designer-sub">NAIL DESIGNER</h3>
-            <p class="hero-slogan-desc">Mais que unhas, é autoestima. Procedimentos de alto padrão em gel, blindagem e nail arts exclusivas feitas especialmente para você.</p>
-            <div class="hero-cta-group">
-              <button class="btn-hero-primary" onclick="document.getElementById('bookingSection').scrollIntoView({behavior:'smooth'})">
-                <i class="fa-regular fa-calendar-check"></i>
-                <span>Agendar Horário Agora</span>
-              </button>
-              <button class="btn-hero-secondary" onclick="document.getElementById('secCatalogoServicos').scrollIntoView({behavior:'smooth'})">
-                <i class="fa-solid fa-film"></i>
-                <span>Ver Procedimentos & Stories</span>
-              </button>
+
+          <div class="quick-action-card" onclick="document.getElementById('secMeusAgendamentos').scrollIntoView({behavior:'smooth'})">
+            <div class="icon-circle">
+              <i class="fa-regular fa-clock-rotate-left"></i>
+            </div>
+            <span>Meus Agendamentos</span>
+          </div>
+
+          <div class="quick-action-card" onclick="document.getElementById('secNossosServicos').scrollIntoView({behavior:'smooth'})">
+            <div class="icon-circle">
+              <i class="fa-regular fa-gem"></i>
+            </div>
+            <span>Serviços</span>
+          </div>
+
+          <div class="quick-action-card" onclick="openProfileContactModal()">
+            <div class="icon-circle">
+              <i class="fa-regular fa-user"></i>
+            </div>
+            <span>Meu Perfil</span>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ========================================================
+           3. BANNER PROMOCIONAL DESTAQUE COM ONDAS
+           ======================================================== -->
+      <section class="promo-banner-section">
+        <div class="promo-banner-card">
+          <div class="promo-banner-text">
+            <h3>Cuidado, beleza e autoestima em cada detalhe ♡</h3>
+            <button class="btn-promo-wine" onclick="document.getElementById('bookingSection').scrollIntoView({behavior:'smooth'})">
+              <span>Agendar agora</span>
+              <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          </div>
+          <div class="promo-banner-img-wrap">
+            <img src="assets/images/trabalho-tons-terrosos.png" alt="Unhas com acabamento rosé e nude impecável">
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================
+           4. SEÇÃO "✦ MEUS AGENDAMENTOS" (DESTAQUE PRÓXIMO ATENDIMENTO)
+           ======================================================== -->
+      <section class="section-meus-agendamentos" id="secMeusAgendamentos">
+        <div class="section-wine-title-bar">
+          <h3>✦ Meus Agendamentos</h3>
+          <a href="#" onclick="openAppointmentsFullModal(); return false;">Ver todos &gt;</a>
+        </div>
+
+        <div class="next-appointment-card" id="nextAppointmentCardPreview">
+          <div class="appointment-date-badge">
+            <span class="week-day" id="appPreviewWeekDay">Sáb</span>
+            <span class="day-num" id="appPreviewDayNum">08</span>
+            <span class="month-name" id="appPreviewMonth">Nov</span>
+          </div>
+
+          <div class="appointment-details-col">
+            <h4 id="appPreviewServiceName">Alongamento em Gel</h4>
+            <div class="slot-meta">
+              <span><i class="fa-regular fa-clock"></i> <strong id="appPreviewTime">14:00</strong></span>
+              <span><i class="fa-regular fa-user"></i> com Estefany Paiva</span>
             </div>
           </div>
+
+          <button class="btn-view-details-pill" onclick="openAppointmentsFullModal()">
+            <span>Ver detalhes</span>
+            <i class="fa-solid fa-chevron-right" style="font-size:0.75rem;"></i>
+          </button>
         </div>
       </section>
 
       <!-- ========================================================
-           1. CARROSSEL SUPERIOR: PORTFÓLIO VIVO (TRABALHOS REALIZADOS)
+           5. SEÇÃO "♡ NOSSOS SERVIÇOS" (CARROSSEL DE PROCEDIMENTOS)
            ======================================================== -->
-      <section class="portfolio-vivo-section" id="secPortfolioVivo">
-        <div class="portfolio-vivo-header">
-          <div>
-            <h2>Trabalhos Realizados</h2>
-            <span>Portfólio Vivo &bull; Resultados Reais</span>
+      <section class="section-nossos-servicos" id="secNossosServicos">
+        <div class="section-wine-title-bar">
+          <h3>♡ Nossos Serviços</h3>
+          <span style="font-size:0.82rem; color:#8A2D4E;">Toque para assistir aos Stories em vídeo</span>
+        </div>
+
+        <div class="service-mock-row">
+          
+          <!-- Card 1: Alongamento em Gel -->
+          <div class="service-mock-card" onclick="openStoryForService('srv_alongamento')">
+            <div class="service-mock-thumb">
+              <img src="assets/images/trabalho-alongamento-chocolate.png" alt="Alongamento em Gel">
+              <div class="story-play-pill-badge" style="position:absolute; bottom:8px; right:8px; background:rgba(0,0,0,0.6); color:#FFF; padding:4px 8px; border-radius:9999px; font-size:0.75rem;">
+                <i class="fa-solid fa-play"></i> Stories
+              </div>
+            </div>
+            <div class="service-mock-info">
+              <h4>Alongamento em Gel</h4>
+              <span class="saiba-mais-link">Saiba mais &gt;</span>
+            </div>
           </div>
-          <span style="font-size:0.82rem; color:#777176;"><i class="fa-solid fa-arrows-left-right"></i> Arraste para explorar</span>
-        </div>
 
-        <div class="carousel-vivo-track" id="carouselVivoTrack">
-          <!-- Injetado dinamicamente via client.js -->
+          <!-- Card 2: Manicure Clássica -->
+          <div class="service-mock-card" onclick="openStoryForService('srv_esmalte')">
+            <div class="service-mock-thumb">
+              <img src="assets/images/trabalho-tons-terrosos.png" alt="Manicure Clássica & Esmaltação">
+              <div class="story-play-pill-badge" style="position:absolute; bottom:8px; right:8px; background:rgba(0,0,0,0.6); color:#FFF; padding:4px 8px; border-radius:9999px; font-size:0.75rem;">
+                <i class="fa-solid fa-play"></i> Stories
+              </div>
+            </div>
+            <div class="service-mock-info">
+              <h4>Manicure Clássica</h4>
+              <span class="saiba-mais-link">Saiba mais &gt;</span>
+            </div>
+          </div>
+
+          <!-- Card 3: Spa das Mãos & Blindagem -->
+          <div class="service-mock-card" onclick="openStoryForService('srv_blindagem')">
+            <div class="service-mock-thumb">
+              <img src="assets/images/trabalho-perolada-glaze.png" alt="Spa das Mãos & Blindagem Diamante">
+              <div class="story-play-pill-badge" style="position:absolute; bottom:8px; right:8px; background:rgba(0,0,0,0.6); color:#FFF; padding:4px 8px; border-radius:9999px; font-size:0.75rem;">
+                <i class="fa-solid fa-play"></i> Stories
+              </div>
+            </div>
+            <div class="service-mock-info">
+              <h4>Spa das Mãos</h4>
+              <span class="saiba-mais-link">Saiba mais &gt;</span>
+            </div>
+          </div>
+
+          <!-- Card 4: Nail Art & Encapsuladas -->
+          <div class="service-mock-card" onclick="openStoryForService('srv_nailart')">
+            <div class="service-mock-thumb">
+              <img src="assets/images/trabalho-amendoada-ouro.png" alt="Nail Art & Encapsuladas">
+              <div class="story-play-pill-badge" style="position:absolute; bottom:8px; right:8px; background:rgba(0,0,0,0.6); color:#FFF; padding:4px 8px; border-radius:9999px; font-size:0.75rem;">
+                <i class="fa-solid fa-play"></i> Stories
+              </div>
+            </div>
+            <div class="service-mock-info">
+              <h4>Nail Art & Foil de Ouro</h4>
+              <span class="saiba-mais-link">Saiba mais &gt;</span>
+            </div>
+          </div>
+
         </div>
       </section>
 
       <!-- ========================================================
-           2. CATÁLOGO DE SERVIÇOS POR CATEGORIA COM STORIES
+           6. CATÁLOGO EXPANSIVO COM FILTROS DE CATEGORIA E PREÇOS
            ======================================================== -->
-      <section class="services-section-wrapper" id="secCatalogoServicos">
+      <section class="services-section-wrapper" id="secCatalogoServicos" style="margin-top:1rem;">
         <div style="margin-bottom:1.5rem;">
-          <h2 style="font-family:var(--font-serif); font-size:1.6rem; color:var(--color-preto); margin-bottom:4px;">
-            Procedimentos & Experiência
+          <h2 style="font-family:var(--font-serif); font-size:1.6rem; color:#350B19; margin-bottom:4px;">
+            Catálogo Completo de Procedimentos
           </h2>
-          <p style="color:var(--color-cinza); font-size:0.95rem;">
-            Toque na imagem da unha para assistir aos <strong>Stories em vídeo</strong> daquele procedimento ou clique em <strong>Agendar</strong>.
+          <p style="color:var(--color-cinza); font-size:0.92rem;">
+            Selecione o procedimento desejado para visualizar a duração, valor e escolher seu horário.
           </p>
         </div>
 
@@ -140,16 +265,16 @@
       </section>
 
       <!-- ========================================================
-           3. FLUXO DE AGENDAMENTO ENXUTO (100% CONFORME LGPD)
+           7. FLUXO DE AGENDAMENTO ENXUTO (100% CONFORME LGPD)
            ======================================================== -->
-      <section class="booking-section-wrapper" id="bookingSection">
+      <section class="booking-section-wrapper" id="bookingSection" style="margin-top:2rem;">
         <div class="booking-card-main">
           
           <div style="margin-bottom:1.8rem; border-bottom:1px solid var(--color-nude-light); padding-bottom:1rem;">
             <span class="lgpd-badge-notice">
               <i class="fa-solid fa-shield-halved"></i> 100% Seguro &bull; Minimização LGPD (Art. 6º, III)
             </span>
-            <h2 style="font-family:var(--font-serif); font-size:1.65rem; color:var(--color-preto); margin-top:6px;">
+            <h2 style="font-family:var(--font-serif); font-size:1.65rem; color:#350B19; margin-top:6px;">
               Escolha seu Horário e Agende
             </h2>
             <p style="color:var(--color-cinza); font-size:0.92rem;">
@@ -159,72 +284,91 @@
 
           <div class="booking-split-grid">
             
-            <!-- Coluna 1: Calendário Mensal e Horários Livres -->
-            <div>
-              <!-- Serviço Selecionado -->
-              <div id="selectedServiceSummaryBooking" style="background:var(--color-creme); border-radius:12px; padding:14px; border:1px solid var(--color-nude); margin-bottom:1.5rem;">
-                <!-- Injetado dinamicamente -->
+            <!-- Coluna 1: Procedimento Selecionado & Calendário -->
+            <div class="booking-left-col">
+              
+              <div class="service-selected-pill" id="selectedServicePreviewBox">
+                <div class="srv-pill-thumb">
+                  <img src="assets/images/trabalho-alongamento-chocolate.png" id="previewSrvThumb" alt="Serviço">
+                </div>
+                <div class="srv-pill-text">
+                  <h4 id="previewSrvName">Alongamento em Gel Formato Coffin</h4>
+                  <p><span id="previewSrvDuration">2h</span> &bull; <strong id="previewSrvPrice">R$ 150,00</strong></p>
+                </div>
               </div>
 
-              <!-- Calendário Mensal -->
-              <div class="calendar-box-styled">
+              <!-- Calendário Mensal Estilo Editorial -->
+              <div class="calendar-component-box">
                 <div class="calendar-header-nav">
-                  <button type="button" class="cal-arrow-btn" id="calPrevMonthBtn" aria-label="Mês Anterior">
-                    <i class="fa-solid fa-chevron-left"></i>
-                  </button>
-                  <h3 id="calMonthYearTitle">Maio 2025</h3>
-                  <button type="button" class="cal-arrow-btn" id="calNextMonthBtn" aria-label="Próximo Mês">
-                    <i class="fa-solid fa-chevron-right"></i>
-                  </button>
+                  <h4 id="calendarMonthYearDisplay">Maio 2025</h4>
+                  <div class="calendar-nav-buttons">
+                    <button type="button" id="btnPrevMonth" aria-label="Mês Anterior">&lt;</button>
+                    <button type="button" id="btnNextMonth" aria-label="Próximo Mês">&gt;</button>
+                  </div>
                 </div>
 
-                <div class="calendar-week-days">
-                  <span>D</span><span>S</span><span>T</span><span>Q</span><span>Q</span><span>S</span><span>S</span>
+                <div class="calendar-weekdays-row">
+                  <span>D</span>
+                  <span>S</span>
+                  <span>T</span>
+                  <span>Q</span>
+                  <span>Q</span>
+                  <span>S</span>
+                  <span>S</span>
                 </div>
 
-                <div class="calendar-grid-cells" id="calGridCells"></div>
+                <div class="calendar-days-grid" id="calendarDaysGrid">
+                  <!-- Dias gerados via client.js -->
+                </div>
               </div>
 
-              <!-- Horários Disponíveis sem Conflito -->
-              <div class="time-slots-wrapper">
-                <h4><i class="fa-regular fa-clock" style="color:var(--color-rose);"></i> Horários disponíveis:</h4>
-                <div class="time-slots-grid" id="bookingTimeSlotsGrid"></div>
-              </div>
             </div>
 
-            <!-- Coluna 2: Formulário Enxuto de 2 Campos (LGPD) -->
-            <div>
-              <div class="lgpd-form-box">
-                <h3 style="font-family:var(--font-serif); font-size:1.25rem; color:var(--color-preto); margin-bottom:12px;">
-                  Identificação Rápida
-                </h3>
-                <p style="font-size:0.85rem; color:var(--color-cinza); margin-bottom:1.2rem; line-height:1.45;">
-                  Coletamos exclusivamente estes 2 dados para contato e confirmação do seu horário na agenda.
-                </p>
-
-                <div class="lgpd-input-group">
-                  <label for="clientNameInput">
-                    <i class="fa-regular fa-user" style="color:var(--color-rose);"></i> Seu Nome Completo:
-                  </label>
-                  <input type="text" id="clientNameInput" class="lgpd-input-styled" placeholder="Ex: Mariana Santos" required autocomplete="name">
+            <!-- Coluna 2: Horários Livres & Formulário Minimalista -->
+            <div class="booking-right-col">
+              
+              <div class="time-slots-container">
+                <label class="time-slots-label">
+                  <i class="fa-regular fa-clock" style="color:var(--color-rose);"></i>
+                  Horários Disponíveis para <span id="selectedDateHumanDisplay" style="color:var(--color-preto); font-weight:700;">Hoje</span>:
+                </label>
+                
+                <div class="time-slots-grid" id="timeSlotsGrid">
+                  <!-- Horários injetados via client.js -->
                 </div>
-
-                <div class="lgpd-input-group">
-                  <label for="clientPhoneInput">
-                    <i class="fa-brands fa-whatsapp" style="color:#25D366;"></i> Seu Celular / WhatsApp:
-                  </label>
-                  <input type="tel" id="clientPhoneInput" class="lgpd-input-styled" placeholder="(61) 98455-1234" required autocomplete="tel">
-                </div>
-
-                <div style="font-size:0.75rem; color:#777176; margin-top:8px; line-height:1.4;">
-                  <i class="fa-solid fa-lock"></i> Seus dados são protegidos por criptografia em repouso e nunca serão compartilhados com terceiros.
-                </div>
-
-                <button class="btn-confirm-booking-lgpd" id="btnConfirmBookingLgpd">
-                  <i class="fa-solid fa-check"></i>
-                  <span>Concluir Agendamento</span>
-                </button>
               </div>
+
+              <!-- Formulário Estrito LGPD: Nome + WhatsApp -->
+              <form id="leanBookingForm" class="lean-booking-form">
+                
+                <div class="form-field-lgpd">
+                  <label for="clientNameInput">
+                    Seu Nome Completo:
+                  </label>
+                  <div class="input-icon-wrap">
+                    <i class="fa-regular fa-user"></i>
+                    <input type="text" id="clientNameInput" placeholder="Ex: Mariana Silva" required autocomplete="name">
+                  </div>
+                </div>
+
+                <div class="form-field-lgpd">
+                  <label for="clientPhoneInput">
+                    Seu Celular / WhatsApp:
+                  </label>
+                  <div class="input-icon-wrap">
+                    <i class="fa-brands fa-whatsapp" style="color:#25D366;"></i>
+                    <input type="tel" id="clientPhoneInput" placeholder="(DD) 9XXXX-XXXX" maxlength="15" required autocomplete="tel">
+                  </div>
+                  <span class="field-hint-text">Utilizado exclusivamente para confirmação do horário via WhatsApp.</span>
+                </div>
+
+                <button type="submit" class="btn-confirm-booking-lgpd" id="btnSubmitBooking">
+                  <span>Confirmar Agendamento</span>
+                  <i class="fa-solid fa-arrow-right"></i>
+                </button>
+
+              </form>
+
             </div>
 
           </div>
@@ -235,10 +379,42 @@
     </main>
 
     <!-- ========================================================
-         MODAL DE STORIES ESTILO INSTAGRAM (3 VÍDEOS SEQUENCIAIS)
+         8. BARRA DE NAVEGAÇÃO INFERIOR VINHO PROFUNDO (MOCKUP)
          ======================================================== -->
-    <div class="story-instagram-modal" id="storyInstagramModal">
-      <div class="story-phone-viewport">
+    <nav class="wine-bottom-nav">
+      
+      <div class="wine-nav-item active" onclick="window.scrollTo({top:0, behavior:'smooth'})">
+        <i class="fa-solid fa-house"></i>
+        <span>Início</span>
+      </div>
+
+      <div class="wine-nav-item" onclick="document.getElementById('bookingSection').scrollIntoView({behavior:'smooth'})">
+        <i class="fa-regular fa-calendar-check"></i>
+        <span>Agendamentos</span>
+      </div>
+
+      <div class="wine-nav-item" onclick="document.getElementById('secNossosServicos').scrollIntoView({behavior:'smooth'})">
+        <i class="fa-regular fa-gem"></i>
+        <span>Serviços</span>
+      </div>
+
+      <div class="wine-nav-item" onclick="openWhatsAppChatDirect()">
+        <i class="fa-regular fa-comment-dots"></i>
+        <span>Contato</span>
+      </div>
+
+      <div class="wine-nav-item" onclick="openProfileContactModal()">
+        <i class="fa-regular fa-user"></i>
+        <span>Perfil</span>
+      </div>
+
+    </nav>
+
+    <!-- ========================================================
+         9. MODAL STORIES ESTILO INSTAGRAM (VÍDEOS SEQUENCIAIS)
+         ======================================================== -->
+    <div class="story-modal-overlay" id="storyModalOverlay" role="dialog" aria-modal="true" aria-hidden="true">
+      <div class="story-modal-viewport" id="storyModalViewport">
         
         <!-- 3 Barras de Progresso Superiores Animadas -->
         <div class="story-progress-bars-container" id="storyProgressBarsContainer"></div>
@@ -251,7 +427,7 @@
             </div>
             <div class="story-author-info">
               <h4 id="storyAuthorTitle">Alongamento em Gel</h4>
-              <span>Estefany Paiva Nails &bull; 5 min atrás</span>
+              <span>Estefany Paiva Nails &bull; Stories</span>
             </div>
           </div>
           <button class="btn-close-story" id="btnCloseStory" aria-label="Fechar Story">&times;</button>
@@ -260,17 +436,21 @@
         <!-- Display da Mídia (Vídeo ou Slide) -->
         <div class="story-media-display" id="storyMediaDisplay"></div>
 
-        <!-- Áreas de Toque Esquerda e Direita -->
-        <div class="story-tap-area story-tap-left" id="storyTapLeft" title="Voltar Story"></div>
-        <div class="story-tap-area story-tap-right" id="storyTapRight" title="Avançar Story"></div>
+        <!-- Áreas de Toque Invisíveis (Navegar Esquerda / Direita) -->
+        <div class="story-touch-areas">
+          <div class="story-touch-tap left" id="storyTapLeft" title="Voltar Story"></div>
+          <div class="story-touch-tap right" id="storyTapRight" title="Avançar Story"></div>
+        </div>
 
-        <!-- Legenda do Story -->
-        <div class="story-caption-overlay" id="storyCaptionOverlay"></div>
+        <!-- Legenda Inferior -->
+        <div class="story-bottom-caption" id="storyBottomCaption">
+          <p id="storyCaptionText">Acabamento ultra natural e simetria perfeita ✨</p>
+        </div>
 
-        <!-- Botão Fixo de Chamada para Ação no Rodapé -->
-        <div class="story-cta-footer">
-          <button class="btn-story-schedule-now" id="btnStoryScheduleNow">
-            <i class="fa-solid fa-calendar-check"></i>
+        <!-- Botão de Ação Rápida Fixo no Rodapé do Story -->
+        <div class="story-fixed-footer-cta">
+          <button class="btn-story-book-now" id="btnStoryBookNow">
+            <i class="fa-regular fa-calendar-check"></i>
             <span>Agendar esta unha agora</span>
           </button>
         </div>
@@ -279,23 +459,40 @@
     </div>
 
     <!-- ========================================================
-         MODAL DE SUCESSO & INTEGRAÇÕES DE CALENDÁRIO
+         10. MODAL DE SUCESSO DO AGENDAMENTO (CALENDÁRIO & .ICS)
          ======================================================== -->
-    <div class="booking-success-modal" id="bookingSuccessModal">
-      <div class="success-card-content">
-        <div class="success-icon-ring">
-          <i class="fa-solid fa-circle-check"></i>
+    <div class="booking-success-modal-overlay" id="bookingSuccessModalOverlay">
+      <div class="success-modal-sheet">
+        <div class="success-check-icon">
+          <i class="fa-solid fa-check"></i>
         </div>
 
-        <h3>Horário Marcado com Sucesso!</h3>
-        <p>A notificação com alerta sonoro já foi enviada instantaneamente para a Estefany. Escolha como deseja salvar seu lembrete:</p>
+        <h3>Horário Agendado com Sucesso!</h3>
+        <p class="success-subtitle" id="successClientGreet">Estamos te esperando para transformar suas unhas ✨</p>
 
-        <div class="success-summary-box" id="successSummaryBox"></div>
+        <div class="success-summary-box">
+          <div class="success-summary-row">
+            <span>Procedimento:</span>
+            <strong id="successServiceName">Alongamento em Gel</strong>
+          </div>
+          <div class="success-summary-row">
+            <span>Data & Horário:</span>
+            <strong id="successDateTime">Sexta, 23 de Maio às 14:00h</strong>
+          </div>
+          <div class="success-summary-row">
+            <span>Valor:</span>
+            <strong id="successServicePrice">R$ 150,00</strong>
+          </div>
+          <div class="success-summary-row">
+            <span>Cliente:</span>
+            <strong id="successClientName">Mariana</strong>
+          </div>
+        </div>
 
         <div class="success-actions-col">
-          <button class="btn-add-gcalendar" id="btnSuccessGoogleCalendar">
+          <button class="btn-add-google-calendar" id="btnSuccessGoogleCalendar">
             <i class="fa-brands fa-google"></i>
-            <span>Salvar no Google Calendar</span>
+            <span>Adicionar ao Google Agenda</span>
           </button>
 
           <button class="btn-download-ics" id="btnSuccessIcsDownload">
@@ -315,57 +512,71 @@
       </div>
     </div>
 
-    <!-- ========================================================
-         RODAPÉ EXPANSIVO COMPLETO
-         ======================================================== -->
-    <footer class="site-footer-expansive">
-      <div class="footer-inner-grid">
-        <div class="footer-col">
-          <h3 id="footerBrandName">ESTEFANY PAIVA NAILS</h3>
-          <p id="footerSlogan">Mais que unhas, é autoestima. Espaço dedicado ao cuidado exclusivo, técnicas anatômicas de curvatura C e acabamento natural de alto padrão.</p>
-        </div>
-
-        <div class="footer-col">
-          <h3>Procedimentos</h3>
-          <ul>
-            <li><a href="#secCatalogoServicos">Alongamento em Gel</a></li>
-            <li><a href="#secCatalogoServicos">Esmaltação em Gel</a></li>
-            <li><a href="#secCatalogoServicos">Nail Art & Encapsuladas</a></li>
-            <li><a href="#secCatalogoServicos">Spa & Blindagem</a></li>
-            <li><a href="#secCatalogoServicos">Manicure Clássica</a></li>
-          </ul>
-        </div>
-
-        <div class="footer-col">
-          <h3>Local & Contato</h3>
-          <p><strong>Brasília - DF</strong></p>
-          <p style="margin-top:6px;">Segunda a Sexta: 08h às 19h<br>Sábado: 08h às 18h</p>
-          <p style="margin-top:8px;" id="footerPhoneDisplay">(61) 98554-3452</p>
-        </div>
-
-        <div class="footer-col">
-          <h3>Segurança & LGPD</h3>
-          <p style="font-size:0.85rem; color:#A39D9E; margin-bottom:12px;">
-            Nossa plataforma opera em conformidade estrita com a Lei Geral de Proteção de Dados (Lei 13.709/2018). Coleta mínima de dados e descarte seguro.
-          </p>
-          <a href="https://wa.me/5561985543452" target="_blank" style="color:var(--color-rose); font-size:0.88rem; font-weight:600; display:inline-flex; align-items:center; gap:6px;">
-            <i class="fa-brands fa-whatsapp"></i> Dúvidas no WhatsApp
-          </a>
-        </div>
-      </div>
-
-      <div class="footer-bottom-bar">
-        <p>&copy; 2026 Estefany Paiva Nails. Todos os direitos reservados. Multi-Portal, LGPD & Push PWA.</p>
-        <p>Plataforma Segura com Criptografia SHA-256 e Zero-Leak.</p>
-      </div>
-    </footer>
-
   </div>
 
   <!-- Scripts -->
   <script src="assets/js/store.js"></script>
   <script src="assets/js/client.js"></script>
   <script>
+    function openWhatsAppChatDirect() {
+      const msg = encodeURIComponent("Olá, Estefany! Gostaria de tirar uma dúvida sobre agendamento de unhas ✨");
+      window.open(`https://wa.me/5561985543452?text=${msg}`, '_blank');
+    }
+
+    function openProfileContactModal() {
+      const savedPhone = localStorage.getItem('epn_last_client_phone') || '';
+      const promptPhone = prompt("Informe seu WhatsApp para consultar seus agendamentos:", savedPhone);
+      if (promptPhone) {
+        localStorage.setItem('epn_last_client_phone', promptPhone);
+        const apps = window.EPStore.getAppointments().filter(a => a.clientPhone.replace(/\D/g, '').includes(promptPhone.replace(/\D/g, '')));
+        if (apps.length > 0) {
+          alert(`Encontramos ${apps.length} agendamento(s) para seu número! Último: ${apps[0].serviceName} em ${apps[0].date} às ${apps[0].time}h (${apps[0].status})`);
+        } else {
+          alert("Nenhum agendamento encontrado para este número. Que tal marcar um agora?");
+          document.getElementById('bookingSection').scrollIntoView({behavior:'smooth'});
+        }
+      }
+    }
+
+    function openAppointmentsFullModal() {
+      const card = document.getElementById('nextAppointmentCardPreview');
+      if (card) {
+        card.scrollIntoView({behavior:'smooth'});
+        card.style.transform = 'scale(1.02)';
+        setTimeout(() => card.style.transform = 'none', 500);
+      }
+    }
+
+    // Carregar informações do próximo agendamento dinamicamente
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.EPStore) {
+        const apps = window.EPStore.getAppointments();
+        const nextApp = apps.find(a => !a.status.toLowerCase().includes('cancelado')) || apps[0];
+        if (nextApp) {
+          const srvNameEl = document.getElementById('appPreviewServiceName');
+          const timeEl = document.getElementById('appPreviewTime');
+          const dayEl = document.getElementById('appPreviewDayNum');
+          const monthEl = document.getElementById('appPreviewMonth');
+          const weekEl = document.getElementById('appPreviewWeekDay');
+
+          if (srvNameEl) srvNameEl.textContent = nextApp.serviceName;
+          if (timeEl) timeEl.textContent = nextApp.time;
+          
+          if (nextApp.date) {
+            const parts = nextApp.date.split('-');
+            if (parts.length === 3) {
+              const dt = new Date(parts[0], parts[1] - 1, parts[2]);
+              const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+              const days = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+              if (dayEl) dayEl.textContent = parts[2];
+              if (monthEl) monthEl.textContent = months[dt.getMonth()] || 'Nov';
+              if (weekEl) weekEl.textContent = days[dt.getDay()] || 'Sáb';
+            }
+          }
+        }
+      }
+    });
+
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW reg error:', err));

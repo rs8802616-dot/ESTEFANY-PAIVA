@@ -1,15 +1,28 @@
 /* ========================================================
    ESTEFANY PAIVA NAILS - PALETA DE CORES & VARIÁVEIS OFICIAIS
-   Conforme PRD Completo e Referências Visuais
+   Conforme PRD Completo e Nova Referência Visual de Luxo
    ======================================================== */
 
 :root {
-  /* Cores Principais do PRD */
-  --color-creme: #F8F2ED;
-  --color-nude: #E9D7CE;
+  /* Cores Vinho / Marsala de Luxo (Mockup de Referência) */
+  --color-wine-deep: #2E0815;
+  --color-wine-dark: #3A0E1D;
+  --color-wine: #4D1328;
+  --color-wine-light: #6A1D39;
+  --color-wine-muted: #8A2D4E;
+
+  /* Cores Creme, Nude e Rosé */
+  --color-creme: #F9F4F2;
+  --color-creme-bg: #FAF5F4;
+  --color-nude: #EAD8CF;
   --color-nude-light: #F4EBE5;
   --color-rose: #E9A3B5;
-  --color-rose-light: #FBECEF;
+  --color-rose-light: #FCEFF2;
+  --color-rose-card: #FBECEF;
+  --color-rose-border: rgba(77, 19, 40, 0.08);
+  --color-rose-btn: #E6BAC3;
+
+  /* Cores de Ação e Destaque */
   --color-pink-accent: #D83F79;
   --color-pink-btn: #F1A7B7;
   --color-pink-btn-hover: #E891A4;
@@ -41,16 +54,16 @@
   --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
 
   /* Formas & Sombras */
-  --radius-xs: 6px;
-  --radius-sm: 10px;
-  --radius-md: 16px;
-  --radius-lg: 24px;
+  --radius-xs: 8px;
+  --radius-sm: 12px;
+  --radius-md: 18px;
+  --radius-lg: 26px;
   --radius-pill: 9999px;
 
-  --shadow-subtle: 0 2px 10px rgba(23, 23, 25, 0.04);
-  --shadow-card: 0 4px 20px rgba(23, 23, 25, 0.06);
-  --shadow-floating: 0 10px 30px rgba(23, 23, 25, 0.12);
-  --shadow-pink: 0 6px 20px rgba(233, 163, 181, 0.4);
+  --shadow-subtle: 0 2px 10px rgba(46, 8, 21, 0.04);
+  --shadow-card: 0 4px 20px rgba(46, 8, 21, 0.06);
+  --shadow-floating: 0 10px 30px rgba(46, 8, 21, 0.12);
+  --shadow-pink: 0 6px 20px rgba(233, 163, 181, 0.35);
 
   --transition-fast: all 0.2s ease;
   --transition-smooth: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
