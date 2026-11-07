@@ -36,62 +36,42 @@
     <header class="client-header-wine">
       <div class="wine-header-inner-expansive">
         
-        <!-- Barra Superior: Assinatura Ep, Menu e Ações Desktop/Mobile -->
+        <!-- Barra Superior: Hamburger, Logo Ep Centralizado e Notificação -->
         <div class="topbar-nav-row">
-          <div class="topbar-left-cluster">
-            <button class="btn-header-icon" id="btnOpenMenu" aria-label="Menu" onclick="document.getElementById('secMeusAgendamentos').scrollIntoView({behavior:'smooth'})">
-              <i class="fa-solid fa-bars"></i>
-            </button>
+          <button class="btn-header-icon" id="btnOpenMenu" aria-label="Menu" onclick="document.getElementById('secMeusAgendamentos').scrollIntoView({behavior:'smooth'})">
+            <i class="fa-solid fa-bars"></i>
+          </button>
 
-            <!-- Logo Assinatura Oficial Ep ESTEFANY PAIVA NAIL DESIGNER -->
-            <div class="signature-logo-wrap" onclick="window.scrollTo({top:0, behavior:'smooth'})">
-              <span class="sig-script-ep">Ep</span>
-              <div class="sig-script-text">
-                <span class="sig-script-title">ESTEFANY PAIVA</span>
-                <span class="sig-script-sub">NAIL DESIGNER</span>
-              </div>
+          <!-- Logo Assinatura Oficial Ep ESTEFANY PAIVA NAIL DESIGNER -->
+          <div class="signature-logo-wrap" onclick="window.scrollTo({top:0, behavior:'smooth'})">
+            <span class="sig-script-ep">Ep</span>
+            <div class="sig-script-text">
+              <span class="sig-script-title">ESTEFANY PAIVA</span>
+              <span class="sig-script-sub">NAIL DESIGNER</span>
             </div>
           </div>
 
-          <!-- Links de Navegação Desktop -->
-          <nav class="desktop-menu-links">
-            <li class="desktop-nav-item active" onclick="window.scrollTo({top:0, behavior:'smooth'})">Início</li>
-            <li class="desktop-nav-item" onclick="document.getElementById('secMeusAgendamentos').scrollIntoView({behavior:'smooth'})">Meus Agendamentos</li>
-            <li class="desktop-nav-item" onclick="document.getElementById('secNossosServicos').scrollIntoView({behavior:'smooth'})">Serviços</li>
-            <li class="desktop-nav-item" onclick="document.getElementById('bookingSection').scrollIntoView({behavior:'smooth'})">Agendar Horário</li>
-            <li class="desktop-nav-item" onclick="openWhatsAppChatDirect()">Contato</li>
-          </nav>
-
-          <div class="topbar-right-cluster">
-            <button class="btn-desktop-book-cta" onclick="document.getElementById('bookingSection').scrollIntoView({behavior:'smooth'})">
-              <i class="fa-regular fa-calendar-check"></i>
-              <span>Agendar Agora</span>
-            </button>
-
-            <button class="btn-header-icon" id="btnNotificationBell" aria-label="Notificações" onclick="document.getElementById('secMeusAgendamentos').scrollIntoView({behavior:'smooth'})">
-              <i class="fa-regular fa-bell"></i>
-              <span class="badge-bell-count">1</span>
-            </button>
-          </div>
+          <button class="btn-header-icon" id="btnNotificationBell" aria-label="Notificações" onclick="document.getElementById('secMeusAgendamentos').scrollIntoView({behavior:'smooth'})">
+            <i class="fa-regular fa-bell"></i>
+            <span class="badge-bell-count">1</span>
+          </button>
         </div>
 
         <!-- Linha de Saudação à Cliente -->
         <div class="greeting-user-box">
-          <div class="greeting-profile-wrap">
-            <div class="greeting-avatar-ring">
-              <img src="assets/images/trabalho-amendoada-ouro.png" alt="Unhas da Cliente">
-            </div>
-            <div class="greeting-text-area">
-              <h2>Olá, Mariana! <i class="fa-regular fa-heart"></i></h2>
-              <p>Bem-vinda de volta!</p>
-            </div>
+          <div class="greeting-avatar-ring">
+            <img src="assets/images/trabalho-amendoada-ouro.png" alt="Unhas da Cliente">
+          </div>
+          <div class="greeting-text-area">
+            <h2>Olá, Mariana! <i class="fa-regular fa-heart"></i></h2>
+            <p>Bem-vinda de volta!</p>
           </div>
         </div>
 
       </div>
     </header>
 
-    <!-- CONTEÚDO PRINCIPAL EXPANSIVO -->
+    <!-- CONTEÚDO PRINCIPAL (EXPANSIVO E CENTRALIZADO) -->
     <main class="client-main-content-expansive">
 
       <!-- ========================================================
@@ -102,28 +82,28 @@
           
           <button class="card-action-squircle" onclick="document.getElementById('bookingSection').scrollIntoView({behavior:'smooth'})">
             <div class="action-icon-wrap">
-              <i class="fa-regular fa-calendar-check"></i>
+              <i class="fa-solid fa-calendar-days"></i>
             </div>
             <span>Agendar Horário</span>
           </button>
 
           <button class="card-action-squircle" onclick="document.getElementById('secMeusAgendamentos').scrollIntoView({behavior:'smooth'})">
             <div class="action-icon-wrap">
-              <i class="fa-regular fa-clock-rotate-left"></i>
+              <i class="fa-solid fa-clock-rotate-left"></i>
             </div>
             <span>Meus Agendamentos</span>
           </button>
 
           <button class="card-action-squircle" onclick="document.getElementById('secNossosServicos').scrollIntoView({behavior:'smooth'})">
             <div class="action-icon-wrap">
-              <i class="fa-regular fa-gem"></i>
+              <i class="fa-solid fa-gem"></i>
             </div>
             <span>Serviços</span>
           </button>
 
           <button class="card-action-squircle" onclick="openProfileContactModal()">
             <div class="action-icon-wrap">
-              <i class="fa-regular fa-user"></i>
+              <i class="fa-solid fa-user"></i>
             </div>
             <span>Meu Perfil</span>
           </button>
@@ -335,7 +315,7 @@
     </main>
 
     <!-- ========================================================
-         7. BARRA DE NAVEGAÇÃO INFERIOR VINHO PROFUNDO
+         7. BARRA DE NAVEGAÇÃO INFERIOR VINHO PROFUNDO (5 ÍCONES)
          ======================================================== -->
     <nav class="bottom-nav-wine-fixed">
       <button class="nav-item-wine active" onclick="window.scrollTo({top:0, behavior:'smooth'})">
@@ -344,22 +324,22 @@
       </button>
 
       <button class="nav-item-wine" onclick="document.getElementById('bookingSection').scrollIntoView({behavior:'smooth'})">
-        <i class="fa-regular fa-calendar-check"></i>
+        <i class="fa-solid fa-calendar-days"></i>
         <span>Agendamentos</span>
       </button>
 
       <button class="nav-item-wine" onclick="document.getElementById('secNossosServicos').scrollIntoView({behavior:'smooth'})">
-        <i class="fa-regular fa-gem"></i>
+        <i class="fa-solid fa-gem"></i>
         <span>Serviços</span>
       </button>
 
       <button class="nav-item-wine" onclick="openWhatsAppChatDirect()">
-        <i class="fa-regular fa-comment-dots"></i>
+        <i class="fa-solid fa-comment-dots"></i>
         <span>Contato</span>
       </button>
 
       <button class="nav-item-wine" onclick="openProfileContactModal()">
-        <i class="fa-regular fa-user"></i>
+        <i class="fa-solid fa-user"></i>
         <span>Perfil</span>
       </button>
     </nav>

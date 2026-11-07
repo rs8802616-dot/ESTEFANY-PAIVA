@@ -1,7 +1,8 @@
 /* ========================================================
-   ESTEFANY PAIVA NAILS - PORTAL DO CLIENTE (100% EXPANSIVO & RESPONSIVO)
-   Design Fiel à Imagem de Referência (Vinho / Marsala & Blush Rosé)
-   Sem moldura de celular; Expansivo no Desktop e Fluido no Celular
+   ESTEFANY PAIVA NAILS - PORTAL DO CLIENTE
+   Design 100% Fiel à Imagem de Referência
+   Cores: Vinho/Marsala (#350B19) e Blush Rosé (#FBECEF)
+   Totalmente Responsivo: Fluido no Celular e Elegante no Desktop
    ======================================================== */
 
 @import url('./variables.css');
@@ -13,42 +14,47 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-html {
+html, body {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
   font-size: 16px;
   scroll-behavior: smooth;
   background-color: #FAF4F5;
-}
-
-body {
-  font-family: var(--font-sans);
-  background-color: #FAF4F5;
   color: #171719;
-  min-height: 100vh;
-  width: 100%;
-  overflow-x: hidden;
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
 }
 
-/* Site Wrapper 100% Expansivo em toda a largura da tela */
+/* ========================================================
+   ESTRUTURA GERAL (CONTAINER CENTRALIZADO NO DESKTOP)
+   ======================================================== */
 .site-wrapper-expansive {
+  max-width: 440px;
+  margin: 0 auto;
+  box-shadow: 0 0 35px rgba(0,0,0,0.15);
   width: 100%;
+  max-width: 100vw;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   background-color: #FAF4F5;
   position: relative;
+  overflow-x: hidden;
 }
 
 /* ========================================================
-   1. CABEÇALHO VINHO DE LUXO EXPANSIVO
+   1. CABEÇALHO VINHO DE LUXO COM ONDAS ORGÂNICAS
    ======================================================== */
 .client-header-wine {
   width: 100%;
+  max-width: 100%;
   background: radial-gradient(circle at 85% 15%, #6A1D39 0%, #350B19 65%, #250611 100%);
   color: #FFFFFF;
   position: relative;
   overflow: hidden;
-  padding-bottom: 28px;
+  padding-bottom: 24px;
+  box-shadow: 0 4px 20px rgba(53, 11, 25, 0.2);
 }
 
 .client-header-wine::before {
@@ -56,9 +62,9 @@ body {
   position: absolute;
   top: -80px;
   right: -60px;
-  width: 450px;
-  height: 450px;
-  background: radial-gradient(circle, rgba(233, 163, 181, 0.16) 0%, transparent 70%);
+  width: 380px;
+  height: 380px;
+  background: radial-gradient(circle, rgba(233, 163, 181, 0.18) 0%, transparent 70%);
   border-radius: 50%;
   pointer-events: none;
 }
@@ -71,62 +77,56 @@ body {
   right: 0;
   height: 24px;
   background: #FAF4F5;
-  border-radius: 30px 30px 0 0;
+  border-radius: 28px 28px 0 0;
 }
 
-/* Container de Alinhamento Expansivo (Centralizado até 1240px) */
 .wine-header-inner-expansive {
   width: 100%;
-  max-width: 1240px;
+  max-width: 580px;
   margin: 0 auto;
-  padding: 16px 1.5rem 10px;
+  padding: 12px 16px 8px;
   position: relative;
   z-index: 2;
 }
 
-/* Barra Superior: Logo Assinatura, Menu e Ações */
+/* Barra Superior: Hamburger, Logo Ep e Notificação */
 .topbar-nav-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 6px 0 20px;
-  gap: 16px;
-}
-
-.topbar-left-cluster {
-  display: flex;
-  align-items: center;
-  gap: 14px;
+  width: 100%;
+  padding: 4px 0 16px;
+  position: relative;
 }
 
 .btn-header-icon {
-  width: 42px;
-  height: 42px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   display: flex;
   align-items: center;
   justify-content: center;
   color: #FFFFFF;
-  font-size: 1.25rem;
+  font-size: 1.15rem;
   cursor: pointer;
   position: relative;
-  transition: all 0.2s;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
 }
 
 .btn-header-icon:hover {
   background: rgba(255, 255, 255, 0.2);
-  transform: scale(1.05);
 }
 
 .badge-bell-count {
   position: absolute;
-  top: 4px;
-  right: 4px;
+  top: -2px;
+  right: -2px;
   background: #D83F79;
   color: #FFFFFF;
-  font-size: 0.65rem;
+  font-size: 0.62rem;
   font-weight: 700;
   width: 17px;
   height: 17px;
@@ -141,20 +141,22 @@ body {
 .signature-logo-wrap {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   cursor: pointer;
   text-decoration: none;
+  user-select: none;
+  flex-shrink: 0;
 }
 
 .sig-script-ep {
   font-family: 'Playfair Display', Georgia, cursive, serif;
   font-style: italic;
-  font-size: 3rem;
+  font-size: 2.5rem;
   font-weight: 400;
   line-height: 0.85;
   color: #FFFFFF;
   letter-spacing: -0.04em;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
 }
 
 .sig-script-text {
@@ -164,99 +166,41 @@ body {
 
 .sig-script-title {
   font-family: var(--font-serif);
-  font-size: 1.15rem;
-  letter-spacing: 0.24em;
+  font-size: 0.92rem;
+  letter-spacing: 0.2em;
   font-weight: 600;
   color: #FFFFFF;
   text-transform: uppercase;
   line-height: 1.15;
+  white-space: nowrap;
 }
 
 .sig-script-sub {
-  font-size: 0.65rem;
-  letter-spacing: 0.38em;
+  font-size: 0.56rem;
+  letter-spacing: 0.34em;
   font-weight: 500;
   color: rgba(255, 255, 255, 0.85);
   text-transform: uppercase;
-  margin-top: 2px;
+  margin-top: 1px;
+  white-space: nowrap;
 }
 
-/* Links do Topo para Desktop */
-.desktop-menu-links {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-  list-style: none;
-}
-
-.desktop-nav-item {
-  color: rgba(255, 255, 255, 0.85);
-  font-size: 0.92rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: color 0.2s;
-}
-
-.desktop-nav-item:hover, .desktop-nav-item.active {
-  color: #FFFFFF;
-  font-weight: 700;
-}
-
-.topbar-right-cluster {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.btn-desktop-book-cta {
-  background: #E6BAC3;
-  color: #350B19;
-  padding: 10px 22px;
-  border-radius: var(--radius-pill);
-  font-size: 0.88rem;
-  font-weight: 700;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  border: none;
-  cursor: pointer;
-  transition: transform 0.2s, background 0.2s;
-}
-
-.btn-desktop-book-cta:hover {
-  background: #FFFFFF;
-  transform: translateY(-2px);
-}
-
-@media (max-width: 880px) {
-  .desktop-menu-links, .btn-desktop-book-cta {
-    display: none;
-  }
-}
-
-/* Linha de Saudação à Cliente */
+/* Saudação à Cliente */
 .greeting-user-box {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 6px 0 10px;
-  flex-wrap: wrap;
   gap: 14px;
-}
-
-.greeting-profile-wrap {
-  display: flex;
-  align-items: center;
-  gap: 16px;
+  padding: 4px 0 8px;
+  width: 100%;
 }
 
 .greeting-avatar-ring {
-  width: 68px;
-  height: 68px;
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
-  padding: 3px;
+  padding: 2.5px;
   background: linear-gradient(135deg, #E9A3B5 0%, #D83F79 50%, #FFFFFF 100%);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
   flex-shrink: 0;
 }
 
@@ -270,49 +214,43 @@ body {
 
 .greeting-text-area h2 {
   font-family: var(--font-serif);
-  font-size: 1.55rem;
+  font-size: 1.35rem;
   font-weight: 600;
   color: #FFFFFF;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .greeting-text-area h2 i {
-  font-size: 1.15rem;
+  font-size: 1rem;
   color: #E9A3B5;
-  font-weight: 400;
 }
 
 .greeting-text-area p {
-  font-size: 0.92rem;
+  font-size: 0.82rem;
   color: rgba(255, 255, 255, 0.85);
   margin-top: 2px;
 }
 
 /* ========================================================
-   2. CONTEÚDO PRINCIPAL EXPANSIVO
+   CONTEÚDO PRINCIPAL (MÁXIMO 580PX NO DESKTOP, FLUIDO NO MOBILE)
    ======================================================== */
 .client-main-content-expansive {
   width: 100%;
-  max-width: 1240px;
+  max-width: 580px;
   margin: 0 auto;
-  padding: 0 1.5rem 5rem;
+  padding: 0 16px 100px;
   flex: 1;
 }
 
-@media (max-width: 600px) {
-  .client-main-content-expansive {
-    padding: 0 1rem 6rem;
-  }
-}
-
 /* ========================================================
-   3. GRADE DE 4 AÇÕES RÁPIDAS (CARDS ROSÉ PASTEL)
+   2. GRADE DE 4 AÇÕES RÁPIDAS
    ======================================================== */
 .quick-actions-bar {
-  margin-top: -8px;
-  margin-bottom: 24px;
+  margin-top: -6px;
+  margin-bottom: 18px;
+  width: 100%;
   position: relative;
   z-index: 5;
 }
@@ -320,124 +258,115 @@ body {
 .quick-actions-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-}
-
-@media (max-width: 640px) {
-  .quick-actions-grid {
-    gap: 8px;
-  }
+  gap: 8px;
+  width: 100%;
 }
 
 .card-action-squircle {
   background: #FBECEF;
   border: 1px solid rgba(77, 19, 40, 0.08);
-  border-radius: 20px;
-  padding: 18px 12px;
+  border-radius: 18px;
+  padding: 12px 2px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 6px;
   cursor: pointer;
-  box-shadow: 0 4px 16px rgba(77, 19, 40, 0.04);
-  transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
-  text-align: center;
+  box-shadow: 0 3px 10px rgba(77, 19, 40, 0.04);
+  width: 100%;
   border: none;
-}
-
-.card-action-squircle:hover {
-  transform: translateY(-3px);
-  background: #F8E3E7;
-  box-shadow: 0 8px 24px rgba(77, 19, 40, 0.08);
+  transition: transform 0.15s ease, background 0.15s ease;
 }
 
 .card-action-squircle:active {
   transform: scale(0.96);
+  background: #F5D9DF;
 }
 
-.card-action-squircle .action-icon-wrap {
-  width: 44px;
-  height: 44px;
+.action-icon-wrap {
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #4D1328;
-  font-size: 1.55rem;
+  font-size: 1.3rem;
 }
 
 .card-action-squircle span {
-  font-size: 0.82rem;
+  font-size: 0.68rem;
   font-weight: 600;
   color: #350B19;
-  line-height: 1.2;
+  line-height: 1.15;
+  text-align: center;
+  padding: 0 2px;
 }
 
 /* ========================================================
-   4. BANNER PROMOCIONAL DESTAQUE COM ONDAS
+   3. BANNER PROMOCIONAL DESTAQUE COM ONDAS
    ======================================================== */
 .promo-card-wrapper {
-  margin-bottom: 28px;
+  margin-bottom: 22px;
+  width: 100%;
 }
 
 .promo-highlight-card {
   background: linear-gradient(135deg, #FBECEF 0%, #F5D9DF 100%);
-  border: 1px solid rgba(77, 19, 40, 0.09);
-  border-radius: 26px;
-  padding: 24px 30px;
+  border: 1px solid rgba(77, 19, 40, 0.08);
+  border-radius: 24px;
+  padding: 16px 18px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 24px;
-  box-shadow: 0 8px 24px rgba(77, 19, 40, 0.06);
+  gap: 12px;
+  box-shadow: 0 4px 16px rgba(77, 19, 40, 0.05);
   position: relative;
   overflow: hidden;
+  width: 100%;
 }
 
 .promo-text-side {
-  flex: 1;
+  flex: 1.2;
   z-index: 2;
 }
 
 .promo-text-side h3 {
   font-family: var(--font-serif);
   font-style: italic;
-  font-size: 1.65rem;
-  line-height: 1.35;
+  font-size: 1.25rem;
+  line-height: 1.3;
   color: #4D1328;
   font-weight: 600;
-  margin-bottom: 16px;
-  max-width: 480px;
+  margin-bottom: 12px;
 }
 
 .btn-promo-wine-pill {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 13px 26px;
+  gap: 6px;
+  padding: 10px 18px;
   background: #4D1328;
   color: #FFFFFF;
   border-radius: var(--radius-pill);
-  font-size: 0.92rem;
+  font-size: 0.82rem;
   font-weight: 600;
   cursor: pointer;
-  box-shadow: 0 4px 15px rgba(77, 19, 40, 0.25);
   border: none;
+  box-shadow: 0 4px 12px rgba(77, 19, 40, 0.25);
+  white-space: nowrap;
   transition: transform 0.2s, background 0.2s;
 }
 
-.btn-promo-wine-pill:hover {
+.btn-promo-wine-pill:active {
+  transform: scale(0.97);
   background: #350B19;
-  transform: translateY(-2px);
 }
 
 .promo-photo-side {
-  width: 240px;
-  height: 180px;
+  width: 120px;
+  height: 110px;
   flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   z-index: 1;
 }
 
@@ -445,356 +374,317 @@ body {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 20px;
-  box-shadow: 0 6px 20px rgba(77, 19, 40, 0.14);
-}
-
-@media (max-width: 720px) {
-  .promo-highlight-card {
-    padding: 18px 16px;
-    gap: 12px;
-  }
-  .promo-text-side h3 {
-    font-size: 1.25rem;
-    margin-bottom: 12px;
-  }
-  .promo-photo-side {
-    width: 135px;
-    height: 125px;
-  }
+  border-radius: 18px;
+  box-shadow: 0 4px 14px rgba(77, 19, 40, 0.12);
+  display: block;
 }
 
 /* ========================================================
-   5. SEÇÃO "✦ MEUS AGENDAMENTOS"
+   4. SEÇÃO "✦ MEUS AGENDAMENTOS"
    ======================================================== */
 .section-client-block {
-  margin-bottom: 30px;
+  margin-bottom: 22px;
+  width: 100%;
+  max-width: 100%;
 }
 
 .section-head-title-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
+  padding: 0 2px;
+  width: 100%;
 }
 
 .section-head-title-row h3 {
   font-family: var(--font-serif);
-  font-size: 1.35rem;
+  font-size: 1.15rem;
   font-weight: 700;
   color: #4D1328;
-  display: flex;
-  align-items: center;
-  gap: 8px;
 }
 
 .section-head-title-row a {
-  font-size: 0.88rem;
+  font-size: 0.82rem;
   font-weight: 600;
   color: #8A2D4E;
   text-decoration: none;
 }
 
-/* Card Próximo Atendimento */
 .next-booking-banner {
   background: #FBECEF;
-  border: 1px solid rgba(77, 19, 40, 0.09);
-  border-radius: 22px;
-  padding: 18px 24px;
+  border: 1px solid rgba(77, 19, 40, 0.08);
+  border-radius: 20px;
+  padding: 12px 14px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 18px;
-  box-shadow: 0 4px 16px rgba(77, 19, 40, 0.04);
+  gap: 10px;
+  box-shadow: 0 4px 14px rgba(77, 19, 40, 0.04);
+  width: 100%;
 }
 
 .booking-date-block {
   background: #FFFFFF;
-  border: 1px solid rgba(77, 19, 40, 0.1);
-  border-radius: 18px;
-  padding: 10px 18px;
+  border-radius: 16px;
+  padding: 8px 10px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-width: 74px;
-  box-shadow: 0 2px 8px rgba(77, 19, 40, 0.05);
+  box-shadow: 0 2px 8px rgba(77, 19, 40, 0.06);
+  flex-shrink: 0;
+  min-width: 54px;
 }
 
 .booking-date-block .date-day-week {
-  font-size: 0.78rem;
+  font-size: 0.72rem;
+  color: #6A1D39;
   font-weight: 600;
-  color: #8A2D4E;
 }
 
 .booking-date-block .date-day-number {
   font-family: var(--font-serif);
-  font-size: 1.8rem;
+  font-size: 1.45rem;
   font-weight: 700;
   color: #350B19;
-  line-height: 1;
-  margin: 3px 0;
+  line-height: 1.05;
 }
 
 .booking-date-block .date-month-name {
-  font-size: 0.78rem;
+  font-size: 0.72rem;
+  color: #6A1D39;
   font-weight: 600;
-  color: #8A2D4E;
 }
 
 .booking-info-mid {
   flex: 1;
+  min-width: 0;
 }
 
 .booking-info-mid h4 {
   font-family: var(--font-serif);
-  font-size: 1.2rem;
+  font-size: 0.95rem;
   font-weight: 700;
   color: #350B19;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .booking-info-mid .booking-time-meta {
-  font-size: 0.88rem;
+  font-size: 0.76rem;
   color: #6A1D39;
   display: flex;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .btn-details-pink-pill {
-  padding: 11px 22px;
+  padding: 9px 12px;
   border-radius: var(--radius-pill);
   background: #E6BAC3;
   color: #4D1328;
-  font-size: 0.88rem;
+  font-size: 0.76rem;
   font-weight: 700;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   border: none;
   white-space: nowrap;
+  flex-shrink: 0;
   transition: transform 0.2s, background 0.2s;
 }
 
 .btn-details-pink-pill:hover {
   background: #DCAAB5;
-  transform: translateY(-2px);
-}
-
-@media (max-width: 600px) {
-  .next-booking-banner {
-    flex-wrap: wrap;
-    padding: 14px;
-  }
-  .btn-details-pink-pill {
-    width: 100%;
-    justify-content: center;
-    margin-top: 6px;
-  }
 }
 
 /* ========================================================
-   6. SEÇÃO "♡ NOSSOS SERVIÇOS" (EXPANSIVO EM GRADE / CARROSSEL)
+   5. SEÇÃO "♡ NOSSOS SERVIÇOS" (CARROSSEL HORIZONTAL)
    ======================================================== */
 .services-scroll-track {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-  gap: 16px;
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  width: 100%;
+  max-width: 100%;
+  padding-bottom: 12px;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
 }
 
-@media (max-width: 768px) {
-  .services-scroll-track {
-    display: flex;
-    overflow-x: auto;
-    padding-bottom: 10px;
-    scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
-  }
-  .services-scroll-track::-webkit-scrollbar {
-    display: none;
-  }
+.services-scroll-track::-webkit-scrollbar {
+  height: 4px;
+}
+
+.services-scroll-track::-webkit-scrollbar-thumb {
+  background: #E6BAC3;
+  border-radius: 4px;
 }
 
 .service-card-mock {
+  flex: 0 0 135px;
+  scroll-snap-align: start;
   background: #FBECEF;
   border: 1px solid rgba(77, 19, 40, 0.08);
-  border-radius: 20px;
+  border-radius: 18px;
   overflow: hidden;
-  box-shadow: 0 4px 14px rgba(77, 19, 40, 0.04);
-  flex: 0 0 160px;
-  display: flex;
-  flex-direction: column;
+  box-shadow: 0 3px 12px rgba(77, 19, 40, 0.04);
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s ease;
 }
 
-.service-card-mock:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 10px 25px rgba(77, 19, 40, 0.1);
+.service-card-mock:active {
+  transform: scale(0.97);
 }
 
 .service-thumb-wrap {
   width: 100%;
-  height: 130px;
+  height: 95px;
   overflow: hidden;
-  position: relative;
 }
 
 .service-thumb-wrap img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.4s ease;
-}
-
-.service-card-mock:hover .service-thumb-wrap img {
-  transform: scale(1.06);
+  display: block;
 }
 
 .service-info-footer {
-  padding: 12px 10px;
+  padding: 8px 6px;
   text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
 }
 
 .service-info-footer h4 {
   font-family: var(--font-serif);
-  font-size: 0.98rem;
+  font-size: 0.82rem;
   font-weight: 700;
   color: #350B19;
-  line-height: 1.25;
+  margin-bottom: 2px;
+  line-height: 1.2;
 }
 
 .service-info-footer .saiba-mais-label {
-  font-size: 0.8rem;
-  font-weight: 600;
+  font-size: 0.72rem;
   color: #8A2D4E;
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
+  font-weight: 600;
 }
 
 /* ========================================================
-   7. SEÇÃO DE AGENDAMENTO (CALENDÁRIO & HORÁRIOS)
+   6. SEÇÃO DE AGENDAMENTO (CALENDÁRIO & FORMULÁRIO LGPD)
    ======================================================== */
 .booking-section-container {
-  margin-top: 16px;
-  margin-bottom: 30px;
+  margin-top: 10px;
+  margin-bottom: 24px;
+  width: 100%;
 }
 
 .booking-clean-card {
   background: #FFFFFF;
   border: 1px solid rgba(77, 19, 40, 0.08);
-  border-radius: 26px;
-  padding: 28px 24px;
-  box-shadow: 0 6px 24px rgba(77, 19, 40, 0.05);
+  border-radius: 22px;
+  padding: 18px 16px;
+  box-shadow: 0 4px 16px rgba(77, 19, 40, 0.04);
+  width: 100%;
 }
 
 .booking-header-title {
-  margin-bottom: 20px;
-  border-bottom: 1px solid rgba(77, 19, 40, 0.06);
-  padding-bottom: 14px;
+  margin-bottom: 14px;
+  text-align: center;
 }
 
 .booking-header-title h3 {
   font-family: var(--font-serif);
-  font-size: 1.55rem;
-  color: #350B19;
-  margin-bottom: 6px;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #4D1328;
 }
 
 .booking-header-title p {
-  font-size: 0.9rem;
+  font-size: 0.82rem;
   color: #777176;
+  margin-top: 2px;
 }
 
-.booking-desktop-columns {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 28px;
-}
-
-@media (max-width: 820px) {
-  .booking-desktop-columns {
-    grid-template-columns: 1fr;
-    gap: 18px;
-  }
-}
-
-/* Card de Procedimento Selecionado */
 .service-selected-banner {
   background: #FBECEF;
-  border-radius: 18px;
-  padding: 12px 18px;
+  border: 1px solid rgba(77, 19, 40, 0.08);
+  border-radius: 16px;
+  padding: 10px 14px;
   display: flex;
   align-items: center;
-  gap: 14px;
-  margin-bottom: 18px;
+  gap: 12px;
+  margin-bottom: 14px;
+  width: 100%;
 }
 
 .service-selected-banner img {
-  width: 54px;
-  height: 54px;
+  width: 50px;
+  height: 50px;
   border-radius: 12px;
   object-fit: cover;
+  flex-shrink: 0;
 }
 
 .service-selected-banner h5 {
-  font-size: 1rem;
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
   font-weight: 700;
   color: #350B19;
 }
 
 .service-selected-banner p {
-  font-size: 0.85rem;
-  color: #8A2D4E;
-  font-weight: 600;
+  font-size: 0.8rem;
+  color: #6A1D39;
+  margin-top: 2px;
 }
 
-/* Calendário Mensal */
+/* Calendário Minimalista */
 .calendar-card-inline {
   background: #FAF4F5;
-  border-radius: 20px;
-  padding: 18px;
-  margin-bottom: 18px;
+  border: 1px solid rgba(77, 19, 40, 0.08);
+  border-radius: 18px;
+  padding: 14px;
+  margin-bottom: 16px;
+  width: 100%;
 }
 
 .calendar-top-nav {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .calendar-top-nav h4 {
   font-family: var(--font-serif);
-  font-size: 1.15rem;
-  color: #350B19;
+  font-size: 0.98rem;
   font-weight: 700;
+  color: #4D1328;
 }
 
 .calendar-nav-btn-group button {
-  width: 32px;
-  height: 32px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
+  border: 1px solid rgba(77, 19, 40, 0.12);
   background: #FFFFFF;
-  border: 1px solid rgba(77, 19, 40, 0.1);
   color: #4D1328;
   font-weight: 700;
   cursor: pointer;
+  margin-left: 4px;
 }
 
 .calendar-weekdays-bar {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   text-align: center;
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   font-weight: 700;
   color: #8A2D4E;
   margin-bottom: 8px;
@@ -803,7 +693,7 @@ body {
 .calendar-days-matrix {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 6px;
+  gap: 4px;
 }
 
 .cal-day-cell {
@@ -811,13 +701,16 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.88rem;
+  font-size: 0.82rem;
   font-weight: 600;
-  border-radius: 12px;
+  border-radius: 10px;
   cursor: pointer;
-  background: #FFFFFF;
   color: #350B19;
-  border: 1px solid rgba(77, 19, 40, 0.05);
+  transition: all 0.15s ease;
+}
+
+.cal-day-cell:hover:not(.disabled) {
+  background: #F0D5DC;
 }
 
 .cal-day-cell.selected {
@@ -826,71 +719,85 @@ body {
   font-weight: 700;
 }
 
+.cal-day-cell.today {
+  border: 1.5px solid #4D1328;
+}
+
 .cal-day-cell.disabled {
-  opacity: 0.35;
+  color: #C0B7BA;
   cursor: not-allowed;
-  background: transparent;
+  opacity: 0.45;
 }
 
 /* Horários Disponíveis */
 .time-slots-wrap {
-  margin-bottom: 18px;
+  margin-bottom: 16px;
+  width: 100%;
 }
 
 .time-slots-label {
-  font-size: 0.88rem;
-  font-weight: 600;
-  color: #4D1328;
-  margin-bottom: 10px;
   display: block;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #4D1328;
+  margin-bottom: 8px;
 }
 
 .time-slots-scroll-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
-  gap: 10px;
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  width: 100%;
 }
 
-.time-pill-btn {
-  padding: 12px 6px;
-  border-radius: 14px;
+.time-slot-pill {
+  padding: 8px 14px;
   background: #FAF4F5;
-  border: 1px solid rgba(77, 19, 40, 0.1);
-  color: #350B19;
-  font-size: 0.88rem;
+  border: 1px solid rgba(77, 19, 40, 0.12);
+  border-radius: var(--radius-pill);
+  font-size: 0.82rem;
   font-weight: 600;
+  color: #4D1328;
   cursor: pointer;
-  text-align: center;
+  white-space: nowrap;
+  transition: all 0.15s ease;
 }
 
-.time-pill-btn.selected {
+.time-slot-pill:hover {
+  background: #F0D5DC;
+}
+
+.time-slot-pill.selected {
   background: #4D1328;
   color: #FFFFFF;
   border-color: #4D1328;
 }
 
-/* Formulário de 2 campos LGPD: Nome + WhatsApp */
+/* Formulário de Identificação Enxuto */
 .form-input-box {
-  margin-bottom: 14px;
+  margin-bottom: 12px;
+  width: 100%;
 }
 
 .form-input-box label {
   display: block;
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   font-weight: 600;
   color: #4D1328;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
 .form-input-box input {
   width: 100%;
-  padding: 13px 16px;
+  padding: 12px 14px;
+  border: 1px solid rgba(77, 19, 40, 0.14);
   border-radius: 14px;
-  border: 1px solid rgba(77, 19, 40, 0.15);
   background: #FAF4F5;
+  font-size: 0.9rem;
   color: #171719;
-  font-size: 0.95rem;
   outline: none;
+  transition: border-color 0.2s;
 }
 
 .form-input-box input:focus {
@@ -901,29 +808,29 @@ body {
 .btn-confirm-booking-wine {
   width: 100%;
   padding: 15px;
-  border-radius: var(--radius-pill);
   background: #4D1328;
   color: #FFFFFF;
-  font-size: 0.98rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.95rem;
   font-weight: 700;
-  cursor: pointer;
   border: none;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  box-shadow: 0 4px 15px rgba(77, 19, 40, 0.3);
-  margin-top: 10px;
-  transition: transform 0.2s, background 0.2s;
+  box-shadow: 0 4px 18px rgba(77, 19, 40, 0.25);
+  margin-top: 16px;
+  transition: transform 0.15s, background 0.15s;
 }
 
-.btn-confirm-booking-wine:hover {
+.btn-confirm-booking-wine:active {
+  transform: scale(0.98);
   background: #350B19;
-  transform: translateY(-2px);
 }
 
 /* ========================================================
-   8. BARRA DE NAVEGAÇÃO INFERIOR VINHO PROFUNDO
+   7. BARRA DE NAVEGAÇÃO INFERIOR VINHO PROFUNDO (5 ÍCONES)
    ======================================================== */
 .bottom-nav-wine-fixed {
   position: fixed;
@@ -932,22 +839,26 @@ body {
   right: 0;
   background: #350B19;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
-  padding: 10px 16px 14px;
+  padding: 6px 4px 10px;
   display: flex;
   align-items: center;
   justify-content: space-around;
   z-index: 1000;
   box-shadow: 0 -6px 20px rgba(0, 0, 0, 0.35);
+  width: 100%;
 }
 
-@media (min-width: 900px) {
+@media (min-width: 650px) {
   .bottom-nav-wine-fixed {
-    max-width: 580px;
-    margin: 0 auto 1.5rem;
     left: 50%;
     transform: translateX(-50%);
-    border-radius: var(--radius-pill);
-    border: 1px solid rgba(255, 255, 255, 0.18);
+    width: fit-content;
+    max-width: 540px;
+    bottom: 16px;
+    border-radius: 40px;
+    padding: 6px 16px 8px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.15);
   }
 }
 
@@ -955,27 +866,30 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 3px;
+  gap: 2px;
   color: rgba(255, 255, 255, 0.65);
-  font-size: 0.72rem;
+  font-size: 0.62rem;
   font-weight: 500;
   cursor: pointer;
   background: transparent;
   border: none;
-  padding: 5px 12px;
+  padding: 4px 6px;
   border-radius: var(--radius-pill);
   transition: all 0.15s ease;
+  flex: 1;
+  max-width: 68px;
 }
 
 .nav-item-wine i {
-  font-size: 1.25rem;
+  font-size: 1.15rem;
 }
 
 .nav-item-wine.active {
   background: #FBECEF;
   color: #350B19;
   font-weight: 700;
-  padding: 6px 18px;
+  padding: 4px 12px;
+  border-radius: 18px;
 }
 
 .nav-item-wine.active i {

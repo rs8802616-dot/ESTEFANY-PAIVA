@@ -35,9 +35,9 @@
          ======================================================== -->
     <header class="admin-header-wine">
       <div class="admin-header-container">
-        <!-- Barra Superior: Menu, Assinatura Ep, Nav Desktop e Ações -->
+        <!-- Barra Superior: Menu, Assinatura Ep e Notificação -->
         <div class="admin-topbar-row">
-          <button class="btn-admin-icon btn-mobile-only" aria-label="Menu" onclick="switchAdminTab('agenda')">
+          <button class="btn-admin-icon" aria-label="Menu" onclick="switchAdminTab('agenda')">
             <i class="fa-solid fa-bars"></i>
           </button>
 
@@ -50,37 +50,10 @@
             </div>
           </div>
 
-          <!-- Navegação Desktop Expansiva (visível em telas médias e grandes) -->
-          <nav class="admin-desktop-nav" aria-label="Navegação Administrativa">
-            <button class="admin-desktop-link active" data-tab="dashboard" onclick="switchAdminTab('dashboard')">
-              <i class="fa-solid fa-house"></i> Início
-            </button>
-            <button class="admin-desktop-link" data-tab="agenda" onclick="switchAdminTab('agenda')">
-              <i class="fa-regular fa-calendar-check"></i> Agenda
-            </button>
-            <button class="admin-desktop-link" data-tab="clientes" onclick="switchAdminTab('clientes')">
-              <i class="fa-solid fa-users"></i> Clientes
-            </button>
-            <button class="admin-desktop-link" data-tab="servicos" onclick="switchAdminTab('servicos')">
-              <i class="fa-solid fa-gem"></i> Serviços
-            </button>
-            <button class="admin-desktop-link" data-tab="relatorios" onclick="switchAdminTab('relatorios')">
-              <i class="fa-solid fa-chart-simple"></i> Relatórios
-            </button>
-            <button class="admin-desktop-link" data-tab="config" onclick="switchAdminTab('config')">
-              <i class="fa-solid fa-gear"></i> Configurações
-            </button>
-            <a href="index.html" class="admin-desktop-link client-view-btn" target="_blank" title="Abrir Portal da Cliente">
-              <i class="fa-solid fa-arrow-up-right-from-square"></i> Ver Site
-            </a>
-          </nav>
-
-          <div class="admin-topbar-actions">
-            <button class="btn-admin-icon" aria-label="Notificações" onclick="switchAdminTab('agenda')">
-              <i class="fa-regular fa-bell"></i>
-              <span class="badge-bell-count">2</span>
-            </button>
-          </div>
+          <button class="btn-admin-icon" aria-label="Notificações" onclick="switchAdminTab('agenda')">
+            <i class="fa-regular fa-bell"></i>
+            <span class="badge-bell-count">2</span>
+          </button>
         </div>
 
         <!-- Saudação à Profissional e Seletor de Período -->

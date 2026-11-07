@@ -411,7 +411,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // ----------------------------------------------------
   // 4. FLUXO DE AGENDAMENTO ENXUTO (LGPD)
   // ----------------------------------------------------
-  function selectServiceAndOpenBooking(serviceId) {
+  function selectServiceAndOpenBooking(serviceId, shouldScroll = true) {
     const srv = window.EPStore.getServiceById(serviceId);
     if (!srv) return;
 
@@ -439,10 +439,12 @@ document.addEventListener('DOMContentLoaded', () => {
     renderBookingCalendar();
     renderBookingTimeSlots();
 
-    // Rola suavemente até a seção de agendamento
-    const bookingSec = document.getElementById('bookingSection');
-    if (bookingSec) {
-      bookingSec.scrollIntoView({ behavior: 'smooth' });
+    // Rola suavemente até a seção de agendamento apenas se o usuário clicou explicitamente
+    if (shouldScroll) {
+      const bookingSec = document.getElementById('bookingSection');
+      if (bookingSec) {
+        bookingSec.scrollIntoView({ behavior: 'smooth' });
+      }
     }
   }
 
@@ -690,9 +692,10 @@ document.addEventListener('DOMContentLoaded', () => {
   renderCategoriesFilter();
   renderServicesGrid();
 
-  // Seleciona o primeiro serviço para agendamento inicial
+  // Seleciona o primeiro serviço para agendamento inicial sem rolar a página
   const firstSrv = window.EPStore.getServices(true)[0];
   if (firstSrv) {
-    selectServiceAndOpenBooking(firstSrv.id);
+    selectServiceAndOpenBooking(firstSrv.id, false);
   }
+  window.scrollTo(0, 0);
 });
