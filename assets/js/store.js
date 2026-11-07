@@ -197,42 +197,51 @@ const SEED_DATA = {
     headerSubtitle: 'Autoestima & Nail Design de Alto Padrão'
   },
 
-  // Carrossel Superior de Trabalhos Realizados (Portfólio Vivo)
+  // Carrossel Superior de Trabalhos Realizados (Portfólio Vivo com fotos reais)
   carouselItems: [
     {
       id: 'car_1',
-      technique: 'Alongamento em Gel com Curvatura C',
+      technique: 'Alongamento Coffin Gel em Tom Chocolate Glossy',
       category: 'Alongamento em Gel',
-      image: 'assets/images/banner-nails-1.jpg',
+      image: 'assets/images/trabalho-alongamento-chocolate.png',
       serviceId: 'srv_alongamento',
       tag: 'Mais Pedido',
       active: true
     },
     {
       id: 'car_2',
-      technique: 'Nail Art Encapsulada com Folhas de Ouro',
+      technique: 'Amendoada Milky White com Foil de Ouro Fluído',
       category: 'Nail Art & Encapsuladas',
-      image: 'assets/images/trabalho-verde-encapsulada.jpg',
+      image: 'assets/images/trabalho-amendoada-ouro.png',
       serviceId: 'srv_nailart',
       tag: 'Exclusividade',
       active: true
     },
     {
       id: 'car_3',
-      technique: 'Amendoada Clássica com Brilho Champanhe',
-      category: 'Alongamento em Gel',
-      image: 'assets/images/trabalho-amendoada-glitter.jpg',
-      serviceId: 'srv_alongamento',
-      tag: 'Sucesso',
+      technique: 'Esmaltação em Gel Paleta Terrosa & Rosé Shimmer',
+      category: 'Esmaltação em Gel',
+      image: 'assets/images/trabalho-tons-terrosos.png',
+      serviceId: 'srv_esmalte',
+      tag: 'Tendência',
       active: true
     },
     {
       id: 'car_4',
-      technique: 'Nude Leitoso com Acabamento Espelhado',
+      technique: 'Francesa Azul Marinho com Nail Art Celestial',
+      category: 'Nail Art & Encapsuladas',
+      image: 'assets/images/trabalho-francesa-estrela.png',
+      serviceId: 'srv_francesa_celestial',
+      tag: 'Alta Arte',
+      active: true
+    },
+    {
+      id: 'car_5',
+      technique: 'Blindagem Diamante com Efeito Glazed Perolado',
       category: 'Spa & Blindagem',
-      image: 'assets/images/trabalho-nude-classica.jpg',
+      image: 'assets/images/trabalho-perolada-glaze.png',
       serviceId: 'srv_blindagem',
-      tag: 'Elegância',
+      tag: 'Brilho Chrome',
       active: true
     }
   ],
@@ -241,75 +250,42 @@ const SEED_DATA = {
   categories: [
     { id: 'cat_alongamento', name: 'Alongamento em Gel', icon: 'fa-gem', order: 1 },
     { id: 'cat_esmalte', name: 'Esmaltação em Gel', icon: 'fa-wand-magic-sparkles', order: 2 },
-    { id: 'cat_classica', name: 'Manicure & Pedicure Clássica', icon: 'fa-hand-sparkles', order: 3 },
-    { id: 'cat_nailart', name: 'Nail Art & Encapsuladas', icon: 'fa-palette', order: 4 },
-    { id: 'cat_blindagem', name: 'Spa & Blindagem', icon: 'fa-shield-halved', order: 5 }
+    { id: 'cat_nailart', name: 'Nail Art & Encapsuladas', icon: 'fa-palette', order: 3 },
+    { id: 'cat_blindagem', name: 'Spa & Blindagem', icon: 'fa-shield-halved', order: 4 },
+    { id: 'cat_classica', name: 'Manicure & Pedicure Clássica', icon: 'fa-hand-sparkles', order: 5 }
   ],
 
-  // Serviços com Stories (3 Vídeos/Slides por serviço)
+  // Serviços com Stories (3 Vídeos/Slides reais por serviço)
   services: [
     {
       id: 'srv_alongamento',
       categoryId: 'cat_alongamento',
-      name: 'Alongamento em Gel Estruturado',
-      description: 'Unhas longas, resistentes e com acabamento ultra natural. Curvatura C perfeita sem agressão à lâmina.',
+      name: 'Alongamento em Gel Formato Coffin',
+      description: 'Estruturação impecável em formato Coffin/Bailarina longo com acabamento chocolate super brilhante. Máxima durabilidade e curvatura anatômica.',
       price: 150.00,
       duration: 120, // 2 horas
-      image: 'assets/images/service-alongamento.jpg',
+      image: 'assets/images/trabalho-alongamento-chocolate.png',
       active: true,
       storiesVideos: [
         {
           id: 'st_al_1',
-          title: 'Preparação & Brocas Russas',
-          mediaUrl: 'assets/images/banner-nails-1.jpg',
-          caption: 'Passo 1: Higienização minuciosa e cuticulagem russa sem corte agressivo ✨',
+          title: 'Alongamento Coffin em Gel',
+          mediaUrl: 'assets/images/trabalho-alongamento-chocolate.png',
+          caption: 'Estrutura longa com resistência reforçada e brilho profundo ✨',
           duration: 5
         },
         {
           id: 'st_al_2',
-          title: 'Estruturação da Curvatura C',
-          mediaUrl: 'assets/images/trabalho-amendoada-glitter.jpg',
-          caption: 'Passo 2: Ponto de tensão perfeitamente nivelado para máxima durabilidade 💎',
+          title: 'Curvatura e Simetria',
+          mediaUrl: 'assets/images/banner-nails-1.jpg',
+          caption: 'Ponto de tensão nivelado milimetricamente para não quebrar 💎',
           duration: 5
         },
         {
           id: 'st_al_3',
-          title: 'Resultado Final Impecável',
-          mediaUrl: 'assets/images/hero-hand-nude.jpg',
-          caption: 'Passo 3: Brilho espelhado e naturalidade extrema que dura até 30 dias! 💕',
-          duration: 5
-        }
-      ]
-    },
-    {
-      id: 'srv_esmalte',
-      categoryId: 'cat_esmalte',
-      name: 'Esmaltação em Gel Secagem UV/LED',
-      description: 'Secagem instantânea na cabine UV/LED. Saia pronta sem risco de borrar, com brilho intacto por até 25 dias.',
-      price: 70.00,
-      duration: 60,
-      image: 'assets/images/service-esmalte.jpg',
-      active: true,
-      storiesVideos: [
-        {
-          id: 'st_es_1',
-          title: 'Paleta de Cores Nude & Rosé',
-          mediaUrl: 'assets/images/service-esmalte.jpg',
-          caption: 'Cores exclusivas com alta pigmentação internacional 🌸',
-          duration: 5
-        },
-        {
-          id: 'st_es_2',
-          title: 'Secagem na Cabine LED',
-          mediaUrl: 'assets/images/trabalho-nude-classica.jpg',
-          caption: 'Totalmente seco em segundos, sem riscos nem marcas! ✨',
-          duration: 5
-        },
-        {
-          id: 'st_es_3',
-          title: 'Brilho Espelhado Duradouro',
-          mediaUrl: 'assets/images/hero-hand-nude.jpg',
-          caption: 'Suas unhas prontas para qualquer compromisso imediatamente! 💅',
+          title: 'Top Coat Espelhado',
+          mediaUrl: 'assets/images/trabalho-amendoada-glitter.jpg',
+          caption: 'Acabamento vítreo chocolate que dura intacto até 30 dias! 💕',
           duration: 5
         }
       ]
@@ -317,32 +293,98 @@ const SEED_DATA = {
     {
       id: 'srv_nailart',
       categoryId: 'cat_nailart',
-      name: 'Nail Art Luxo & Flores Encapsuladas',
-      description: 'Decoração artística protegida dentro da estrutura do gel. Folhas de ouro, flores desidratadas e glitter fino.',
-      price: 185.00,
-      duration: 150,
-      image: 'assets/images/trabalho-verde-encapsulada.jpg',
+      name: 'Amendoada Milky White com Foil de Ouro',
+      description: 'Unhas almond com base leitosa suave e ondas desenhadas à mão com folhas de ouro encapsuladas. Elegância sofisticada para qualquer ocasião.',
+      price: 180.00,
+      duration: 135,
+      image: 'assets/images/trabalho-amendoada-ouro.png',
       active: true,
       storiesVideos: [
         {
           id: 'st_na_1',
-          title: 'Aplicação Botânica & Folhas de Ouro',
-          mediaUrl: 'assets/images/trabalho-verde-encapsulada.jpg',
-          caption: 'Trabalho artesanal delicado feito unha por unha 🌿✨',
+          title: 'Base Milky White Suave',
+          mediaUrl: 'assets/images/trabalho-amendoada-ouro.png',
+          caption: 'Técnica leitosa translúcida ultra feminina e elegante 🌿✨',
           duration: 5
         },
         {
           id: 'st_na_2',
-          title: 'Camada de Gel Cristalino',
-          mediaUrl: 'assets/images/service-alongamento.jpg',
-          caption: 'A arte fica totalmente protegida e não descasca nem desbota! 💎',
+          title: 'Detalhes em Ouro Fluído',
+          mediaUrl: 'assets/images/trabalho-verde-encapsulada.jpg',
+          caption: 'Aplicação de foil de ouro 24k protegido sob a lâmina de gel 💎',
           duration: 5
         },
         {
           id: 'st_na_3',
-          title: 'Design Exclusivo para Você',
+          title: 'Design Feito à Mão',
           mediaUrl: 'assets/images/trabalho-amendoada-glitter.jpg',
-          caption: 'Um resultado exclusivo que todo mundo vai elogiar 💕',
+          caption: 'Cada unha recebe um desenho artístico exclusivo e exclusivo 💕',
+          duration: 5
+        }
+      ]
+    },
+    {
+      id: 'srv_esmalte',
+      categoryId: 'cat_esmalte',
+      name: 'Esmaltação em Gel Tons Terrosos & Rosé',
+      description: 'Combinação harmônica em degradê suave de nude, cappuccino e marrom aveludado com partícula de brilho rosé.',
+      price: 75.00,
+      duration: 60,
+      image: 'assets/images/trabalho-tons-terrosos.png',
+      active: true,
+      storiesVideos: [
+        {
+          id: 'st_es_1',
+          title: 'Paleta Mocha & Nude Quente',
+          mediaUrl: 'assets/images/trabalho-tons-terrosos.png',
+          caption: 'Harmonização de tons quentes com secagem na cabine LED 🌸',
+          duration: 5
+        },
+        {
+          id: 'st_es_2',
+          title: 'Brilho Acetinado Rosé',
+          mediaUrl: 'assets/images/trabalho-nude-classica.jpg',
+          caption: 'Toque de shimmer delicado no anelar para iluminar o conjunto ✨',
+          duration: 5
+        },
+        {
+          id: 'st_es_3',
+          title: 'Secagem Instantânea',
+          mediaUrl: 'assets/images/hero-hand-nude.jpg',
+          caption: 'Saia da sessão sem perigo de borrar ou perder o brilho! 💅',
+          duration: 5
+        }
+      ]
+    },
+    {
+      id: 'srv_francesa_celestial',
+      categoryId: 'cat_nailart',
+      name: 'Francesa Marinho & Nail Art Estrela Celestial',
+      description: 'Francesinha moderna em azul marinho profundo combinada com aura nail art e estrela dourada desenhada no ponto focal.',
+      price: 165.00,
+      duration: 120,
+      image: 'assets/images/trabalho-francesa-estrela.png',
+      active: true,
+      storiesVideos: [
+        {
+          id: 'st_fc_1',
+          title: 'Francesinha Azul Marinho',
+          mediaUrl: 'assets/images/trabalho-francesa-estrela.png',
+          caption: 'Traço de precisão cirúrgica na ponta amendoada 🌌',
+          duration: 5
+        },
+        {
+          id: 'st_fc_2',
+          title: 'Aura Violeta & Estrela Dourada',
+          mediaUrl: 'assets/images/trabalho-amendoada-ouro.png',
+          caption: 'Esfumado suave com estrela cósmica desenhada à mão livre ✨',
+          duration: 5
+        },
+        {
+          id: 'st_fc_3',
+          title: 'Resultado Estiloso & Único',
+          mediaUrl: 'assets/images/trabalho-alongamento-chocolate.png',
+          caption: 'Aquele trabalho que rende centenas de curtidas e elogios! 💫',
           duration: 5
         }
       ]
@@ -350,32 +392,32 @@ const SEED_DATA = {
     {
       id: 'srv_blindagem',
       categoryId: 'cat_blindagem',
-      name: 'Banho de Gel & Blindagem Diamante',
-      description: 'Camada protetora sobre a sua unha natural. Evita quebras, fortalece unhas fracas e garante crescimento saudável.',
-      price: 90.00,
+      name: 'Blindagem Diamante com Efeito Glazed Perolado',
+      description: 'Tratamento de fortalecimento da lâmina natural finalizado com pó cromado perolado (efeito Hailey Bieber). Brilho acetinado de luxo.',
+      price: 95.00,
       duration: 75,
-      image: 'assets/images/service-banho.jpg',
+      image: 'assets/images/trabalho-perolada-glaze.png',
       active: true,
       storiesVideos: [
         {
           id: 'st_bl_1',
-          title: 'Diagnóstico da Lâmina Natural',
-          mediaUrl: 'assets/images/service-banho.jpg',
-          caption: 'Avaliação da saúde da unha e higienização profunda 🔍',
+          title: 'Efeito Glazed Donut Perolado',
+          mediaUrl: 'assets/images/trabalho-perolada-glaze.png',
+          caption: 'Pó de cromo micropulverizado para um reflexo branco acetinado 💎',
           duration: 5
         },
         {
           id: 'st_bl_2',
-          title: 'Aplicação da Base Estrutural',
-          mediaUrl: 'assets/images/trabalho-nude-classica.jpg',
-          caption: 'Gel de alta flexibilidade que absorve impactos e choques ✨',
+          title: 'Reforço Estrutural com Gel',
+          mediaUrl: 'assets/images/service-banho.jpg',
+          caption: 'Protege unhas finas e quebradiças contra lascas e quebras ✨',
           duration: 5
         },
         {
           id: 'st_bl_3',
-          title: 'Unhas Fortes e Naturais',
-          mediaUrl: 'assets/images/banner-nails-1.jpg',
-          caption: 'Crescimento saudável e protegido por até 4 semanas! 💅',
+          title: 'Aspecto Saudável & Limpo',
+          mediaUrl: 'assets/images/trabalho-nude-classica.jpg',
+          caption: 'Unhas impecáveis, com brilho limpo e sofisticado por semanas! 💅',
           duration: 5
         }
       ]
@@ -544,7 +586,8 @@ window.EPStore = {
     }
 
     // 5. Portfólio Vivo (Carrossel Topo)
-    if (!localStorage.getItem(STORAGE_KEYS.CAROUSEL_ITEMS)) {
+    const existingCarousel = localStorage.getItem(STORAGE_KEYS.CAROUSEL_ITEMS);
+    if (!existingCarousel || !existingCarousel.includes('trabalho-alongamento-chocolate.png')) {
       localStorage.setItem(STORAGE_KEYS.CAROUSEL_ITEMS, JSON.stringify(SEED_DATA.carouselItems));
     }
 
@@ -554,7 +597,8 @@ window.EPStore = {
     }
 
     // 7. Serviços com Stories
-    if (!localStorage.getItem(STORAGE_KEYS.SERVICES)) {
+    const existingServices = localStorage.getItem(STORAGE_KEYS.SERVICES);
+    if (!existingServices || !existingServices.includes('trabalho-alongamento-chocolate.png')) {
       localStorage.setItem(STORAGE_KEYS.SERVICES, JSON.stringify(SEED_DATA.services));
     }
 
