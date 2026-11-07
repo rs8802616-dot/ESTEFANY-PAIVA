@@ -3,27 +3,57 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Estefany Paiva &bull; Painel Administrativo</title>
-  
+  <title>Estefany Paiva Nails - Painel Administrativo</title>
+
+  <!-- PWA Metadata & Favicon -->
   <meta name="theme-color" content="#350B19">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/jpeg" href="assets/images/capa-estefany-paiva.jpg">
-  <link rel="apple-touch-icon" href="assets/images/capa-estefany-paiva.jpg">
 
-  <!-- Google Fonts: Editorial Serif + Modern Sans -->
+  <!-- Google Fonts: Editorial Serif + Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-  <!-- Font Awesome Icons -->
+  <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
   <!-- Estilos do Painel Administrativo -->
-  <link rel="stylesheet" href="assets/css/variables.css">
   <link rel="stylesheet" href="assets/css/admin.css">
+  <style>
+    @media print {
+      body * { visibility: hidden; }
+      #printableReportArea, #printableReportArea * { visibility: visible; }
+      #printableReportArea { position: absolute; left: 0; top: 0; width: 100%; }
+      .no-print { display: none !important; }
+    }
+    .toast-notification {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #350B19;
+      color: #FFFFFF;
+      padding: 14px 22px;
+      border-radius: 30px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.35);
+      border: 1px solid rgba(251, 236, 239, 0.2);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 9999;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .toast-notification.active {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  </style>
 </head>
 <body>
 
@@ -35,25 +65,54 @@
          ======================================================== -->
     <header class="admin-header-wine">
       <div class="admin-header-container">
-        <!-- Barra Superior: Menu, Assinatura Ep e Notificação -->
+        <!-- Barra Superior: Menu, Assinatura Ep, Nav Desktop e Notificação -->
         <div class="admin-topbar-row">
-          <button class="btn-admin-icon" aria-label="Menu" onclick="switchAdminTab('agenda')">
-            <i class="fa-solid fa-bars"></i>
-          </button>
+          <div class="admin-topbar-left">
+            <button class="btn-admin-icon" aria-label="Menu" onclick="switchAdminTab('agenda')">
+              <i class="fa-solid fa-bars"></i>
+            </button>
 
-          <!-- Logo Assinatura Oficial Ep ESTEFANY PAIVA NAIL DESIGNER -->
-          <div class="signature-logo-wrap" onclick="switchAdminTab('dashboard')">
-            <span class="sig-script-ep">Ep</span>
-            <div class="sig-script-text">
-              <span class="sig-script-title">ESTEFANY PAIVA</span>
-              <span class="sig-script-sub">NAIL DESIGNER</span>
+            <!-- Logo Assinatura Oficial Ep ESTEFANY PAIVA NAIL DESIGNER -->
+            <div class="signature-logo-wrap" onclick="switchAdminTab('dashboard')" style="cursor:pointer;">
+              <span class="sig-script-ep">Ep</span>
+              <div class="sig-script-text">
+                <span class="sig-script-title">ESTEFANY PAIVA</span>
+                <span class="sig-script-sub">NAIL DESIGNER</span>
+              </div>
             </div>
           </div>
 
-          <button class="btn-admin-icon" aria-label="Notificações" onclick="switchAdminTab('agenda')">
-            <i class="fa-regular fa-bell"></i>
-            <span class="badge-bell-count">2</span>
-          </button>
+          <!-- Menu de Navegação no Desktop -->
+          <nav class="admin-desktop-nav-menu">
+            <button class="admin-desktop-nav-btn active" data-tab="dashboard" onclick="switchAdminTab('dashboard')">
+              <i class="fa-solid fa-house"></i> Início
+            </button>
+            <button class="admin-desktop-nav-btn" data-tab="agenda" onclick="switchAdminTab('agenda')">
+              <i class="fa-regular fa-calendar-check"></i> Agenda
+            </button>
+            <button class="admin-desktop-nav-btn" data-tab="clientes" onclick="switchAdminTab('clientes')">
+              <i class="fa-solid fa-users"></i> Clientes
+            </button>
+            <button class="admin-desktop-nav-btn" data-tab="servicos" onclick="switchAdminTab('servicos')">
+              <i class="fa-regular fa-gem"></i> Serviços
+            </button>
+            <button class="admin-desktop-nav-btn" data-tab="relatorios" onclick="switchAdminTab('relatorios')">
+              <i class="fa-solid fa-chart-simple"></i> Relatórios
+            </button>
+            <button class="admin-desktop-nav-btn" data-tab="configuracoes" onclick="switchAdminTab('configuracoes')">
+              <i class="fa-solid fa-gear"></i> Configurações
+            </button>
+            <button class="admin-desktop-nav-btn" data-tab="avaliacoes" onclick="switchAdminTab('avaliacoes')">
+              <i class="fa-regular fa-star"></i> Avaliações
+            </button>
+          </nav>
+
+          <div class="admin-topbar-right">
+            <button class="btn-admin-icon" aria-label="Notificações" onclick="openModalNotificacoes()">
+              <i class="fa-regular fa-bell"></i>
+              <span class="badge-bell-count" id="adminBellBadge">2</span>
+            </button>
+          </div>
         </div>
 
         <!-- Saudação à Profissional e Seletor de Período -->
@@ -91,697 +150,485 @@
            ======================================================== -->
       <section class="admin-view-screen active" id="viewScreen_dashboard">
 
-      <!-- 4 KPIs em Cards Rosé -->
-      <div class="admin-kpis-grid">
-        <div class="kpi-pink-card">
-          <i class="fa-regular fa-calendar-check"></i>
-          <span class="kpi-num">12</span>
-          <span class="kpi-lbl">Agendamentos</span>
-          <span class="kpi-growth"><i class="fa-solid fa-arrow-up"></i> 12%</span>
-        </div>
+        <!-- 4 KPIs em Cards Rosé -->
+        <div class="admin-kpis-grid">
+          <div class="kpi-pink-card">
+            <i class="fa-regular fa-calendar-check"></i>
+            <span class="kpi-num" id="kpiTotalAgendamentos">12</span>
+            <span class="kpi-lbl">Agendamentos</span>
+            <span class="kpi-growth"><i class="fa-solid fa-arrow-up"></i> 12%</span>
+          </div>
 
-        <div class="kpi-pink-card">
-          <i class="fa-solid fa-users"></i>
-          <span class="kpi-num">248</span>
-          <span class="kpi-lbl">Clientes ativas</span>
-          <span class="kpi-growth"><i class="fa-solid fa-arrow-up"></i> 8%</span>
-        </div>
+          <div class="kpi-pink-card">
+            <i class="fa-solid fa-users"></i>
+            <span class="kpi-num" id="kpiClientesAtivas">248</span>
+            <span class="kpi-lbl">Clientes ativas</span>
+            <span class="kpi-growth"><i class="fa-solid fa-arrow-up"></i> 8%</span>
+          </div>
 
-        <div class="kpi-pink-card">
-          <i class="fa-solid fa-dollar-sign"></i>
-          <span class="kpi-num" style="font-size:1.15rem;">R$ 3.420</span>
-          <span class="kpi-lbl">Faturamento</span>
-          <span class="kpi-growth"><i class="fa-solid fa-arrow-up"></i> 15%</span>
-        </div>
+          <div class="kpi-pink-card">
+            <i class="fa-solid fa-dollar-sign"></i>
+            <span class="kpi-num" style="font-size:1.15rem;" id="kpiFaturamento">R$ 3.420</span>
+            <span class="kpi-lbl">Faturamento</span>
+            <span class="kpi-growth"><i class="fa-solid fa-arrow-up"></i> 15%</span>
+          </div>
 
-        <div class="kpi-pink-card">
-          <i class="fa-solid fa-star"></i>
-          <span class="kpi-num">4.9</span>
-          <span class="kpi-lbl">Avaliação média</span>
-          <span class="kpi-growth"><i class="fa-solid fa-arrow-up"></i> 0.2</span>
-        </div>
-      </div>
-
-      <!-- Card "Seu crescimento" (Gráfico de Linha em Curva SVG) -->
-      <div class="admin-chart-card">
-        <div class="chart-header-row">
-          <h3><i class="fa-solid fa-chart-line"></i> Seu crescimento</h3>
-          <div class="period-select-pill" style="background:#FFF; color:#4D1328; border-color:rgba(77,19,40,0.15);">
-            <span>Últimos 4 meses</span>
-            <i class="fa-solid fa-chevron-down" style="font-size:0.65rem;"></i>
+          <div class="kpi-pink-card">
+            <i class="fa-solid fa-star"></i>
+            <span class="kpi-num">4.9</span>
+            <span class="kpi-lbl">Avaliação média</span>
+            <span class="kpi-growth"><i class="fa-solid fa-arrow-up"></i> 0.2</span>
           </div>
         </div>
 
-        <div style="position:relative; width:100%; height:160px; margin-top:14px;">
-          <div class="chart-badge-highlight">
-            R$ 3.420
-          </div>
-          <!-- Gráfico SVG com curva suave -->
-          <svg viewBox="0 0 340 130" style="width:100%; height:100%; overflow:visible;">
-            <defs>
-              <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#D83F79" stop-opacity="0.25"/>
-                <stop offset="100%" stop-color="#D83F79" stop-opacity="0.0"/>
-              </linearGradient>
-            </defs>
-            <!-- Linhas horizontais de grade -->
-            <line x1="25" y1="20" x2="330" y2="20" stroke="rgba(77,19,40,0.06)" stroke-width="1"/>
-            <line x1="25" y1="50" x2="330" y2="50" stroke="rgba(77,19,40,0.06)" stroke-width="1"/>
-            <line x1="25" y1="80" x2="330" y2="80" stroke="rgba(77,19,40,0.06)" stroke-width="1"/>
-            <line x1="25" y1="110" x2="330" y2="110" stroke="rgba(77,19,40,0.06)" stroke-width="1"/>
-
-            <!-- Rótulos verticais -->
-            <text x="5" y="24" font-size="9" fill="#8A2D4E">4k</text>
-            <text x="5" y="54" font-size="9" fill="#8A2D4E">3k</text>
-            <text x="5" y="84" font-size="9" fill="#8A2D4E">2k</text>
-            <text x="5" y="114" font-size="9" fill="#8A2D4E">0</text>
-
-            <!-- Área preenchida -->
-            <path d="M 35 105 C 100 80, 160 70, 220 65 C 260 62, 290 35, 315 35 L 315 110 L 35 110 Z" fill="url(#chartGradient)"/>
-            <!-- Curva suave -->
-            <path d="M 35 105 C 100 80, 160 70, 220 65 C 260 62, 290 35, 315 35" fill="none" stroke="#A82A52" stroke-width="3" stroke-linecap="round"/>
-
-            <!-- Pontos -->
-            <circle cx="35" cy="105" r="4.5" fill="#4D1328"/>
-            <circle cx="130" cy="75" r="4.5" fill="#4D1328"/>
-            <circle cx="220" cy="65" r="4.5" fill="#4D1328"/>
-            <circle cx="315" cy="35" r="6" fill="#D83F79" stroke="#FFF" stroke-width="2"/>
-
-            <!-- Rótulos meses -->
-            <text x="30" y="125" font-size="9.5" fill="#8A2D4E" font-weight="600">Jul</text>
-            <text x="120" y="125" font-size="9.5" fill="#8A2D4E" font-weight="600">Ago</text>
-            <text x="212" y="125" font-size="9.5" fill="#8A2D4E" font-weight="600">Set</text>
-            <text x="305" y="125" font-size="9.5" fill="#8A2D4E" font-weight="600">Out</text>
-          </svg>
-        </div>
-      </div>
-
-      <!-- Dupla de Cards: Próximos Agendamentos & Serviços Mais Realizados -->
-      <div class="admin-cards-duo">
-        
-        <!-- Card Próximos Agendamentos -->
-        <div class="admin-sub-card">
-          <div class="admin-sub-card-header">
-            <h4><i class="fa-regular fa-calendar-check"></i> Próximos agendamentos</h4>
-            <a href="#" onclick="switchAdminTab('agenda'); return false;">Ver todos &gt;</a>
-          </div>
-
-          <div class="slot-client-row" onclick="switchAdminTab('agenda')">
-            <div class="client-avatar-badge">MS</div>
-            <div class="slot-client-info">
-              <h5>Mariana Silva</h5>
-              <p>Hoje &bull; 14:00</p>
+        <!-- Linha 2 do Dashboard: Gráfico de Crescimento + Donut de Serviços -->
+        <div class="admin-dashboard-split-row">
+          <!-- Card "Seu crescimento" (Gráfico de Linha em Curva SVG) -->
+          <div class="admin-chart-card">
+            <div class="chart-header-row">
+              <h3><i class="fa-solid fa-chart-line"></i> Seu crescimento</h3>
+              <div class="period-select-pill" style="background:#FFF; color:#4D1328; border-color:rgba(77,19,40,0.15);">
+                <span>Últimos 4 meses</span>
+                <i class="fa-solid fa-chevron-down" style="font-size:0.65rem;"></i>
+              </div>
             </div>
-            <i class="fa-solid fa-chevron-right" style="color:#8A2D4E; font-size:0.75rem;"></i>
-          </div>
 
-          <div class="slot-client-row" onclick="switchAdminTab('agenda')">
-            <div class="client-avatar-badge" style="background:#F2CDD4;">JS</div>
-            <div class="slot-client-info">
-              <h5>Juliana Souza</h5>
-              <p>Hoje &bull; 16:00</p>
-            </div>
-            <i class="fa-solid fa-chevron-right" style="color:#8A2D4E; font-size:0.75rem;"></i>
-          </div>
+            <div style="position:relative; width:100%; height:160px; margin-top:14px;">
+              <div class="chart-badge-highlight">
+                R$ 3.420
+              </div>
+              <!-- Gráfico SVG com curva suave -->
+              <svg viewBox="0 0 340 130" style="width:100%; height:100%; overflow:visible;">
+                <defs>
+                  <linearGradient id="adminChartGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#D83F79" stop-opacity="0.35"/>
+                    <stop offset="100%" stop-color="#FBECEF" stop-opacity="0.02"/>
+                  </linearGradient>
+                </defs>
+                <line x1="20" y1="105" x2="320" y2="105" stroke="rgba(77,19,40,0.08)" stroke-dasharray="3,3"/>
+                <line x1="20" y1="75" x2="320" y2="75" stroke="rgba(77,19,40,0.08)" stroke-dasharray="3,3"/>
+                <line x1="20" y1="45" x2="320" y2="45" stroke="rgba(77,19,40,0.08)" stroke-dasharray="3,3"/>
+                <line x1="20" y1="15" x2="320" y2="15" stroke="rgba(77,19,40,0.08)" stroke-dasharray="3,3"/>
 
-          <div class="slot-client-row" onclick="switchAdminTab('agenda')">
-            <div class="client-avatar-badge" style="background:#E6BAC3;">AC</div>
-            <div class="slot-client-info">
-              <h5>Ana Costa</h5>
-              <p>Hoje &bull; 18:00</p>
-            </div>
-            <i class="fa-solid fa-chevron-right" style="color:#8A2D4E; font-size:0.75rem;"></i>
-          </div>
-        </div>
+                <path d="M 30 105 C 80 95, 120 75, 170 72 C 220 70, 260 65, 310 40 L 310 120 L 30 120 Z" fill="url(#adminChartGrad)"/>
+                <path d="M 30 105 C 80 95, 120 75, 170 72 C 220 70, 260 65, 310 40" fill="none" stroke="#8A2D4E" stroke-width="3" stroke-linecap="round"/>
 
-        <!-- Card Serviços Mais Realizados (Donut Chart) -->
-        <div class="admin-sub-card">
-          <div class="admin-sub-card-header">
-            <h4><i class="fa-solid fa-star"></i> Serviços mais realizados</h4>
-          </div>
+                <circle cx="30" cy="105" r="4.5" fill="#4D1328"/>
+                <circle cx="120" cy="75" r="4.5" fill="#4D1328"/>
+                <circle cx="210" cy="70" r="4.5" fill="#4D1328"/>
+                <circle cx="310" cy="40" r="5.5" fill="#8A2D4E" stroke="#FFFFFF" stroke-width="2"/>
 
-          <div class="donut-chart-container">
-            <div class="donut-svg-wrap">
-              <svg viewBox="0 0 36 36" style="width:100%; height:100%; transform: rotate(-90deg);">
-                <!-- Alongamento (45%) -->
-                <circle cx="18" cy="18" r="14" fill="none" stroke="#E9A3B5" stroke-width="5" stroke-dasharray="45 55" stroke-dashoffset="0"/>
-                <!-- Manicure (35%) -->
-                <circle cx="18" cy="18" r="14" fill="none" stroke="#8A2D4E" stroke-width="5" stroke-dasharray="35 65" stroke-dashoffset="-45"/>
-                <!-- Spa (20%) -->
-                <circle cx="18" cy="18" r="14" fill="none" stroke="#350B19" stroke-width="5" stroke-dasharray="20 80" stroke-dashoffset="-80"/>
+                <text x="24" y="128" font-size="10" font-weight="600" fill="#6A1D39">Jul</text>
+                <text x="112" y="128" font-size="10" font-weight="600" fill="#6A1D39">Ago</text>
+                <text x="204" y="128" font-size="10" font-weight="600" fill="#6A1D39">Set</text>
+                <text x="302" y="128" font-size="10" font-weight="600" fill="#6A1D39">Out</text>
               </svg>
             </div>
+          </div>
 
-            <div class="donut-legend-list">
-              <div class="donut-legend-item">
-                <span><span class="bullet" style="background:#E9A3B5;"></span>Alongamento em Gel</span>
-                <strong>45%</strong>
+          <!-- Card "Serviços mais realizados" (Donut Chart) -->
+          <div class="admin-sub-card">
+            <div class="sub-card-header-row">
+              <h4 style="font-family:var(--font-serif); font-size:1.05rem; color:#4D1328; font-weight:700;">
+                <i class="fa-solid fa-star" style="color:#C59B6D;"></i> Serviços mais realizados
+              </h4>
+            </div>
+
+            <div class="donut-chart-container" style="margin-top:12px;">
+              <div class="donut-svg-wrap">
+                <svg viewBox="0 0 100 100" class="donut-svg">
+                  <circle cx="50" cy="50" r="36" fill="transparent" stroke="#FAF4F5" stroke-width="16"/>
+                  <circle cx="50" cy="50" r="36" fill="transparent" stroke="#350B19" stroke-width="16" stroke-dasharray="226.2" stroke-dashoffset="180.9" transform="rotate(-90 50 50)"/>
+                  <circle cx="50" cy="50" r="36" fill="transparent" stroke="#8A2D4E" stroke-width="16" stroke-dasharray="226.2" stroke-dashoffset="147.0" transform="rotate(18 50 50)"/>
+                  <circle cx="50" cy="50" r="36" fill="transparent" stroke="#E9A3B5" stroke-width="16" stroke-dasharray="226.2" stroke-dashoffset="124.4" transform="rotate(144 50 50)"/>
+                </svg>
               </div>
-              <div class="donut-legend-item">
-                <span><span class="bullet" style="background:#8A2D4E;"></span>Manicure Clássica</span>
-                <strong>35%</strong>
-              </div>
-              <div class="donut-legend-item">
-                <span><span class="bullet" style="background:#350B19;"></span>Spa das Mãos</span>
-                <strong>20%</strong>
+
+              <div class="donut-legend-wrap">
+                <div class="donut-legend-item">
+                  <span><span class="bullet" style="background:#E9A3B5;"></span>Alongamento em Gel</span>
+                  <strong>45%</strong>
+                </div>
+                <div class="donut-legend-item">
+                  <span><span class="bullet" style="background:#8A2D4E;"></span>Manicure Clássica</span>
+                  <strong>35%</strong>
+                </div>
+                <div class="donut-legend-item">
+                  <span><span class="bullet" style="background:#350B19;"></span>Spa das Mãos</span>
+                  <strong>20%</strong>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-      </div>
+        <!-- Linha 3 do Dashboard: Próximos Agendamentos + Acesso Rápido -->
+        <div class="admin-dashboard-split-row">
+          <!-- Card "Próximos agendamentos" -->
+          <div class="admin-sub-card">
+            <div class="sub-card-header-row">
+              <h4 style="font-family:var(--font-serif); font-size:1.05rem; color:#4D1328; font-weight:700;">
+                <i class="fa-regular fa-calendar-check"></i> Próximos agendamentos
+              </h4>
+              <a href="#" onclick="switchAdminTab('agenda'); return false;" class="view-all-link">Ver todos &gt;</a>
+            </div>
 
-      <!-- 6 Ações de Gestão Rápida -->
-      <div class="admin-6-actions-grid">
-        <button class="admin-action-btn-squircle" onclick="switchAdminTab('agenda')">
-          <i class="fa-regular fa-calendar-check"></i>
-          <span>Agenda</span>
-        </button>
+            <div class="appointments-list-compact" id="dashboardRecentAppointmentsList">
+              <!-- Carregado dinamicamente via JS -->
+            </div>
+          </div>
 
-        <button class="admin-action-btn-squircle" onclick="switchAdminTab('clientes')">
-          <i class="fa-solid fa-users"></i>
-          <span>Clientes</span>
-        </button>
+          <!-- Card de Acesso Rápido (6 Ações) -->
+          <div class="admin-sub-card">
+            <div class="sub-card-header-row">
+              <h4 style="font-family:var(--font-serif); font-size:1.05rem; color:#4D1328; font-weight:700;">
+                <i class="fa-solid fa-bolt"></i> Acesso Rápido
+              </h4>
+              <button onclick="openModalNovoAgendamento()" class="btn-open-client-pill" style="font-size:0.72rem;">
+                <i class="fa-solid fa-plus"></i> Agendar
+              </button>
+            </div>
 
-        <button class="admin-action-btn-squircle" onclick="switchAdminTab('servicos')">
-          <i class="fa-regular fa-gem"></i>
-          <span>Serviços</span>
-        </button>
+            <div class="admin-action-buttons-grid" style="margin-top:10px;">
+              <button class="admin-action-btn-squircle" onclick="switchAdminTab('agenda')">
+                <i class="fa-regular fa-calendar-check"></i>
+                <span>Agenda</span>
+              </button>
+              <button class="admin-action-btn-squircle" onclick="switchAdminTab('clientes')">
+                <i class="fa-solid fa-users"></i>
+                <span>Clientes</span>
+              </button>
+              <button class="admin-action-btn-squircle" onclick="switchAdminTab('servicos')">
+                <i class="fa-regular fa-gem"></i>
+                <span>Serviços</span>
+              </button>
+              <button class="admin-action-btn-squircle" onclick="switchAdminTab('relatorios')">
+                <i class="fa-solid fa-chart-simple"></i>
+                <span>Relatórios</span>
+              </button>
+              <button class="admin-action-btn-squircle" onclick="switchAdminTab('configuracoes')">
+                <i class="fa-solid fa-gear"></i>
+                <span>Ajustes</span>
+              </button>
+              <button class="admin-action-btn-squircle" onclick="switchAdminTab('avaliacoes')">
+                <i class="fa-regular fa-star"></i>
+                <span>Avaliações</span>
+              </button>
+            </div>
+          </div>
+        </div>
 
-        <button class="admin-action-btn-squircle" onclick="switchAdminTab('relatorios')">
-          <i class="fa-solid fa-chart-simple"></i>
-          <span>Relatórios</span>
-        </button>
+      </section>
 
-        <button class="admin-action-btn-squircle" onclick="switchAdminTab('configuracoes')">
-          <i class="fa-solid fa-gear"></i>
-          <span>Configurações</span>
-        </button>
+      <!-- ========================================================
+           TELA 2: CONTROLE DE AGENDAMENTOS (AGENDA)
+           ======================================================== -->
+      <section class="admin-view-screen" id="viewScreen_agenda">
+        <div class="section-head-title-row" style="margin-top:10px;">
+          <h3 style="font-family:var(--font-serif); font-size:1.35rem; color:#4D1328;"><i class="fa-regular fa-calendar-check"></i> Controle de Agendamentos</h3>
+          <button class="btn-open-client-pill" onclick="openModalNovoAgendamento()">
+            <i class="fa-solid fa-plus"></i> Novo Agendamento
+          </button>
+        </div>
 
-        <button class="admin-action-btn-squircle" onclick="switchAdminTab('avaliacoes')">
-          <i class="fa-regular fa-user"></i>
-          <span>Perfil</span>
+        <!-- Filtros Todos, Confirmados, Pendentes -->
+        <div class="filter-pills-row">
+          <button class="filter-pill active" onclick="filterAppointmentsAdmin('all', this)">Todos</button>
+          <button class="filter-pill" onclick="filterAppointmentsAdmin('confirmado', this)">Confirmados</button>
+          <button class="filter-pill" onclick="filterAppointmentsAdmin('pendente', this)">Pendentes</button>
+        </div>
+
+        <!-- Barra de Busca -->
+        <div class="search-input-box">
+          <i class="fa-solid fa-magnifying-glass" style="color:#8A2D4E;"></i>
+          <input type="text" placeholder="Buscar agendamentos por cliente ou serviço..." oninput="searchAppointmentsAdmin(this.value)">
+        </div>
+
+        <!-- Grade Responsiva de Agendamentos (2 Colunas no PC / 1 no Mobile) -->
+        <div class="admin-items-responsive-grid" id="adminAppointmentsList">
+          <!-- Carregado dinamicamente via JS -->
+        </div>
+
+        <button class="btn-admin-bottom-action" onclick="openModalNovoAgendamento()">
+          <i class="fa-solid fa-plus"></i> Novo Agendamento
         </button>
-      </div>
+      </section>
+
+      <!-- ========================================================
+           TELA 3: CLIENTES
+           ======================================================== -->
+      <section class="admin-view-screen" id="viewScreen_clientes">
+        <div class="section-head-title-row" style="margin-top:10px;">
+          <h3 style="font-family:var(--font-serif); font-size:1.35rem; color:#4D1328;"><i class="fa-solid fa-users"></i> Clientes</h3>
+          <button onclick="openModalNovoCliente()" style="background:#4D1328; color:#FFF; width:34px; height:34px; border-radius:50%; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center;">
+            <i class="fa-solid fa-plus"></i>
+          </button>
+        </div>
+
+        <div class="search-input-box">
+          <i class="fa-solid fa-magnifying-glass" style="color:#8A2D4E;"></i>
+          <input type="text" placeholder="Buscar cliente por nome ou WhatsApp..." oninput="searchCustomersAdmin(this.value)">
+        </div>
+
+        <!-- Grade Responsiva de Clientes -->
+        <div class="admin-items-responsive-grid" id="adminClientsList">
+          <!-- Carregado dinamicamente via JS -->
+        </div>
+
+        <button class="btn-admin-bottom-action" onclick="openModalNovoCliente()">
+          <i class="fa-solid fa-user-plus"></i> Adicionar Cliente
+        </button>
+      </section>
+
+      <!-- ========================================================
+           TELA 4: SERVIÇOS & TOGGLES
+           ======================================================== -->
+      <section class="admin-view-screen" id="viewScreen_servicos">
+        <div class="section-head-title-row" style="margin-top:10px;">
+          <h3 style="font-family:var(--font-serif); font-size:1.35rem; color:#4D1328;"><i class="fa-regular fa-gem"></i> Catálogo de Serviços</h3>
+          <button onclick="openModalNovoServico()" style="background:#4D1328; color:#FFF; width:34px; height:34px; border-radius:50%; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center;">
+            <i class="fa-solid fa-plus"></i>
+          </button>
+        </div>
+
+        <!-- Grade Responsiva de Serviços -->
+        <div class="admin-items-responsive-grid" id="adminServicesList">
+          <!-- Carregado dinamicamente via JS -->
+        </div>
+
+        <button class="btn-admin-bottom-action" onclick="openModalNovoServico()">
+          <i class="fa-solid fa-plus"></i> Adicionar Novo Serviço
+        </button>
+      </section>
+
+      <!-- ========================================================
+           TELA 5: RELATÓRIOS FINANCEIROS
+           ======================================================== -->
+      <section class="admin-view-screen" id="viewScreen_relatorios">
+        <div class="section-head-title-row" style="margin-top:10px;">
+          <h3 style="font-family:var(--font-serif); font-size:1.35rem; color:#4D1328;"><i class="fa-solid fa-chart-simple"></i> Relatórios Gerenciais</h3>
+          <button class="btn-open-client-pill" onclick="printAdminReport()">
+            <i class="fa-solid fa-print"></i> Imprimir / PDF
+          </button>
+        </div>
+
+        <div id="printableReportArea">
+          <div class="admin-dashboard-split-row">
+            <div class="admin-chart-card">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <div>
+                  <span style="font-size:0.78rem; color:#8A2D4E; font-weight:600;">Faturamento Mensal</span>
+                  <h3 style="font-family:var(--font-serif); font-size:1.6rem; color:#350B19; margin:2px 0;">R$ 34.860,00</h3>
+                </div>
+                <span class="kpi-growth" style="font-size:0.85rem;"><i class="fa-solid fa-arrow-up"></i> 18%</span>
+              </div>
+
+              <div style="position:relative; width:100%; height:130px; margin-top:10px;">
+                <svg viewBox="0 0 340 100" style="width:100%; height:100%;">
+                  <path d="M 20 85 C 80 80, 140 70, 200 60 C 260 55, 290 25, 325 20 L 325 95 L 20 95 Z" fill="rgba(216, 63, 121, 0.2)"/>
+                  <path d="M 20 85 C 80 80, 140 70, 200 60 C 260 55, 290 25, 325 20" fill="none" stroke="#D83F79" stroke-width="3" stroke-linecap="round"/>
+                  <circle cx="325" cy="20" r="5" fill="#D83F79"/>
+                  <text x="15" y="100" font-size="9" fill="#8A2D4E">Mai</text>
+                  <text x="75" y="100" font-size="9" fill="#8A2D4E">Jun</text>
+                  <text x="135" y="100" font-size="9" fill="#8A2D4E">Jul</text>
+                  <text x="195" y="100" font-size="9" fill="#8A2D4E">Ago</text>
+                  <text x="255" y="100" font-size="9" fill="#8A2D4E">Set</text>
+                  <text x="315" y="100" font-size="9" fill="#8A2D4E">Out</text>
+                </svg>
+              </div>
+            </div>
+
+            <div class="admin-sub-card">
+              <div class="sub-card-header-row">
+                <h4 style="font-family:var(--font-serif); font-size:1.05rem; color:#4D1328; font-weight:700;">
+                  <i class="fa-solid fa-receipt"></i> Detalhamento por Categoria
+                </h4>
+              </div>
+              <div class="donut-legend-wrap" style="margin-top:12px;">
+                <div class="donut-legend-item">
+                  <span><span class="bullet" style="background:#E9A3B5;"></span>Alongamento em Gel</span>
+                  <strong>R$ 15.680 (45%)</strong>
+                </div>
+                <div class="donut-legend-item">
+                  <span><span class="bullet" style="background:#8A2D4E;"></span>Manicure Clássica</span>
+                  <strong>R$ 12.200 (35%)</strong>
+                </div>
+                <div class="donut-legend-item">
+                  <span><span class="bullet" style="background:#350B19;"></span>Spa das Mãos</span>
+                  <strong>R$ 6.980 (20%)</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn-admin-bottom-action" onclick="printAdminReport()">
+          <i class="fa-solid fa-download"></i> Baixar Relatório em PDF
+        </button>
+      </section>
+
+      <!-- ========================================================
+           TELA 6: CONFIGURAÇÕES
+           ======================================================== -->
+      <section class="admin-view-screen" id="viewScreen_configuracoes">
+        <div class="section-head-title-row" style="margin-top:10px;">
+          <h3 style="font-family:var(--font-serif); font-size:1.35rem; color:#4D1328;"><i class="fa-solid fa-gear"></i> Configurações</h3>
+        </div>
+
+        <div class="admin-items-responsive-grid">
+          <div class="card-list-item" onclick="openModalConfigSalao()">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <i class="fa-regular fa-user" style="font-size:1.2rem; color:#4D1328;"></i>
+              <div>
+                <h5 style="font-size:0.9rem; font-weight:700; color:#350B19;">Perfil do Salão</h5>
+                <p style="font-size:0.75rem; color:#6A1D39;">Nome, slogan, telefone e Instagram</p>
+              </div>
+            </div>
+            <i class="fa-solid fa-chevron-right" style="color:#8A2D4E; font-size:0.75rem;"></i>
+          </div>
+
+          <div class="card-list-item">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <i class="fa-regular fa-bell" style="font-size:1.2rem; color:#4D1328;"></i>
+              <div>
+                <h5 style="font-size:0.9rem; font-weight:700; color:#350B19;">Notificações Push com Som</h5>
+                <p style="font-size:0.75rem; color:#6A1D39;">Apitar no celular em novos agendamentos</p>
+              </div>
+            </div>
+            <label class="switch-toggle-custom">
+              <input type="checkbox" checked id="togglePushSwitch" onchange="togglePushNotificationSettings(this.checked)">
+              <span class="switch-slider"></span>
+            </label>
+          </div>
+
+          <div class="card-list-item" onclick="openModalConfigHorarios()">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <i class="fa-regular fa-clock" style="font-size:1.2rem; color:#4D1328;"></i>
+              <div>
+                <h5 style="font-size:0.9rem; font-weight:700; color:#350B19;">Horários de Atendimento</h5>
+                <p style="font-size:0.75rem; color:#6A1D39;">Configurar turnos e intervalo buffer</p>
+              </div>
+            </div>
+            <i class="fa-solid fa-chevron-right" style="color:#8A2D4E; font-size:0.75rem;"></i>
+          </div>
+
+          <div class="card-list-item" onclick="openModalConfigPagamento()">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <i class="fa-regular fa-credit-card" style="font-size:1.2rem; color:#4D1328;"></i>
+              <div>
+                <h5 style="font-size:0.9rem; font-weight:700; color:#350B19;">Formas de Pagamento</h5>
+                <p style="font-size:0.75rem; color:#6A1D39;">Pix, Cartão de Crédito, Débito e Dinheiro</p>
+              </div>
+            </div>
+            <i class="fa-solid fa-chevron-right" style="color:#8A2D4E; font-size:0.75rem;"></i>
+          </div>
+
+          <div class="card-list-item" onclick="openModalConfigPrivacidade()">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <i class="fa-solid fa-shield-halved" style="font-size:1.2rem; color:#4D1328;"></i>
+              <div>
+                <h5 style="font-size:0.9rem; font-weight:700; color:#350B19;">Privacidade & LGPD</h5>
+                <p style="font-size:0.75rem; color:#6A1D39;">Zero vazamentos e dados mínimos</p>
+              </div>
+            </div>
+            <i class="fa-solid fa-chevron-right" style="color:#8A2D4E; font-size:0.75rem;"></i>
+          </div>
+
+          <div class="card-list-item" onclick="window.open('https://wa.me/5561985543452', '_blank');">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <i class="fa-regular fa-circle-question" style="font-size:1.2rem; color:#4D1328;"></i>
+              <div>
+                <h5 style="font-size:0.9rem; font-weight:700; color:#350B19;">Suporte Técnico</h5>
+                <p style="font-size:0.75rem; color:#6A1D39;">Fale diretamente pelo WhatsApp</p>
+              </div>
+            </div>
+            <i class="fa-solid fa-chevron-right" style="color:#8A2D4E; font-size:0.75rem;"></i>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================
+           TELA 7: AVALIAÇÕES (MOCKUP)
+           ======================================================== -->
+      <section class="admin-view-screen" id="viewScreen_avaliacoes">
+        <div class="section-head-title-row" style="margin-top:10px;">
+          <h3 style="font-family:var(--font-serif); font-size:1.35rem; color:#4D1328;"><i class="fa-solid fa-star"></i> Avaliações das Clientes</h3>
+        </div>
+
+        <div class="admin-dashboard-split-row">
+          <div class="admin-sub-card" style="text-align:center; padding:24px;">
+            <h2 style="font-family:var(--font-serif); font-size:3.2rem; color:#350B19; line-height:1;">⭐ 4.9</h2>
+            <span style="font-size:0.85rem; color:#8A2D4E; font-weight:600;">de 5 estrelas</span>
+            <div style="color:#EAB308; font-size:1.25rem; margin:8px 0;">★★★★★</div>
+            <p style="font-size:0.78rem; color:#6A1D39;">Baseado em 248 avaliações reais</p>
+
+            <!-- Barras de Estrelas -->
+            <div style="margin-top:16px; font-size:0.78rem;">
+              <div style="display:flex; align-items:center; gap:8px; margin-bottom:5px;">
+                <span style="width:60px; text-align:left;">5 estrelas</span>
+                <div style="flex:1; height:8px; background:#FAF4F5; border-radius:4px; overflow:hidden;">
+                  <div style="width:92%; height:100%; background:#4D1328;"></div>
+                </div>
+                <span style="width:30px; text-align:right;">92%</span>
+              </div>
+
+              <div style="display:flex; align-items:center; gap:8px; margin-bottom:5px;">
+                <span style="width:60px; text-align:left;">4 estrelas</span>
+                <div style="flex:1; height:8px; background:#FAF4F5; border-radius:4px; overflow:hidden;">
+                  <div style="width:6%; height:100%; background:#4D1328;"></div>
+                </div>
+                <span style="width:30px; text-align:right;">6%</span>
+              </div>
+
+              <div style="display:flex; align-items:center; gap:8px; margin-bottom:5px;">
+                <span style="width:60px; text-align:left;">3 estrelas</span>
+                <div style="flex:1; height:8px; background:#FAF4F5; border-radius:4px; overflow:hidden;">
+                  <div style="width:1%; height:100%; background:#4D1328;"></div>
+                </div>
+                <span style="width:30px; text-align:right;">1%</span>
+              </div>
+
+              <div style="display:flex; align-items:center; gap:8px; margin-bottom:5px;">
+                <span style="width:60px; text-align:left;">2 estrelas</span>
+                <div style="flex:1; height:8px; background:#FAF4F5; border-radius:4px; overflow:hidden;">
+                  <div style="width:1%; height:100%; background:#4D1328;"></div>
+                </div>
+                <span style="width:30px; text-align:right;">1%</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Comentários Recentes -->
+          <div class="admin-sub-card">
+            <div class="sub-card-header-row">
+              <h4 style="font-family:var(--font-serif); font-size:1.05rem; color:#4D1328; font-weight:700;">Comentários Recentes</h4>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:10px; margin-top:10px;">
+              <div class="card-list-item" style="flex-direction:column; align-items:flex-start; gap:6px;">
+                <div style="display:flex; justify-content:space-between; width:100%;">
+                  <strong style="color:#350B19; font-size:0.88rem;">Mariana Silva <span style="color:#EAB308;">★★★★★</span></strong>
+                  <span style="font-size:0.75rem; color:#8A2D4E;">Há 2 dias</span>
+                </div>
+                <p style="font-size:0.82rem; color:#6A1D39;">"Atendimento impecável! 💜 Minhas unhas ficaram perfeitas!"</p>
+              </div>
+
+              <div class="card-list-item" style="flex-direction:column; align-items:flex-start; gap:6px;">
+                <div style="display:flex; justify-content:space-between; width:100%;">
+                  <strong style="color:#350B19; font-size:0.88rem;">Juliana Souza <span style="color:#EAB308;">★★★★★</span></strong>
+                  <span style="font-size:0.75rem; color:#8A2D4E;">Há 4 dias</span>
+                </div>
+                <p style="font-size:0.82rem; color:#6A1D39;">"Amei o resultado! Super recomendo! ❤️"</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
     </main>
 
     <!-- ========================================================
-         TELA 2: CONTROLE DE AGENDAMENTOS (AGENDA)
-         ======================================================== -->
-    <section class="admin-view-screen" id="viewScreen_agenda">
-      <div class="section-head-title-row" style="margin-top:10px;">
-        <h3 style="font-family:var(--font-serif); font-size:1.35rem; color:#4D1328;"><i class="fa-regular fa-calendar-check"></i> Controle de Agendamentos</h3>
-      </div>
-
-      <!-- Filtros Todos, Confirmados, Pendentes -->
-      <div class="filter-pills-row">
-        <button class="filter-pill active" onclick="filterAppointmentsAdmin('all', this)">Todos</button>
-        <button class="filter-pill" onclick="filterAppointmentsAdmin('confirmado', this)">Confirmados</button>
-        <button class="filter-pill" onclick="filterAppointmentsAdmin('pendente', this)">Pendentes</button>
-      </div>
-
-      <!-- Barra de Busca -->
-      <div class="search-input-box">
-        <i class="fa-solid fa-magnifying-glass" style="color:#8A2D4E;"></i>
-        <input type="text" placeholder="Buscar agendamentos..." oninput="searchAppointmentsAdmin(this.value)">
-      </div>
-
-      <!-- Lista de Agendamentos -->
-      <div id="adminAppointmentsList">
-        <div class="card-list-item" onclick="openAdminSlotAction('Mariana Silva', '(11) 98765-4321', 'Alongamento em Gel', '14:00', 'Confirmado')">
-          <div style="display:flex; align-items:center; gap:10px;">
-            <div class="client-avatar-badge">MS</div>
-            <div>
-              <h5 style="font-size:0.92rem; font-weight:700; color:#350B19;">Mariana Silva</h5>
-              <p style="font-size:0.78rem; color:#6A1D39;">Alongamento em Gel &bull; Hoje &bull; 14:00</p>
-            </div>
-          </div>
-          <div style="display:flex; align-items:center; gap:8px;">
-            <span class="badge-status-pill confirmado">Confirmado</span>
-            <i class="fa-solid fa-chevron-right" style="color:#8A2D4E; font-size:0.75rem;"></i>
-          </div>
-        </div>
-
-        <div class="card-list-item" onclick="openAdminSlotAction('Juliana Souza', '(11) 98765-8765', 'Manicure Clássica', '16:00', 'Confirmado')">
-          <div style="display:flex; align-items:center; gap:10px;">
-            <div class="client-avatar-badge" style="background:#F2CDD4;">JS</div>
-            <div>
-              <h5 style="font-size:0.92rem; font-weight:700; color:#350B19;">Juliana Souza</h5>
-              <p style="font-size:0.78rem; color:#6A1D39;">Manicure Clássica &bull; Hoje &bull; 16:00</p>
-            </div>
-          </div>
-          <div style="display:flex; align-items:center; gap:8px;">
-            <span class="badge-status-pill confirmado">Confirmado</span>
-            <i class="fa-solid fa-chevron-right" style="color:#8A2D4E; font-size:0.75rem;"></i>
-          </div>
-        </div>
-
-        <div class="card-list-item" onclick="openAdminSlotAction('Ana Costa', '(11) 98765-1111', 'Spa das Mãos', '18:00', 'Confirmado')">
-          <div style="display:flex; align-items:center; gap:10px;">
-            <div class="client-avatar-badge" style="background:#E6BAC3;">AC</div>
-            <div>
-              <h5 style="font-size:0.92rem; font-weight:700; color:#350B19;">Ana Costa</h5>
-              <p style="font-size:0.78rem; color:#6A1D39;">Spa das Mãos &bull; Hoje &bull; 18:00</p>
-            </div>
-          </div>
-          <div style="display:flex; align-items:center; gap:8px;">
-            <span class="badge-status-pill confirmado">Confirmado</span>
-            <i class="fa-solid fa-chevron-right" style="color:#8A2D4E; font-size:0.75rem;"></i>
-          </div>
-        </div>
-
-        <div class="card-list-item" onclick="openAdminSlotAction('Raquel Ferreira', '(11) 98765-2222', 'Blindagem Diamante', '09:00', 'Pendente')">
-          <div style="display:flex; align-items:center; gap:10px;">
-            <div class="client-avatar-badge" style="background:#F6DCE2;">RF</div>
-            <div>
-              <h5 style="font-size:0.92rem; font-weight:700; color:#350B19;">Raquel Ferreira</h5>
-              <p style="font-size:0.78rem; color:#6A1D39;">Blindagem Diamante &bull; Amanhã &bull; 09:00</p>
-            </div>
-          </div>
-          <div style="display:flex; align-items:center; gap:8px;">
-            <span class="badge-status-pill pendente">Pendente</span>
-            <i class="fa-solid fa-chevron-right" style="color:#8A2D4E; font-size:0.75rem;"></i>
-          </div>
-        </div>
-
-        <div class="card-list-item" onclick="openAdminSlotAction('Camila Lima', '(11) 98765-3333', 'Alongamento em Gel', '11:00', 'Confirmado')">
-          <div style="display:flex; align-items:center; gap:10px;">
-            <div class="client-avatar-badge">CL</div>
-            <div>
-              <h5 style="font-size:0.92rem; font-weight:700; color:#350B19;">Camila Lima</h5>
-              <p style="font-size:0.78rem; color:#6A1D39;">Alongamento em Gel &bull; Amanhã &bull; 11:00</p>
-            </div>
-          </div>
-          <div style="display:flex; align-items:center; gap:8px;">
-            <span class="badge-status-pill confirmado">Confirmado</span>
-            <i class="fa-solid fa-chevron-right" style="color:#8A2D4E; font-size:0.75rem;"></i>
-          </div>
-        </div>
-      </div>
-
-      <button class="btn-admin-bottom-action" onclick="alert('Abrindo formulário de agendamento manual');">
-        <i class="fa-solid fa-plus"></i> Novo Agendamento
-      </button>
-    </section>
-
-    <!-- ========================================================
-         TELA 3: CLIENTES
-         ======================================================== -->
-    <section class="admin-view-screen" id="viewScreen_clientes">
-      <div class="section-head-title-row" style="margin-top:10px;">
-        <h3 style="font-family:var(--font-serif); font-size:1.35rem; color:#4D1328;"><i class="fa-solid fa-users"></i> Clientes</h3>
-        <button onclick="prompt('Nome da nova cliente:');" style="background:#4D1328; color:#FFF; width:30px; height:30px; border-radius:50%; border:none; cursor:pointer;"><i class="fa-solid fa-plus"></i></button>
-      </div>
-
-      <div class="search-input-box">
-        <i class="fa-solid fa-magnifying-glass" style="color:#8A2D4E;"></i>
-        <input type="text" placeholder="Buscar cliente..." oninput="searchCustomersAdmin(this.value)">
-      </div>
-
-      <div id="adminClientsList">
-        <div class="card-list-item" onclick="callClientWhatsApp('(11) 98765-4321', 'Mariana Silva')">
-          <div style="display:flex; align-items:center; gap:10px;">
-            <div class="client-avatar-badge">MS</div>
-            <div>
-              <h5 style="font-size:0.92rem; font-weight:700; color:#350B19;">Mariana Silva</h5>
-              <p style="font-size:0.76rem; color:#6A1D39;">(11) 98765-4321 &bull; Último: 15/11/2026</p>
-            </div>
-          </div>
-          <i class="fa-solid fa-chevron-right" style="color:#8A2D4E; font-size:0.75rem;"></i>
-        </div>
-
-        <div class="card-list-item" onclick="callClientWhatsApp('(11) 98765-8765', 'Juliana Souza')">
-          <div style="display:flex; align-items:center; gap:10px;">
-            <div class="client-avatar-badge" style="background:#F2CDD4;">JS</div>
-            <div>
-              <h5 style="font-size:0.92rem; font-weight:700; color:#350B19;">Juliana Souza</h5>
-              <p style="font-size:0.76rem; color:#6A1D39;">(11) 98765-8765 &bull; Último: 12/11/2026</p>
-            </div>
-          </div>
-          <i class="fa-solid fa-chevron-right" style="color:#8A2D4E; font-size:0.75rem;"></i>
-        </div>
-
-        <div class="card-list-item" onclick="callClientWhatsApp('(11) 98765-1111', 'Ana Costa')">
-          <div style="display:flex; align-items:center; gap:10px;">
-            <div class="client-avatar-badge" style="background:#E6BAC3;">AC</div>
-            <div>
-              <h5 style="font-size:0.92rem; font-weight:700; color:#350B19;">Ana Costa</h5>
-              <p style="font-size:0.76rem; color:#6A1D39;">(11) 98765-1111 &bull; Último: 10/11/2026</p>
-            </div>
-          </div>
-          <i class="fa-solid fa-chevron-right" style="color:#8A2D4E; font-size:0.75rem;"></i>
-        </div>
-
-        <div class="card-list-item" onclick="callClientWhatsApp('(11) 98765-2222', 'Raquel Ferreira')">
-          <div style="display:flex; align-items:center; gap:10px;">
-            <div class="client-avatar-badge" style="background:#F6DCE2;">RF</div>
-            <div>
-              <h5 style="font-size:0.92rem; font-weight:700; color:#350B19;">Raquel Ferreira</h5>
-              <p style="font-size:0.76rem; color:#6A1D39;">(11) 98765-2222 &bull; Último: 08/11/2026</p>
-            </div>
-          </div>
-          <i class="fa-solid fa-chevron-right" style="color:#8A2D4E; font-size:0.75rem;"></i>
-        </div>
-
-        <div class="card-list-item" onclick="callClientWhatsApp('(11) 98765-3333', 'Camila Lima')">
-          <div style="display:flex; align-items:center; gap:10px;">
-            <div class="client-avatar-badge">CL</div>
-            <div>
-              <h5 style="font-size:0.92rem; font-weight:700; color:#350B19;">Camila Lima</h5>
-              <p style="font-size:0.76rem; color:#6A1D39;">(11) 98765-3333 &bull; Último: 05/11/2026</p>
-            </div>
-          </div>
-          <i class="fa-solid fa-chevron-right" style="color:#8A2D4E; font-size:0.75rem;"></i>
-        </div>
-      </div>
-
-      <button class="btn-admin-bottom-action" onclick="alert('Cadastro de novo cliente');">
-        Adicionar Cliente +
-      </button>
-    </section>
-
-    <!-- ========================================================
-         TELA 4: SERVIÇOS & TOGGLES
-         ======================================================== -->
-    <section class="admin-view-screen" id="viewScreen_servicos">
-      <div class="section-head-title-row" style="margin-top:10px;">
-        <h3 style="font-family:var(--font-serif); font-size:1.35rem; color:#4D1328;"><i class="fa-regular fa-gem"></i> Serviços</h3>
-        <button onclick="prompt('Nome do novo serviço:');" style="background:#4D1328; color:#FFF; width:30px; height:30px; border-radius:50%; border:none; cursor:pointer;"><i class="fa-solid fa-plus"></i></button>
-      </div>
-
-      <div class="card-list-item">
-        <div style="display:flex; align-items:center; gap:12px;">
-          <img src="assets/images/trabalho-alongamento-chocolate.png" style="width:48px; height:48px; border-radius:12px; object-fit:cover;" alt="Alongamento">
-          <div>
-            <h5 style="font-size:0.92rem; font-weight:700; color:#350B19;">Alongamento em Gel</h5>
-            <p style="font-size:0.76rem; color:#6A1D39;">Unhas longas e resistentes...</p>
-            <strong style="font-size:0.85rem; color:#4D1328;">R$ 180,00</strong>
-          </div>
-        </div>
-        <label class="switch-toggle-custom">
-          <input type="checkbox" checked>
-          <span class="switch-slider"></span>
-        </label>
-      </div>
-
-      <div class="card-list-item">
-        <div style="display:flex; align-items:center; gap:12px;">
-          <img src="assets/images/trabalho-tons-terrosos.png" style="width:48px; height:48px; border-radius:12px; object-fit:cover;" alt="Manicure">
-          <div>
-            <h5 style="font-size:0.92rem; font-weight:700; color:#350B19;">Manicure Clássica</h5>
-            <p style="font-size:0.76rem; color:#6A1D39;">Cuidado e beleza para suas unhas...</p>
-            <strong style="font-size:0.85rem; color:#4D1328;">R$ 70,00</strong>
-          </div>
-        </div>
-        <label class="switch-toggle-custom">
-          <input type="checkbox" checked>
-          <span class="switch-slider"></span>
-        </label>
-      </div>
-
-      <div class="card-list-item">
-        <div style="display:flex; align-items:center; gap:12px;">
-          <img src="assets/images/trabalho-perolada-glaze.png" style="width:48px; height:48px; border-radius:12px; object-fit:cover;" alt="Spa">
-          <div>
-            <h5 style="font-size:0.92rem; font-weight:700; color:#350B19;">Spa das Mãos</h5>
-            <p style="font-size:0.76rem; color:#6A1D39;">Hidratação e bem-estar...</p>
-            <strong style="font-size:0.85rem; color:#4D1328;">R$ 90,00</strong>
-          </div>
-        </div>
-        <label class="switch-toggle-custom">
-          <input type="checkbox" checked>
-          <span class="switch-slider"></span>
-        </label>
-      </div>
-
-      <div class="card-list-item">
-        <div style="display:flex; align-items:center; gap:12px;">
-          <img src="assets/images/trabalho-amendoada-ouro.png" style="width:48px; height:48px; border-radius:12px; object-fit:cover;" alt="Blindagem">
-          <div>
-            <h5 style="font-size:0.92rem; font-weight:700; color:#350B19;">Blindagem Diamante</h5>
-            <p style="font-size:0.76rem; color:#6A1D39;">Proteção e brilho intenso...</p>
-            <strong style="font-size:0.85rem; color:#4D1328;">R$ 120,00</strong>
-          </div>
-        </div>
-        <label class="switch-toggle-custom">
-          <input type="checkbox" checked>
-          <span class="switch-slider"></span>
-        </label>
-      </div>
-
-      <div class="card-list-item">
-        <div style="display:flex; align-items:center; gap:12px;">
-          <img src="assets/images/trabalho-francesa-estrela.png" style="width:48px; height:48px; border-radius:12px; object-fit:cover;" alt="Esmaltação">
-          <div>
-            <h5 style="font-size:0.92rem; font-weight:700; color:#350B19;">Esmaltação em Gel</h5>
-            <p style="font-size:0.76rem; color:#6A1D39;">Cor perfeita por mais tempo...</p>
-            <strong style="font-size:0.85rem; color:#4D1328;">R$ 100,00</strong>
-          </div>
-        </div>
-        <label class="switch-toggle-custom">
-          <input type="checkbox" checked>
-          <span class="switch-slider"></span>
-        </label>
-      </div>
-    </section>
-
-    <!-- ========================================================
-         TELA 5: RELATÓRIOS FINANCEIROS
-         ======================================================== -->
-    <section class="admin-view-screen" id="viewScreen_relatorios">
-      <div class="section-head-title-row" style="margin-top:10px;">
-        <h3 style="font-family:var(--font-serif); font-size:1.35rem; color:#4D1328;"><i class="fa-solid fa-chart-simple"></i> Relatórios</h3>
-      </div>
-
-      <div class="filter-pills-row">
-        <button class="filter-pill active">Faturamento</button>
-        <button class="filter-pill">Clientes</button>
-        <button class="filter-pill">Serviços</button>
-      </div>
-
-      <div class="admin-chart-card">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-          <div>
-            <span style="font-size:0.78rem; color:#8A2D4E; font-weight:600;">Faturamento Total</span>
-            <h3 style="font-family:var(--font-serif); font-size:1.6rem; color:#350B19; margin:2px 0;">R$ 34.860,00</h3>
-          </div>
-          <span class="kpi-growth" style="font-size:0.85rem;"><i class="fa-solid fa-arrow-up"></i> 18%</span>
-        </div>
-
-        <div style="position:relative; width:100%; height:130px; margin-top:10px;">
-          <svg viewBox="0 0 340 100" style="width:100%; height:100%;">
-            <path d="M 20 85 C 80 80, 140 70, 200 60 C 260 55, 290 25, 325 20 L 325 95 L 20 95 Z" fill="rgba(216, 63, 121, 0.2)"/>
-            <path d="M 20 85 C 80 80, 140 70, 200 60 C 260 55, 290 25, 325 20" fill="none" stroke="#D83F79" stroke-width="3" stroke-linecap="round"/>
-            <circle cx="325" cy="20" r="5" fill="#D83F79"/>
-            <text x="15" y="105" font-size="9" fill="#8A2D4E">Mai</text>
-            <text x="75" y="105" font-size="9" fill="#8A2D4E">Jun</text>
-            <text x="135" y="105" font-size="9" fill="#8A2D4E">Jul</text>
-            <text x="195" y="105" font-size="9" fill="#8A2D4E">Ago</text>
-            <text x="255" y="105" font-size="9" fill="#8A2D4E">Set</text>
-            <text x="315" y="105" font-size="9" fill="#8A2D4E">Out</text>
-          </svg>
-        </div>
-      </div>
-
-      <!-- Donut Chart -->
-      <div class="admin-sub-card">
-        <h4 style="font-family:var(--font-serif); font-size:1.05rem; color:#4D1328; margin-bottom:12px;">★ Serviços mais realizados</h4>
-        <div class="donut-chart-container">
-          <div class="donut-svg-wrap">
-            <svg viewBox="0 0 36 36" style="width:100%; height:100%; transform: rotate(-90deg);">
-              <circle cx="18" cy="18" r="14" fill="none" stroke="#E9A3B5" stroke-width="5" stroke-dasharray="45 55" stroke-dashoffset="0"/>
-              <circle cx="18" cy="18" r="14" fill="none" stroke="#8A2D4E" stroke-width="5" stroke-dasharray="35 65" stroke-dashoffset="-45"/>
-              <circle cx="18" cy="18" r="14" fill="none" stroke="#350B19" stroke-width="5" stroke-dasharray="20 80" stroke-dashoffset="-80"/>
-            </svg>
-          </div>
-          <div class="donut-legend-list">
-            <div class="donut-legend-item">
-              <span><span class="bullet" style="background:#E9A3B5;"></span>Alongamento em Gel</span>
-              <strong>45%</strong>
-            </div>
-            <div class="donut-legend-item">
-              <span><span class="bullet" style="background:#8A2D4E;"></span>Manicure Clássica</span>
-              <strong>35%</strong>
-            </div>
-            <div class="donut-legend-item">
-              <span><span class="bullet" style="background:#350B19;"></span>Spa das Mãos</span>
-              <strong>20%</strong>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <button class="btn-admin-bottom-action" onclick="alert('Relatório consolidado pronto para download!');">
-        <i class="fa-solid fa-download"></i> Baixar Relatório em PDF
-      </button>
-    </section>
-
-    <!-- ========================================================
-         TELA 6: CONFIGURAÇÕES
-         ======================================================== -->
-    <section class="admin-view-screen" id="viewScreen_configuracoes">
-      <div class="section-head-title-row" style="margin-top:10px;">
-        <h3 style="font-family:var(--font-serif); font-size:1.35rem; color:#4D1328;"><i class="fa-solid fa-gear"></i> Configurações</h3>
-      </div>
-
-      <div class="card-list-item" onclick="alert('Editar perfil do salão');">
-        <div style="display:flex; align-items:center; gap:12px;">
-          <i class="fa-regular fa-user" style="font-size:1.2rem; color:#4D1328;"></i>
-          <div>
-            <h5 style="font-size:0.9rem; font-weight:700; color:#350B19;">Perfil do Salão</h5>
-            <p style="font-size:0.75rem; color:#6A1D39;">Edite as informações do seu salão</p>
-          </div>
-        </div>
-        <i class="fa-solid fa-chevron-right" style="color:#8A2D4E; font-size:0.75rem;"></i>
-      </div>
-
-      <div class="card-list-item">
-        <div style="display:flex; align-items:center; gap:12px;">
-          <i class="fa-regular fa-bell" style="font-size:1.2rem; color:#4D1328;"></i>
-          <div>
-            <h5 style="font-size:0.9rem; font-weight:700; color:#350B19;">Notificações</h5>
-            <p style="font-size:0.75rem; color:#6A1D39;">Gerencie as notificações do app</p>
-          </div>
-        </div>
-        <label class="switch-toggle-custom">
-          <input type="checkbox" checked>
-          <span class="switch-slider"></span>
-        </label>
-      </div>
-
-      <div class="card-list-item" onclick="alert('Defina o horário de atendimento');">
-        <div style="display:flex; align-items:center; gap:12px;">
-          <i class="fa-regular fa-clock" style="font-size:1.2rem; color:#4D1328;"></i>
-          <div>
-            <h5 style="font-size:0.9rem; font-weight:700; color:#350B19;">Horários de Funcionamento</h5>
-            <p style="font-size:0.75rem; color:#6A1D39;">Defina o horário de atendimento</p>
-          </div>
-        </div>
-        <i class="fa-solid fa-chevron-right" style="color:#8A2D4E; font-size:0.75rem;"></i>
-      </div>
-
-      <div class="card-list-item" onclick="alert('Configure as opções de pagamento');">
-        <div style="display:flex; align-items:center; gap:12px;">
-          <i class="fa-regular fa-credit-card" style="font-size:1.2rem; color:#4D1328;"></i>
-          <div>
-            <h5 style="font-size:0.9rem; font-weight:700; color:#350B19;">Formas de Pagamento</h5>
-            <p style="font-size:0.75rem; color:#6A1D39;">Configure as opções de pagamento</p>
-          </div>
-        </div>
-        <i class="fa-solid fa-chevron-right" style="color:#8A2D4E; font-size:0.75rem;"></i>
-      </div>
-
-      <div class="card-list-item" onclick="alert('Proteja seus dados com LGPD');">
-        <div style="display:flex; align-items:center; gap:12px;">
-          <i class="fa-solid fa-lock" style="font-size:1.2rem; color:#4D1328;"></i>
-          <div>
-            <h5 style="font-size:0.9rem; font-weight:700; color:#350B19;">Privacidade e Segurança</h5>
-            <p style="font-size:0.75rem; color:#6A1D39;">Proteja seus dados</p>
-          </div>
-        </div>
-        <i class="fa-solid fa-chevron-right" style="color:#8A2D4E; font-size:0.75rem;"></i>
-      </div>
-
-      <div class="card-list-item" onclick="window.open('https://wa.me/5561985543452', '_blank');">
-        <div style="display:flex; align-items:center; gap:12px;">
-          <i class="fa-regular fa-circle-question" style="font-size:1.2rem; color:#4D1328;"></i>
-          <div>
-            <h5 style="font-size:0.9rem; font-weight:700; color:#350B19;">Suporte</h5>
-            <p style="font-size:0.75rem; color:#6A1D39;">Precisa de ajuda? Fale conosco</p>
-          </div>
-        </div>
-        <i class="fa-solid fa-chevron-right" style="color:#8A2D4E; font-size:0.75rem;"></i>
-      </div>
-    </section>
-
-    <!-- ========================================================
-         TELA 7: AVALIAÇÕES (MOCKUP)
-         ======================================================== -->
-    <section class="admin-view-screen" id="viewScreen_avaliacoes">
-      <div class="section-head-title-row" style="margin-top:10px;">
-        <h3 style="font-family:var(--font-serif); font-size:1.35rem; color:#4D1328;"><i class="fa-solid fa-star"></i> Avaliações</h3>
-      </div>
-
-      <div class="admin-sub-card" style="text-align:center; padding:20px;">
-        <h2 style="font-family:var(--font-serif); font-size:2.8rem; color:#350B19; line-height:1;">⭐ 4.9</h2>
-        <span style="font-size:0.85rem; color:#8A2D4E; font-weight:600;">de 5 estrelas</span>
-        <div style="color:#EAB308; font-size:1.2rem; margin:8px 0;">★★★★★</div>
-        <p style="font-size:0.78rem; color:#6A1D39;">Baseado em 248 avaliações</p>
-
-        <!-- Barras de Estrelas -->
-        <div style="margin-top:16px; font-size:0.78rem;">
-          <div style="display:flex; align-items:center; gap:8px; margin-bottom:5px;">
-            <span style="width:60px; text-align:left;">5 estrelas</span>
-            <div style="flex:1; height:8px; background:#FAF4F5; border-radius:4px; overflow:hidden;">
-              <div style="width:92%; height:100%; background:#4D1328;"></div>
-            </div>
-            <span style="width:30px; text-align:right;">92%</span>
-          </div>
-
-          <div style="display:flex; align-items:center; gap:8px; margin-bottom:5px;">
-            <span style="width:60px; text-align:left;">4 estrelas</span>
-            <div style="flex:1; height:8px; background:#FAF4F5; border-radius:4px; overflow:hidden;">
-              <div style="width:6%; height:100%; background:#4D1328;"></div>
-            </div>
-            <span style="width:30px; text-align:right;">6%</span>
-          </div>
-
-          <div style="display:flex; align-items:center; gap:8px; margin-bottom:5px;">
-            <span style="width:60px; text-align:left;">3 estrelas</span>
-            <div style="flex:1; height:8px; background:#FAF4F5; border-radius:4px; overflow:hidden;">
-              <div style="width:1%; height:100%; background:#4D1328;"></div>
-            </div>
-            <span style="width:30px; text-align:right;">1%</span>
-          </div>
-
-          <div style="display:flex; align-items:center; gap:8px; margin-bottom:5px;">
-            <span style="width:60px; text-align:left;">2 estrelas</span>
-            <div style="flex:1; height:8px; background:#FAF4F5; border-radius:4px; overflow:hidden;">
-              <div style="width:1%; height:100%; background:#4D1328;"></div>
-            </div>
-            <span style="width:30px; text-align:right;">1%</span>
-          </div>
-
-          <div style="display:flex; align-items:center; gap:8px;">
-            <span style="width:60px; text-align:left;">1 estrela</span>
-            <div style="flex:1; height:8px; background:#FAF4F5; border-radius:4px; overflow:hidden;">
-              <div style="width:0%; height:100%; background:#4D1328;"></div>
-            </div>
-            <span style="width:30px; text-align:right;">0%</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Comentários Recentes -->
-      <div style="margin-top:16px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-          <h4 style="font-family:var(--font-serif); font-size:1.05rem; color:#4D1328;">Comentários Recentes</h4>
-          <span style="font-size:0.8rem; color:#8A2D4E;">Ver todas &gt;</span>
-        </div>
-
-        <div class="card-list-item" style="flex-direction:column; align-items:flex-start; gap:6px;">
-          <div style="display:flex; justify-content:space-between; width:100%;">
-            <strong style="color:#350B19; font-size:0.88rem;">Mariana Silva <span style="color:#EAB308;">★★★★★</span></strong>
-            <span style="font-size:0.75rem; color:#8A2D4E;">Há 2 dias</span>
-          </div>
-          <p style="font-size:0.82rem; color:#6A1D39;">"Atendimento impecável! 💜 Minhas unhas ficaram perfeitas!"</p>
-        </div>
-
-        <div class="card-list-item" style="flex-direction:column; align-items:flex-start; gap:6px;">
-          <div style="display:flex; justify-content:space-between; width:100%;">
-            <strong style="color:#350B19; font-size:0.88rem;">Juliana Souza <span style="color:#EAB308;">★★★★★</span></strong>
-            <span style="font-size:0.75rem; color:#8A2D4E;">Há 4 dias</span>
-          </div>
-          <p style="font-size:0.82rem; color:#6A1D39;">"Amei o resultado! Super recomendo! ❤️"</p>
-        </div>
-      </div>
-    </section>
-
-    </main>
-
-    <!-- ========================================================
-         BARRA DE NAVEGAÇÃO INFERIOR VINHO PROFUNDO (ADMIN - MOBILE / FLUTUANTE)
+         BARRA DE NAVEGAÇÃO INFERIOR VINHO PROFUNDO (MOBILE FLUTUANTE)
          ======================================================== -->
     <nav class="bottom-nav-wine-admin">
       <button class="admin-nav-tab-btn active" data-tab="dashboard" onclick="switchAdminTab('dashboard')">
@@ -799,46 +646,777 @@
         <span>Clientes</span>
       </button>
 
+      <button class="admin-nav-tab-btn" data-tab="servicos" onclick="switchAdminTab('servicos')">
+        <i class="fa-regular fa-gem"></i>
+        <span>Serviços</span>
+      </button>
+
       <button class="admin-nav-tab-btn" data-tab="relatorios" onclick="switchAdminTab('relatorios')">
         <i class="fa-solid fa-chart-simple"></i>
         <span>Relatórios</span>
       </button>
 
-      <button class="admin-nav-tab-btn" data-tab="avaliacoes" onclick="switchAdminTab('avaliacoes')">
-        <i class="fa-regular fa-user"></i>
-        <span>Perfil</span>
+      <button class="admin-nav-tab-btn" data-tab="configuracoes" onclick="switchAdminTab('configuracoes')">
+        <i class="fa-solid fa-gear"></i>
+        <span>Ajustes</span>
       </button>
     </nav>
 
   </div>
 
+  <!-- ========================================================
+       MODAIS ADMINISTRATIVOS INTERATIVOS
+       ======================================================== -->
+
+  <!-- 1. Modal: Novo Agendamento -->
+  <div class="admin-modal-overlay" id="modalNovoAgendamento">
+    <div class="admin-modal-card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <h3 style="font-family:var(--font-serif); font-size:1.3rem; color:#350B19;">
+          <i class="fa-regular fa-calendar-plus" style="color:#8A2D4E;"></i> Novo Agendamento
+        </h3>
+        <button onclick="closeModal('modalNovoAgendamento')" style="background:none; border:none; font-size:1.2rem; color:#6A1D39; cursor:pointer;">✕</button>
+      </div>
+
+      <form id="formNovoAgendamento" onsubmit="saveNovoAgendamento(event)">
+        <div class="form-input-box" style="margin-bottom:12px;">
+          <label style="display:block; font-size:0.8rem; font-weight:600; color:#4D1328; margin-bottom:4px;">Nome da Cliente *</label>
+          <input type="text" id="inputAgendamentoNome" required placeholder="Ex: Mariana Silva" style="width:100%; padding:10px 14px; border-radius:12px; border:1px solid rgba(77,19,40,0.18);">
+        </div>
+
+        <div class="form-input-box" style="margin-bottom:12px;">
+          <label style="display:block; font-size:0.8rem; font-weight:600; color:#4D1328; margin-bottom:4px;">WhatsApp / Celular *</label>
+          <input type="tel" id="inputAgendamentoTelefone" required placeholder="(11) 98765-4321" style="width:100%; padding:10px 14px; border-radius:12px; border:1px solid rgba(77,19,40,0.18);">
+        </div>
+
+        <div class="form-input-box" style="margin-bottom:12px;">
+          <label style="display:block; font-size:0.8rem; font-weight:600; color:#4D1328; margin-bottom:4px;">Serviço *</label>
+          <select id="selectAgendamentoServico" required style="width:100%; padding:10px 14px; border-radius:12px; border:1px solid rgba(77,19,40,0.18); background:#FFF;">
+            <!-- Populado via JS -->
+          </select>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px;">
+          <div class="form-input-box">
+            <label style="display:block; font-size:0.8rem; font-weight:600; color:#4D1328; margin-bottom:4px;">Data *</label>
+            <input type="date" id="inputAgendamentoData" required style="width:100%; padding:10px 14px; border-radius:12px; border:1px solid rgba(77,19,40,0.18);">
+          </div>
+          <div class="form-input-box">
+            <label style="display:block; font-size:0.8rem; font-weight:600; color:#4D1328; margin-bottom:4px;">Horário *</label>
+            <select id="selectAgendamentoHorario" required style="width:100%; padding:10px 14px; border-radius:12px; border:1px solid rgba(77,19,40,0.18); background:#FFF;">
+              <option value="09:00">09:00</option>
+              <option value="10:30">10:30</option>
+              <option value="11:00">11:00</option>
+              <option value="14:00">14:00</option>
+              <option value="15:30">15:30</option>
+              <option value="16:00">16:00</option>
+              <option value="17:30">17:30</option>
+              <option value="18:00">18:00</option>
+              <option value="19:30">19:30</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-input-box" style="margin-bottom:16px;">
+          <label style="display:block; font-size:0.8rem; font-weight:600; color:#4D1328; margin-bottom:4px;">Observações (opcional)</label>
+          <input type="text" id="inputAgendamentoObs" placeholder="Ex: Prefere formato amendoado com foil de ouro" style="width:100%; padding:10px 14px; border-radius:12px; border:1px solid rgba(77,19,40,0.18);">
+        </div>
+
+        <div style="display:flex; gap:10px;">
+          <button type="button" onclick="closeModal('modalNovoAgendamento')" style="flex:1; padding:12px; border-radius:30px; border:1px solid rgba(77,19,40,0.2); background:transparent; color:#6A1D39; font-weight:600; cursor:pointer;">
+            Cancelar
+          </button>
+          <button type="submit" style="flex:1; padding:12px; border-radius:30px; border:none; background:#4D1328; color:#FFF; font-weight:700; cursor:pointer;">
+            <i class="fa-solid fa-check"></i> Salvar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 2. Modal: Detalhes do Agendamento -->
+  <div class="admin-modal-overlay" id="modalDetalhesAgendamento">
+    <div class="admin-modal-card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+        <h3 style="font-family:var(--font-serif); font-size:1.3rem; color:#350B19;">Detalhes do Agendamento</h3>
+        <button onclick="closeModal('modalDetalhesAgendamento')" style="background:none; border:none; font-size:1.2rem; color:#6A1D39; cursor:pointer;">✕</button>
+      </div>
+
+      <div style="background:#FBECEF; border-radius:16px; padding:16px; margin-bottom:16px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+          <h4 id="detalheClienteNome" style="font-size:1.1rem; color:#350B19; font-weight:700;">Mariana Silva</h4>
+          <span id="detalheStatusBadge" class="badge-status-pill confirmado">Confirmado</span>
+        </div>
+        <p style="font-size:0.85rem; color:#6A1D39; margin-bottom:4px;">
+          <i class="fa-solid fa-phone" style="color:#8A2D4E; width:18px;"></i> <span id="detalheClienteTelefone">(11) 98765-4321</span>
+        </p>
+        <p style="font-size:0.85rem; color:#6A1D39; margin-bottom:4px;">
+          <i class="fa-solid fa-gem" style="color:#8A2D4E; width:18px;"></i> <span id="detalheServicoNome">Alongamento em Gel</span>
+        </p>
+        <p style="font-size:0.85rem; color:#6A1D39; margin-bottom:4px;">
+          <i class="fa-regular fa-clock" style="color:#8A2D4E; width:18px;"></i> <span id="detalheDataHora">Hoje às 14:00</span>
+        </p>
+        <p style="font-size:0.85rem; color:#6A1D39;">
+          <i class="fa-solid fa-tag" style="color:#8A2D4E; width:18px;"></i> <span id="detalhePreco">R$ 180,00</span>
+        </p>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        <button id="btnWhatsDetalhe" onclick="abrirWhatsAppDetalhe()" style="width:100%; padding:12px; border-radius:30px; border:none; background:#25D366; color:#FFF; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;">
+          <i class="fa-brands fa-whatsapp" style="font-size:1.2rem;"></i> Conversar no WhatsApp
+        </button>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+          <button onclick="marcarComoConfirmado()" style="padding:10px; border-radius:20px; border:1px solid #16A34A; background:#ECFDF5; color:#16A34A; font-weight:600; cursor:pointer;">
+            <i class="fa-solid fa-check"></i> Confirmar
+          </button>
+          <button onclick="marcarComoConcluido()" style="padding:10px; border-radius:20px; border:1px solid #4D1328; background:#FBECEF; color:#4D1328; font-weight:600; cursor:pointer;">
+            <i class="fa-solid fa-flag-checkered"></i> Concluir
+          </button>
+        </div>
+
+        <button onclick="cancelarAgendamentoDetalhe()" style="width:100%; padding:10px; border-radius:20px; border:1px solid #DC2626; background:#FEF2F2; color:#DC2626; font-weight:600; cursor:pointer;">
+          <i class="fa-solid fa-ban"></i> Cancelar Horário
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Modal: Novo Cliente -->
+  <div class="admin-modal-overlay" id="modalNovoCliente">
+    <div class="admin-modal-card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <h3 style="font-family:var(--font-serif); font-size:1.3rem; color:#350B19;">
+          <i class="fa-solid fa-user-plus" style="color:#8A2D4E;"></i> Adicionar Cliente
+        </h3>
+        <button onclick="closeModal('modalNovoCliente')" style="background:none; border:none; font-size:1.2rem; color:#6A1D39; cursor:pointer;">✕</button>
+      </div>
+
+      <form id="formNovoCliente" onsubmit="saveNovoCliente(event)">
+        <div class="form-input-box" style="margin-bottom:12px;">
+          <label style="display:block; font-size:0.8rem; font-weight:600; color:#4D1328; margin-bottom:4px;">Nome Completo *</label>
+          <input type="text" id="inputClienteNome" required placeholder="Ex: Camila Lima" style="width:100%; padding:10px 14px; border-radius:12px; border:1px solid rgba(77,19,40,0.18);">
+        </div>
+
+        <div class="form-input-box" style="margin-bottom:12px;">
+          <label style="display:block; font-size:0.8rem; font-weight:600; color:#4D1328; margin-bottom:4px;">WhatsApp / Celular *</label>
+          <input type="tel" id="inputClienteTelefone" required placeholder="(11) 98765-3333" style="width:100%; padding:10px 14px; border-radius:12px; border:1px solid rgba(77,19,40,0.18);">
+        </div>
+
+        <div class="form-input-box" style="margin-bottom:16px;">
+          <label style="display:block; font-size:0.8rem; font-weight:600; color:#4D1328; margin-bottom:4px;">Notas / Preferências</label>
+          <input type="text" id="inputClienteNotas" placeholder="Ex: Prefere cuticulagem funda e esmaltes escuros" style="width:100%; padding:10px 14px; border-radius:12px; border:1px solid rgba(77,19,40,0.18);">
+        </div>
+
+        <div style="display:flex; gap:10px;">
+          <button type="button" onclick="closeModal('modalNovoCliente')" style="flex:1; padding:12px; border-radius:30px; border:1px solid rgba(77,19,40,0.2); background:transparent; color:#6A1D39; font-weight:600; cursor:pointer;">
+            Cancelar
+          </button>
+          <button type="submit" style="flex:1; padding:12px; border-radius:30px; border:none; background:#4D1328; color:#FFF; font-weight:700; cursor:pointer;">
+            <i class="fa-solid fa-check"></i> Salvar Cliente
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 4. Modal: Novo Serviço -->
+  <div class="admin-modal-overlay" id="modalNovoServico">
+    <div class="admin-modal-card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <h3 style="font-family:var(--font-serif); font-size:1.3rem; color:#350B19;">
+          <i class="fa-regular fa-gem" style="color:#8A2D4E;"></i> Cadastrar Novo Serviço
+        </h3>
+        <button onclick="closeModal('modalNovoServico')" style="background:none; border:none; font-size:1.2rem; color:#6A1D39; cursor:pointer;">✕</button>
+      </div>
+
+      <form id="formNovoServico" onsubmit="saveNovoServico(event)">
+        <div class="form-input-box" style="margin-bottom:12px;">
+          <label style="display:block; font-size:0.8rem; font-weight:600; color:#4D1328; margin-bottom:4px;">Nome do Serviço *</label>
+          <input type="text" id="inputServicoNome" required placeholder="Ex: Banho de Gel Diamante" style="width:100%; padding:10px 14px; border-radius:12px; border:1px solid rgba(77,19,40,0.18);">
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px;">
+          <div class="form-input-box">
+            <label style="display:block; font-size:0.8rem; font-weight:600; color:#4D1328; margin-bottom:4px;">Preço (R$) *</label>
+            <input type="number" id="inputServicoPreco" required placeholder="130.00" step="0.50" style="width:100%; padding:10px 14px; border-radius:12px; border:1px solid rgba(77,19,40,0.18);">
+          </div>
+          <div class="form-input-box">
+            <label style="display:block; font-size:0.8rem; font-weight:600; color:#4D1328; margin-bottom:4px;">Duração (min) *</label>
+            <input type="number" id="inputServicoDuracao" required placeholder="90" step="15" style="width:100%; padding:10px 14px; border-radius:12px; border:1px solid rgba(77,19,40,0.18);">
+          </div>
+        </div>
+
+        <div class="form-input-box" style="margin-bottom:12px;">
+          <label style="display:block; font-size:0.8rem; font-weight:600; color:#4D1328; margin-bottom:4px;">Categoria *</label>
+          <select id="selectServicoCategoria" required style="width:100%; padding:10px 14px; border-radius:12px; border:1px solid rgba(77,19,40,0.18); background:#FFF;">
+            <option value="cat_alongamento">Alongamento em Gel</option>
+            <option value="cat_esmalte">Esmaltação em Gel</option>
+            <option value="cat_manicure">Manicure Clássica</option>
+            <option value="cat_nailart">Nail Art & Encapsuladas</option>
+            <option value="cat_spa">Spa & Blindagem</option>
+          </select>
+        </div>
+
+        <div class="form-input-box" style="margin-bottom:16px;">
+          <label style="display:block; font-size:0.8rem; font-weight:600; color:#4D1328; margin-bottom:4px;">Descrição Curta</label>
+          <input type="text" id="inputServicoDesc" placeholder="Ex: Fortalecimento com camada de gel brilhante..." style="width:100%; padding:10px 14px; border-radius:12px; border:1px solid rgba(77,19,40,0.18);">
+        </div>
+
+        <div style="display:flex; gap:10px;">
+          <button type="button" onclick="closeModal('modalNovoServico')" style="flex:1; padding:12px; border-radius:30px; border:1px solid rgba(77,19,40,0.2); background:transparent; color:#6A1D39; font-weight:600; cursor:pointer;">
+            Cancelar
+          </button>
+          <button type="submit" style="flex:1; padding:12px; border-radius:30px; border:none; background:#4D1328; color:#FFF; font-weight:700; cursor:pointer;">
+            <i class="fa-solid fa-check"></i> Salvar Serviço
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 5. Modal: Notificações & Alerta Sonoro -->
+  <div class="admin-modal-overlay" id="modalNotificacoes">
+    <div class="admin-modal-card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <h3 style="font-family:var(--font-serif); font-size:1.3rem; color:#350B19;">
+          <i class="fa-regular fa-bell" style="color:#8A2D4E;"></i> Notificações Recentes
+        </h3>
+        <button onclick="closeModal('modalNotificacoes')" style="background:none; border:none; font-size:1.2rem; color:#6A1D39; cursor:pointer;">✕</button>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:16px;" id="notificacoesList">
+        <div class="card-list-item" style="padding:10px 14px;">
+          <div>
+            <strong style="color:#350B19; font-size:0.88rem;">Novo Agendamento! ✨</strong>
+            <p style="font-size:0.78rem; color:#6A1D39;">Mariana Silva agendou Alongamento em Gel para Hoje às 14:00.</p>
+          </div>
+          <span style="font-size:0.72rem; color:#8A2D4E;">Há 15m</span>
+        </div>
+
+        <div class="card-list-item" style="padding:10px 14px;">
+          <div>
+            <strong style="color:#350B19; font-size:0.88rem;">Agendamento Confirmado 👍</strong>
+            <p style="font-size:0.78rem; color:#6A1D39;">Juliana Souza confirmou Manicure Clássica para Hoje às 16:00.</p>
+          </div>
+          <span style="font-size:0.72rem; color:#8A2D4E;">Há 1h</span>
+        </div>
+      </div>
+
+      <button onclick="testAudioAlert()" style="width:100%; padding:14px; border-radius:30px; border:none; background:#4D1328; color:#FFF; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;">
+        <i class="fa-solid fa-volume-high"></i> Testar Alerta Sonoro (Apito no Celular)
+      </button>
+    </div>
+  </div>
+
+  <!-- 6. Modal: Perfil do Salão -->
+  <div class="admin-modal-overlay" id="modalConfigSalao">
+    <div class="admin-modal-card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <h3 style="font-family:var(--font-serif); font-size:1.3rem; color:#350B19;">Perfil do Salão</h3>
+        <button onclick="closeModal('modalConfigSalao')" style="background:none; border:none; font-size:1.2rem; color:#6A1D39; cursor:pointer;">✕</button>
+      </div>
+
+      <form id="formConfigSalao" onsubmit="saveConfigSalao(event)">
+        <div class="form-input-box" style="margin-bottom:12px;">
+          <label style="display:block; font-size:0.8rem; font-weight:600; color:#4D1328; margin-bottom:4px;">Nome do Salão / Estúdio</label>
+          <input type="text" id="inputSalaoNome" value="ESTEFANY PAIVA NAILS" style="width:100%; padding:10px 14px; border-radius:12px; border:1px solid rgba(77,19,40,0.18);">
+        </div>
+
+        <div class="form-input-box" style="margin-bottom:12px;">
+          <label style="display:block; font-size:0.8rem; font-weight:600; color:#4D1328; margin-bottom:4px;">Slogan / Frase de Destaque</label>
+          <input type="text" id="inputSalaoSlogan" value="Mais que unhas, é autoestima." style="width:100%; padding:10px 14px; border-radius:12px; border:1px solid rgba(77,19,40,0.18);">
+        </div>
+
+        <div class="form-input-box" style="margin-bottom:12px;">
+          <label style="display:block; font-size:0.8rem; font-weight:600; color:#4D1328; margin-bottom:4px;">WhatsApp Oficial</label>
+          <input type="text" id="inputSalaoWhats" value="(61) 98554-3452" style="width:100%; padding:10px 14px; border-radius:12px; border:1px solid rgba(77,19,40,0.18);">
+        </div>
+
+        <div class="form-input-box" style="margin-bottom:16px;">
+          <label style="display:block; font-size:0.8rem; font-weight:600; color:#4D1328; margin-bottom:4px;">Instagram</label>
+          <input type="text" id="inputSalaoInsta" value="@estefanypaiva_nails" style="width:100%; padding:10px 14px; border-radius:12px; border:1px solid rgba(77,19,40,0.18);">
+        </div>
+
+        <button type="submit" style="width:100%; padding:12px; border-radius:30px; border:none; background:#4D1328; color:#FFF; font-weight:700; cursor:pointer;">
+          <i class="fa-solid fa-floppy-disk"></i> Salvar Alterações
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 7. Modal: Horários de Atendimento -->
+  <div class="admin-modal-overlay" id="modalConfigHorarios">
+    <div class="admin-modal-card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <h3 style="font-family:var(--font-serif); font-size:1.3rem; color:#350B19;">Horários de Atendimento</h3>
+        <button onclick="closeModal('modalConfigHorarios')" style="background:none; border:none; font-size:1.2rem; color:#6A1D39; cursor:pointer;">✕</button>
+      </div>
+
+      <div style="font-size:0.88rem; color:#4D1328; line-height:1.6; margin-bottom:16px;">
+        <p><strong>Segunda a Sexta:</strong> 09:00 às 19:30</p>
+        <p><strong>Sábado:</strong> 08:30 às 18:00</p>
+        <p><strong>Domingo e Feriados:</strong> Fechado</p>
+        <hr style="border:none; border-top:1px solid rgba(77,19,40,0.1); margin:12px 0;">
+        <p><i class="fa-regular fa-clock"></i> <strong>Intervalo de Higienização (Buffer):</strong> 15 minutos entre cada cliente.</p>
+      </div>
+
+      <button onclick="closeModal('modalConfigHorarios'); showToast('Horários configurados com sucesso!');" style="width:100%; padding:12px; border-radius:30px; border:none; background:#4D1328; color:#FFF; font-weight:700; cursor:pointer;">
+        Entendido
+      </button>
+    </div>
+  </div>
+
+  <!-- 8. Modal: Formas de Pagamento -->
+  <div class="admin-modal-overlay" id="modalConfigPagamento">
+    <div class="admin-modal-card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <h3 style="font-family:var(--font-serif); font-size:1.3rem; color:#350B19;">Formas de Pagamento</h3>
+        <button onclick="closeModal('modalConfigPagamento')" style="background:none; border:none; font-size:1.2rem; color:#6A1D39; cursor:pointer;">✕</button>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:16px;">
+        <label style="display:flex; align-items:center; gap:10px; font-weight:600; color:#350B19;">
+          <input type="checkbox" checked> <span>Pix (Chave celular ou QR Code)</span>
+        </label>
+        <label style="display:flex; align-items:center; gap:10px; font-weight:600; color:#350B19;">
+          <input type="checkbox" checked> <span>Cartão de Crédito (Visa, Master, Elo)</span>
+        </label>
+        <label style="display:flex; align-items:center; gap:10px; font-weight:600; color:#350B19;">
+          <input type="checkbox" checked> <span>Cartão de Débito</span>
+        </label>
+        <label style="display:flex; align-items:center; gap:10px; font-weight:600; color:#350B19;">
+          <input type="checkbox" checked> <span>Dinheiro</span>
+        </label>
+      </div>
+
+      <button onclick="closeModal('modalConfigPagamento'); showToast('Formas de pagamento salvas!');" style="width:100%; padding:12px; border-radius:30px; border:none; background:#4D1328; color:#FFF; font-weight:700; cursor:pointer;">
+        Salvar Opções
+      </button>
+    </div>
+  </div>
+
+  <!-- 9. Modal: Privacidade & LGPD -->
+  <div class="admin-modal-overlay" id="modalConfigPrivacidade">
+    <div class="admin-modal-card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <h3 style="font-family:var(--font-serif); font-size:1.3rem; color:#350B19;">Privacidade & LGPD</h3>
+        <button onclick="closeModal('modalConfigPrivacidade')" style="background:none; border:none; font-size:1.2rem; color:#6A1D39; cursor:pointer;">✕</button>
+      </div>
+
+      <div style="font-size:0.85rem; color:#6A1D39; line-height:1.6; margin-bottom:16px;">
+        <p><strong>Minimização de Dados (Art. 6º, III):</strong> Coletamos exclusivamente <em>Nome</em> e <em>WhatsApp</em> para viabilizar a confirmação de horário.</p>
+        <p style="margin-top:8px;"><strong>Zero Dados Sensíveis:</strong> Nunca solicitamos CPF, dados bancários ou cartões no agendamento público.</p>
+        <p style="margin-top:8px;"><strong>Retenção Segura:</strong> Registros mantidos em conformidade rigorosa com a legislação brasileira.</p>
+      </div>
+
+      <button onclick="closeModal('modalConfigPrivacidade')" style="width:100%; padding:12px; border-radius:30px; border:none; background:#4D1328; color:#FFF; font-weight:700; cursor:pointer;">
+        Fechar
+      </button>
+    </div>
+  </div>
+
+  <!-- Toast Notification Feedback -->
+  <div class="toast-notification" id="toastAdminNotification">
+    <i class="fa-solid fa-circle-check" style="color:#25D366;"></i>
+    <span id="toastAdminText">Ação realizada com sucesso!</span>
+  </div>
+
   <!-- Scripts -->
   <script src="assets/js/store.js"></script>
   <script>
+    let activeAppointmentTarget = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (window.EPStore) {
+        await window.EPStore.init();
+      }
+      loadAdminDashboard();
+      renderAdminAgenda();
+      renderAdminClientes();
+      renderAdminServicos();
+    });
+
+    function showToast(msg) {
+      const toast = document.getElementById('toastAdminNotification');
+      const text = document.getElementById('toastAdminText');
+      if (toast && text) {
+        text.innerText = msg;
+        toast.classList.add('active');
+        setTimeout(() => toast.classList.remove('active'), 3200);
+      }
+    }
+
     function switchAdminTab(tabName) {
-      document.querySelectorAll('.admin-view-screen').forEach(sec => {
-        sec.classList.remove('active');
-      });
-
+      document.querySelectorAll('.admin-view-screen').forEach(sec => sec.classList.remove('active'));
       document.querySelectorAll('.admin-nav-tab-btn').forEach(btn => {
-        btn.classList.remove('active');
-        if (btn.getAttribute('data-tab') === tabName) {
-          btn.classList.add('active');
-        }
+        btn.classList.toggle('active', btn.getAttribute('data-tab') === tabName);
       });
-
-      document.querySelectorAll('.admin-desktop-link').forEach(btn => {
-        btn.classList.remove('active');
-        if (btn.getAttribute('data-tab') === tabName) {
-          btn.classList.add('active');
-        }
+      document.querySelectorAll('.admin-desktop-nav-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-tab') === tabName);
       });
 
       const target = document.getElementById(`viewScreen_${tabName}`);
       if (target) {
         target.classList.add('active');
-        window.scrollTo({top:0, behavior:'smooth'});
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
+    }
+
+    function loadAdminDashboard() {
+      const appointments = window.EPStore ? window.EPStore.getAppointments() : [];
+      const listContainer = document.getElementById('dashboardRecentAppointmentsList');
+      if (!listContainer) return;
+
+      const activeList = appointments.filter(a => a.status !== 'Cancelado').slice(0, 4);
+      if (activeList.length === 0) {
+        listContainer.innerHTML = '<p style="font-size:0.85rem; color:#8A2D4E; padding:12px 0;">Nenhum agendamento recente.</p>';
+        return;
+      }
+
+      listContainer.innerHTML = activeList.map(item => {
+        const initials = item.clientName.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
+        return `
+          <div class="appointment-item-row" onclick="openAdminSlotAction('${item.id}', '${item.clientName}', '${item.clientPhone}', '${item.serviceName}', '${item.date}', '${item.time}', '${item.status}', '${item.servicePrice}')">
+            <div class="client-avatar-badge">${initials}</div>
+            <div class="appointment-info-col">
+              <h5>${item.clientName}</h5>
+              <p>${item.serviceName} &bull; ${item.time}</p>
+            </div>
+            <i class="fa-solid fa-chevron-right action-arrow-icon"></i>
+          </div>
+        `;
+      }).join('');
+
+      // Atualiza KPIs
+      const kpiTotal = document.getElementById('kpiTotalAgendamentos');
+      const kpiFat = document.getElementById('kpiFaturamento');
+      if (kpiTotal) kpiTotal.innerText = appointments.length;
+      if (kpiFat) {
+        const total = appointments.reduce((sum, a) => sum + (parseFloat(a.servicePrice) || 0), 0);
+        kpiFat.innerText = `R$ ${total.toFixed(0)}`;
+      }
+    }
+
+    function renderAdminAgenda() {
+      const appointments = window.EPStore ? window.EPStore.getAppointments() : [];
+      const container = document.getElementById('adminAppointmentsList');
+      if (!container) return;
+
+      if (appointments.length === 0) {
+        container.innerHTML = '<p style="font-size:0.85rem; color:#8A2D4E; padding:20px;">Nenhum agendamento encontrado.</p>';
+        return;
+      }
+
+      container.innerHTML = appointments.map(item => {
+        const initials = item.clientName.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
+        const statusClass = (item.status || 'pendente').toLowerCase();
+        return `
+          <div class="card-list-item" onclick="openAdminSlotAction('${item.id}', '${item.clientName}', '${item.clientPhone}', '${item.serviceName}', '${item.date}', '${item.time}', '${item.status}', '${item.servicePrice}')">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <div class="client-avatar-badge">${initials}</div>
+              <div>
+                <h5 style="font-size:0.92rem; font-weight:700; color:#350B19;">${item.clientName}</h5>
+                <p style="font-size:0.78rem; color:#6A1D39;">${item.serviceName} &bull; ${item.date} às ${item.time}</p>
+              </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span class="badge-status-pill ${statusClass}">${item.status}</span>
+              <i class="fa-solid fa-chevron-right" style="color:#8A2D4E; font-size:0.75rem;"></i>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderAdminClientes() {
+      const appointments = window.EPStore ? window.EPStore.getAppointments() : [];
+      const container = document.getElementById('adminClientsList');
+      if (!container) return;
+
+      const clientMap = new Map();
+      appointments.forEach(a => {
+        if (!clientMap.has(a.clientPhone)) {
+          clientMap.set(a.clientPhone, {
+            name: a.clientName,
+            phone: a.clientPhone,
+            lastDate: a.date,
+            service: a.serviceName
+          });
+        }
+      });
+
+      if (clientMap.size === 0) {
+        clientMap.set('(11) 98765-4321', { name: 'Mariana Silva', phone: '(11) 98765-4321', lastDate: '15/11/2026', service: 'Alongamento em Gel' });
+        clientMap.set('(11) 98765-8765', { name: 'Juliana Souza', phone: '(11) 98765-8765', lastDate: '12/11/2026', service: 'Manicure Clássica' });
+        clientMap.set('(11) 98765-1111', { name: 'Ana Costa', phone: '(11) 98765-1111', lastDate: '10/11/2026', service: 'Spa das Mãos' });
+        clientMap.set('(11) 98765-2222', { name: 'Raquel Ferreira', phone: '(11) 98765-2222', lastDate: '08/11/2026', service: 'Blindagem Diamante' });
+        clientMap.set('(11) 98765-3333', { name: 'Camila Lima', phone: '(11) 98765-3333', lastDate: '05/11/2026', service: 'Alongamento em Gel' });
+      }
+
+      container.innerHTML = Array.from(clientMap.values()).map(cli => {
+        const initials = cli.name.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
+        return `
+          <div class="card-list-item" onclick="callClientWhatsApp('${cli.phone}', '${cli.name}')">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <div class="client-avatar-badge">${initials}</div>
+              <div>
+                <h5 style="font-size:0.92rem; font-weight:700; color:#350B19;">${cli.name}</h5>
+                <p style="font-size:0.76rem; color:#6A1D39;">${cli.phone} &bull; Último: ${cli.lastDate}</p>
+              </div>
+            </div>
+            <i class="fa-brands fa-whatsapp" style="color:#25D366; font-size:1.1rem;"></i>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderAdminServicos() {
+      const services = window.EPStore ? window.EPStore.getServices() : [];
+      const container = document.getElementById('adminServicesList');
+      const selectAgendamento = document.getElementById('selectAgendamentoServico');
+      if (!container) return;
+
+      container.innerHTML = services.map(s => {
+        return `
+          <div class="card-list-item">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <img src="${s.image || 'assets/images/trabalho-alongamento-chocolate.png'}" style="width:48px; height:48px; border-radius:12px; object-fit:cover;" alt="${s.name}">
+              <div>
+                <h5 style="font-size:0.92rem; font-weight:700; color:#350B19;">${s.name}</h5>
+                <p style="font-size:0.76rem; color:#6A1D39;">${s.description || 'Duração: ' + s.duration + ' min'}</p>
+                <strong style="font-size:0.85rem; color:#4D1328;">R$ ${(parseFloat(s.price) || 0).toFixed(2).replace('.', ',')}</strong>
+              </div>
+            </div>
+            <label class="switch-toggle-custom">
+              <input type="checkbox" ${s.active !== false ? 'checked' : ''} onchange="toggleServiceActive('${s.id}', this.checked)">
+              <span class="switch-slider"></span>
+            </label>
+          </div>
+        `;
+      }).join('');
+
+      if (selectAgendamento) {
+        selectAgendamento.innerHTML = services.map(s => `<option value="${s.id}">${s.name} - R$ ${parseFloat(s.price).toFixed(2)}</option>`).join('');
+      }
+    }
+
+    function toggleServiceActive(serviceId, isChecked) {
+      if (window.EPStore) {
+        const s = window.EPStore.getServiceById(serviceId);
+        if (s) {
+          s.active = isChecked;
+          window.EPStore.saveService(s);
+          showToast(`Serviço ${isChecked ? 'ativado' : 'desativado'} com sucesso!`);
+        }
+      }
+    }
+
+    function openModal(id) {
+      const el = document.getElementById(id);
+      if (el) el.classList.add('active');
+    }
+
+    function closeModal(id) {
+      const el = document.getElementById(id);
+      if (el) el.classList.remove('active');
+    }
+
+    function openModalNovoAgendamento() {
+      const today = new Date().toISOString().split('T')[0];
+      const dateInput = document.getElementById('inputAgendamentoData');
+      if (dateInput) dateInput.value = today;
+      openModal('modalNovoAgendamento');
+    }
+
+    async function saveNovoAgendamento(event) {
+      event.preventDefault();
+      const nome = document.getElementById('inputAgendamentoNome').value;
+      const tel = document.getElementById('inputAgendamentoTelefone').value;
+      const servicoId = document.getElementById('selectAgendamentoServico').value;
+      const data = document.getElementById('inputAgendamentoData').value;
+      const horario = document.getElementById('selectAgendamentoHorario').value;
+      const obs = document.getElementById('inputAgendamentoObs').value;
+
+      if (window.EPStore) {
+        const servico = window.EPStore.getServiceById(servicoId) || { name: 'Alongamento em Gel', price: 180, duration: 90 };
+        const newApp = {
+          clientName: nome,
+          clientPhone: tel,
+          serviceId: servicoId,
+          serviceName: servico.name,
+          servicePrice: servico.price,
+          duration: servico.duration || 60,
+          date: data,
+          time: horario,
+          status: 'Confirmado',
+          notes: obs
+        };
+        await window.EPStore.createAppointment(newApp);
+        if (window.AudioAlertEngine) {
+          window.AudioAlertEngine.playNotificationChime();
+        }
+      }
+
+      closeModal('modalNovoAgendamento');
+      document.getElementById('formNovoAgendamento').reset();
+      showToast('Agendamento cadastrado com sucesso!');
+      loadAdminDashboard();
+      renderAdminAgenda();
+      renderAdminClientes();
+    }
+
+    function openAdminSlotAction(id, name, phone, srv, date, time, status, price) {
+      activeAppointmentTarget = { id, name, phone, srv, date, time, status, price };
+      document.getElementById('detalheClienteNome').innerText = name;
+      document.getElementById('detalheClienteTelefone').innerText = phone;
+      document.getElementById('detalheServicoNome').innerText = srv;
+      document.getElementById('detalheDataHora').innerText = `${date} às ${time}`;
+      document.getElementById('detalhePreco').innerText = `R$ ${parseFloat(price || 180).toFixed(2).replace('.', ',')}`;
+
+      const badge = document.getElementById('detalheStatusBadge');
+      badge.innerText = status;
+      badge.className = `badge-status-pill ${(status || '').toLowerCase()}`;
+
+      openModal('modalDetalhesAgendamento');
+    }
+
+    function abrirWhatsAppDetalhe() {
+      if (!activeAppointmentTarget) return;
+      callClientWhatsApp(activeAppointmentTarget.phone, activeAppointmentTarget.name);
+    }
+
+    function marcarComoConfirmado() {
+      if (!activeAppointmentTarget || !window.EPStore) return;
+      window.EPStore.updateAppointmentStatus(activeAppointmentTarget.id, 'Confirmado');
+      closeModal('modalDetalhesAgendamento');
+      showToast('Agendamento confirmado!');
+      loadAdminDashboard();
+      renderAdminAgenda();
+    }
+
+    function marcarComoConcluido() {
+      if (!activeAppointmentTarget || !window.EPStore) return;
+      window.EPStore.updateAppointmentStatus(activeAppointmentTarget.id, 'Concluído');
+      closeModal('modalDetalhesAgendamento');
+      showToast('Atendimento marcado como concluído!');
+      loadAdminDashboard();
+      renderAdminAgenda();
+    }
+
+    function cancelarAgendamentoDetalhe() {
+      if (!activeAppointmentTarget || !window.EPStore) return;
+      if (confirm(`Deseja cancelar o horário de ${activeAppointmentTarget.name}?`)) {
+        window.EPStore.updateAppointmentStatus(activeAppointmentTarget.id, 'Cancelado');
+        closeModal('modalDetalhesAgendamento');
+        showToast('Horário cancelado com sucesso.');
+        loadAdminDashboard();
+        renderAdminAgenda();
+      }
+    }
+
+    function openModalNovoCliente() {
+      openModal('modalNovoCliente');
+    }
+
+    function saveNovoCliente(event) {
+      event.preventDefault();
+      const nome = document.getElementById('inputClienteNome').value;
+      const tel = document.getElementById('inputClienteTelefone').value;
+      const notas = document.getElementById('inputClienteNotas').value;
+
+      if (window.EPStore) {
+        const dummyApp = {
+          clientName: nome,
+          clientPhone: tel,
+          serviceId: 'srv_alongamento',
+          serviceName: 'Alongamento em Gel',
+          servicePrice: 180,
+          date: new Date().toISOString().split('T')[0],
+          time: '14:00',
+          status: 'Confirmado',
+          notes: notas
+        };
+        window.EPStore.createAppointment(dummyApp);
+      }
+
+      closeModal('modalNovoCliente');
+      document.getElementById('formNovoCliente').reset();
+      showToast('Cliente cadastrada com sucesso!');
+      renderAdminClientes();
+    }
+
+    function openModalNovoServico() {
+      openModal('modalNovoServico');
+    }
+
+    function saveNovoServico(event) {
+      event.preventDefault();
+      const nome = document.getElementById('inputServicoNome').value;
+      const preco = parseFloat(document.getElementById('inputServicoPreco').value);
+      const duracao = parseInt(document.getElementById('inputServicoDuracao').value, 10);
+      const categoria = document.getElementById('selectServicoCategoria').value;
+      const desc = document.getElementById('inputServicoDesc').value;
+
+      if (window.EPStore) {
+        window.EPStore.saveService({
+          name: nome,
+          price: preco,
+          duration: duracao,
+          categoryId: categoria,
+          description: desc,
+          active: true,
+          image: 'assets/images/trabalho-amendoada-ouro.png'
+        });
+      }
+
+      closeModal('modalNovoServico');
+      document.getElementById('formNovoServico').reset();
+      showToast('Novo serviço cadastrado com sucesso!');
+      renderAdminServicos();
+    }
+
+    function openModalNotificacoes() {
+      openModal('modalNotificacoes');
+    }
+
+    function testAudioAlert() {
+      if (window.AudioAlertEngine) {
+        window.AudioAlertEngine.playNotificationChime();
+        showToast('Alerta sonoro executado!');
+      } else {
+        alert('Motor de áudio não inicializado');
+      }
+    }
+
+    function openModalConfigSalao() { openModal('modalConfigSalao'); }
+    function openModalConfigHorarios() { openModal('modalConfigHorarios'); }
+    function openModalConfigPagamento() { openModal('modalConfigPagamento'); }
+    function openModalConfigPrivacidade() { openModal('modalConfigPrivacidade'); }
+
+    function saveConfigSalao(e) {
+      e.preventDefault();
+      if (window.EPStore) {
+        window.EPStore.saveSalonSettings({
+          salonName: document.getElementById('inputSalaoNome').value,
+          slogan: document.getElementById('inputSalaoSlogan').value,
+          phone: document.getElementById('inputSalaoWhats').value,
+          instagram: document.getElementById('inputSalaoInsta').value
+        });
+      }
+      closeModal('modalConfigSalao');
+      showToast('Configurações do salão salvas!');
+    }
+
+    function togglePushNotificationSettings(isChecked) {
+      if (isChecked && window.AudioAlertEngine) {
+        window.AudioAlertEngine.triggerNativePush('Notificações Ativadas', 'Você receberá alertas sonoros para novos agendamentos!');
+      }
+      showToast(`Notificações push ${isChecked ? 'ativadas' : 'desativadas'}.`);
+    }
+
+    function printAdminReport() {
+      window.print();
     }
 
     function filterAppointmentsAdmin(status, btn) {
@@ -881,13 +1459,6 @@
       const clean = phone.replace(/\D/g, '');
       const msg = encodeURIComponent(`Olá, ${name}! Tudo bem? Aqui é a Estefany Paiva Nails ✨`);
       window.open(`https://wa.me/55${clean}?text=${msg}`, '_blank');
-    }
-
-    function openAdminSlotAction(client, phone, srv, time, status) {
-      const opt = confirm(`Agendamento de ${client} (${srv} às ${time}):\n\nDeseja abrir o WhatsApp da cliente?`);
-      if (opt) {
-        callClientWhatsApp(phone, client);
-      }
     }
   </script>
 </body>

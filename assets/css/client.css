@@ -27,15 +27,12 @@ html, body {
 }
 
 /* ========================================================
-   ESTRUTURA GERAL (CONTAINER CENTRALIZADO NO DESKTOP)
+   ESTRUTURA GERAL (TOTALMENTE RESPONSIVO - MOBILE & DESKTOP)
    ======================================================== */
 .site-wrapper-expansive {
-  max-width: 440px;
-  margin: 0 auto;
-  box-shadow: 0 0 35px rgba(0,0,0,0.15);
   width: 100%;
-  max-width: 100vw;
   min-height: 100vh;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
   background-color: #FAF4F5;
@@ -82,11 +79,48 @@ html, body {
 
 .wine-header-inner-expansive {
   width: 100%;
-  max-width: 580px;
+  max-width: 1120px;
   margin: 0 auto;
-  padding: 12px 16px 8px;
+  padding: 12px 20px 8px;
   position: relative;
   z-index: 2;
+}
+
+/* Menu de Navegação no Desktop do Cliente */
+.client-desktop-nav {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.22);
+  padding: 4px 10px;
+  border-radius: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+@media (min-width: 900px) {
+  .client-desktop-nav {
+    display: flex;
+  }
+}
+
+.client-desktop-nav a {
+  color: rgba(255, 255, 255, 0.85);
+  text-decoration: none;
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 20px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.client-desktop-nav a:hover,
+.client-desktop-nav a.active {
+  background: #FBECEF;
+  color: #350B19;
+  font-weight: 700;
 }
 
 /* Barra Superior: Hamburger, Logo Ep e Notificação */
@@ -238,10 +272,36 @@ html, body {
    ======================================================== */
 .client-main-content-expansive {
   width: 100%;
-  max-width: 580px;
+  max-width: 1120px;
   margin: 0 auto;
-  padding: 0 16px 100px;
+  padding: 0 20px 100px;
   flex: 1;
+}
+
+/* Layout Expansivo no Desktop (2 Colunas Balanceadas) */
+.client-desktop-grid {
+  display: block;
+  width: 100%;
+}
+
+@media (min-width: 900px) {
+  .client-desktop-grid {
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: 32px;
+    align-items: start;
+    margin-top: 10px;
+  }
+
+  .client-col-left {
+    min-width: 0;
+  }
+
+  .client-col-right {
+    min-width: 0;
+    position: sticky;
+    top: 24px;
+  }
 }
 
 /* ========================================================
@@ -848,7 +908,7 @@ html, body {
   width: 100%;
 }
 
-@media (min-width: 650px) {
+@media (min-width: 650px) and (max-width: 899px) {
   .bottom-nav-wine-fixed {
     left: 50%;
     transform: translateX(-50%);
@@ -860,6 +920,51 @@ html, body {
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45);
     border: 1px solid rgba(255, 255, 255, 0.15);
   }
+}
+
+@media (min-width: 900px) {
+  .bottom-nav-wine-fixed {
+    display: none !important;
+  }
+}
+
+/* Modais do Cliente */
+.client-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(37, 6, 17, 0.72);
+  backdrop-filter: blur(5px);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.client-modal-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.client-modal-card {
+  background: #FFFFFF;
+  border-radius: 24px;
+  padding: 24px 20px;
+  width: 100%;
+  max-width: 480px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(77, 19, 40, 0.1);
+  transform: translateY(14px);
+  transition: transform 0.25s ease;
+}
+
+.client-modal-overlay.active .client-modal-card {
+  transform: translateY(0);
 }
 
 .nav-item-wine {
@@ -894,4 +999,245 @@ html, body {
 
 .nav-item-wine.active i {
   color: #350B19;
+}
+
+
+/* ========================================================
+   REFINAMENTOS RESPONSIVOS DO PORTAL DO CLIENTE (TABLET & PC)
+   ======================================================== */
+.wine-top-row {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  width: 100% !important;
+  padding-bottom: 12px !important;
+}
+
+.calendar-month-header {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  margin-bottom: 12px !important;
+}
+
+.btn-cal-nav {
+  background: transparent !important;
+  border: none !important;
+  color: #4D1328 !important;
+  font-size: 1rem !important;
+  cursor: pointer !important;
+  padding: 4px 8px !important;
+}
+
+.calendar-weekdays-row {
+  display: grid !important;
+  grid-template-columns: repeat(7, 1fr) !important;
+  text-align: center !important;
+  font-size: 0.78rem !important;
+  font-weight: 700 !important;
+  color: #8A2D4E !important;
+  margin-bottom: 8px !important;
+}
+
+.calendar-days-grid {
+  display: grid !important;
+  grid-template-columns: repeat(7, 1fr) !important;
+  gap: 6px !important;
+}
+
+.cal-day-cell {
+  aspect-ratio: 1 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 50% !important;
+  border: 1px solid rgba(77, 19, 40, 0.08) !important;
+  background: #FFF !important;
+  color: #350B19 !important;
+  font-size: 0.85rem !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+}
+
+.cal-day-cell:hover {
+  background: #FBECEF !important;
+  border-color: #D83F79 !important;
+}
+
+.cal-day-cell.selected {
+  background: #4D1328 !important;
+  color: #FFFFFF !important;
+  font-weight: 700 !important;
+}
+
+.cal-day-cell.disabled {
+  opacity: 0.2 !important;
+  pointer-events: none !important;
+  border: none !important;
+  background: transparent !important;
+}
+
+.category-tabs-track {
+  display: flex !important;
+  gap: 8px !important;
+  overflow-x: auto !important;
+  padding-bottom: 10px !important;
+  scrollbar-width: none !important;
+}
+
+.category-tabs-track::-webkit-scrollbar {
+  display: none !important;
+}
+
+.category-tab-pill {
+  padding: 8px 18px !important;
+  border-radius: 30px !important;
+  font-size: 0.82rem !important;
+  font-weight: 600 !important;
+  background: #FBECEF !important;
+  border: 1px solid rgba(77, 19, 40, 0.1) !important;
+  color: #4D1328 !important;
+  cursor: pointer !important;
+  white-space: nowrap !important;
+  transition: all 0.2s ease !important;
+}
+
+.category-tab-pill.active {
+  background: #4D1328 !important;
+  color: #FFFFFF !important;
+}
+
+.services-carousel-track {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 14px !important;
+  width: 100% !important;
+}
+
+@media (min-width: 600px) {
+  .services-carousel-track {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+.service-card-lux {
+  background: #FFFFFF !important;
+  border-radius: 20px !important;
+  border: 1px solid rgba(77, 19, 40, 0.08) !important;
+  overflow: hidden !important;
+  box-shadow: 0 4px 16px rgba(53, 11, 25, 0.05) !important;
+  transition: transform 0.2s ease !important;
+}
+
+.service-card-lux:hover {
+  transform: translateY(-3px) !important;
+}
+
+.service-photo-cover {
+  width: 100% !important;
+  height: 160px !important;
+  position: relative !important;
+  overflow: hidden !important;
+  cursor: pointer !important;
+}
+
+.service-photo-cover img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  transition: transform 0.3s ease !important;
+}
+
+.service-photo-cover:hover img {
+  transform: scale(1.05) !important;
+}
+
+.story-preview-indicator {
+  position: absolute !important;
+  bottom: 10px !important;
+  right: 10px !important;
+  background: rgba(53, 11, 25, 0.85) !important;
+  color: #FFF !important;
+  font-size: 0.72rem !important;
+  font-weight: 700 !important;
+  padding: 4px 10px !important;
+  border-radius: 20px !important;
+  backdrop-filter: blur(4px) !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.service-details-box {
+  padding: 14px 16px 16px !important;
+}
+
+.service-details-box h4 {
+  font-family: var(--font-serif) !important;
+  font-size: 1.05rem !important;
+  color: #350B19 !important;
+  font-weight: 700 !important;
+}
+
+.service-desc-snippet {
+  font-size: 0.8rem !important;
+  color: #6A1D39 !important;
+  margin: 4px 0 12px !important;
+  line-height: 1.4 !important;
+}
+
+.service-price-row {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+}
+
+.service-price-val {
+  font-size: 1rem !important;
+  font-weight: 700 !important;
+  color: #4D1328 !important;
+}
+
+.btn-select-service-pill {
+  background: #FBECEF !important;
+  color: #4D1328 !important;
+  border: 1px solid rgba(77, 19, 40, 0.15) !important;
+  padding: 6px 16px !important;
+  border-radius: 30px !important;
+  font-size: 0.8rem !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+}
+
+.btn-select-service-pill:hover {
+  background: #4D1328 !important;
+  color: #FFFFFF !important;
+}
+
+.slots-grid-chips {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 8px !important;
+  margin: 10px 0 16px !important;
+}
+
+.slot-chip-btn {
+  padding: 8px !important;
+  border-radius: 12px !important;
+  border: 1px solid rgba(77, 19, 40, 0.12) !important;
+  background: #FAF4F5 !important;
+  color: #350B19 !important;
+  font-weight: 600 !important;
+  font-size: 0.82rem !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+}
+
+.slot-chip-btn.active {
+  background: #4D1328 !important;
+  color: #FFFFFF !important;
+  font-weight: 700 !important;
 }

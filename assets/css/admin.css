@@ -1,8 +1,7 @@
 /* ========================================================
    ESTEFANY PAIVA NAILS - PAINEL ADMINISTRATIVO
-   Design 100% Fiel às Telas do Mockup (Vinho & Blush Pink)
-   Cores: Vinho/Marsala (#350B19) e Blush Rosé (#FBECEF)
-   Totalmente Responsivo: Fluido no Celular e Elegante no Desktop
+   Design 100% Fiel ao Mockup (Vinho/Marsala & Blush Rosé)
+   Totalmente Responsivo: Fluido no Celular, Espaçoso e Elegante no PC/Tablet
    ======================================================== */
 
 @import url('./variables.css');
@@ -27,7 +26,7 @@ html, body {
 }
 
 /* ========================================================
-   ESTRUTURA GERAL (CONTAINER CENTRALIZADO NO DESKTOP)
+   ESTRUTURA GERAL
    ======================================================== */
 .admin-site-wrapper-expansive {
   width: 100%;
@@ -40,7 +39,9 @@ html, body {
   overflow-x: hidden;
 }
 
-/* 1. Cabeçalho Vinho de Luxo */
+/* ========================================================
+   1. CABEÇALHO VINHO DE LUXO COM ONDAS ORGÂNICAS
+   ======================================================== */
 .admin-header-wine {
   width: 100%;
   background: radial-gradient(circle at 85% 15%, #6A1D39 0%, #350B19 65%, #250611 100%);
@@ -76,7 +77,7 @@ html, body {
 
 .admin-header-container {
   width: 100%;
-  max-width: 580px;
+  max-width: 1120px;
   margin: 0 auto;
   padding: 12px 16px 8px;
   position: relative;
@@ -90,6 +91,13 @@ html, body {
   width: 100%;
   padding: 4px 0 16px;
   position: relative;
+  gap: 16px;
+}
+
+.admin-topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
 }
 
 .btn-admin-icon {
@@ -110,7 +118,7 @@ html, body {
 }
 
 .btn-admin-icon:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.22);
 }
 
 .badge-bell-count {
@@ -130,7 +138,7 @@ html, body {
   border: 1.5px solid #350B19;
 }
 
-/* Assinatura Ep Centralizada */
+/* Assinatura Ep */
 .signature-logo-wrap {
   display: flex;
   align-items: center;
@@ -176,6 +184,55 @@ html, body {
   text-transform: uppercase;
   margin-top: 1px;
   white-space: nowrap;
+}
+
+/* Menu de Navegação no Desktop */
+.admin-desktop-nav-menu {
+  display: none;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 4px 6px;
+  border-radius: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+@media (min-width: 900px) {
+  .admin-desktop-nav-menu {
+    display: flex;
+  }
+}
+
+.admin-desktop-nav-btn {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.78);
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.admin-desktop-nav-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #FFFFFF;
+}
+
+.admin-desktop-nav-btn.active {
+  background: #FBECEF;
+  color: #350B19;
+  font-weight: 700;
+}
+
+.admin-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 /* Linha de Saudação do Admin */
@@ -254,7 +311,7 @@ html, body {
 .btn-open-client-pill {
   background: #FBECEF;
   color: #350B19;
-  padding: 6px 12px;
+  padding: 6px 14px;
   border-radius: var(--radius-pill);
   font-size: 0.78rem;
   font-weight: 700;
@@ -264,24 +321,36 @@ html, body {
   text-decoration: none;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   white-space: nowrap;
+  transition: transform 0.2s, background 0.2s;
+}
+
+.btn-open-client-pill:hover {
+  background: #FFFFFF;
+  transform: translateY(-2px);
 }
 
 /* ========================================================
-   CONTEÚDO PRINCIPAL (MÁXIMO 580PX NO DESKTOP, FLUIDO NO MOBILE)
+   CONTEÚDO PRINCIPAL (EXPANSIVO E RESPONSIVO)
    ======================================================== */
 .admin-main-content-expansive {
   width: 100%;
-  max-width: 580px;
+  max-width: 1120px;
   margin: 0 auto;
   padding: 0 16px 100px;
   flex: 1;
+}
+
+@media (max-width: 768px) {
+  .admin-main-content-expansive {
+    max-width: 580px;
+  }
 }
 
 /* 2. 4 KPIs em Cards Rosé */
 .admin-kpis-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
+  gap: 12px;
   margin-top: -6px;
   margin-bottom: 20px;
   width: 100%;
@@ -289,11 +358,17 @@ html, body {
   z-index: 5;
 }
 
+@media (max-width: 600px) {
+  .admin-kpis-grid {
+    gap: 6px;
+  }
+}
+
 .kpi-pink-card {
   background: #FBECEF;
   border: 1px solid rgba(77, 19, 40, 0.08);
   border-radius: 18px;
-  padding: 12px 2px;
+  padding: 14px 6px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -302,30 +377,37 @@ html, body {
   box-shadow: 0 3px 10px rgba(77, 19, 40, 0.04);
   text-align: center;
   width: 100%;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.kpi-pink-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(77, 19, 40, 0.08);
 }
 
 .kpi-pink-card i {
-  font-size: 1.15rem;
+  font-size: 1.25rem;
   color: #4D1328;
 }
 
 .kpi-pink-card .kpi-num {
   font-family: var(--font-serif);
-  font-size: 1.25rem;
+  font-size: 1.35rem;
   font-weight: 700;
   color: #350B19;
   line-height: 1.1;
 }
 
 .kpi-pink-card .kpi-lbl {
-  font-size: 0.65rem;
+  font-size: 0.7rem;
   font-weight: 600;
   color: #6A1D39;
   line-height: 1.15;
 }
 
 .kpi-pink-card .kpi-growth {
-  font-size: 0.65rem;
+  font-size: 0.68rem;
   font-weight: 700;
   color: #226E3A;
   display: flex;
@@ -333,13 +415,28 @@ html, body {
   gap: 2px;
 }
 
+/* Layout em Duas Colunas no Dashboard para PC/Tablet */
+.admin-dashboard-split-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 18px;
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+@media (min-width: 860px) {
+  .admin-dashboard-split-row {
+    grid-template-columns: 1.35fr 1fr;
+  }
+}
+
 /* 3. Card "Seu crescimento" (Line Chart) */
 .admin-chart-card {
   background: #FBECEF;
   border: 1px solid rgba(77, 19, 40, 0.08);
   border-radius: 22px;
-  padding: 18px 16px;
-  margin-bottom: 20px;
+  padding: 18px 20px;
+  margin-bottom: 0;
   box-shadow: 0 4px 14px rgba(77, 19, 40, 0.04);
   width: 100%;
 }
@@ -394,20 +491,12 @@ html, body {
   box-shadow: 0 3px 8px rgba(77, 19, 40, 0.08);
 }
 
-/* 4. Dupla de Cards: Próximos Agendamentos & Serviços Mais Realizados */
-.admin-cards-duo {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 16px;
-  margin-bottom: 20px;
-  width: 100%;
-}
-
+/* 4. Dupla de Cards: Próximos Agendamentos & Donut */
 .admin-sub-card {
   background: #FBECEF;
   border: 1px solid rgba(77, 19, 40, 0.08);
   border-radius: 20px;
-  padding: 16px;
+  padding: 18px 20px;
   box-shadow: 0 4px 14px rgba(77, 19, 40, 0.04);
   width: 100%;
 }
@@ -447,18 +536,25 @@ html, body {
   transition: background 0.15s ease;
 }
 
+.slot-client-row:hover {
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 12px;
+  padding-left: 6px;
+  padding-right: 6px;
+}
+
 .slot-client-row:last-child {
   border-bottom: none;
 }
 
 .client-avatar-badge {
-  width: 38px;
-  height: 38px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   background: #E6BAC3;
   color: #4D1328;
   font-weight: 700;
-  font-size: 0.85rem;
+  font-size: 0.88rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -471,7 +567,7 @@ html, body {
 }
 
 .slot-client-info h5 {
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   font-weight: 700;
   color: #350B19;
 }
@@ -523,8 +619,13 @@ html, body {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
-  margin-bottom: 24px;
   width: 100%;
+}
+
+@media (min-width: 860px) {
+  .admin-6-actions-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
 .admin-action-btn-squircle {
@@ -540,13 +641,17 @@ html, body {
   cursor: pointer;
   box-shadow: 0 3px 10px rgba(77, 19, 40, 0.04);
   border: none;
-  transition: transform 0.15s ease;
+  transition: transform 0.15s ease, background 0.15s ease;
   width: 100%;
+}
+
+.admin-action-btn-squircle:hover {
+  transform: translateY(-2px);
+  background: #F6DCE2;
 }
 
 .admin-action-btn-squircle:active {
   transform: scale(0.96);
-  background: #F6DCE2;
 }
 
 .admin-action-btn-squircle i {
@@ -560,72 +665,10 @@ html, body {
   color: #350B19;
 }
 
-/* 6. Barra de Navegação Inferior Vinho */
-.bottom-nav-wine-admin {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: #350B19;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  padding: 6px 4px 10px;
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-  z-index: 1000;
-  box-shadow: 0 -6px 20px rgba(0, 0, 0, 0.35);
-  width: 100%;
-}
-
-@media (min-width: 650px) {
-  .bottom-nav-wine-admin {
-    left: 50%;
-    transform: translateX(-50%);
-    width: fit-content;
-    max-width: 540px;
-    bottom: 16px;
-    border-radius: 40px;
-    padding: 6px 16px 8px;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-  }
-}
-
-.admin-nav-tab-btn {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  color: rgba(255, 255, 255, 0.65);
-  font-size: 0.65rem;
-  font-weight: 500;
-  cursor: pointer;
-  background: transparent;
-  border: none;
-  padding: 4px 6px;
-  border-radius: var(--radius-pill);
-  transition: all 0.15s ease;
-  flex: 1;
-  max-width: 68px;
-}
-
-.admin-nav-tab-btn i {
-  font-size: 1.15rem;
-}
-
-.admin-nav-tab-btn.active {
-  background: #FBECEF;
-  color: #350B19;
-  font-weight: 700;
-  padding: 4px 12px;
-  border-radius: 18px;
-}
-
-.admin-nav-tab-btn.active i {
-  color: #350B19;
-}
-
-/* Telas Secundárias do Admin (Agenda, Clientes, etc.) */
+/* ========================================================
+   TELAS SECUNDÁRIAS (AGENDA, CLIENTES, SERVIÇOS, ETC.)
+   GRID RESPONSIVO NO DESKTOP/TABLET (NUNCA ESTICA A 1920PX)
+   ======================================================== */
 .admin-view-screen {
   display: none;
   margin-bottom: 24px;
@@ -634,6 +677,21 @@ html, body {
 
 .admin-view-screen.active {
   display: block;
+}
+
+/* Grades responsivas para listas em telas maiores */
+.admin-items-responsive-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .admin-items-responsive-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
 }
 
 .filter-pills-row {
@@ -646,15 +704,16 @@ html, body {
 }
 
 .filter-pill {
-  padding: 6px 14px;
+  padding: 7px 16px;
   border-radius: var(--radius-pill);
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   font-weight: 600;
   background: #FBECEF;
   border: 1px solid rgba(77, 19, 40, 0.1);
   color: #4D1328;
   cursor: pointer;
   white-space: nowrap;
+  transition: all 0.2s ease;
 }
 
 .filter-pill.active {
@@ -666,11 +725,11 @@ html, body {
   background: #FFFFFF;
   border: 1px solid rgba(77, 19, 40, 0.12);
   border-radius: 14px;
-  padding: 10px 14px;
+  padding: 11px 16px;
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 14px;
+  gap: 10px;
+  margin-bottom: 16px;
   width: 100%;
 }
 
@@ -679,20 +738,26 @@ html, body {
   background: transparent;
   width: 100%;
   outline: none;
-  font-size: 0.88rem;
+  font-size: 0.9rem;
 }
 
 .card-list-item {
   background: #FBECEF;
   border: 1px solid rgba(77, 19, 40, 0.08);
   border-radius: 18px;
-  padding: 12px 14px;
+  padding: 14px 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 10px;
+  margin-bottom: 0;
   cursor: pointer;
   width: 100%;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.card-list-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(77, 19, 40, 0.08);
 }
 
 .badge-status-pill {
@@ -714,7 +779,9 @@ html, body {
 
 .btn-admin-bottom-action {
   width: 100%;
-  padding: 14px;
+  max-width: 400px;
+  margin: 20px auto 0;
+  padding: 14px 20px;
   border-radius: var(--radius-pill);
   background: #4D1328;
   color: #FFFFFF;
@@ -727,7 +794,12 @@ html, body {
   justify-content: center;
   gap: 8px;
   box-shadow: 0 4px 15px rgba(77, 19, 40, 0.3);
-  margin-top: 14px;
+  transition: all 0.2s ease;
+}
+
+.btn-admin-bottom-action:hover {
+  background: #350B19;
+  transform: translateY(-2px);
 }
 
 .switch-toggle-custom {
@@ -770,4 +842,154 @@ input:checked + .switch-slider {
 
 input:checked + .switch-slider:before {
   transform: translateX(20px);
+}
+
+/* ========================================================
+   6. BARRA DE NAVEGAÇÃO INFERIOR VINHO (MOBILE ONLY)
+   ======================================================== */
+.bottom-nav-wine-admin {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #350B19;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 6px 4px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  z-index: 1000;
+  box-shadow: 0 -6px 20px rgba(0, 0, 0, 0.35);
+  width: 100%;
+}
+
+/* Em computadores e tablets grandes, a navegação fica no topo */
+@media (min-width: 900px) {
+  .bottom-nav-wine-admin {
+    display: none !important;
+  }
+}
+
+.admin-nav-tab-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 0.65rem;
+  font-weight: 500;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  padding: 4px 6px;
+  border-radius: var(--radius-pill);
+  transition: all 0.15s ease;
+  flex: 1;
+  max-width: 68px;
+}
+
+.admin-nav-tab-btn i {
+  font-size: 1.15rem;
+}
+
+.admin-nav-tab-btn.active {
+  background: #FBECEF;
+  color: #350B19;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 18px;
+}
+
+.admin-nav-tab-btn.active i {
+  color: #350B19;
+}
+
+/* Modais Administrativos Flutuantes */
+.admin-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(37, 6, 17, 0.7);
+  backdrop-filter: blur(4px);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.admin-modal-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.admin-modal-card {
+  background: #FFFFFF;
+  border-radius: 24px;
+  padding: 24px 20px;
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(77, 19, 40, 0.1);
+  transform: translateY(12px);
+  transition: transform 0.25s ease;
+}
+
+.admin-modal-overlay.active .admin-modal-card {
+  transform: translateY(0);
+}
+
+
+/* ========================================================
+   REFINAMENTOS RESPONSIVOS DO PAINEL ADMIN (TABLET & PC)
+   ======================================================== */
+.admin-action-buttons-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 10px !important;
+}
+
+.appointments-list-compact {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+  margin-top: 10px !important;
+}
+
+.appointment-item-row {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  background: #FBECEF !important;
+  border: 1px solid rgba(77, 19, 40, 0.08) !important;
+  border-radius: 16px !important;
+  padding: 10px 14px !important;
+  cursor: pointer !important;
+  transition: transform 0.15s ease !important;
+}
+
+.appointment-item-row:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 12px rgba(77, 19, 40, 0.08) !important;
+}
+
+.appointment-info-col {
+  flex: 1 !important;
+  margin-left: 10px !important;
+}
+
+.appointment-info-col h5 {
+  font-size: 0.9rem !important;
+  font-weight: 700 !important;
+  color: #350B19 !important;
+  margin-bottom: 2px !important;
+}
+
+.appointment-info-col p {
+  font-size: 0.76rem !important;
+  color: #6A1D39 !important;
 }
