@@ -1,4 +1,4 @@
-const CACHE_NAME = 'estefany-nails-v4-real-photos';
+const CACHE_NAME = 'estefany-nails-v5-official-cover';
 const STATIC_ASSETS = [
   './',
   './index.html',
@@ -11,6 +11,7 @@ const STATIC_ASSETS = [
   './assets/js/store.js',
   './assets/js/client.js',
   './assets/js/admin.js',
+  './assets/images/capa-estefany-paiva.jpg',
   './assets/images/trabalho-alongamento-chocolate.png',
   './assets/images/trabalho-amendoada-ouro.png',
   './assets/images/trabalho-tons-terrosos.png',
