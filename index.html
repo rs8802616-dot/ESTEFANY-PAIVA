@@ -98,8 +98,8 @@
             <img src="assets/images/trabalho-amendoada-ouro.png" id="clientHeaderAvatarImg" alt="Estefany Paiva">
           </div>
           <div class="greeting-text-area">
-            <h2>Olá, <span id="clientGreetingName">Mariana</span>! <i class="fa-regular fa-heart"></i></h2>
-            <p id="clientHeaderWelcomeSub">Bem-vinda de volta ao seu momento de beleza e autocuidado.</p>
+            <h2 id="clientGreetingHeading">Olá, <span id="clientGreetingName">Bem-vinda</span>! <i class="fa-regular fa-heart"></i></h2>
+            <p id="clientHeaderWelcomeSub">Bem-vinda ao seu momento de beleza e autocuidado.</p>
           </div>
         </div>
       </div>
@@ -499,7 +499,7 @@
         <div class="greeting-avatar-ring" style="width:72px; height:72px; margin:0 auto 10px;">
           <img src="assets/images/trabalho-amendoada-ouro.png" id="profileModalAvatarImg" alt="Perfil">
         </div>
-        <h4 style="font-family:var(--font-serif); font-size:1.2rem; color:#350B19;" id="profileModalClientName">Mariana Silva</h4>
+        <h4 style="font-family:var(--font-serif); font-size:1.2rem; color:#350B19;" id="profileModalClientName">Cliente VIP</h4>
         <p style="font-size:0.8rem; color:#8A2D4E;" id="profileModalClientPhone">Cliente VIP Estefany Paiva Nails</p>
       </div>
 
@@ -823,10 +823,42 @@
       }).join('');
     }
 
+    // Retorna APENAS os agendamentos pertencentes à cliente deste aparelho (Privacidade LGPD)
+    function getCurrentClientOwnAppointments() {
+      if (!window.EPStore) return [];
+      const allApps = window.EPStore.getAppointments().filter(a => a.status !== 'Cancelado' && a.status !== 'cancelado');
+      const lastId = localStorage.getItem('epn_last_appointment_id') || '';
+      const savedPhone = (localStorage.getItem('epn_last_client_phone') || '').replace(/\D/g, '');
+      const savedName = (localStorage.getItem('epn_last_client_name') || '').trim().toLowerCase();
+
+      if (!lastId && savedPhone.length < 8 && savedName.length < 3) {
+        return [];
+      }
+
+      return allApps.filter(a => {
+        if (lastId && a.id === lastId) return true;
+        const aPhone = (a.clientPhone || '').replace(/\D/g, '');
+        if (savedPhone.length >= 8 && aPhone && (aPhone.includes(savedPhone) || savedPhone.includes(aPhone))) return true;
+        const aName = (a.clientName || '').trim().toLowerCase();
+        if (savedName.length >= 3 && aName === savedName) return true;
+        return false;
+      });
+    }
+
     // Restaura Nome, WhatsApp e Agendamento da cliente mesmo após F5 / atualizar a página
     function restoreClientSavedData() {
-      const savedName = localStorage.getItem('epn_last_client_name') || '';
-      const savedPhone = localStorage.getItem('epn_last_client_phone') || '';
+      let savedName = localStorage.getItem('epn_last_client_name') || '';
+      let savedPhone = localStorage.getItem('epn_last_client_phone') || '';
+      const lastId = localStorage.getItem('epn_last_appointment_id') || '';
+
+      // Se tinha apenas o ID salvo, recupera o nome e telefone do próprio agendamento
+      if ((!savedName || !savedPhone) && lastId && window.EPStore) {
+        const found = window.EPStore.getAppointments().find(a => a.id === lastId);
+        if (found) {
+          savedName = savedName || found.clientName || '';
+          savedPhone = savedPhone || found.clientPhone || '';
+        }
+      }
 
       const nameInput = document.getElementById('clientNameInput');
       const phoneInput = document.getElementById('clientPhoneInput');
@@ -843,21 +875,26 @@
       const nameVal = nameInput ? nameInput.value.trim() : '';
       const phoneVal = phoneInput ? phoneInput.value.trim() : '';
 
-      if (nameVal) localStorage.setItem('epn_last_client_name', nameVal);
-      if (phoneVal) localStorage.setItem('epn_last_client_phone', phoneVal);
+      localStorage.setItem('epn_last_client_name', nameVal);
+      localStorage.setItem('epn_last_client_phone', phoneVal);
 
       updateClientHeaderAndProfile(nameVal, phoneVal);
+      updateNextBookingBanner();
+      updateClientNotificationsBadge();
     }
 
     function updateClientHeaderAndProfile(name, phone) {
-      const firstName = (name || 'Mariana').split(' ')[0];
+      const cleanName = (name || '').trim();
+      const firstName = cleanName ? cleanName.split(' ')[0] : '';
       const greetEl = document.getElementById('clientGreetingName');
-      if (greetEl) greetEl.innerText = firstName;
+      if (greetEl) {
+        greetEl.innerText = firstName || 'Bem-vinda';
+      }
 
       const profNameEl = document.getElementById('profileModalClientName');
       const profPhoneEl = document.getElementById('profileModalClientPhone');
-      if (profNameEl) profNameEl.innerText = name || 'Cliente VIP';
-      if (profPhoneEl) profPhoneEl.innerText = phone ? `WhatsApp: ${phone}` : 'Cliente VIP Estefany Paiva Nails';
+      if (profNameEl) profNameEl.innerText = cleanName || 'Cliente VIP';
+      if (profPhoneEl) profPhoneEl.innerText = phone ? `WhatsApp: ${phone}` : 'Preencha seu nome e WhatsApp ao agendar';
     }
 
     function showToast(msg) {
@@ -1117,23 +1154,18 @@
 
     function updateNextBookingBanner() {
       if (!window.EPStore) return;
-      const apps = window.EPStore.getAppointments().filter(a => a.status !== 'Cancelado');
-      if (apps.length === 0) return;
+      const ownApps = getCurrentClientOwnAppointments();
+      const secMeus = document.getElementById('secMeusAgendamentos');
 
-      const lastId = localStorage.getItem('epn_last_appointment_id') || '';
-      const savedPhone = (localStorage.getItem('epn_last_client_phone') || '').replace(/\D/g, '');
-      const savedName = (localStorage.getItem('epn_last_client_name') || '').toLowerCase();
+      if (ownApps.length === 0) {
+        const srvEl = document.getElementById('appPreviewServiceName');
+        const timeEl = document.getElementById('appPreviewTime');
+        if (srvEl) srvEl.innerText = 'Nenhum horário agendado ainda';
+        if (timeEl) timeEl.innerText = 'Toque abaixo para escolher seu horário';
+        return;
+      }
 
-      let next = apps.find(a => a.id === lastId);
-      if (!next && savedPhone.length >= 8) {
-        next = apps.find(a => (a.clientPhone || '').replace(/\D/g, '').includes(savedPhone));
-      }
-      if (!next && savedName.length >= 3) {
-        next = apps.find(a => (a.clientName || '').toLowerCase() === savedName);
-      }
-      if (!next) {
-        next = apps[0];
-      }
+      const next = ownApps[0];
 
       const srvEl = document.getElementById('appPreviewServiceName');
       const timeEl = document.getElementById('appPreviewTime');
@@ -1166,10 +1198,11 @@
 
     function updateClientNotificationsBadge() {
       if (!window.EPStore) return;
-      const apps = window.EPStore.getAppointments().filter(a => a.status !== 'Cancelado');
+      const ownApps = getCurrentClientOwnAppointments();
       const badge = document.getElementById('clientBellBadge');
       if (badge) {
-        badge.innerText = Math.max(1, apps.length);
+        badge.innerText = ownApps.length;
+        badge.style.display = ownApps.length > 0 ? 'flex' : 'none';
       }
     }
 
@@ -1177,18 +1210,24 @@
       const listEl = document.getElementById('clientNotificationsDynamicList');
       if (!listEl || !window.EPStore) return;
 
-      const apps = window.EPStore.getAppointments().filter(a => a.status !== 'Cancelado');
-      if (apps.length === 0) {
-        listEl.innerHTML = '<p style="font-size:0.85rem; color:#8A2D4E; padding:12px;">Nenhuma notificação no momento.</p>';
+      const ownApps = getCurrentClientOwnAppointments();
+      if (ownApps.length === 0) {
+        listEl.innerHTML = `
+          <div style="text-align:center; padding:18px 12px; background:#FBECEF; border-radius:16px;">
+            <i class="fa-regular fa-bell" style="font-size:1.5rem; color:#8A2D4E; margin-bottom:6px; display:block;"></i>
+            <strong style="color:#350B19; font-size:0.88rem;">Você ainda não tem notificações</strong>
+            <p style="font-size:0.78rem; color:#6A1D39; margin-top:4px;">Assim que você confirmar um agendamento, seus avisos e lembretes aparecerão exclusivamente aqui.</p>
+          </div>
+        `;
         return;
       }
 
-      listEl.innerHTML = apps.slice(0, 6).map(a => `
+      listEl.innerHTML = ownApps.map(a => `
         <div style="background:#FBECEF; border:1px solid rgba(77,19,40,0.08); border-radius:16px; padding:12px 14px; display:flex; justify-content:space-between; align-items:center; gap:10px;">
           <div>
-            <strong style="color:#350B19; font-size:0.88rem; display:block;">Horário ${a.status} ✨</strong>
+            <strong style="color:#350B19; font-size:0.88rem; display:block;">Seu Horário está ${a.status} ✨</strong>
             <p style="font-size:0.78rem; color:#6A1D39; margin-top:2px;">
-              <strong>${a.clientName}:</strong> ${a.serviceName} agendado para <strong>${a.date} às ${a.time}</strong>.
+              <strong>${a.clientName}:</strong> ${a.serviceName} agendado para <strong>${a.date.split('-').reverse().join('/')} às ${a.time}</strong>.
             </p>
           </div>
           <span style="background:#DDF2E1; color:#226E3A; font-size:0.7rem; font-weight:700; padding:4px 10px; border-radius:20px; flex-shrink:0;">
@@ -1231,12 +1270,15 @@
       const term = (input ? input.value : '').replace(/\D/g, '');
 
       const allApps = window.EPStore ? window.EPStore.getAppointments() : [];
-      const filtered = term.length >= 4
-        ? allApps.filter(a => (a.clientPhone || '').replace(/\D/g, '').includes(term))
-        : allApps;
+      let filtered = [];
+      if (term.length >= 4) {
+        filtered = allApps.filter(a => (a.clientPhone || '').replace(/\D/g, '').includes(term));
+      } else {
+        filtered = getCurrentClientOwnAppointments();
+      }
 
       if (filtered.length === 0) {
-        container.innerHTML = '<p style="font-size:0.85rem; color:#8A2D4E; padding:14px; text-align:center;">Nenhum agendamento encontrado para este número.</p>';
+        container.innerHTML = '<p style="font-size:0.85rem; color:#8A2D4E; padding:14px; text-align:center;">Digite seu WhatsApp acima ou faça seu primeiro agendamento para consultar seus horários.</p>';
         return;
       }
 
@@ -1245,7 +1287,7 @@
           <div>
             <h5 style="color:#350B19; font-weight:700; font-size:0.9rem;">${item.serviceName}</h5>
             <p style="font-size:0.76rem; color:#4D1328; font-weight:600;">Cliente: ${item.clientName}</p>
-            <p style="font-size:0.75rem; color:#6A1D39;">${item.date} às ${item.time} &bull; <strong>${item.status}</strong></p>
+            <p style="font-size:0.75rem; color:#6A1D39;">${item.date.split('-').reverse().join('/')} às ${item.time} &bull; <strong>${item.status}</strong></p>
           </div>
           <button onclick="openWhatsAppChatDirect()" style="padding:6px 12px; border-radius:20px; border:none; background:#25D366; color:#FFF; font-size:0.75rem; font-weight:700; cursor:pointer;">
             <i class="fa-brands fa-whatsapp"></i> Falar
