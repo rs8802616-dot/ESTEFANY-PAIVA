@@ -43,4 +43,10 @@ O sistema é uma aplicação web progressiva (PWA) de luxo para salão de estét
 - **v21**: Sincronização em tempo real de fotos e dados entre aparelhos via SSE e chunks criptografados.
 - **v22**: Abertura direta do agendamento em modal popup ao clicar em agendar nos Stories ou Catálogo.
 - **v23**: Correção de piscamento no Painel Administrativo, estabilização dos recálculos do motor gráfico de cores e criação desta documentação mestra para guiar todas as próximas intervenções.
-- **v24**: Correção crítica de renderização da página da administradora (dmin.html), blindagem do ciclo de inicialização DOMContentLoaded com tratamento de exceções resiliente e correção da navegação offline no Service Worker para nunca redirecionar o admin para a home do cliente.
+- **v24**: Correção crítica de renderização da página da administradora (admin.html), blindagem do ciclo de inicialização DOMContentLoaded com tratamento de exceções resiliente e correção da navegação offline no Service Worker para nunca redirecionar o admin para a home do cliente.
+- **v25**: Eliminação definitiva dos blocos brancos e cortes visuais na tela do celular:
+  1. **Remoção de Camadas Fantasmas no Android/Chrome**: Modais administrativos (.admin-modal-overlay) e do cliente (.client-modal-overlay) agora utilizam 'display: none !important' e 'visibility: hidden !important' quando inativos, impedindo que o motor gráfico do navegador (Blink/GPU) desenhe superfícies brancas ou sobreponha iframes (#modalPortalClienteInApp) sobre as telas do app.
+  2. **Renderização Sob Demanda e Isolada por Aba**: A função switchAdminTab() agora dispara a renderização segura da aba ativa (dashboard, agenda, clientes, serviços, relatórios), com scroll top instantâneo.
+  3. **Tolerância a Falhas**: Todas as funções dentro de refreshAllAdminViews() foram isoladas em blocos try/catch independentes.
+  4. **Estados Vazios Elegantes**: Fallbacks visuais adicionados para clientes e serviços quando a base de dados estiver vazia.
+  5. **Purga Automática de Cache**: Versão do Service Worker elevada para 'estefany-nails-v25-fix-mobile-modal-overlay-cutoffs' para atualização imediata no celular do usuário.

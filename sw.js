@@ -1,4 +1,4 @@
-const CACHE_NAME = 'estefany-nails-v24-fix-admin-render';
+const CACHE_NAME = 'estefany-nails-v25-fix-mobile-modal-overlay-cutoffs';
 const STATIC_ASSETS = [
   './',
   './index.html',

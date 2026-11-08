@@ -1842,7 +1842,7 @@
   </div>
 
   <!-- MODAL TELA CHEIA: VISUALIZAR PORTAL DA CLIENTE DENTRO DO ADMIN SEM SAIR DO LINK DO ADMINISTRADOR -->
-  <div class="admin-modal-overlay" id="modalPortalClienteInApp" style="padding:0; background:rgba(15, 5, 10, 0.92); z-index:9500;">
+  <div class="admin-modal-overlay" id="modalPortalClienteInApp" style="display:none; padding:0; background:rgba(15, 5, 10, 0.92); z-index:9500;">
     <div style="width:100%; height:100vh; display:flex; flex-direction:column; background:#FAF4F5; overflow:hidden;">
       <!-- Barra Fixa de Controle do Administrador no Topo -->
       <div style="background:linear-gradient(135deg, #350B19 0%, #6A1D39 100%); color:#FFFFFF; padding:10px 16px; display:flex; align-items:center; justify-content:space-between; gap:10px; box-shadow:0 4px 16px rgba(0,0,0,0.35); z-index:10; flex-shrink:0;">
@@ -1900,6 +1900,15 @@
         console.warn('EPStore.init caught:', err);
       }
 
+      // Garante que nenhum modal sobreponha a tela no celular
+      try {
+        document.querySelectorAll('.admin-modal-overlay').forEach(m => {
+          if (!m.classList.contains('active')) {
+            m.style.display = 'none';
+          }
+        });
+      } catch (e) {}
+
       try {
         refreshAllAdminViews();
       } catch (err) {
@@ -1920,14 +1929,14 @@
     });
 
     function refreshAllAdminViews() {
-      applySalonSettingsToAdminHeader();
-      loadAdminDashboard();
-      renderAdminCalendar();
-      renderAdminAgenda();
-      renderAdminClientes();
-      renderAdminServicos();
-      renderAdminNotificationsModal();
-      renderInteractiveReports();
+      try { applySalonSettingsToAdminHeader(); } catch (e) { console.error('Erro em applySalonSettingsToAdminHeader:', e); }
+      try { loadAdminDashboard(); } catch (e) { console.error('Erro em loadAdminDashboard:', e); }
+      try { renderAdminCalendar(); } catch (e) { console.error('Erro em renderAdminCalendar:', e); }
+      try { renderAdminAgenda(); } catch (e) { console.error('Erro em renderAdminAgenda:', e); }
+      try { renderAdminClientes(); } catch (e) { console.error('Erro em renderAdminClientes:', e); }
+      try { renderAdminServicos(); } catch (e) { console.error('Erro em renderAdminServicos:', e); }
+      try { renderAdminNotificationsModal(); } catch (e) { console.error('Erro em renderAdminNotificationsModal:', e); }
+      try { renderInteractiveReports(); } catch (e) { console.error('Erro em renderInteractiveReports:', e); }
     }
 
     function applySalonSettingsToAdminHeader() {
@@ -1966,7 +1975,22 @@
       const target = document.getElementById(`viewScreen_${tabName}`);
       if (target) {
         target.classList.add('active');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        try {
+          window.scrollTo(0, 0);
+          document.body.scrollTop = 0;
+          document.documentElement.scrollTop = 0;
+        } catch (e) {}
+      }
+
+      // Renderização sob demanda e segura da aba selecionada
+      try {
+        if (tabName === 'dashboard') loadAdminDashboard();
+        else if (tabName === 'agenda') { renderAdminCalendar(); renderAdminAgenda(); }
+        else if (tabName === 'clientes') renderAdminClientes();
+        else if (tabName === 'servicos') renderAdminServicos();
+        else if (tabName === 'relatorios') renderInteractiveReports();
+      } catch (err) {
+        console.error('Erro ao renderizar aba ' + tabName, err);
       }
     }
 
@@ -2168,6 +2192,17 @@
         }
       });
 
+      if (clientMap.size === 0) {
+        container.innerHTML = `
+          <div style="text-align:center; padding:36px 16px; color:#8A2D4E; background:#FFFFFF; border-radius:18px; border:1px solid rgba(77,19,40,0.1);">
+            <i class="fa-solid fa-users" style="font-size:2.2rem; margin-bottom:12px; opacity:0.6; display:block; color:#D83F79;"></i>
+            <p style="font-size:0.92rem; font-weight:700; color:#350B19;">Nenhum cliente cadastrado ainda.</p>
+            <p style="font-size:0.78rem; color:#6A1D39; margin-top:4px;">Os clientes que agendarem pelo celular aparecerão aqui automaticamente.</p>
+          </div>
+        `;
+        return;
+      }
+
       container.innerHTML = Array.from(clientMap.values()).map(cli => {
         const initials = (cli.name || 'CL').split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
         return `
@@ -2193,6 +2228,17 @@
       const container = document.getElementById('adminServicesList');
       const selectAgendamento = document.getElementById('selectAgendamentoServico');
       if (!container) return;
+
+      if (services.length === 0) {
+        container.innerHTML = `
+          <div style="text-align:center; padding:36px 16px; color:#8A2D4E; background:#FFFFFF; border-radius:18px; border:1px solid rgba(77,19,40,0.1);">
+            <i class="fa-regular fa-gem" style="font-size:2.2rem; margin-bottom:12px; opacity:0.6; display:block; color:#D83F79;"></i>
+            <p style="font-size:0.92rem; font-weight:700; color:#350B19;">Nenhum serviço cadastrado ainda.</p>
+            <p style="font-size:0.78rem; color:#6A1D39; margin-top:4px;">Toque em "+ Novo Serviço" para cadastrar seu primeiro procedimento.</p>
+          </div>
+        `;
+        return;
+      }
 
       container.innerHTML = services.map(s => {
         const imgUrl = s.image || 'assets/images/trabalho-alongamento-chocolate.png';
@@ -2499,12 +2545,18 @@
 
     function openModal(id) {
       const el = document.getElementById(id);
-      if (el) el.classList.add('active');
+      if (el) {
+        el.style.display = 'flex';
+        el.classList.add('active');
+      }
     }
 
     function closeModal(id) {
       const el = document.getElementById(id);
-      if (el) el.classList.remove('active');
+      if (el) {
+        el.classList.remove('active');
+        el.style.display = 'none';
+      }
     }
 
     function openModalNovoAgendamento() {
@@ -3460,6 +3512,7 @@
         frame.src = `index.html?preview_admin=1&_t=${Date.now()}`;
       }
       if (modal) {
+        modal.style.display = 'flex';
         modal.classList.add('active');
       }
     }
@@ -3476,6 +3529,9 @@
       const modal = document.getElementById('modalPortalClienteInApp');
       if (modal) {
         modal.classList.remove('active');
+        modal.style.display = 'none';
+        const frame = document.getElementById('clientPortalEmbeddedFrame');
+        if (frame) frame.src = 'about:blank';
       }
       refreshAllAdminViews();
     }

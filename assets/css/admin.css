@@ -911,7 +911,8 @@ input:checked + .switch-slider:before {
   background: rgba(37, 6, 17, 0.7);
   backdrop-filter: blur(4px);
   z-index: 2000;
-  display: flex;
+  display: none !important;
+  visibility: hidden !important;
   align-items: center;
   justify-content: center;
   padding: 16px;
@@ -921,8 +922,19 @@ input:checked + .switch-slider:before {
 }
 
 .admin-modal-overlay.active {
-  opacity: 1;
-  pointer-events: auto;
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+#modalPortalClienteInApp:not(.active) {
+  display: none !important;
+  visibility: hidden !important;
+}
+#modalPortalClienteInApp.active {
+  display: flex !important;
+  visibility: visible !important;
 }
 
 .admin-modal-card {
