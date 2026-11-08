@@ -1145,36 +1145,39 @@ window.EPStore = {
       }
 
       /* CORREÇÃO SEÇÃO POR SEÇÃO (INÍCIO, AGENDA, CLIENTES, SERVIÇOS, RELATÓRIOS, CONFIGURAÇÕES, AVALIAÇÕES E CLIENTE):
-         Qualquer sub-caixa ou linha interna com background claro hardcoded (#FFFFFF, #FFF, #FBECEF, #FAF4F5, #FFF9FA)
+         Qualquer sub-caixa, formulário ou linha interna com background claro hardcoded (#FFFFFF, #FFF, #FBECEF, #FAF4F5, #FFF9FA, #EFF6FF, #ECFDF5)
          adapta automaticamente seu fundo e suas letras em Modo Preto / Paletas Escuras! */
-      .admin-chart-card div[style*="background:#FFFFFF"],
-      .admin-chart-card div[style*="background: #FFFFFF"],
-      .admin-chart-card div[style*="background:#FFF"],
-      .admin-chart-card div[style*="background:#FBECEF"],
-      .admin-chart-card div[style*="background:#FAF4F5"],
-      .admin-chart-card div[style*="background:#FFF9FA"],
-      .admin-sub-card div[style*="background:#FFFFFF"],
-      .admin-sub-card div[style*="background: #FFFFFF"],
-      .admin-sub-card div[style*="background:#FFF"],
-      .admin-sub-card div[style*="background:#FBECEF"],
-      .admin-sub-card div[style*="background:#FAF4F5"],
-      .admin-sub-card div[style*="background:#FFF9FA"],
+      .admin-chart-card [style*="background:#FFFFFF"]:not(.bullet),
+      .admin-chart-card [style*="background: #FFFFFF"]:not(.bullet),
+      .admin-chart-card [style*="background:#FFF"]:not(.bullet),
+      .admin-chart-card [style*="background:#FBECEF"]:not(.bullet),
+      .admin-chart-card [style*="background:#FAF4F5"]:not(.bullet),
+      .admin-chart-card [style*="background:#FFF9FA"]:not(.bullet),
+      .admin-sub-card [style*="background:#FFFFFF"]:not(.bullet),
+      .admin-sub-card [style*="background: #FFFFFF"]:not(.bullet),
+      .admin-sub-card [style*="background:#FFF"]:not(.bullet),
+      .admin-sub-card [style*="background:#FBECEF"]:not(.bullet),
+      .admin-sub-card [style*="background:#FAF4F5"]:not(.bullet),
+      .admin-sub-card [style*="background:#FFF9FA"]:not(.bullet),
       .admin-modal-card div[style*="background:#FFFFFF"]:not(#liveColorPreviewBox),
       .admin-modal-card div[style*="background:#FFF"]:not(#liveColorPreviewBox),
       .admin-modal-card div[style*="background:#FBECEF"]:not(#liveColorPreviewBox),
       .admin-modal-card div[style*="background:#FAF4F5"]:not(#liveColorPreviewBox),
       .admin-modal-card div[style*="background:#FFF9FA"]:not(#liveColorPreviewBox),
+      .admin-modal-card form[style*="background:#FBECEF"],
+      .admin-modal-card form[style*="background:#FFF"],
       .admin-modal-card label[style*="background:#FBECEF"],
+      .admin-modal-card label[style*="background:#EFF6FF"],
       .admin-modal-card button[style*="background:#FFF"],
       .admin-modal-card button[style*="background:#FBECEF"],
-      .admin-modal-card select[style*="background:#FFF"],
-      .admin-modal-card select[style*="background:#FBECEF"],
-      .admin-modal-card input[style*="background:#FFF"],
+      .admin-modal-card button[style*="background:#ECFDF5"],
+      .admin-modal-card select,
+      .admin-modal-card input:not([type="color"]):not([type="checkbox"]),
       .client-modal-card div[style*="background:#FBECEF"],
       .client-modal-card div[style*="background:#FFFFFF"],
       .client-modal-card div[style*="background:#FFF"],
       .client-modal-card button[style*="background:#FBECEF"],
-      .client-modal-card input,
+      .client-modal-card input:not([type="color"]):not([type="checkbox"]),
       #bookingSection div[style*="background:#FBECEF"],
       #bookingSection div[style*="background: #FBECEF"],
       #bookingSection div[style*="background:#FFF0F3"],
@@ -1187,11 +1190,26 @@ window.EPStore = {
         border-color: ${borderOnCard} !important;
       }
 
+      /* Selos verdes e coloridos (+18% vs mês anterior, Confirmado, Pendente, etc.) mantêm sua cor legível original */
+      span[style*="background:#DDF2E1"],
+      span[style*="background: #DDF2E1"] {
+        background: ${isDarkCard ? 'rgba(16, 185, 129, 0.22)' : '#DDF2E1'} !important;
+        color: ${isDarkCard ? '#6EE7B7' : '#226E3A'} !important;
+      }
+      span[style*="color:#226E3A"],
+      .kpi-growth {
+        color: ${isDarkCard ? '#34D399' : '#16A34A'} !important;
+      }
+      span[style*="background:#FFD4DC"] {
+        background: ${isDarkCard ? 'rgba(244, 63, 94, 0.25)' : '#FFD4DC'} !important;
+        color: ${isDarkCard ? '#FDA4AF' : '#D83F79'} !important;
+      }
+
       /* Garante que todos os textos, números, ícones e rótulos dentro dessas sub-caixas tenham contraste máximo */
       .admin-chart-card div[style*="background:"] strong,
       .admin-chart-card div[style*="background:"] h4,
       .admin-chart-card div[style*="background:"] h5,
-      .admin-chart-card div[style*="background:"] span:not(.badge-status-pill),
+      .admin-chart-card div[style*="background:"] span:not(.badge-status-pill):not([style*="#DDF2E1"]):not([style*="#226E3A"]),
       .admin-sub-card div[style*="background:"] strong,
       .admin-sub-card div[style*="background:"] h4,
       .admin-sub-card div[style*="background:"] h5,
@@ -1199,8 +1217,13 @@ window.EPStore = {
       .admin-modal-card:not(#modalConfigCores) div[style*="background:"] strong,
       .admin-modal-card:not(#modalConfigCores) div[style*="background:"] h4,
       .admin-modal-card:not(#modalConfigCores) div[style*="background:"] span:not(.badge-status-pill),
-      .admin-modal-card label[style*="background:#FBECEF"],
+      .admin-modal-card form[style*="background:"] strong,
+      .admin-modal-card form[style*="background:"] label,
+      .admin-modal-card form[style*="background:"] span,
+      .admin-modal-card label[style*="background:"],
       .admin-modal-card button[style*="background:#FBECEF"],
+      .admin-modal-card button[style*="background:#FFF"],
+      .admin-modal-card button[style*="background:#ECFDF5"],
       .client-modal-card div[style*="background:#FBECEF"] h4,
       .client-modal-card div[style*="background:#FBECEF"] strong,
       .client-modal-card div[style*="background:#FBECEF"] p,
@@ -1291,6 +1314,202 @@ window.EPStore = {
       root.style.setProperty('--radius-md', '16px');
       root.style.setProperty('--radius-lg', '24px');
       root.style.setProperty('--radius-pill', '9999px');
+    }
+
+    // Executa o Motor Gráfico de Contraste Inteligente no DOM (Garante 0 textos ocultos em qualquer cor!)
+    this._lastGraphicPalette = {
+      prim, sec, cardBg, pageBg, isDarkCard, isDarkPage, isLightPrim,
+      textOnCard, subOnCard, borderOnCard, innerSurfaceBg, textOnPage, subOnPage, textOnPrim
+    };
+    this.runSmartContrastGraphicEngine(this._lastGraphicPalette);
+    this.initGraphicContrastObserver();
+  },
+
+  // ========================================================
+  // MOTOR GRÁFICO DE CONTRASTE INTELIGENTE (DOM RUNTIME ENGINE)
+  // ========================================================
+  initGraphicContrastObserver() {
+    if (this._graphicObserverInitialized || typeof MutationObserver === 'undefined' || !document.body) return;
+    this._graphicObserverInitialized = true;
+    let rafPending = false;
+    const obs = new MutationObserver(() => {
+      if (rafPending) return;
+      rafPending = true;
+      requestAnimationFrame(() => {
+        rafPending = false;
+        if (this._lastGraphicPalette) {
+          this.runSmartContrastGraphicEngine(this._lastGraphicPalette);
+        }
+      });
+    });
+    obs.observe(document.body, { childList: true, subtree: true });
+  },
+
+  parseCssColorToRgb(str) {
+    if (!str) return null;
+    const s = String(str).trim().toLowerCase();
+    if (s === 'transparent' || s === 'rgba(0, 0, 0, 0)' || s === 'rgba(0,0,0,0)') return null;
+    if (s.startsWith('#')) {
+      const clean = s.slice(1);
+      const full = clean.length === 3 ? clean.split('').map(c => c + c).join('') : clean;
+      if (full.length >= 6) {
+        return {
+          r: parseInt(full.slice(0, 2), 16) || 0,
+          g: parseInt(full.slice(2, 4), 16) || 0,
+          b: parseInt(full.slice(4, 6), 16) || 0,
+          a: 1
+        };
+      }
+    }
+    const m = s.match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?\s*\)/);
+    if (m) {
+      const alpha = m[4] !== undefined ? parseFloat(m[4]) : 1;
+      if (alpha < 0.12) return null;
+      return { r: parseInt(m[1], 10), g: parseInt(m[2], 10), b: parseInt(m[3], 10), a: alpha };
+    }
+    return null;
+  },
+
+  getRgbLuminance(rgb) {
+    if (!rgb) return 0.5;
+    const a = [rgb.r / 255, rgb.g / 255, rgb.b / 255].map(v => (v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4)));
+    return 0.2126 * a[0] + 0.7152 * a[1] + 0.0722 * a[2];
+  },
+
+  runSmartContrastGraphicEngine(palette) {
+    if (!document.body || this._runningGraphicEngine) return;
+    this._runningGraphicEngine = true;
+    try {
+      const p = palette || this._lastGraphicPalette || {};
+      const prim = p.prim || '#350B19';
+      const sec = p.sec || '#D83F79';
+      const isDarkCard = !!p.isDarkCard;
+      const textOnCard = p.textOnCard || (isDarkCard ? '#FFFFFF' : '#27131A');
+      const subOnCard = p.subOnCard || (isDarkCard ? 'rgba(255,255,255,0.82)' : '#5C2235');
+      const textOnPrim = p.textOnPrim || '#FFFFFF';
+      const innerSurfaceBg = p.innerSurfaceBg || (isDarkCard ? '#18181B' : '#FFFFFF');
+      const borderOnCard = p.borderOnCard || (isDarkCard ? 'rgba(255,255,255,0.16)' : 'rgba(77,19,40,0.12)');
+
+      // 0. Adapta o gráfico Donut e legendas para nunca sumirem no modo escuro
+      document.querySelectorAll('.donut-svg circle').forEach((circle, idx) => {
+        if (idx === 0) {
+          circle.setAttribute('stroke', isDarkCard ? '#18181B' : '#FAF4F5');
+        } else if (idx === 1) {
+          circle.setAttribute('stroke', isDarkCard ? '#F59E0B' : '#350B19');
+        } else if (idx === 2) {
+          circle.setAttribute('stroke', sec);
+        } else if (idx === 3) {
+          circle.setAttribute('stroke', isDarkCard ? '#F472B6' : '#E9A3B5');
+        }
+      });
+      const bullets = document.querySelectorAll('.donut-legend-item .bullet');
+      if (bullets.length >= 3) {
+        bullets[0].style.setProperty('background', isDarkCard ? '#F472B6' : '#E9A3B5', 'important');
+        bullets[1].style.setProperty('background', sec, 'important');
+        bullets[2].style.setProperty('background', isDarkCard ? '#F59E0B' : '#350B19', 'important');
+      }
+
+      // 1. Adapta automaticamente todas as sub-caixas, formulários, botões secundários e inputs dentro dos cards e modais
+      const containers = document.querySelectorAll('.admin-chart-card, .admin-sub-card, .admin-modal-card, .client-modal-card, .booking-section-wrapper, .kpi-pink-card, .card-list-item');
+      containers.forEach(card => {
+        if (card.id === 'modalStoryViewer') return;
+        const children = card.querySelectorAll('div[style*="background"], form[style*="background"], label[style*="background"], button[style*="background"], select, input:not([type="color"]):not([type="checkbox"])');
+        children.forEach(el => {
+          if (el.id === 'liveColorPreviewBox' || el.classList.contains('bullet') || el.classList.contains('badge-status-pill')) return;
+          if (el.closest('#liveColorPreviewBox') || el.closest('.instagram-story-modal-box')) return;
+          const styleAttr = (el.getAttribute('style') || '').toLowerCase();
+          // Ignora barras de progresso coloridas e avatares
+          if (styleAttr.includes('height:100%') || styleAttr.includes('linear-gradient') || el.classList.contains('client-avatar-badge')) return;
+          // Mantém botões de ação primária (WhatsApp, Google, Cancelar Vermelho, Botão Primário Vinho)
+          if (styleAttr.includes('#25d366') || styleAttr.includes('#1a73e8') || styleAttr.includes('#dc2626')) return;
+          if (el.tagName === 'BUTTON' && (styleAttr.includes('#4d1328') || styleAttr.includes('#350b19'))) {
+            el.style.setProperty('background', prim, 'important');
+            el.style.setProperty('color', textOnPrim, 'important');
+            return;
+          }
+
+          if (isDarkCard) {
+            // Em modo escuro/preto, transforma qualquer caixa interna clara em superfície escura elegante
+            if (
+              styleAttr.includes('#fff') ||
+              styleAttr.includes('#fbecef') ||
+              styleAttr.includes('#faf4f5') ||
+              styleAttr.includes('#fff9fa') ||
+              styleAttr.includes('#eff6ff') ||
+              styleAttr.includes('#ecfdf5') ||
+              styleAttr.includes('#fef2f2') ||
+              styleAttr.includes('#fff0f3') ||
+              el.tagName === 'INPUT' ||
+              el.tagName === 'SELECT'
+            ) {
+              el.style.setProperty('background', '#18181B', 'important');
+              el.style.setProperty('color', '#FFFFFF', 'important');
+              el.style.setProperty('border-color', 'rgba(255,255,255,0.18)', 'important');
+            }
+          } else {
+            // Em modo claro, restaura contraste limpo
+            if (el.tagName === 'INPUT' || el.tagName === 'SELECT') {
+              el.style.setProperty('background', '#FFFFFF', 'important');
+              el.style.setProperty('color', textOnCard, 'important');
+              el.style.setProperty('border-color', borderOnCard, 'important');
+            } else if (styleAttr.includes('background') && !styleAttr.includes('#4d1328')) {
+              el.style.setProperty('background', innerSurfaceBg, 'important');
+              el.style.setProperty('color', textOnCard, 'important');
+            }
+          }
+        });
+
+        // 2. Verifica cada texto (strong, span, p, label, h1..h6, a) para nunca permitir letra invisível
+        const textNodes = card.querySelectorAll('h1, h2, h3, h4, h5, h6, strong, span, p, label, a');
+        textNodes.forEach(txtEl => {
+          if (txtEl.closest('#liveColorPreviewBox') || txtEl.closest('.instagram-story-modal-box')) return;
+          if (txtEl.classList.contains('bullet') || txtEl.classList.contains('badge-bell-count') || txtEl.classList.contains('avatar-story-badge')) return;
+          const st = (txtEl.getAttribute('style') || '').toLowerCase();
+
+          // Preserva badges verdes/vermelhos/azuis dando o contraste certo para modo claro ou escuro
+          if (st.includes('#ddf2e1') || st.includes('#226e3a') || st.includes('#059669') || st.includes('#16a34a') || txtEl.classList.contains('kpi-growth')) {
+            if (st.includes('background')) {
+              txtEl.style.setProperty('background', isDarkCard ? 'rgba(16, 185, 129, 0.22)' : '#DDF2E1', 'important');
+            }
+            txtEl.style.setProperty('color', isDarkCard ? '#6EE7B7' : '#15803D', 'important');
+            return;
+          }
+          if (st.includes('#ffd4dc') || st.includes('#b91c1c') || st.includes('#dc2626')) {
+            if (st.includes('background')) {
+              txtEl.style.setProperty('background', isDarkCard ? 'rgba(244, 63, 94, 0.22)' : '#FFD4DC', 'important');
+            }
+            txtEl.style.setProperty('color', isDarkCard ? '#FDA4AF' : '#DC2626', 'important');
+            return;
+          }
+          if (txtEl.classList.contains('badge-status-pill')) return;
+
+          // Se for um label de botão de upload com fundo primário (#4D1328), mantém texto claro
+          if (txtEl.tagName === 'LABEL' && (st.includes('background:#4d1328') || st.includes('background: #4d1328'))) {
+            txtEl.style.setProperty('background', prim, 'important');
+            txtEl.style.setProperty('color', textOnPrim, 'important');
+            return;
+          }
+
+          // Se estiver dentro de um botão colorido (#4D1328, #25D366, #1A73E8), mantém contraste do botão
+          const parentBtn = txtEl.closest('button');
+          if (parentBtn) {
+            const btnSt = (parentBtn.getAttribute('style') || '').toLowerCase();
+            if (btnSt.includes('#25d366') || btnSt.includes('#1a73e8') || btnSt.includes('#dc2626')) {
+              txtEl.style.setProperty('color', '#FFFFFF', 'important');
+              return;
+            }
+            if (btnSt.includes('#4d1328') || btnSt.includes('#350b19') || parentBtn.classList.contains('btn-promo-wine-pill') || parentBtn.classList.contains('btn-confirm-booking-wine')) {
+              txtEl.style.setProperty('color', textOnPrim, 'important');
+              return;
+            }
+          }
+
+          const isHeadingOrStrong = ['H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'STRONG', 'LABEL'].includes(txtEl.tagName);
+          txtEl.style.setProperty('color', isHeadingOrStrong ? textOnCard : subOnCard, 'important');
+        });
+      });
+    } finally {
+      this._runningGraphicEngine = false;
     }
   },
 

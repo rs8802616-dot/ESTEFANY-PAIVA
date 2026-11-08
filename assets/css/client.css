@@ -1613,3 +1613,96 @@ html, body {
   color: #9C828A !important;
   transform: none !important;
 }
+
+
+/* ========================================================
+   CORREÇÃO DEFINITIVA DO BANNER PROMOCIONAL E SAUDAÇÃO NO CELULAR
+   ======================================================== */
+.wine-greeting-row {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 15px !important;
+  padding: 6px 0 10px !important;
+  width: 100% !important;
+}
+
+.wine-greeting-row .greeting-text-area {
+  flex: 1 1 0% !important;
+  min-width: 0 !important;
+}
+
+@media (max-width: 767px) {
+  .promo-highlight-card {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 18px 16px !important;
+    min-height: 192px !important;
+    gap: 14px !important;
+    border-radius: 24px !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+  }
+
+  .promo-text-side {
+    flex: 1 1 0% !important;
+    min-width: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    justify-content: center !important;
+  }
+
+  .promo-text-side h3 {
+    font-size: 1.24rem !important;
+    line-height: 1.24 !important;
+    margin-bottom: 14px !important;
+    word-break: normal !important;
+  }
+
+  .btn-promo-wine-pill {
+    padding: 10px 18px !important;
+    font-size: 0.84rem !important;
+  }
+
+  .promo-photo-side {
+    width: 132px !important;
+    height: 156px !important;
+    flex-shrink: 0 !important;
+    border-radius: 18px !important;
+    overflow: hidden !important;
+  }
+
+  .promo-photo-side img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    border-radius: 18px !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .promo-highlight-card {
+    padding: 16px 14px !important;
+    gap: 11px !important;
+    min-height: 176px !important;
+  }
+
+  .promo-text-side h3 {
+    font-size: 1.14rem !important;
+    line-height: 1.22 !important;
+    margin-bottom: 12px !important;
+  }
+
+  .btn-promo-wine-pill {
+    padding: 9px 15px !important;
+    font-size: 0.78rem !important;
+  }
+
+  .promo-photo-side {
+    width: 116px !important;
+    height: 140px !important;
+  }
+}

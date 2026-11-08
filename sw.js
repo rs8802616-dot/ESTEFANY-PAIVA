@@ -1,4 +1,4 @@
-const CACHE_NAME = 'estefany-nails-v19-stories24h-gcal-contrast';
+const CACHE_NAME = 'estefany-nails-v20-graphic-engine-mobile-banner';
 const STATIC_ASSETS = [
   './',
   './index.html',
