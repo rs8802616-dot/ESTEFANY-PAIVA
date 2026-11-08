@@ -43,3 +43,4 @@ O sistema é uma aplicação web progressiva (PWA) de luxo para salão de estét
 - **v21**: Sincronização em tempo real de fotos e dados entre aparelhos via SSE e chunks criptografados.
 - **v22**: Abertura direta do agendamento em modal popup ao clicar em agendar nos Stories ou Catálogo.
 - **v23**: Correção de piscamento no Painel Administrativo, estabilização dos recálculos do motor gráfico de cores e criação desta documentação mestra para guiar todas as próximas intervenções.
+- **v24**: Correção crítica de renderização da página da administradora (dmin.html), blindagem do ciclo de inicialização DOMContentLoaded com tratamento de exceções resiliente e correção da navegação offline no Service Worker para nunca redirecionar o admin para a home do cliente.

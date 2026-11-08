@@ -1,4 +1,4 @@
-const CACHE_NAME = 'estefany-nails-v22-booking-modal-popup';
+const CACHE_NAME = 'estefany-nails-v24-fix-admin-render';
 const STATIC_ASSETS = [
   './',
   './index.html',
@@ -49,6 +49,11 @@ self.addEventListener('fetch', (event) => {
         return caches.match(event.request).then((cachedResponse) => {
           if (cachedResponse) return cachedResponse;
           if (event.request.mode === 'navigate') {
+            if (event.request.url.includes('admin.html')) {
+              return caches.match('./admin.html');
+            } else if (event.request.url.includes('master.html')) {
+              return caches.match('./master.html');
+            }
             return caches.match('./index.html');
           }
         });

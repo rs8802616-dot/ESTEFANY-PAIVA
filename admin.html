@@ -1892,13 +1892,22 @@
     let editableCustomSlots = ['09:00', '10:30', '13:00', '14:00', '15:30', '17:00', '18:30', '19:30'];
 
     document.addEventListener('DOMContentLoaded', async () => {
-      if (window.EPStore) {
-        await window.EPStore.init();
+      try {
+        if (window.EPStore) {
+          await window.EPStore.init();
+        }
+      } catch (err) {
+        console.warn('EPStore.init caught:', err);
       }
-      refreshAllAdminViews();
 
-      const urlTab = new URLSearchParams(window.location.search).get('tab');
-      if (urlTab) switchAdminTab(urlTab);
+      try {
+        refreshAllAdminViews();
+      } catch (err) {
+        console.error('refreshAllAdminViews caught:', err);
+      }
+
+      const urlTab = new URLSearchParams(window.location.search).get('tab') || 'dashboard';
+      switchAdminTab(urlTab);
 
       // Atualização automática em tempo real quando cliente agendar pelo celular!
       window.addEventListener('epstore:updated', (ev) => {
