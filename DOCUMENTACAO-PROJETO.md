@@ -50,3 +50,8 @@ O sistema é uma aplicação web progressiva (PWA) de luxo para salão de estét
   3. **Tolerância a Falhas**: Todas as funções dentro de refreshAllAdminViews() foram isoladas em blocos try/catch independentes.
   4. **Estados Vazios Elegantes**: Fallbacks visuais adicionados para clientes e serviços quando a base de dados estiver vazia.
   5. **Purga Automática de Cache**: Versão do Service Worker elevada para 'estefany-nails-v25-fix-mobile-modal-overlay-cutoffs' para atualização imediata no celular do usuário.
+- **v26**: Abertura do Agendamento em Tela Toda e Correção da Grade do Calendário no Celular:
+  1. **Agendamento em Tela Toda (Full Screen)**: O modal de agendamento (#modalAgendamentoPopup) agora abre ocupando 100% da tela do celular (tela cheia), com barra superior elegante estilo app nativo (botão "Voltar", título com ícone e botão de fechar), proporcionando uma experiência de uso fluida sem sensação de caixa flutuante apertada.
+  2. **Correção Definitiva do Calendário (Zero Vazamento)**: Ajustada a grade do calendário (.calendar-days-grid e .calendar-weekdays-row) com colunas fluidas repeat(7, minmax(0, 1fr)), eliminando a quebra e corte da coluna de sábado (Sáb) nas laterais dos celulares.
+  3. **Trava de Rolagem de Fundo**: Ao abrir o agendamento em tela cheia, o scroll do corpo da página é bloqueado (overflow: hidden) e restaurado ao fechar.
+  4. **Atualização do Cache PWA**: Versão do Service Worker elevada para 'estefany-nails-v26-fullscreen-booking-calendar-fix'.

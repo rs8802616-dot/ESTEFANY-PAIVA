@@ -629,18 +629,26 @@
     </div>
   </div>
 
-  <!-- 5B. Modal: Área de Agendamento Completa (Abre direto ao clicar em Agendar nos Stories, Catálogo ou Topo) -->
-  <div class="client-modal-overlay" id="modalAgendamentoPopup" style="z-index: 2100;">
-    <div class="client-modal-card" style="max-height: 94vh; padding: 22px 18px;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-        <h3 style="font-family:var(--font-serif); font-size:1.3rem; color:#350B19; margin:0;">
-          <i class="fa-solid fa-calendar-plus" style="color:#D83F79;"></i> Agendar Meu Horário
-        </h3>
-        <button type="button" onclick="closeClientModal('modalAgendamentoPopup')" style="background:none; border:none; font-size:1.3rem; color:#6A1D39; cursor:pointer; padding:2px 6px;">✕</button>
+  <!-- Modal Tela Toda de Agendamento Direto (Abre a tela inteira sem cortar o calendário) -->
+  <div class="client-modal-overlay booking-fullscreen-modal" id="modalAgendamentoPopup" style="z-index: 9200;">
+    <div class="booking-fullscreen-card">
+      <!-- Barra superior estilo app nativo -->
+      <div class="booking-fullscreen-topbar">
+        <button type="button" onclick="closeClientModal('modalAgendamentoPopup')" class="btn-fullscreen-back">
+          <i class="fa-solid fa-arrow-left"></i> Voltar
+        </button>
+        <div class="booking-fullscreen-title-box">
+          <h4 class="booking-fullscreen-title">
+            <i class="fa-solid fa-calendar-plus" style="color:#E9A3B5; margin-right:6px;"></i> Agendar Horário
+          </h4>
+        </div>
+        <button type="button" onclick="closeClientModal('modalAgendamentoPopup')" class="btn-fullscreen-close" aria-label="Fechar">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
       </div>
 
       <!-- Container onde o formulário e calendário completo de agendamento é carregado -->
-      <div id="modalBookingSectionHost">
+      <div class="booking-fullscreen-body" id="modalBookingSectionHost">
         <!-- O conteúdo de agendamento fica aqui -->
       </div>
     </div>
@@ -713,6 +721,14 @@
     }
 
     document.addEventListener('DOMContentLoaded', async () => {
+      // Garante que nenhum modal sobreponha a tela indevidamente
+      try {
+        document.querySelectorAll('.client-modal-overlay').forEach(m => {
+          if (!m.classList.contains('active')) {
+            m.style.display = 'none';
+          }
+        });
+      } catch (e) {}
       if (window.EPStore) {
         await window.EPStore.init();
       }
@@ -1313,12 +1329,20 @@
 
     function openClientModal(id) {
       const el = document.getElementById(id);
-      if (el) el.classList.add('active');
+      if (el) {
+        el.style.display = 'flex';
+        el.classList.add('active');
+        document.body.style.overflow = 'hidden';
+      }
     }
 
     function closeClientModal(id) {
       const el = document.getElementById(id);
-      if (el) el.classList.remove('active');
+      if (el) {
+        el.classList.remove('active');
+        el.style.display = 'none';
+        document.body.style.overflow = '';
+      }
     }
 
     function openAppointmentsFullModal() {

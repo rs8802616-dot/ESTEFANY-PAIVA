@@ -918,7 +918,9 @@ window.EPStore = {
       .admin-site-wrapper-expansive,
       .client-main-content-expansive,
       .admin-main-content-expansive,
-      .admin-main-container {
+      .admin-main-container,
+      .booking-fullscreen-card,
+      .booking-fullscreen-body {
         background-color: ${pageBg} !important;
         color: ${textOnPage} !important;
       }
@@ -954,7 +956,8 @@ window.EPStore = {
       .admin-header-wine,
       .bottom-nav-wine-client,
       .bottom-nav-wine-fixed,
-      .bottom-nav-wine-admin {
+      .bottom-nav-wine-admin,
+      .booking-fullscreen-topbar {
         background: linear-gradient(145deg, ${prim} 0%, ${sec} 145%) !important;
         color: ${textOnPrim} !important;
       }

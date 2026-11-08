@@ -1,4 +1,4 @@
-const CACHE_NAME = 'estefany-nails-v25-fix-mobile-modal-overlay-cutoffs';
+const CACHE_NAME = 'estefany-nails-v26-fullscreen-booking-calendar-fix';
 const STATIC_ASSETS = [
   './',
   './index.html',

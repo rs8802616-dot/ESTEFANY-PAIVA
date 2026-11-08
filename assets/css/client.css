@@ -1085,42 +1085,68 @@ html, body {
 
 .calendar-weekdays-row {
   display: grid !important;
-  grid-template-columns: repeat(7, 1fr) !important;
+  grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+  gap: 4px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
   text-align: center !important;
-  font-size: 0.78rem !important;
+  font-size: 0.72rem !important;
   font-weight: 700 !important;
   color: #8A2D4E !important;
   margin-bottom: 8px !important;
+  padding: 0 !important;
+}
+
+.calendar-weekdays-row span {
+  display: block !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  text-align: center !important;
+  box-sizing: border-box !important;
 }
 
 .calendar-days-grid {
   display: grid !important;
-  grid-template-columns: repeat(7, 1fr) !important;
-  gap: 6px !important;
+  grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+  gap: 4px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
 }
 
 .cal-day-cell,
 .cal-day-btn {
   aspect-ratio: 1 !important;
-  min-height: 40px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
   display: flex !important;
   flex-direction: column !important;
   align-items: center !important;
   justify-content: center !important;
-  border-radius: 14px !important;
+  border-radius: 11px !important;
   border: 1px solid rgba(77, 19, 40, 0.1) !important;
   background: #FFF !important;
   color: #350B19 !important;
-  font-size: 0.86rem !important;
+  font-size: 0.84rem !important;
   font-weight: 700 !important;
   cursor: pointer !important;
   position: relative !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
   transition: all 0.15s ease !important;
 }
 
 .cal-day-empty {
   aspect-ratio: 1 !important;
-  min-height: 40px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  height: auto !important;
+  box-sizing: border-box !important;
 }
 
 .cal-day-cell:hover,
@@ -1710,20 +1736,155 @@ html, body {
   }
 }
 
-/* Modal Agendamento Popup Direct */
-#modalAgendamentoPopup .client-modal-card {
-  max-width: 520px;
-  width: 95%;
-  max-height: 92vh;
-  overflow-y: auto;
-  padding: 18px 16px;
-  border-radius: 20px;
+/* ========================================================
+   MODAL DE AGENDAMENTO EM TELA TODA (FULL SCREEN NO CELULAR)
+   ======================================================== */
+#modalAgendamentoPopup.booking-fullscreen-modal {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: 100vw !important;
+  max-height: 100vh !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  background: #FAF4F5 !important;
+  z-index: 9200 !important;
+  display: none !important;
+  align-items: stretch !important;
+  justify-content: stretch !important;
 }
 
-#modalBookingSectionHost .booking-section-wrapper {
+#modalAgendamentoPopup.booking-fullscreen-modal.active {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+.booking-fullscreen-card {
+  width: 100% !important;
+  max-width: 100% !important;
+  height: 100% !important;
+  max-height: 100vh !important;
+  min-height: 100vh !important;
+  border-radius: 0 !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  background: #FAF4F5 !important;
+  box-shadow: none !important;
+  transform: none !important;
+  overflow: hidden !important;
+}
+
+.booking-fullscreen-topbar {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 12px 16px !important;
+  background: linear-gradient(135deg, #350B19 0%, #6A1D39 100%) !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22) !important;
+  flex-shrink: 0 !important;
+  z-index: 10 !important;
+}
+
+.btn-fullscreen-back {
+  background: rgba(255, 255, 255, 0.16) !important;
+  color: #FFFFFF !important;
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  padding: 6px 12px !important;
+  border-radius: 20px !important;
+  font-size: 0.82rem !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  transition: all 0.2s ease !important;
+}
+
+.btn-fullscreen-back:hover {
+  background: rgba(255, 255, 255, 0.26) !important;
+}
+
+.booking-fullscreen-title-box {
+  display: flex !important;
+  align-items: center !important;
+}
+
+.booking-fullscreen-title {
+  font-family: var(--font-serif) !important;
+  font-size: 1.05rem !important;
+  font-weight: 700 !important;
+  color: #FFFFFF !important;
+  margin: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.btn-fullscreen-close {
+  background: rgba(255, 255, 255, 0.16) !important;
+  color: #FFFFFF !important;
+  border: none !important;
+  width: 34px !important;
+  height: 34px !important;
+  border-radius: 50% !important;
+  font-size: 1rem !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.2s ease !important;
+}
+
+.btn-fullscreen-close:hover {
+  background: rgba(255, 255, 255, 0.28) !important;
+}
+
+.booking-fullscreen-body {
+  flex: 1 !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  padding: 16px 14px 60px !important;
+  background: #FAF4F5 !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.booking-fullscreen-body .booking-section-wrapper {
   margin: 0 !important;
   padding: 0 !important;
   box-shadow: none !important;
   border: none !important;
   background: transparent !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* No desktop (> 768px), mantém elegante e centralizado com proporção mobile luxury */
+@media (min-width: 769px) {
+  #modalAgendamentoPopup.booking-fullscreen-modal {
+    padding: 24px 16px !important;
+    background: rgba(25, 4, 11, 0.85) !important;
+    backdrop-filter: blur(8px) !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  .booking-fullscreen-card {
+    max-width: 520px !important;
+    height: 94vh !important;
+    max-height: 94vh !important;
+    min-height: auto !important;
+    border-radius: 24px !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45) !important;
+    border: 1px solid rgba(77, 19, 40, 0.15) !important;
+  }
+  .booking-fullscreen-topbar {
+    border-radius: 24px 24px 0 0 !important;
+  }
 }
