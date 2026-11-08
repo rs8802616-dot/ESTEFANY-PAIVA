@@ -59,10 +59,10 @@
          ======================================================== -->
     <header class="client-header-wine">
       <div class="wine-header-inner-expansive">
-        <!-- Linha Superior: Menu, Assinatura Ep, Nav Desktop e Notificação -->
+        <!-- Linha Superior: Menu 3 Traços (Idêntico ao Admin), Assinatura Ep, Nav Desktop e Sino de Notificação (Idêntico ao Admin) -->
         <div class="wine-top-row">
           <div style="display:flex; align-items:center; gap:14px;">
-            <button class="btn-wine-icon-squircle" aria-label="Menu" onclick="openMenuDrawer()">
+            <button class="btn-header-icon" aria-label="Menu" onclick="openMenuDrawer()">
               <i class="fa-solid fa-bars"></i>
             </button>
 
@@ -70,8 +70,8 @@
             <div class="signature-logo-wrap" onclick="window.scrollTo({top:0, behavior:'smooth'})" style="cursor:pointer;">
               <span class="sig-script-ep">Ep</span>
               <div class="sig-script-text">
-                <span class="sig-script-title">ESTEFANY PAIVA</span>
-                <span class="sig-script-sub">NAIL DESIGNER</span>
+                <span class="sig-script-title" id="clientHeaderSalonTitle">ESTEFANY PAIVA</span>
+                <span class="sig-script-sub" id="clientHeaderSalonSub">NAIL DESIGNER</span>
               </div>
             </div>
           </div>
@@ -81,13 +81,13 @@
             <a href="#secNossosServicos"><i class="fa-solid fa-gem"></i> Serviços</a>
             <a href="#secMeusAgendamentos" onclick="openAppointmentsFullModal(); return false;"><i class="fa-regular fa-calendar-check"></i> Meus Agendamentos</a>
             <a href="#bookingSection" class="active"><i class="fa-solid fa-calendar-plus"></i> Agendar Horário</a>
-            <a href="admin.html" target="_blank" style="background:rgba(255,255,255,0.15);"><i class="fa-solid fa-user-shield"></i> Painel Admin</a>
+            <a href="admin.html" style="background:rgba(255,255,255,0.15);"><i class="fa-solid fa-user-shield"></i> Painel Admin</a>
           </nav>
 
           <div style="display:flex; align-items:center; gap:10px;">
-            <button class="btn-wine-icon-squircle" aria-label="Notificações" onclick="openModalNotificacoesCliente()">
+            <button class="btn-header-icon" aria-label="Notificações" onclick="openModalNotificacoesCliente()">
               <i class="fa-regular fa-bell"></i>
-              <span class="badge-bell-count">1</span>
+              <span class="badge-bell-count" id="clientBellBadge">2</span>
             </button>
           </div>
         </div>
@@ -95,11 +95,11 @@
         <!-- Linha de Saudação à Cliente -->
         <div class="wine-greeting-row">
           <div class="greeting-avatar-ring">
-            <img src="assets/images/trabalho-amendoada-ouro.png" alt="Mariana">
+            <img src="assets/images/trabalho-amendoada-ouro.png" id="clientHeaderAvatarImg" alt="Estefany Paiva">
           </div>
           <div class="greeting-text-area">
             <h2>Olá, <span id="clientGreetingName">Mariana</span>! <i class="fa-regular fa-heart"></i></h2>
-            <p>Bem-vinda de volta ao seu momento de beleza e autocuidado.</p>
+            <p id="clientHeaderWelcomeSub">Bem-vinda de volta ao seu momento de beleza e autocuidado.</p>
           </div>
         </div>
       </div>
@@ -153,14 +153,14 @@
           <section class="promo-card-wrapper">
             <div class="promo-highlight-card">
               <div class="promo-text-side">
-                <h3>Cuidado, beleza e autoestima em cada detalhe ♡</h3>
+                <h3 id="clientPromoBannerTitle">Cuidado, beleza e autoestima em cada detalhe ♡</h3>
                 <button class="btn-promo-wine-pill" onclick="scrollToBooking()">
-                  <span>Agendar agora</span>
+                  <span id="clientPromoBannerBtnText">Agendar agora</span>
                   <i class="fa-solid fa-arrow-right"></i>
                 </button>
               </div>
               <div class="promo-photo-side">
-                <img src="assets/images/trabalho-tons-terrosos.png" alt="Unhas com acabamento impecável">
+                <img src="assets/images/trabalho-tons-terrosos.png" id="clientPromoBannerImg" alt="Unhas com acabamento impecável">
               </div>
             </div>
           </section>
@@ -335,6 +335,11 @@
 
               <div class="calendar-days-grid" id="calendarDaysGrid">
                 <!-- Populado via JS -->
+              </div>
+
+              <!-- Resumo de Horários Agendados no Dia Selecionado do Calendário -->
+              <div id="calendarSelectedDayBookingsBox" style="margin-top:12px; padding-top:10px; border-top:1px solid rgba(77,19,40,0.08); font-size:0.78rem; color:#4D1328;">
+                <!-- Populado dinamicamente via JS -->
               </div>
             </div>
 
@@ -511,26 +516,74 @@
     </div>
   </div>
 
-  <!-- 4. Modal: Notificações Cliente -->
+  <!-- 4. Modal: Central de Notificações da Cliente (Idêntica à Área Administrativa) -->
   <div class="client-modal-overlay" id="modalNotificacoesCliente">
     <div class="client-modal-card">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
         <h3 style="font-family:var(--font-serif); font-size:1.3rem; color:#350B19;">
-          <i class="fa-regular fa-bell" style="color:#8A2D4E;"></i> Notificações
+          <i class="fa-regular fa-bell" style="color:#8A2D4E;"></i> Central de Notificações
         </h3>
         <button onclick="closeClientModal('modalNotificacoesCliente')" style="background:none; border:none; font-size:1.2rem; color:#6A1D39; cursor:pointer;">✕</button>
       </div>
 
-      <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:16px;">
-        <div style="background:#FBECEF; border-radius:14px; padding:12px 14px;">
-          <strong style="color:#350B19; font-size:0.88rem;">Lembrete de Horário 💅</strong>
-          <p style="font-size:0.78rem; color:#6A1D39; margin-top:2px;">Seu atendimento de Alongamento em Gel é neste Sábado às 14:00.</p>
-        </div>
+      <div id="clientNotificationsDynamicList" style="display:flex; flex-direction:column; gap:10px; margin-bottom:16px; max-height:48vh; overflow-y:auto;">
+        <!-- Populado dinamicamente via JS com os agendamentos reais -->
       </div>
 
-      <button onclick="testClientAudioAlert()" style="width:100%; padding:12px; border-radius:30px; border:none; background:#4D1328; color:#FFF; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;">
-        <i class="fa-solid fa-volume-high"></i> Testar Alerta Sonoro
+      <button onclick="testClientAudioAlert()" style="width:100%; padding:13px; border-radius:30px; border:none; background:#4D1328; color:#FFF; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;">
+        <i class="fa-solid fa-volume-high"></i> Testar Alerta Sonoro (Apito no Celular)
       </button>
+    </div>
+  </div>
+
+  <!-- 4B. Modal: Menu Principal 3 Traços (Idêntico ao Padrão Administrativo) -->
+  <div class="client-modal-overlay" id="modalMenuClienteDrawer">
+    <div class="client-modal-card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <div style="width:40px; height:40px; border-radius:50%; background:#350B19; color:#FFF; display:flex; align-items:center; justify-content:center; font-family:var(--font-serif); font-style:italic; font-size:1.25rem;">Ep</div>
+          <div>
+            <h3 style="font-family:var(--font-serif); font-size:1.15rem; color:#350B19; margin:0;" id="drawerSalonTitle">Estefany Paiva Nails</h3>
+            <span style="font-size:0.75rem; color:#8A2D4E;">Menu de Acesso Rápido</span>
+          </div>
+        </div>
+        <button onclick="closeClientModal('modalMenuClienteDrawer')" style="background:none; border:none; font-size:1.2rem; color:#6A1D39; cursor:pointer;">✕</button>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        <button onclick="closeClientModal('modalMenuClienteDrawer'); scrollToBooking();" style="width:100%; padding:13px 16px; border-radius:16px; border:1px solid rgba(77,19,40,0.08); background:#FBECEF; color:#350B19; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:space-between;">
+          <span><i class="fa-regular fa-calendar-plus" style="color:#4D1328; width:24px;"></i> Agendar Novo Horário</span>
+          <i class="fa-solid fa-chevron-right" style="font-size:0.75rem; color:#8A2D4E;"></i>
+        </button>
+
+        <button onclick="closeClientModal('modalMenuClienteDrawer'); openAppointmentsFullModal();" style="width:100%; padding:13px 16px; border-radius:16px; border:1px solid rgba(77,19,40,0.08); background:#FBECEF; color:#350B19; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:space-between;">
+          <span><i class="fa-regular fa-calendar-check" style="color:#4D1328; width:24px;"></i> Meus Agendamentos</span>
+          <i class="fa-solid fa-chevron-right" style="font-size:0.75rem; color:#8A2D4E;"></i>
+        </button>
+
+        <button onclick="closeClientModal('modalMenuClienteDrawer'); document.getElementById('secNossosServicos').scrollIntoView({behavior:'smooth'});" style="width:100%; padding:13px 16px; border-radius:16px; border:1px solid rgba(77,19,40,0.08); background:#FBECEF; color:#350B19; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:space-between;">
+          <span><i class="fa-solid fa-gem" style="color:#4D1328; width:24px;"></i> Catálogo de Serviços</span>
+          <i class="fa-solid fa-chevron-right" style="font-size:0.75rem; color:#8A2D4E;"></i>
+        </button>
+
+        <button onclick="closeClientModal('modalMenuClienteDrawer'); openModalNotificacoesCliente();" style="width:100%; padding:13px 16px; border-radius:16px; border:1px solid rgba(77,19,40,0.08); background:#FBECEF; color:#350B19; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:space-between;">
+          <span><i class="fa-regular fa-bell" style="color:#4D1328; width:24px;"></i> Minhas Notificações</span>
+          <i class="fa-solid fa-chevron-right" style="font-size:0.75rem; color:#8A2D4E;"></i>
+        </button>
+
+        <button onclick="closeClientModal('modalMenuClienteDrawer'); openProfileContactModal();" style="width:100%; padding:13px 16px; border-radius:16px; border:1px solid rgba(77,19,40,0.08); background:#FBECEF; color:#350B19; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:space-between;">
+          <span><i class="fa-regular fa-user" style="color:#4D1328; width:24px;"></i> Meu Perfil & Contato</span>
+          <i class="fa-solid fa-chevron-right" style="font-size:0.75rem; color:#8A2D4E;"></i>
+        </button>
+
+        <button onclick="closeClientModal('modalMenuClienteDrawer'); openWhatsAppChatDirect();" style="width:100%; padding:13px 16px; border-radius:16px; border:none; background:#25D366; color:#FFFFFF; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; margin-top:4px;">
+          <i class="fa-brands fa-whatsapp" style="font-size:1.1rem;"></i> Falar com a Estefany no WhatsApp
+        </button>
+
+        <a href="admin.html" style="width:100%; padding:11px 16px; border-radius:16px; border:1px solid rgba(77,19,40,0.18); background:#FFFFFF; color:#4D1328; font-weight:700; text-decoration:none; display:flex; align-items:center; justify-content:center; gap:8px; font-size:0.84rem; margin-top:4px;">
+          <i class="fa-solid fa-user-shield"></i> Área da Profissional (Admin)
+        </a>
+      </div>
     </div>
   </div>
 
@@ -621,6 +674,7 @@
     let selectedDate = new Date();
     let currentCalMonth = new Date().getMonth();
     let currentCalYear = new Date().getFullYear();
+    let activeClientCategory = 'all';
 
     // Stories state
     let storyActiveService = null;
@@ -643,11 +697,101 @@
       if (window.EPStore) {
         await window.EPStore.init();
       }
+      applyDynamicSalonSettingsToClient();
+      renderDynamicClientServices();
       restoreClientSavedData();
       renderCalendar();
       renderDynamicSlots();
       updateNextBookingBanner();
+      updateClientNotificationsBadge();
+
+      // Atualiza automaticamente quando houver qualquer mudança no Admin ou em outro aparelho
+      window.addEventListener('epstore:updated', () => {
+        applyDynamicSalonSettingsToClient();
+        renderDynamicClientServices();
+        renderCalendar();
+        renderDynamicSlots();
+        updateNextBookingBanner();
+        updateClientNotificationsBadge();
+      });
     });
+
+    function applyDynamicSalonSettingsToClient() {
+      if (!window.EPStore) return;
+      const s = window.EPStore.getSalonSettings();
+      if (!s) return;
+
+      const titleEl = document.getElementById('clientHeaderSalonTitle');
+      if (titleEl && s.salonName) {
+        titleEl.innerText = s.salonName.replace(/NAILS/i, '').trim() || s.salonName;
+      }
+      const drawerTitle = document.getElementById('drawerSalonTitle');
+      if (drawerTitle && s.salonName) drawerTitle.innerText = s.salonName;
+
+      const welcomeEl = document.getElementById('clientHeaderWelcomeSub');
+      if (welcomeEl && (s.welcomeText || s.slogan)) {
+        welcomeEl.innerText = s.welcomeText || s.slogan;
+      }
+
+      const avatarEl = document.getElementById('clientHeaderAvatarImg');
+      if (avatarEl && s.avatarImage) {
+        avatarEl.src = s.avatarImage;
+      }
+
+      const promoTitle = document.getElementById('clientPromoBannerTitle');
+      if (promoTitle && s.promoBannerTitle) promoTitle.innerText = s.promoBannerTitle;
+
+      const promoBtn = document.getElementById('clientPromoBannerBtnText');
+      if (promoBtn && s.promoBannerBtnText) promoBtn.innerText = s.promoBannerBtnText;
+
+      const promoImg = document.getElementById('clientPromoBannerImg');
+      if (promoImg && s.promoBannerImage) promoImg.src = s.promoBannerImage;
+    }
+
+    // Renderiza todos os serviços cadastrados no EPStore (incluindo novos serviços com foto do celular!)
+    function renderDynamicClientServices() {
+      const container = document.getElementById('clientServicesCarousel');
+      if (!container || !window.EPStore) return;
+
+      const services = window.EPStore.getServices(true);
+      if (!services || services.length === 0) return;
+
+      const filtered = activeClientCategory === 'all'
+        ? services
+        : services.filter(s => {
+            const cat = (s.categoryId || '').toLowerCase();
+            if (activeClientCategory === 'cat_manicure') return cat.includes('classica') || cat.includes('manicure');
+            if (activeClientCategory === 'cat_spa') return cat.includes('blindagem') || cat.includes('spa');
+            return cat === activeClientCategory;
+          });
+
+      container.innerHTML = filtered.map(s => {
+        const imgUrl = s.image || 'assets/images/trabalho-alongamento-chocolate.png';
+        const priceFormatted = parseFloat(s.price || 150).toFixed(2).replace('.', ',');
+        const safeName = (s.name || 'Serviço').replace(/'/g, "\'");
+        const safeImg = imgUrl.replace(/'/g, "\'");
+        return `
+          <div class="service-card-lux" data-category="${s.categoryId || 'cat_alongamento'}" data-service-id="${s.id}">
+            <div class="service-photo-cover" onclick="openStoryViewer('${s.id}')">
+              <img src="${imgUrl}" alt="${s.name}">
+              <div class="story-preview-indicator">
+                <i class="fa-solid fa-play"></i> Ver Detalhes
+              </div>
+            </div>
+            <div class="service-details-box">
+              <h4>${s.name}</h4>
+              <p class="service-desc-snippet">${s.description || 'Acabamento impecável com produtos de alta linha.'}</p>
+              <div class="service-price-row">
+                <span class="service-price-val">R$ ${priceFormatted}</span>
+                <button class="btn-select-service-pill" onclick="selectServiceForBooking('${s.id}', '${safeName}', ${parseFloat(s.price || 150)}, '${safeImg}')">
+                  Agendar
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
 
     // Restaura Nome, WhatsApp e Agendamento da cliente mesmo após F5 / atualizar a página
     function restoreClientSavedData() {
@@ -715,22 +859,50 @@
       if (!grid) return;
 
       const dateStr = formatLocalYYYYMMDD(selectedDate);
-      const allSlots = ['09:00', '10:30', '13:00', '14:00', '15:30', '17:00', '18:30', '19:30'];
-      const apps = window.EPStore ? window.EPStore.getAppointments() : [];
-      const busyTimes = new Set(
-        apps.filter(a => a.date === dateStr && a.status !== 'Cancelado').map(a => a.time)
-      );
+      const allSlots = window.EPStore && window.EPStore.getConfiguredSlots
+        ? window.EPStore.getConfiguredSlots()
+        : ['09:00', '10:30', '13:00', '14:00', '15:30', '17:00', '18:30', '19:30'];
 
-      // Se o horário selecionado estiver ocupado neste dia, escolhe o primeiro livre
+      const apps = window.EPStore ? window.EPStore.getAppointments() : [];
+      const dayApps = apps.filter(a => a.date === dateStr && a.status !== 'Cancelado');
+      const busyTimes = new Set(dayApps.map(a => a.time));
+
       if (busyTimes.has(selectedSlotTime)) {
         const firstFree = allSlots.find(s => !busyTimes.has(s));
         if (firstFree) selectedSlotTime = firstFree;
       }
 
       grid.innerHTML = allSlots.map(slot => {
-        const isActive = slot === selectedSlotTime;
+        const isBusy = busyTimes.has(slot);
+        const isActive = !isBusy && slot === selectedSlotTime;
+        if (isBusy) {
+          return `<button type="button" class="slot-chip-btn booked-slot" onclick="showToast('Este horário (${slot}) já está agendado no calendário!')">${slot} ✓</button>`;
+        }
         return `<button type="button" class="slot-chip-btn ${isActive ? 'active' : ''}" onclick="selectSlot(this, '${slot}')">${slot}</button>`;
       }).join('');
+
+      // Atualiza o resumo de agendamentos dentro do próprio card do calendário
+      const summaryBox = document.getElementById('calendarSelectedDayBookingsBox');
+      if (summaryBox) {
+        const formattedDay = selectedDate.toLocaleDateString('pt-BR');
+        if (dayApps.length === 0) {
+          summaryBox.innerHTML = `<span style="color:#6A1D39;"><i class="fa-regular fa-calendar-check" style="color:#226E3A;"></i> <strong>${formattedDay}:</strong> Todos os horários livres para agendamento.</span>`;
+        } else {
+          summaryBox.innerHTML = `
+            <div style="margin-bottom:6px; font-weight:700; color:#350B19;">
+              <i class="fa-solid fa-calendar-check" style="color:#D83F79;"></i> Horários agendados no calendário em ${formattedDay}:
+            </div>
+            <div style="display:flex; flex-direction:column; gap:5px;">
+              ${dayApps.map(a => `
+                <div style="background:#FBECEF; border:1px solid rgba(216,63,121,0.2); border-radius:10px; padding:6px 10px; display:flex; justify-content:space-between; align-items:center;">
+                  <span><strong>${a.time}</strong> &bull; ${a.serviceName} (${a.clientName.split(' ')[0]})</span>
+                  <span style="background:#DDF2E1; color:#226E3A; font-size:0.68rem; font-weight:700; padding:2px 8px; border-radius:20px;">Agendado</span>
+                </div>
+              `).join('')}
+            </div>
+          `;
+        }
+      }
     }
 
     function selectSlot(btn, time) {
@@ -750,14 +922,24 @@
       const firstDay = new Date(currentCalYear, currentCalMonth, 1).getDay();
       const totalDays = new Date(currentCalYear, currentCalMonth + 1, 0).getDate();
 
+      const apps = window.EPStore ? window.EPStore.getAppointments().filter(a => a.status !== 'Cancelado') : [];
+      const bookedDatesSet = new Set(apps.map(a => a.date));
+
       let html = '';
       for (let i = 0; i < firstDay; i++) {
         html += '<span class="cal-day-cell disabled"></span>';
       }
 
       for (let day = 1; day <= totalDays; day++) {
+        const dStr = `${currentCalYear}-${String(currentCalMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const hasBooking = bookedDatesSet.has(dStr);
         const isSelected = day === selectedDate.getDate() && currentCalMonth === selectedDate.getMonth() && currentCalYear === selectedDate.getFullYear();
-        html += `<button type="button" class="cal-day-cell ${isSelected ? 'selected' : ''}" onclick="pickDay(${day})">${day}</button>`;
+        html += `
+          <button type="button" class="cal-day-cell ${isSelected ? 'selected' : ''} ${hasBooking ? 'has-booking' : ''}" onclick="pickDay(${day})" title="${hasBooking ? 'Possui horário agendado' : 'Disponível'}">
+            <span>${day}</span>
+            ${hasBooking ? '<span class="cal-day-dot"></span>' : ''}
+          </button>
+        `;
       }
       grid.innerHTML = html;
     }
@@ -801,6 +983,7 @@
       }
 
       const dateStr = formatLocalYYYYMMDD(selectedDate);
+      const bookedTime = selectedSlotTime;
       const newBooking = {
         clientName: name,
         clientPhone: phone,
@@ -809,7 +992,7 @@
         servicePrice: selectedService.price,
         duration: 90,
         date: dateStr,
-        time: selectedSlotTime,
+        time: bookedTime,
         status: 'Confirmado'
       };
 
@@ -828,6 +1011,9 @@
         };
         list.unshift(savedApp);
         localStorage.setItem('epn_appointments_lgpd', JSON.stringify(list));
+        if (window.EPStore && window.EPStore.publishCloudSync) {
+          window.EPStore.publishCloudSync('UPSERT_APPOINTMENT', savedApp);
+        }
       }
 
       // Garante persistência permanente dos dados da cliente
@@ -837,20 +1023,23 @@
         localStorage.setItem('epn_last_appointment_id', savedApp.id);
       }
 
+      // Sobe imediatamente para o calendário, para Meus Agendamentos e para o Sino de Notificações
       updateClientHeaderAndProfile(name, phone);
-      updateNextBookingBanner();
+      renderCalendar();
       renderDynamicSlots();
+      updateNextBookingBanner();
+      updateClientNotificationsBadge();
 
       if (window.AudioAlertEngine) {
         window.AudioAlertEngine.playNotificationChime();
       }
 
       document.getElementById('successSrvName').innerText = selectedService.name;
-      document.getElementById('successDateTime').innerText = `${selectedDate.toLocaleDateString('pt-BR')} às ${selectedSlotTime}`;
+      document.getElementById('successDateTime').innerText = `${selectedDate.toLocaleDateString('pt-BR')} às ${bookedTime}`;
       document.getElementById('successClientName').innerText = name;
 
       openClientModal('modalBookingSuccess');
-      showToast('Agendamento confirmado e salvo!');
+      showToast('Agendamento salvo no calendário e enviado para a Estefany!');
     }
 
     function updateNextBookingBanner() {
@@ -862,7 +1051,6 @@
       const savedPhone = (localStorage.getItem('epn_last_client_phone') || '').replace(/\D/g, '');
       const savedName = (localStorage.getItem('epn_last_client_name') || '').toLowerCase();
 
-      // Prioriza o agendamento da própria cliente
       let next = apps.find(a => a.id === lastId);
       if (!next && savedPhone.length >= 8) {
         next = apps.find(a => (a.clientPhone || '').replace(/\D/g, '').includes(savedPhone));
@@ -893,7 +1081,6 @@
           if (monthEl) monthEl.innerText = months[dt.getMonth()] || 'Nov';
           if (weekEl) weekEl.innerText = days[dt.getDay()] || 'Sáb';
 
-          // Atualiza também o modal de Detalhes do Horário
           const detSrv = document.getElementById('detalheModalSrv');
           const detData = document.getElementById('detalheModalData');
           const detHora = document.getElementById('detalheModalHora');
@@ -904,21 +1091,47 @@
       }
     }
 
-    function filterServicesByCategory(catId, btn) {
-      document.querySelectorAll('.category-tab-pill').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-
-      const cards = document.querySelectorAll('#clientServicesCarousel .service-card-lux');
-      cards.forEach(card => {
-        if (catId === 'all' || card.getAttribute('data-category') === catId) {
-          card.style.display = 'block';
-        } else {
-          card.style.display = 'none';
-        }
-      });
+    function updateClientNotificationsBadge() {
+      if (!window.EPStore) return;
+      const apps = window.EPStore.getAppointments().filter(a => a.status !== 'Cancelado');
+      const badge = document.getElementById('clientBellBadge');
+      if (badge) {
+        badge.innerText = Math.max(1, apps.length);
+      }
     }
 
-    // Modais helpers
+    function renderClientNotificationsModal() {
+      const listEl = document.getElementById('clientNotificationsDynamicList');
+      if (!listEl || !window.EPStore) return;
+
+      const apps = window.EPStore.getAppointments().filter(a => a.status !== 'Cancelado');
+      if (apps.length === 0) {
+        listEl.innerHTML = '<p style="font-size:0.85rem; color:#8A2D4E; padding:12px;">Nenhuma notificação no momento.</p>';
+        return;
+      }
+
+      listEl.innerHTML = apps.slice(0, 6).map(a => `
+        <div style="background:#FBECEF; border:1px solid rgba(77,19,40,0.08); border-radius:16px; padding:12px 14px; display:flex; justify-content:space-between; align-items:center; gap:10px;">
+          <div>
+            <strong style="color:#350B19; font-size:0.88rem; display:block;">Horário ${a.status} ✨</strong>
+            <p style="font-size:0.78rem; color:#6A1D39; margin-top:2px;">
+              <strong>${a.clientName}:</strong> ${a.serviceName} agendado para <strong>${a.date} às ${a.time}</strong>.
+            </p>
+          </div>
+          <span style="background:#DDF2E1; color:#226E3A; font-size:0.7rem; font-weight:700; padding:4px 10px; border-radius:20px; flex-shrink:0;">
+            ${a.status}
+          </span>
+        </div>
+      `).join('');
+    }
+
+    function filterServicesByCategory(catId, btn) {
+      activeClientCategory = catId;
+      document.querySelectorAll('.category-tab-pill').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      renderDynamicClientServices();
+    }
+
     function openClientModal(id) {
       const el = document.getElementById(id);
       if (el) el.classList.add('active');
@@ -979,6 +1192,7 @@
     }
 
     function openModalNotificacoesCliente() {
+      renderClientNotificationsModal();
       openClientModal('modalNotificacoesCliente');
     }
 
@@ -990,8 +1204,10 @@
     }
 
     function openWhatsAppChatDirect() {
+      const s = window.EPStore ? window.EPStore.getSalonSettings() : {};
+      const cleanPhone = ((s && s.phone) ? s.phone : '61985543452').replace(/\D/g, '');
       const msg = encodeURIComponent("Olá, Estefany! Gostaria de falar sobre o meu agendamento de unhas ✨");
-      window.open(`https://wa.me/5561985543452?text=${msg}`, '_blank');
+      window.open(`https://wa.me/55${cleanPhone}?text=${msg}`, '_blank');
     }
 
     function downloadCalendarIcs() {
@@ -1016,10 +1232,15 @@ END:VCALENDAR`;
       showToast('Arquivo de calendário (.ics) baixado!');
     }
 
-    // Stories functionality
     function openStoryViewer(serviceId) {
       storyActiveService = serviceId;
       storyIndex = 0;
+      const srv = window.EPStore ? window.EPStore.getServiceById(serviceId) : null;
+      if (srv) {
+        selectedService = { id: srv.id, name: srv.name, price: srv.price, image: srv.image };
+        const nameEl = document.getElementById('storyServiceName');
+        if (nameEl) nameEl.innerText = srv.name;
+      }
       document.getElementById('modalStoryViewer').classList.add('active');
       showStorySlide(0);
     }
@@ -1032,7 +1253,12 @@ END:VCALENDAR`;
     function showStorySlide(idx) {
       storyIndex = idx;
       const img = document.getElementById('storyMediaImg');
-      img.src = storyImages[idx % storyImages.length];
+      const srv = window.EPStore && storyActiveService ? window.EPStore.getServiceById(storyActiveService) : null;
+      if (srv && srv.image && idx === 0) {
+        img.src = srv.image;
+      } else {
+        img.src = storyImages[idx % storyImages.length];
+      }
 
       [1, 2, 3].forEach(n => {
         const bar = document.getElementById(`storyProgress${n}`);
@@ -1070,7 +1296,8 @@ END:VCALENDAR`;
     }
 
     function openMenuDrawer() {
-      openAppointmentsFullModal();
-    }  </script>
+      openClientModal('modalMenuClienteDrawer');
+    }
+  </script>
 </body>
 </html>

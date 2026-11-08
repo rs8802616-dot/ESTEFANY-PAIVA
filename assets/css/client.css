@@ -1294,3 +1294,87 @@ html, body {
     flex-shrink: 0 !important;
   }
 }
+
+
+/* ========================================================
+   ÍCONES DO TOPO IDÊNTICOS À ÁREA ADMINISTRATIVA (3 TRAÇOS & SINO)
+   E INDICADORES DE AGENDAMENTO NO CALENDÁRIO
+   ======================================================== */
+.btn-header-icon,
+.btn-wine-icon-squircle,
+.btn-admin-icon {
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 50% !important;
+  background: rgba(255, 255, 255, 0.12) !important;
+  border: 1px solid rgba(255, 255, 255, 0.22) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: #FFFFFF !important;
+  font-size: 1.15rem !important;
+  cursor: pointer !important;
+  position: relative !important;
+  flex-shrink: 0 !important;
+  transition: all 0.2s ease !important;
+}
+
+.btn-header-icon:hover,
+.btn-wine-icon-squircle:hover,
+.btn-admin-icon:hover {
+  background: rgba(255, 255, 255, 0.24) !important;
+  transform: translateY(-1px) !important;
+}
+
+.badge-bell-count {
+  position: absolute !important;
+  top: -2px !important;
+  right: -2px !important;
+  background: #D83F79 !important;
+  color: #FFFFFF !important;
+  font-size: 0.62rem !important;
+  font-weight: 700 !important;
+  width: 18px !important;
+  height: 18px !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: 1.5px solid #350B19 !important;
+}
+
+.cal-day-cell {
+  position: relative !important;
+  flex-direction: column !important;
+}
+
+.cal-day-cell.has-booking {
+  border-color: #D83F79 !important;
+  background: #FBECEF !important;
+  font-weight: 800 !important;
+}
+
+.cal-day-cell.selected.has-booking {
+  background: #4D1328 !important;
+  color: #FFFFFF !important;
+}
+
+.cal-day-dot {
+  width: 5px !important;
+  height: 5px !important;
+  border-radius: 50% !important;
+  background: #D83F79 !important;
+  margin-top: 2px !important;
+  display: block !important;
+}
+
+.cal-day-cell.selected .cal-day-dot {
+  background: #FBECEF !important;
+}
+
+.slot-chip-btn.booked-slot {
+  background: #F3E5E8 !important;
+  color: #8A2D4E !important;
+  border: 1px dashed rgba(138, 45, 78, 0.35) !important;
+  font-size: 0.75rem !important;
+}

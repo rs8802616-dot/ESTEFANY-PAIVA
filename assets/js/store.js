@@ -173,10 +173,27 @@ const SEED_DATA = {
   salonSettings: {
     salonName: 'ESTEFANY PAIVA NAILS',
     slogan: 'Mais que unhas, é autoestima.',
+    welcomeText: 'Bem-vinda de volta ao seu momento de beleza e autocuidado.',
     ownerName: 'Estefany Paiva',
     phone: '(61) 98554-3452',
     instagram: '@estefanypaiva_nails',
     address: 'Brasília - DF',
+    avatarImage: 'assets/images/trabalho-amendoada-ouro.png',
+    promoBannerTitle: 'Cuidado, beleza e autoestima em cada detalhe ♡',
+    promoBannerBtnText: 'Agendar agora',
+    promoBannerImage: 'assets/images/trabalho-tons-terrosos.png',
+    workHoursWeekdays: '09:00 às 19:30',
+    workHoursSaturday: '08:30 às 18:00',
+    workSundayOpen: false,
+    workHoursSunday: 'Fechado',
+    customSlots: ['09:00', '10:30', '13:00', '14:00', '15:30', '17:00', '18:30', '19:30'],
+    payPix: true,
+    payCredit: true,
+    payDebit: true,
+    payCash: true,
+    pixKey: '(61) 98554-3452',
+    depositPercent: 0,
+    cancellationPolicy: 'Avisar com pelo menos 24h de antecedência.',
     bufferMinutes: 15,
     minNoticeHours: 2,
     maxFutureDays: 45,
@@ -614,6 +631,8 @@ window.EPStore = {
 
     // Aplica o tema visual no documento em tempo real
     this.applyThemeToDocument();
+    this.startRealtimeSync();
+    await this.pullCloudEvents(false);
   },
 
   // ----------------------------------------------------
@@ -828,6 +847,7 @@ window.EPStore = {
     const current = this.getSalonSettings();
     const updated = { ...current, ...newSettings };
     localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(updated));
+    this.publishCloudSync('UPDATE_SETTINGS', updated);
     return updated;
   },
 
@@ -892,12 +912,15 @@ window.EPStore = {
     const list = this.getServices(false);
     if (!serviceData.id) serviceData.id = 'srv_' + Date.now();
     const idx = list.findIndex(s => s.id === serviceData.id);
+    let savedItem = serviceData;
     if (idx >= 0) {
       list[idx] = { ...list[idx], ...serviceData };
+      savedItem = list[idx];
     } else {
       list.push(serviceData);
     }
     localStorage.setItem(STORAGE_KEYS.SERVICES, JSON.stringify(list));
+    this.publishCloudSync('UPSERT_SERVICE', savedItem);
     return list;
   },
 
@@ -905,6 +928,7 @@ window.EPStore = {
     let list = this.getServices(false);
     list = list.filter(s => s.id !== id);
     localStorage.setItem(STORAGE_KEYS.SERVICES, JSON.stringify(list));
+    this.publishCloudSync('DELETE_SERVICE', { id });
     return list;
   },
 
@@ -915,12 +939,21 @@ window.EPStore = {
     return JSON.parse(localStorage.getItem(STORAGE_KEYS.APPOINTMENTS) || '[]');
   },
 
+  // Retorna todos os slots configurados pela administradora
+  getConfiguredSlots() {
+    const settings = this.getSalonSettings();
+    if (Array.isArray(settings.customSlots) && settings.customSlots.length > 0) {
+      return settings.customSlots;
+    }
+    return ['09:00', '10:30', '13:00', '14:00', '15:30', '17:00', '18:30', '19:30'];
+  },
+
   // Retorna slots disponíveis para a data escolhida
   getAvailableSlots(dateStr, durationMinutes = 60) {
     const appointments = this.getAppointments();
     const dayAppointments = appointments.filter(a => a.date === dateStr && a.status !== 'Cancelado');
 
-    const defaultSlots = ['09:00', '10:30', '13:00', '14:00', '15:30', '17:00', '18:30', '19:30'];
+    const defaultSlots = this.getConfiguredSlots();
     const takenTimes = new Set(dayAppointments.map(a => a.time));
 
     return defaultSlots.filter(slot => !takenTimes.has(slot));
@@ -968,8 +1001,9 @@ window.EPStore = {
       localStorage.setItem('epn_last_appointment_id', newApp.id);
     }
 
-    // Registra métrica de conversão
+    // Registra métrica de conversão e sincroniza em tempo real com o Painel Admin (Celular <-> PC)
     this.recordBookingCompletion();
+    this.publishCloudSync('UPSERT_APPOINTMENT', newApp);
 
     // Dispara alerta sonoro e notificação push instantânea para a administradora
     try {
@@ -992,6 +1026,7 @@ window.EPStore = {
     list[idx].status = newStatus;
     list[idx].updatedAt = new Date().toISOString();
     localStorage.setItem(STORAGE_KEYS.APPOINTMENTS, JSON.stringify(list));
+    this.publishCloudSync('UPDATE_APPOINTMENT_STATUS', { id, status: newStatus, updatedAt: list[idx].updatedAt });
 
     // Se cancelado ou confirmado, emite alerta
     if (newStatus === 'Cancelado') {
@@ -1141,6 +1176,235 @@ window.EPStore = {
       '🔔 Teste de Notificação & Som',
       'O som e as notificações push estão funcionando perfeitamente no seu celular!'
     );
+  },
+
+  // ----------------------------------------------------
+  // COMPRESSÃO DE IMAGEM DO CELULAR / GALERIA (BASE64 LEVE)
+  // ----------------------------------------------------
+  compressImageFile(file, maxWidth = 420, quality = 0.72) {
+    return new Promise((resolve, reject) => {
+      if (!file) return reject(new Error('Nenhum arquivo selecionado'));
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let w = img.width;
+          let h = img.height;
+          if (w > maxWidth) {
+            h = Math.round((h * maxWidth) / w);
+            w = maxWidth;
+          }
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          const dataUrl = canvas.toDataURL('image/jpeg', quality);
+          resolve(dataUrl);
+        };
+        img.onerror = reject;
+        img.src = ev.target.result;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  },
+
+  // ----------------------------------------------------
+  // SINCRONIZAÇÃO EM TEMPO REAL ENTRE CELULAR E PC (CLOUD + LOCAL)
+  // ----------------------------------------------------
+  CLOUD_TOPIC: 'ep_nails_studio_sync_2026_paiva',
+  _syncChannel: null,
+  _sseSource: null,
+  _processedSyncIds: new Set(),
+
+  emitStoreUpdate(detail = {}) {
+    try {
+      window.dispatchEvent(new CustomEvent('epstore:updated', { detail }));
+    } catch (e) {}
+  },
+
+  async publishCloudSync(action, payload) {
+    const msgObj = {
+      syncId: 'sync_' + Date.now() + '_' + Math.floor(Math.random() * 10000),
+      action,
+      payload,
+      ts: Date.now()
+    };
+    this._processedSyncIds.add(msgObj.syncId);
+
+    // 1. BroadcastChannel local (mesmo navegador / abas abertas)
+    try {
+      if (!this._syncChannel && 'BroadcastChannel' in window) {
+        this._syncChannel = new BroadcastChannel('ep_nails_realtime_channel');
+      }
+      if (this._syncChannel) {
+        this._syncChannel.postMessage(msgObj);
+      }
+    } catch (e) {}
+
+    // 2. Nuvem (Sincroniza Celular <-> Computador / Tablet instantaneamente)
+    try {
+      let safePayload = payload;
+      // Se a imagem for base64 muito grande (> 45KB), mantém na nuvem versão compacta para caber no limite de pacote
+      const serialized = JSON.stringify(msgObj);
+      if (serialized.length < 60000) {
+        await fetch(`https://ntfy.sh/${this.CLOUD_TOPIC}`, {
+          method: 'POST',
+          body: serialized
+        });
+      }
+    } catch (err) {
+      console.warn('Aviso de sincronização em nuvem:', err);
+    }
+
+    this.emitStoreUpdate({ action, payload });
+  },
+
+  applyIncomingSyncEvent(msgObj, notifyIfNewBooking = false) {
+    if (!msgObj || !msgObj.action) return false;
+    if (msgObj.syncId && this._processedSyncIds.has(msgObj.syncId)) return false;
+    if (msgObj.syncId) this._processedSyncIds.add(msgObj.syncId);
+
+    let changed = false;
+    const { action, payload } = msgObj;
+
+    if (action === 'UPSERT_APPOINTMENT' && payload && payload.id) {
+      const list = this.getAppointments();
+      const idx = list.findIndex(a => a.id === payload.id);
+      if (idx === -1) {
+        list.unshift(payload);
+        localStorage.setItem(STORAGE_KEYS.APPOINTMENTS, JSON.stringify(list));
+        changed = true;
+        if (notifyIfNewBooking) {
+          try {
+            AudioAlertEngine.triggerNativePush(
+              '💅 Novo Agendamento Recebido!',
+              `${payload.clientName} agendou ${payload.serviceName} para ${payload.date} às ${payload.time}`
+            );
+          } catch (e) {}
+        }
+      } else if (JSON.stringify(list[idx]) !== JSON.stringify(payload)) {
+        list[idx] = { ...list[idx], ...payload };
+        localStorage.setItem(STORAGE_KEYS.APPOINTMENTS, JSON.stringify(list));
+        changed = true;
+      }
+    } else if (action === 'UPDATE_APPOINTMENT_STATUS' && payload && payload.id) {
+      const list = this.getAppointments();
+      const idx = list.findIndex(a => a.id === payload.id);
+      if (idx >= 0 && list[idx].status !== payload.status) {
+        list[idx].status = payload.status;
+        list[idx].updatedAt = payload.updatedAt || new Date().toISOString();
+        localStorage.setItem(STORAGE_KEYS.APPOINTMENTS, JSON.stringify(list));
+        changed = true;
+      }
+    } else if (action === 'DELETE_APPOINTMENT' && payload && payload.id) {
+      const list = this.getAppointments();
+      const filtered = list.filter(a => a.id !== payload.id);
+      if (filtered.length !== list.length) {
+        localStorage.setItem(STORAGE_KEYS.APPOINTMENTS, JSON.stringify(filtered));
+        changed = true;
+      }
+    } else if (action === 'UPSERT_SERVICE' && payload && payload.id) {
+      const list = this.getServices(false);
+      const idx = list.findIndex(s => s.id === payload.id);
+      if (idx >= 0) {
+        list[idx] = { ...list[idx], ...payload };
+      } else {
+        list.push(payload);
+      }
+      localStorage.setItem(STORAGE_KEYS.SERVICES, JSON.stringify(list));
+      changed = true;
+    } else if (action === 'DELETE_SERVICE' && payload && payload.id) {
+      const list = this.getServices(false).filter(s => s.id !== payload.id);
+      localStorage.setItem(STORAGE_KEYS.SERVICES, JSON.stringify(list));
+      changed = true;
+    } else if (action === 'UPDATE_SETTINGS' && payload) {
+      const current = this.getSalonSettings();
+      const updated = { ...current, ...payload };
+      localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(updated));
+      changed = true;
+    }
+
+    if (changed) {
+      this.emitStoreUpdate({ action, payload, fromRemote: true });
+    }
+    return changed;
+  },
+
+  async pullCloudEvents(notifyNew = false) {
+    try {
+      const resp = await fetch(`https://ntfy.sh/${this.CLOUD_TOPIC}/json?poll=1&since=48h`);
+      if (!resp.ok) return false;
+      const text = await resp.text();
+      const lines = text.split('\n').filter(Boolean);
+      let anyChanged = false;
+      for (const line of lines) {
+        try {
+          const envelope = JSON.parse(line);
+          if (envelope && envelope.event === 'message' && envelope.message) {
+            const msgObj = JSON.parse(envelope.message);
+            if (this.applyIncomingSyncEvent(msgObj, notifyNew)) {
+              anyChanged = true;
+            }
+          }
+        } catch (innerErr) {}
+      }
+      return anyChanged;
+    } catch (e) {
+      return false;
+    }
+  },
+
+  startRealtimeSync() {
+    if (this._realtimeStarted) return;
+    this._realtimeStarted = true;
+
+    // 1. Escuta mudanças entre abas no mesmo dispositivo
+    window.addEventListener('storage', (ev) => {
+      if (ev.key && Object.values(STORAGE_KEYS).includes(ev.key)) {
+        this.emitStoreUpdate({ action: 'STORAGE_EVENT', key: ev.key });
+      }
+    });
+
+    // 2. BroadcastChannel local
+    try {
+      if ('BroadcastChannel' in window) {
+        this._syncChannel = new BroadcastChannel('ep_nails_realtime_channel');
+        this._syncChannel.onmessage = (ev) => {
+          if (ev.data) this.applyIncomingSyncEvent(ev.data, true);
+        };
+      }
+    } catch (e) {}
+
+    // 3. SSE em tempo real da nuvem (Celular <-> PC instantâneo)
+    try {
+      if ('EventSource' in window) {
+        this._sseSource = new EventSource(`https://ntfy.sh/${this.CLOUD_TOPIC}/sse`);
+        this._sseSource.onmessage = (ev) => {
+          try {
+            const envelope = JSON.parse(ev.data);
+            if (envelope && envelope.message) {
+              const msgObj = JSON.parse(envelope.message);
+              this.applyIncomingSyncEvent(msgObj, true);
+            }
+          } catch (err) {}
+        };
+      }
+    } catch (e) {}
+
+    // 4. Polling de segurança a cada 6 segundos (caso a rede móvel bloqueie SSE)
+    setInterval(() => {
+      this.pullCloudEvents(true);
+    }, 6000);
+  },
+
+  deleteAppointment(id) {
+    let list = this.getAppointments();
+    list = list.filter(a => a.id !== id);
+    localStorage.setItem(STORAGE_KEYS.APPOINTMENTS, JSON.stringify(list));
+    this.publishCloudSync('DELETE_APPOINTMENT', { id });
+    return list;
   }
 };
 

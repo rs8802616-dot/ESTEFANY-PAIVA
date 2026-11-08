@@ -119,10 +119,10 @@
         <div class="admin-greeting-row">
           <div class="admin-greeting-left">
             <div class="admin-avatar-ring">
-              <img src="assets/images/trabalho-amendoada-ouro.png" alt="Estefany Paiva">
+              <img src="assets/images/trabalho-amendoada-ouro.png" id="adminHeaderAvatarImg" alt="Estefany Paiva">
             </div>
             <div class="admin-greeting-text">
-              <h2>Olá, Estefany! 👋</h2>
+              <h2 id="adminHeaderOwnerGreet">Olá, Estefany! 👋</h2>
               <p>Aqui está o resumo completo do seu negócio hoje.</p>
             </div>
           </div>
@@ -321,14 +321,49 @@
       </section>
 
       <!-- ========================================================
-           TELA 2: CONTROLE DE AGENDAMENTOS (AGENDA)
+           TELA 2: CONTROLE DE AGENDAMENTOS & CALENDÁRIO (AGENDA)
            ======================================================== -->
       <section class="admin-view-screen" id="viewScreen_agenda">
         <div class="section-head-title-row" style="margin-top:10px;">
-          <h3 style="font-family:var(--font-serif); font-size:1.35rem; color:#4D1328;"><i class="fa-regular fa-calendar-check"></i> Controle de Agendamentos</h3>
-          <button class="btn-open-client-pill" onclick="openModalNovoAgendamento()">
+          <div>
+            <h3 style="font-family:var(--font-serif); font-size:1.35rem; color:#4D1328;">
+              <i class="fa-regular fa-calendar-check"></i> Calendário & Controle de Agendamentos
+            </h3>
+            <p style="font-size:0.78rem; color:#8A2D4E;">Agendamentos feitos pela cliente no celular sobem automaticamente para este calendário.</p>
+          </div>
+          <button class="btn-open-client-pill" onclick="openModalNovoAgendamento()" style="background:#4D1328; color:#FFF; cursor:pointer; border:none;">
             <i class="fa-solid fa-plus"></i> Novo Agendamento
           </button>
+        </div>
+
+        <!-- Calendário Visual Interativo da Administradora -->
+        <div class="admin-chart-card" style="margin-bottom:18px; padding:16px 18px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:12px;">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <button type="button" class="filter-pill" onclick="changeAdminCalMonth(-1)" style="padding:5px 12px;">
+                <i class="fa-solid fa-chevron-left"></i>
+              </button>
+              <h4 id="adminCalMonthTitle" style="font-family:var(--font-serif); font-size:1.1rem; color:#350B19; min-width:140px; text-align:center;">Novembro 2026</h4>
+              <button type="button" class="filter-pill" onclick="changeAdminCalMonth(1)" style="padding:5px 12px;">
+                <i class="fa-solid fa-chevron-right"></i>
+              </button>
+            </div>
+
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span id="adminSelectedDateLabel" style="font-size:0.78rem; font-weight:700; color:#8A2D4E;">Exibindo: Todos os dias</span>
+              <button type="button" class="filter-pill active" id="btnShowAllAgendaDays" onclick="clearAdminDateFilter()">
+                Ver Todos os Dias
+              </button>
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns:repeat(7, minmax(0, 1fr)); text-align:center; font-size:0.75rem; font-weight:700; color:#8A2D4E; margin-bottom:6px;">
+            <span>Dom</span><span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sáb</span>
+          </div>
+
+          <div id="adminCalendarDaysGrid" style="display:grid; grid-template-columns:repeat(7, minmax(0, 1fr)); gap:6px;">
+            <!-- Populado via JS -->
+          </div>
         </div>
 
         <!-- Filtros Todos, Confirmados, Pendentes -->
@@ -341,7 +376,7 @@
         <!-- Barra de Busca -->
         <div class="search-input-box">
           <i class="fa-solid fa-magnifying-glass" style="color:#8A2D4E;"></i>
-          <input type="text" placeholder="Buscar agendamentos por cliente ou serviço..." oninput="searchAppointmentsAdmin(this.value)">
+          <input type="text" placeholder="Buscar agendamentos por nome da cliente, WhatsApp, data ou serviço..." oninput="searchAppointmentsAdmin(this.value)">
         </div>
 
         <!-- Grade Responsiva de Agendamentos (2 Colunas no PC / 1 no Mobile) -->
@@ -381,13 +416,16 @@
       </section>
 
       <!-- ========================================================
-           TELA 4: SERVIÇOS & TOGGLES
+           TELA 4: SERVIÇOS & CADASTRO COM FOTO DO CELULAR
            ======================================================== -->
       <section class="admin-view-screen" id="viewScreen_servicos">
         <div class="section-head-title-row" style="margin-top:10px;">
-          <h3 style="font-family:var(--font-serif); font-size:1.35rem; color:#4D1328;"><i class="fa-regular fa-gem"></i> Catálogo de Serviços</h3>
-          <button onclick="openModalNovoServico()" style="background:#4D1328; color:#FFF; width:34px; height:34px; border-radius:50%; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center;">
-            <i class="fa-solid fa-plus"></i>
+          <div>
+            <h3 style="font-family:var(--font-serif); font-size:1.35rem; color:#4D1328;"><i class="fa-regular fa-gem"></i> Catálogo de Serviços</h3>
+            <p style="font-size:0.78rem; color:#8A2D4E;">Cadastre novos serviços com foto da galeria do celular, edite preços ou ative/desative.</p>
+          </div>
+          <button class="btn-open-client-pill" onclick="openModalNovoServico()" style="background:#4D1328; color:#FFF; cursor:pointer; border:none;">
+            <i class="fa-solid fa-camera"></i> + Novo Serviço com Foto
           </button>
         </div>
 
@@ -397,12 +435,12 @@
         </div>
 
         <button class="btn-admin-bottom-action" onclick="openModalNovoServico()">
-          <i class="fa-solid fa-plus"></i> Adicionar Novo Serviço
+          <i class="fa-solid fa-plus"></i> Cadastrar Novo Serviço com Foto
         </button>
       </section>
 
       <!-- ========================================================
-           TELA 5: RELATÓRIOS FINANCEIROS (100% HARMÔNICO COM O TEMA VINHO & ROSÉ)
+           TELA 5: RELATÓRIOS FINANCEIROS (SEM O GRÁFICO DE LINHA FEIO)
            ======================================================== -->
       <section class="admin-view-screen" id="viewScreen_relatorios">
 
@@ -422,7 +460,7 @@
           </div>
         </div>
 
-        <!-- Pílulas de Período (Mesmo estilo da Agenda) -->
+        <!-- Pílulas de Período -->
         <div class="filter-pills-row no-print">
           <button type="button" class="filter-pill" onclick="setReportPeriod('7d', this)">Últimos 7 Dias</button>
           <button type="button" class="filter-pill active" onclick="setReportPeriod('30d', this)">Este Mês</button>
@@ -436,110 +474,107 @@
           <div class="admin-kpis-grid" style="margin-top:4px;">
             <div class="kpi-pink-card" onclick="filterReportTableByStatus('Confirmado')" style="cursor:pointer;">
               <i class="fa-solid fa-dollar-sign"></i>
-              <span class="kpi-num" style="font-size:1.12rem;" id="repKpiReceitaConfirmada">R$ 8.420</span>
+              <span class="kpi-num" style="font-size:1.12rem;" id="repKpiReceitaConfirmada">R$ 8.915</span>
               <span class="kpi-lbl">Receita Confirmada</span>
               <span class="kpi-growth" id="repKpiGrowth1"><i class="fa-solid fa-arrow-up"></i> 18%</span>
             </div>
 
             <div class="kpi-pink-card" onclick="filterReportTableByStatus('Pendente')" style="cursor:pointer;">
               <i class="fa-regular fa-calendar-check"></i>
-              <span class="kpi-num" style="font-size:1.12rem;" id="repKpiReceitaPrevista">R$ 2.890</span>
+              <span class="kpi-num" style="font-size:1.12rem;" id="repKpiReceitaPrevista">R$ 2.853</span>
               <span class="kpi-lbl">Previsão na Agenda</span>
-              <span class="kpi-growth" id="repKpiCountPrevista"><i class="fa-regular fa-clock"></i> 16 horários</span>
+              <span class="kpi-growth" id="repKpiCountPrevista"><i class="fa-regular fa-clock"></i> 16 agendados</span>
             </div>
 
             <div class="kpi-pink-card">
               <i class="fa-solid fa-receipt"></i>
-              <span class="kpi-num" style="font-size:1.12rem;" id="repKpiTicketMedio">R$ 145</span>
+              <span class="kpi-num" style="font-size:1.12rem;" id="repKpiTicketMedio">R$ 144</span>
               <span class="kpi-lbl">Ticket Médio</span>
-              <span class="kpi-growth" id="repKpiTotalAtendimentos"><i class="fa-solid fa-check"></i> 58 atend.</span>
+              <span class="kpi-growth" id="repKpiTotalAtendimentos"><i class="fa-solid fa-check"></i> 62 atend.</span>
             </div>
 
             <div class="kpi-pink-card" onclick="openGoalEditorPrompt()" style="cursor:pointer;" title="Clique para alterar sua meta">
               <i class="fa-solid fa-bullseye"></i>
-              <span class="kpi-num" id="repKpiGoalPct">84%</span>
+              <span class="kpi-num" id="repKpiGoalPct">89%</span>
               <span class="kpi-lbl">Meta Atingida</span>
               <span class="kpi-growth" style="text-decoration:underline;">Ajustar Meta</span>
             </div>
           </div>
 
-          <!-- Linha Principal em 2 Colunas Idêntica ao Dashboard -->
+          <!-- Linha Principal em 2 Colunas: Balanço por Semana/Período + Faturamento por Procedimento -->
           <div class="admin-dashboard-split-row">
 
-            <!-- Coluna 1: Gráfico de Evolução de Faturamento & Meta -->
+            <!-- Coluna 1: Desempenho Detalhado por Semana / Etapa (Substitui o gráfico de linha antigo) -->
             <div class="admin-chart-card">
               <div class="chart-header-row">
                 <div>
-                  <h3 id="repChartSubtitle"><i class="fa-solid fa-chart-line"></i> Evolução do Faturamento</h3>
-                  <p style="font-size:0.76rem; color:#8A2D4E; margin-top:2px;" id="insightPointTitle">Clique nos pontos do gráfico para ver detalhes do período</p>
+                  <h3 id="repChartSubtitle"><i class="fa-solid fa-award" style="color:#C59B6D;"></i> Desempenho & Meta (Este Mês)</h3>
+                  <p style="font-size:0.76rem; color:#8A2D4E; margin-top:2px;" id="insightPointTitle">
+                    Acompanhe a evolução real de cada semana e o progresso da sua meta
+                  </p>
                 </div>
-                <div class="period-select-pill" style="background:#FFF; color:#4D1328; border-color:rgba(77,19,40,0.15); cursor:pointer;" onclick="toggleReportChartView()">
-                  <span id="repToggleModeLabel">Ver em Barras</span>
-                  <i class="fa-solid fa-repeat" style="font-size:0.68rem;"></i>
+                <button type="button" class="filter-pill no-print" onclick="openGoalEditorPrompt()" style="background:#FFFFFF; font-size:0.74rem; padding:5px 12px;">
+                  <i class="fa-solid fa-Sliders"></i> <i class="fa-solid fa-pen"></i> Definir Meta
+                </button>
+              </div>
+
+              <!-- Card de Progresso da Meta em Destaque -->
+              <div style="background:#FFFFFF; border:1px solid rgba(77,19,40,0.08); border-radius:16px; padding:12px 14px; margin-bottom:12px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-bottom:6px;">
+                  <span style="font-size:0.82rem; font-weight:700; color:#350B19;">
+                    <i class="fa-solid fa-trophy" style="color:#C59B6D;"></i> <span id="repGoalText">Meta Mensal: R$ 8.915 de R$ 10.000 (89%)</span>
+                  </span>
+                  <span id="repGoalRemainingBadge" style="font-size:0.74rem; font-weight:700; color:#8A2D4E; background:#FBECEF; padding:3px 10px; border-radius:20px;">
+                    Faltam R$ 1.085
+                  </span>
+                </div>
+                <div style="width:100%; height:10px; background:#F3E5E8; border-radius:10px; overflow:hidden;">
+                  <div id="repGoalProgressBar" style="width:89%; height:100%; background:linear-gradient(90deg, #4D1328 0%, #D83F79 100%); border-radius:10px; transition:width 0.4s ease;"></div>
                 </div>
               </div>
 
-              <!-- Modo 1: Gráfico SVG de Curva Suave (Padrão igual ao Início) -->
-              <div id="repInteractiveLineStage" style="position:relative; width:100%; height:170px; margin-top:14px;">
-                <div class="chart-badge-highlight" id="repChartMainValue">
-                  R$ 8.420
-                </div>
-                <svg viewBox="0 0 340 135" style="width:100%; height:100%; overflow:visible;" id="repDynamicSvgLine">
-                  <!-- Populado via JS -->
-                </svg>
-              </div>
-
-              <!-- Modo 2: Gráfico de Barras Rosé & Vinho (Alternável) -->
-              <div class="interactive-bars-stage" id="repInteractiveBarsStage" style="display:none; height:170px; margin-top:14px;">
-                <!-- Populado via JS -->
-              </div>
-
-              <!-- Barra de Progresso da Meta Mensal Integrada -->
-              <div style="margin-top:16px; padding-top:12px; border-top:1px solid rgba(77,19,40,0.08);">
-                <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.78rem; color:#4D1328; margin-bottom:6px;">
-                  <span style="font-weight:700;"><i class="fa-solid fa-trophy" style="color:#C59B6D;"></i> <span id="repGoalText">Progresso da Meta: R$ 8.420 de R$ 10.000 (84%)</span></span>
-                  <button type="button" onclick="openGoalEditorPrompt()" class="no-print" style="background:none; border:none; color:#8A2D4E; font-weight:700; font-size:0.75rem; cursor:pointer; text-decoration:underline;">Editar Meta</button>
-                </div>
-                <div style="width:100%; height:9px; background:#FAF4F5; border-radius:10px; overflow:hidden; border:1px solid rgba(77,19,40,0.08);">
-                  <div id="repGoalProgressBar" style="width:84%; height:100%; background:linear-gradient(90deg, #8A2D4E 0%, #D83F79 100%); border-radius:10px; transition:width 0.4s ease;"></div>
-                </div>
+              <!-- Lista de Cartões de Desempenho por Semana / Período -->
+              <div id="repWeeklyBreakdownCards" style="display:flex; flex-direction:column; gap:8px;">
+                <!-- Populado dinamicamente via JS -->
               </div>
             </div>
 
-            <!-- Coluna 2: Receita por Categoria (Donut + Barras Harmônicas) -->
-            <div class="admin-sub-card">
-              <div class="sub-card-header-row">
-                <h4 style="font-family:var(--font-serif); font-size:1.05rem; color:#4D1328; font-weight:700;">
-                  <i class="fa-solid fa-star" style="color:#C59B6D;"></i> Faturamento por Procedimento
-                </h4>
-                <a href="#" onclick="setReportCategoryFilter('all'); return false;" class="view-all-link no-print" id="btnResetCategoryFilter" style="display:none;">Mostrar todos</a>
-              </div>
-
-              <div class="donut-chart-container" style="margin-top:10px; margin-bottom:14px;">
-                <div class="donut-svg-wrap">
-                  <svg viewBox="0 0 100 100" class="donut-svg">
-                    <circle cx="50" cy="50" r="36" fill="transparent" stroke="#FAF4F5" stroke-width="16"/>
-                    <circle cx="50" cy="50" r="36" fill="transparent" stroke="#350B19" stroke-width="16" stroke-dasharray="226.2" stroke-dashoffset="180.9" transform="rotate(-90 50 50)"/>
-                    <circle cx="50" cy="50" r="36" fill="transparent" stroke="#8A2D4E" stroke-width="16" stroke-dasharray="226.2" stroke-dashoffset="147.0" transform="rotate(18 50 50)"/>
-                    <circle cx="50" cy="50" r="36" fill="transparent" stroke="#E9A3B5" stroke-width="16" stroke-dasharray="226.2" stroke-dashoffset="124.4" transform="rotate(144 50 50)"/>
-                  </svg>
+            <!-- Coluna 2: Receita por Categoria (Donut + Procedimentos) -->
+            <div class="admin-sub-card" style="display:flex; flex-direction:column; justify-content:space-between;">
+              <div>
+                <div class="sub-card-header-row">
+                  <h4 style="font-family:var(--font-serif); font-size:1.05rem; color:#4D1328; font-weight:700;">
+                    <i class="fa-solid fa-star" style="color:#C59B6D;"></i> Faturamento por Procedimento
+                  </h4>
+                  <a href="#" onclick="setReportCategoryFilter('all'); return false;" class="view-all-link no-print" id="btnResetCategoryFilter" style="display:none;">Mostrar todos</a>
                 </div>
 
-                <div class="donut-legend-wrap" id="repCategoriesInteractiveList" style="gap:8px;">
-                  <!-- Populado dinamicamente via JS -->
+                <div class="donut-chart-container" style="margin-top:10px; margin-bottom:14px;">
+                  <div class="donut-svg-wrap">
+                    <svg viewBox="0 0 100 100" class="donut-svg">
+                      <circle cx="50" cy="50" r="36" fill="transparent" stroke="#FAF4F5" stroke-width="16"/>
+                      <circle cx="50" cy="50" r="36" fill="transparent" stroke="#350B19" stroke-width="16" stroke-dasharray="226.2" stroke-dashoffset="180.9" transform="rotate(-90 50 50)"/>
+                      <circle cx="50" cy="50" r="36" fill="transparent" stroke="#8A2D4E" stroke-width="16" stroke-dasharray="226.2" stroke-dashoffset="147.0" transform="rotate(18 50 50)"/>
+                      <circle cx="50" cy="50" r="36" fill="transparent" stroke="#E9A3B5" stroke-width="16" stroke-dasharray="226.2" stroke-dashoffset="124.4" transform="rotate(144 50 50)"/>
+                    </svg>
+                  </div>
+
+                  <div class="donut-legend-wrap" id="repCategoriesInteractiveList" style="gap:8px;">
+                    <!-- Populado dinamicamente via JS -->
+                  </div>
                 </div>
               </div>
 
               <!-- Resumo Rápido da Categoria Selecionada -->
               <div style="background:#FAF4F5; border-radius:14px; padding:10px 14px; border:1px solid rgba(77,19,40,0.06); display:flex; justify-content:space-between; align-items:center; font-size:0.78rem; color:#6A1D39;">
-                <span id="insightPointMeta"><i class="fa-solid fa-hand-pointer" style="color:#8A2D4E;"></i> Toque em um procedimento acima para filtrar a lista</span>
-                <strong style="color:#350B19;" id="insightPointBadge">100% da Receita</strong>
+                <span id="insightPointMeta"><i class="fa-solid fa-hand-pointer" style="color:#8A2D4E;"></i> Toque em um procedimento acima para filtrar</span>
+                <strong style="color:#350B19;" id="insightPointBadge">Todas as Categorias</strong>
               </div>
             </div>
 
           </div>
 
-          <!-- Extrato de Atendimentos e Entradas (Mesmo Padrão Visual da Aba Agenda) -->
+          <!-- Extrato de Atendimentos e Entradas -->
           <div style="margin-top:20px;">
             <div class="section-head-title-row" style="margin-bottom:10px !important;">
               <div>
@@ -562,7 +597,7 @@
               <input type="text" id="repTransactionSearchInput" placeholder="Buscar lançamento por nome da cliente, procedimento ou data..." oninput="renderReportTransactionsTable()">
             </div>
 
-            <!-- Grade de Cards Rosé (Idêntica à Agenda e Clientes) -->
+            <!-- Grade de Cards Rosé -->
             <div class="admin-items-responsive-grid" id="repTransactionsCardsGrid">
               <!-- Populado dinamicamente via JS -->
             </div>
@@ -577,31 +612,72 @@
       </section>
 
       <!-- ========================================================
-           TELA 6: CONFIGURAÇÕES
+           TELA 6: CONFIGURAÇÕES (100% LIVRE PARA ELA MUDAR TUDO)
            ======================================================== -->
       <section class="admin-view-screen" id="viewScreen_configuracoes">
         <div class="section-head-title-row" style="margin-top:10px;">
-          <h3 style="font-family:var(--font-serif); font-size:1.35rem; color:#4D1328;"><i class="fa-solid fa-gear"></i> Configurações</h3>
+          <div>
+            <h3 style="font-family:var(--font-serif); font-size:1.35rem; color:#4D1328;"><i class="fa-solid fa-gear"></i> Configurações Livres do Estúdio</h3>
+            <p style="font-size:0.78rem; color:#8A2D4E;">Personalize livremente fotos, nomes, banner da cliente, horários da agenda, Pix e notificações.</p>
+          </div>
         </div>
 
         <div class="admin-items-responsive-grid">
+          <!-- 1. Perfil, Foto, Nome, Slogan, WhatsApp e Endereço -->
           <div class="card-list-item" onclick="openModalConfigSalao()">
             <div style="display:flex; align-items:center; gap:12px;">
-              <i class="fa-regular fa-user" style="font-size:1.2rem; color:#4D1328;"></i>
+              <div class="client-avatar-badge"><i class="fa-regular fa-id-card"></i></div>
               <div>
-                <h5 style="font-size:0.9rem; font-weight:700; color:#350B19;">Perfil do Salão</h5>
-                <p style="font-size:0.75rem; color:#6A1D39;">Nome, slogan, telefone e Instagram</p>
+                <h5 style="font-size:0.92rem; font-weight:700; color:#350B19;">Perfil do Estúdio & Foto</h5>
+                <p style="font-size:0.76rem; color:#6A1D39;">Trocar foto de perfil, nome, slogan, WhatsApp, Instagram e endereço</p>
               </div>
             </div>
-            <i class="fa-solid fa-chevron-right" style="color:#8A2D4E; font-size:0.75rem;"></i>
+            <span class="filter-pill" style="padding:4px 10px; font-size:0.72rem;">Editar</span>
           </div>
 
+          <!-- 2. Banner Promocional da Tela da Cliente -->
+          <div class="card-list-item" onclick="openModalConfigBanner()">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <div class="client-avatar-badge"><i class="fa-regular fa-image"></i></div>
+              <div>
+                <h5 style="font-size:0.92rem; font-weight:700; color:#350B19;">Banner & Capa da Cliente</h5>
+                <p style="font-size:0.76rem; color:#6A1D39;">Mudar frase de destaque, botão e foto do banner do celular</p>
+              </div>
+            </div>
+            <span class="filter-pill" style="padding:4px 10px; font-size:0.72rem;">Editar</span>
+          </div>
+
+          <!-- 3. Horários de Atendimento & Grade de Horários Livres -->
+          <div class="card-list-item" onclick="openModalConfigHorarios()">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <div class="client-avatar-badge"><i class="fa-regular fa-clock"></i></div>
+              <div>
+                <h5 style="font-size:0.92rem; font-weight:700; color:#350B19;">Horários & Grade da Agenda</h5>
+                <p style="font-size:0.76rem; color:#6A1D39;">Adicionar ou remover horários disponíveis (09:00, 14:00, etc.) e turnos</p>
+              </div>
+            </div>
+            <span class="filter-pill" style="padding:4px 10px; font-size:0.72rem;">Editar</span>
+          </div>
+
+          <!-- 4. Formas de Pagamento, Chave Pix & Sinal -->
+          <div class="card-list-item" onclick="openModalConfigPagamento()">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <div class="client-avatar-badge"><i class="fa-regular fa-credit-card"></i></div>
+              <div>
+                <h5 style="font-size:0.92rem; font-weight:700; color:#350B19;">Pagamentos, Pix & Regras</h5>
+                <p style="font-size:0.76rem; color:#6A1D39;">Configurar chave Pix, cartões, taxa de reserva e política de cancelamento</p>
+              </div>
+            </div>
+            <span class="filter-pill" style="padding:4px 10px; font-size:0.72rem;">Editar</span>
+          </div>
+
+          <!-- 5. Notificações Push com Som -->
           <div class="card-list-item">
             <div style="display:flex; align-items:center; gap:12px;">
-              <i class="fa-regular fa-bell" style="font-size:1.2rem; color:#4D1328;"></i>
+              <div class="client-avatar-badge"><i class="fa-regular fa-bell"></i></div>
               <div>
-                <h5 style="font-size:0.9rem; font-weight:700; color:#350B19;">Notificações Push com Som</h5>
-                <p style="font-size:0.75rem; color:#6A1D39;">Apitar no celular em novos agendamentos</p>
+                <h5 style="font-size:0.92rem; font-weight:700; color:#350B19;">Alerta Sonoro no Celular</h5>
+                <p style="font-size:0.76rem; color:#6A1D39;">Tocar aviso sonoro sempre que entrar um novo agendamento</p>
               </div>
             </div>
             <label class="switch-toggle-custom">
@@ -610,45 +686,37 @@
             </label>
           </div>
 
-          <div class="card-list-item" onclick="openModalConfigHorarios()">
+          <!-- 6. Gerenciar Catálogo de Serviços & Fotos -->
+          <div class="card-list-item" onclick="switchAdminTab('servicos')">
             <div style="display:flex; align-items:center; gap:12px;">
-              <i class="fa-regular fa-clock" style="font-size:1.2rem; color:#4D1328;"></i>
+              <div class="client-avatar-badge"><i class="fa-regular fa-gem"></i></div>
               <div>
-                <h5 style="font-size:0.9rem; font-weight:700; color:#350B19;">Horários de Atendimento</h5>
-                <p style="font-size:0.75rem; color:#6A1D39;">Configurar turnos e intervalo buffer</p>
+                <h5 style="font-size:0.92rem; font-weight:700; color:#350B19;">Gerenciar Serviços & Fotos</h5>
+                <p style="font-size:0.76rem; color:#6A1D39;">Adicionar novos procedimentos com foto da galeria do celular</p>
               </div>
             </div>
             <i class="fa-solid fa-chevron-right" style="color:#8A2D4E; font-size:0.75rem;"></i>
           </div>
 
-          <div class="card-list-item" onclick="openModalConfigPagamento()">
+          <!-- 7. Meta Financeira Mensal -->
+          <div class="card-list-item" onclick="openGoalEditorPrompt()">
             <div style="display:flex; align-items:center; gap:12px;">
-              <i class="fa-regular fa-credit-card" style="font-size:1.2rem; color:#4D1328;"></i>
+              <div class="client-avatar-badge"><i class="fa-solid fa-bullseye"></i></div>
               <div>
-                <h5 style="font-size:0.9rem; font-weight:700; color:#350B19;">Formas de Pagamento</h5>
-                <p style="font-size:0.75rem; color:#6A1D39;">Pix, Cartão de Crédito, Débito e Dinheiro</p>
+                <h5 style="font-size:0.92rem; font-weight:700; color:#350B19;">Meta de Faturamento Mensal</h5>
+                <p style="font-size:0.76rem; color:#6A1D39;">Definir livremente o valor da sua meta financeira do mês</p>
               </div>
             </div>
-            <i class="fa-solid fa-chevron-right" style="color:#8A2D4E; font-size:0.75rem;"></i>
+            <span class="filter-pill" style="padding:4px 10px; font-size:0.72rem;">Ajustar</span>
           </div>
 
+          <!-- 8. Privacidade & LGPD -->
           <div class="card-list-item" onclick="openModalConfigPrivacidade()">
             <div style="display:flex; align-items:center; gap:12px;">
-              <i class="fa-solid fa-shield-halved" style="font-size:1.2rem; color:#4D1328;"></i>
+              <div class="client-avatar-badge"><i class="fa-solid fa-shield-halved"></i></div>
               <div>
-                <h5 style="font-size:0.9rem; font-weight:700; color:#350B19;">Privacidade & LGPD</h5>
-                <p style="font-size:0.75rem; color:#6A1D39;">Zero vazamentos e dados mínimos</p>
-              </div>
-            </div>
-            <i class="fa-solid fa-chevron-right" style="color:#8A2D4E; font-size:0.75rem;"></i>
-          </div>
-
-          <div class="card-list-item" onclick="window.open('https://wa.me/5561985543452', '_blank');">
-            <div style="display:flex; align-items:center; gap:12px;">
-              <i class="fa-regular fa-circle-question" style="font-size:1.2rem; color:#4D1328;"></i>
-              <div>
-                <h5 style="font-size:0.9rem; font-weight:700; color:#350B19;">Suporte Técnico</h5>
-                <p style="font-size:0.75rem; color:#6A1D39;">Fale diretamente pelo WhatsApp</p>
+                <h5 style="font-size:0.92rem; font-weight:700; color:#350B19;">Privacidade & LGPD</h5>
+                <p style="font-size:0.76rem; color:#6A1D39;">Proteção de dados das clientes e anonimização segura</p>
               </div>
             </div>
             <i class="fa-solid fa-chevron-right" style="color:#8A2D4E; font-size:0.75rem;"></i>
@@ -657,7 +725,7 @@
       </section>
 
       <!-- ========================================================
-           TELA 7: AVALIAÇÕES (MOCKUP)
+           TELA 7: AVALIAÇÕES
            ======================================================== -->
       <section class="admin-view-screen" id="viewScreen_avaliacoes">
         <div class="section-head-title-row" style="margin-top:10px;">
@@ -671,7 +739,6 @@
             <div style="color:#EAB308; font-size:1.25rem; margin:8px 0;">★★★★★</div>
             <p style="font-size:0.78rem; color:#6A1D39;">Baseado em 248 avaliações reais</p>
 
-            <!-- Barras de Estrelas -->
             <div style="margin-top:16px; font-size:0.78rem;">
               <div style="display:flex; align-items:center; gap:8px; margin-bottom:5px;">
                 <span style="width:60px; text-align:left;">5 estrelas</span>
@@ -680,7 +747,6 @@
                 </div>
                 <span style="width:30px; text-align:right;">92%</span>
               </div>
-
               <div style="display:flex; align-items:center; gap:8px; margin-bottom:5px;">
                 <span style="width:60px; text-align:left;">4 estrelas</span>
                 <div style="flex:1; height:8px; background:#FAF4F5; border-radius:4px; overflow:hidden;">
@@ -688,17 +754,8 @@
                 </div>
                 <span style="width:30px; text-align:right;">6%</span>
               </div>
-
               <div style="display:flex; align-items:center; gap:8px; margin-bottom:5px;">
                 <span style="width:60px; text-align:left;">3 estrelas</span>
-                <div style="flex:1; height:8px; background:#FAF4F5; border-radius:4px; overflow:hidden;">
-                  <div style="width:1%; height:100%; background:#4D1328;"></div>
-                </div>
-                <span style="width:30px; text-align:right;">1%</span>
-              </div>
-
-              <div style="display:flex; align-items:center; gap:8px; margin-bottom:5px;">
-                <span style="width:60px; text-align:left;">2 estrelas</span>
                 <div style="flex:1; height:8px; background:#FAF4F5; border-radius:4px; overflow:hidden;">
                   <div style="width:1%; height:100%; background:#4D1328;"></div>
                 </div>
@@ -707,7 +764,6 @@
             </div>
           </div>
 
-          <!-- Comentários Recentes -->
           <div class="admin-sub-card">
             <div class="sub-card-header-row">
               <h4 style="font-family:var(--font-serif); font-size:1.05rem; color:#4D1328; font-weight:700;">Comentários Recentes</h4>
@@ -733,7 +789,6 @@
           </div>
         </div>
       </section>
-
     </main>
 
     <!-- ========================================================
@@ -929,17 +984,31 @@
     </div>
   </div>
 
-  <!-- 4. Modal: Novo Serviço -->
+  <!-- 4. Modal: Cadastrar ou Editar Serviço (COM UPLOAD DE FOTO DO CELULAR) -->
   <div class="admin-modal-overlay" id="modalNovoServico">
     <div class="admin-modal-card">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-        <h3 style="font-family:var(--font-serif); font-size:1.3rem; color:#350B19;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+        <h3 style="font-family:var(--font-serif); font-size:1.3rem; color:#350B19;" id="modalServicoHeading">
           <i class="fa-regular fa-gem" style="color:#8A2D4E;"></i> Cadastrar Novo Serviço
         </h3>
         <button onclick="closeModal('modalNovoServico')" style="background:none; border:none; font-size:1.2rem; color:#6A1D39; cursor:pointer;">✕</button>
       </div>
 
       <form id="formNovoServico" onsubmit="saveNovoServico(event)">
+        <input type="hidden" id="inputServicoIdEdit" value="">
+
+        <!-- Upload de Foto do Celular / Galeria com Preview -->
+        <div style="background:#FBECEF; border:1.5px dashed #8A2D4E; border-radius:16px; padding:14px; text-align:center; margin-bottom:14px;">
+          <div style="width:92px; height:92px; border-radius:16px; overflow:hidden; margin:0 auto 10px; border:2px solid #FFFFFF; box-shadow:0 4px 12px rgba(77,19,40,0.15); background:#FFF;">
+            <img id="previewServicoFotoImg" src="assets/images/trabalho-alongamento-chocolate.png" style="width:100%; height:100%; object-fit:cover;" alt="Prévia da Foto">
+          </div>
+          <label for="inputServicoFotoFile" style="display:inline-flex; align-items:center; gap:6px; background:#4D1328; color:#FFFFFF; padding:8px 16px; border-radius:30px; font-size:0.8rem; font-weight:700; cursor:pointer;">
+            <i class="fa-solid fa-camera"></i> Escolher Foto do Celular / Galeria
+          </label>
+          <input type="file" id="inputServicoFotoFile" accept="image/*" style="display:none;" onchange="handleServicePhotoUpload(this)">
+          <p style="font-size:0.7rem; color:#6A1D39; margin-top:6px;">Toque acima para abrir a câmera ou galeria de fotos do seu celular</p>
+        </div>
+
         <div class="form-input-box" style="margin-bottom:12px;">
           <label style="display:block; font-size:0.8rem; font-weight:600; color:#4D1328; margin-bottom:4px;">Nome do Serviço *</label>
           <input type="text" id="inputServicoNome" required placeholder="Ex: Banho de Gel Diamante" style="width:100%; padding:10px 14px; border-radius:12px; border:1px solid rgba(77,19,40,0.18);">
@@ -948,7 +1017,7 @@
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px;">
           <div class="form-input-box">
             <label style="display:block; font-size:0.8rem; font-weight:600; color:#4D1328; margin-bottom:4px;">Preço (R$) *</label>
-            <input type="number" id="inputServicoPreco" required placeholder="130.00" step="0.50" style="width:100%; padding:10px 14px; border-radius:12px; border:1px solid rgba(77,19,40,0.18);">
+            <input type="number" id="inputServicoPreco" required placeholder="150.00" step="0.50" style="width:100%; padding:10px 14px; border-radius:12px; border:1px solid rgba(77,19,40,0.18);">
           </div>
           <div class="form-input-box">
             <label style="display:block; font-size:0.8rem; font-weight:600; color:#4D1328; margin-bottom:4px;">Duração (min) *</label>
@@ -961,9 +1030,9 @@
           <select id="selectServicoCategoria" required style="width:100%; padding:10px 14px; border-radius:12px; border:1px solid rgba(77,19,40,0.18); background:#FFF;">
             <option value="cat_alongamento">Alongamento em Gel</option>
             <option value="cat_esmalte">Esmaltação em Gel</option>
-            <option value="cat_manicure">Manicure Clássica</option>
+            <option value="cat_classica">Manicure Clássica</option>
             <option value="cat_nailart">Nail Art & Encapsuladas</option>
-            <option value="cat_spa">Spa & Blindagem</option>
+            <option value="cat_blindagem">Spa & Blindagem</option>
           </select>
         </div>
 
@@ -989,27 +1058,13 @@
     <div class="admin-modal-card">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
         <h3 style="font-family:var(--font-serif); font-size:1.3rem; color:#350B19;">
-          <i class="fa-regular fa-bell" style="color:#8A2D4E;"></i> Notificações Recentes
+          <i class="fa-regular fa-bell" style="color:#8A2D4E;"></i> Notificações de Agendamentos
         </h3>
         <button onclick="closeModal('modalNotificacoes')" style="background:none; border:none; font-size:1.2rem; color:#6A1D39; cursor:pointer;">✕</button>
       </div>
 
-      <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:16px;" id="notificacoesList">
-        <div class="card-list-item" style="padding:10px 14px;">
-          <div>
-            <strong style="color:#350B19; font-size:0.88rem;">Novo Agendamento! ✨</strong>
-            <p style="font-size:0.78rem; color:#6A1D39;">Mariana Silva agendou Alongamento em Gel para Hoje às 14:00.</p>
-          </div>
-          <span style="font-size:0.72rem; color:#8A2D4E;">Há 15m</span>
-        </div>
-
-        <div class="card-list-item" style="padding:10px 14px;">
-          <div>
-            <strong style="color:#350B19; font-size:0.88rem;">Agendamento Confirmado 👍</strong>
-            <p style="font-size:0.78rem; color:#6A1D39;">Juliana Souza confirmou Manicure Clássica para Hoje às 16:00.</p>
-          </div>
-          <span style="font-size:0.72rem; color:#8A2D4E;">Há 1h</span>
-        </div>
+      <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:16px; max-height:48vh; overflow-y:auto;" id="notificacoesList">
+        <!-- Populado dinamicamente via JS -->
       </div>
 
       <button onclick="testAudioAlert()" style="width:100%; padding:14px; border-radius:30px; border:none; background:#4D1328; color:#FFF; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;">
@@ -1018,90 +1073,200 @@
     </div>
   </div>
 
-  <!-- 6. Modal: Perfil do Salão -->
+  <!-- 6. Modal: Perfil do Estúdio, Fotos & Contato (100% Editável) -->
   <div class="admin-modal-overlay" id="modalConfigSalao">
     <div class="admin-modal-card">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-        <h3 style="font-family:var(--font-serif); font-size:1.3rem; color:#350B19;">Perfil do Salão</h3>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+        <h3 style="font-family:var(--font-serif); font-size:1.3rem; color:#350B19;">Perfil do Estúdio & Foto</h3>
         <button onclick="closeModal('modalConfigSalao')" style="background:none; border:none; font-size:1.2rem; color:#6A1D39; cursor:pointer;">✕</button>
       </div>
 
       <form id="formConfigSalao" onsubmit="saveConfigSalao(event)">
-        <div class="form-input-box" style="margin-bottom:12px;">
-          <label style="display:block; font-size:0.8rem; font-weight:600; color:#4D1328; margin-bottom:4px;">Nome do Salão / Estúdio</label>
-          <input type="text" id="inputSalaoNome" value="ESTEFANY PAIVA NAILS" style="width:100%; padding:10px 14px; border-radius:12px; border:1px solid rgba(77,19,40,0.18);">
+        <!-- Upload da Foto de Perfil da Profissional -->
+        <div style="background:#FBECEF; border-radius:16px; padding:12px; text-align:center; margin-bottom:14px;">
+          <img id="previewConfigAvatarImg" src="assets/images/trabalho-amendoada-ouro.png" style="width:74px; height:74px; border-radius:50%; object-fit:cover; border:2px solid #4D1328; display:block; margin:0 auto 8px;" alt="Foto de Perfil">
+          <label for="inputConfigAvatarFile" style="display:inline-flex; align-items:center; gap:6px; background:#4D1328; color:#FFF; padding:6px 14px; border-radius:20px; font-size:0.76rem; font-weight:700; cursor:pointer;">
+            <i class="fa-solid fa-camera"></i> Trocar Foto de Perfil (Celular)
+          </label>
+          <input type="file" id="inputConfigAvatarFile" accept="image/*" style="display:none;" onchange="handleAvatarPhotoUpload(this)">
         </div>
 
-        <div class="form-input-box" style="margin-bottom:12px;">
-          <label style="display:block; font-size:0.8rem; font-weight:600; color:#4D1328; margin-bottom:4px;">Slogan / Frase de Destaque</label>
-          <input type="text" id="inputSalaoSlogan" value="Mais que unhas, é autoestima." style="width:100%; padding:10px 14px; border-radius:12px; border:1px solid rgba(77,19,40,0.18);">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
+          <div class="form-input-box">
+            <label style="display:block; font-size:0.78rem; font-weight:600; color:#4D1328; margin-bottom:4px;">Nome da Profissional</label>
+            <input type="text" id="inputSalaoOwner" value="Estefany Paiva" style="width:100%; padding:10px 12px; border-radius:12px; border:1px solid rgba(77,19,40,0.18);">
+          </div>
+          <div class="form-input-box">
+            <label style="display:block; font-size:0.78rem; font-weight:600; color:#4D1328; margin-bottom:4px;">Nome do Estúdio</label>
+            <input type="text" id="inputSalaoNome" value="ESTEFANY PAIVA NAILS" style="width:100%; padding:10px 12px; border-radius:12px; border:1px solid rgba(77,19,40,0.18);">
+          </div>
         </div>
 
-        <div class="form-input-box" style="margin-bottom:12px;">
-          <label style="display:block; font-size:0.8rem; font-weight:600; color:#4D1328; margin-bottom:4px;">WhatsApp Oficial</label>
-          <input type="text" id="inputSalaoWhats" value="(61) 98554-3452" style="width:100%; padding:10px 14px; border-radius:12px; border:1px solid rgba(77,19,40,0.18);">
+        <div class="form-input-box" style="margin-bottom:10px;">
+          <label style="display:block; font-size:0.78rem; font-weight:600; color:#4D1328; margin-bottom:4px;">Slogan / Frase Curta</label>
+          <input type="text" id="inputSalaoSlogan" value="Mais que unhas, é autoestima." style="width:100%; padding:10px 12px; border-radius:12px; border:1px solid rgba(77,19,40,0.18);">
+        </div>
+
+        <div class="form-input-box" style="margin-bottom:10px;">
+          <label style="display:block; font-size:0.78rem; font-weight:600; color:#4D1328; margin-bottom:4px;">Mensagem de Boas-vindas da Cliente</label>
+          <input type="text" id="inputSalaoWelcome" value="Bem-vinda de volta ao seu momento de beleza e autocuidado." style="width:100%; padding:10px 12px; border-radius:12px; border:1px solid rgba(77,19,40,0.18);">
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
+          <div class="form-input-box">
+            <label style="display:block; font-size:0.78rem; font-weight:600; color:#4D1328; margin-bottom:4px;">WhatsApp Oficial</label>
+            <input type="text" id="inputSalaoWhats" value="(61) 98554-3452" style="width:100%; padding:10px 12px; border-radius:12px; border:1px solid rgba(77,19,40,0.18);">
+          </div>
+          <div class="form-input-box">
+            <label style="display:block; font-size:0.78rem; font-weight:600; color:#4D1328; margin-bottom:4px;">Instagram</label>
+            <input type="text" id="inputSalaoInsta" value="@estefanypaiva_nails" style="width:100%; padding:10px 12px; border-radius:12px; border:1px solid rgba(77,19,40,0.18);">
+          </div>
         </div>
 
         <div class="form-input-box" style="margin-bottom:16px;">
-          <label style="display:block; font-size:0.8rem; font-weight:600; color:#4D1328; margin-bottom:4px;">Instagram</label>
-          <input type="text" id="inputSalaoInsta" value="@estefanypaiva_nails" style="width:100%; padding:10px 14px; border-radius:12px; border:1px solid rgba(77,19,40,0.18);">
+          <label style="display:block; font-size:0.78rem; font-weight:600; color:#4D1328; margin-bottom:4px;">Endereço / Cidade</label>
+          <input type="text" id="inputSalaoEndereco" value="Brasília - DF" style="width:100%; padding:10px 12px; border-radius:12px; border:1px solid rgba(77,19,40,0.18);">
         </div>
 
         <button type="submit" style="width:100%; padding:12px; border-radius:30px; border:none; background:#4D1328; color:#FFF; font-weight:700; cursor:pointer;">
-          <i class="fa-solid fa-floppy-disk"></i> Salvar Alterações
+          <i class="fa-solid fa-floppy-disk"></i> Salvar Perfil & Atualizar App
         </button>
       </form>
     </div>
   </div>
 
-  <!-- 7. Modal: Horários de Atendimento -->
-  <div class="admin-modal-overlay" id="modalConfigHorarios">
+  <!-- 6B. Modal: Personalizar Banner Promocional da Tela da Cliente -->
+  <div class="admin-modal-overlay" id="modalConfigBanner">
     <div class="admin-modal-card">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-        <h3 style="font-family:var(--font-serif); font-size:1.3rem; color:#350B19;">Horários de Atendimento</h3>
-        <button onclick="closeModal('modalConfigHorarios')" style="background:none; border:none; font-size:1.2rem; color:#6A1D39; cursor:pointer;">✕</button>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+        <h3 style="font-family:var(--font-serif); font-size:1.3rem; color:#350B19;">Banner da Tela da Cliente</h3>
+        <button onclick="closeModal('modalConfigBanner')" style="background:none; border:none; font-size:1.2rem; color:#6A1D39; cursor:pointer;">✕</button>
       </div>
 
-      <div style="font-size:0.88rem; color:#4D1328; line-height:1.6; margin-bottom:16px;">
-        <p><strong>Segunda a Sexta:</strong> 09:00 às 19:30</p>
-        <p><strong>Sábado:</strong> 08:30 às 18:00</p>
-        <p><strong>Domingo e Feriados:</strong> Fechado</p>
-        <hr style="border:none; border-top:1px solid rgba(77,19,40,0.1); margin:12px 0;">
-        <p><i class="fa-regular fa-clock"></i> <strong>Intervalo de Higienização (Buffer):</strong> 15 minutos entre cada cliente.</p>
-      </div>
+      <form onsubmit="saveConfigBanner(event)">
+        <div style="background:#FBECEF; border-radius:16px; padding:12px; text-align:center; margin-bottom:14px;">
+          <img id="previewConfigBannerImg" src="assets/images/trabalho-tons-terrosos.png" style="width:100%; max-width:220px; height:110px; border-radius:14px; object-fit:cover; display:block; margin:0 auto 8px; border:2px solid #FFF;" alt="Banner">
+          <label for="inputConfigBannerFile" style="display:inline-flex; align-items:center; gap:6px; background:#4D1328; color:#FFF; padding:6px 14px; border-radius:20px; font-size:0.76rem; font-weight:700; cursor:pointer;">
+            <i class="fa-solid fa-camera"></i> Escolher Foto do Banner (Celular)
+          </label>
+          <input type="file" id="inputConfigBannerFile" accept="image/*" style="display:none;" onchange="handleBannerPhotoUpload(this)">
+        </div>
 
-      <button onclick="closeModal('modalConfigHorarios'); showToast('Horários configurados com sucesso!');" style="width:100%; padding:12px; border-radius:30px; border:none; background:#4D1328; color:#FFF; font-weight:700; cursor:pointer;">
-        Entendido
-      </button>
+        <div class="form-input-box" style="margin-bottom:12px;">
+          <label style="display:block; font-size:0.8rem; font-weight:600; color:#4D1328; margin-bottom:4px;">Frase Principal do Banner</label>
+          <input type="text" id="inputBannerTitle" value="Cuidado, beleza e autoestima em cada detalhe ♡" style="width:100%; padding:10px 14px; border-radius:12px; border:1px solid rgba(77,19,40,0.18);">
+        </div>
+
+        <div class="form-input-box" style="margin-bottom:16px;">
+          <label style="display:block; font-size:0.8rem; font-weight:600; color:#4D1328; margin-bottom:4px;">Texto do Botão do Banner</label>
+          <input type="text" id="inputBannerBtnText" value="Agendar agora" style="width:100%; padding:10px 14px; border-radius:12px; border:1px solid rgba(77,19,40,0.18);">
+        </div>
+
+        <button type="submit" style="width:100%; padding:12px; border-radius:30px; border:none; background:#4D1328; color:#FFF; font-weight:700; cursor:pointer;">
+          <i class="fa-solid fa-check"></i> Salvar Banner da Cliente
+        </button>
+      </form>
     </div>
   </div>
 
-  <!-- 8. Modal: Formas de Pagamento -->
+  <!-- 7. Modal: Horários de Atendimento & Grade de Horários (100% Editável) -->
+  <div class="admin-modal-overlay" id="modalConfigHorarios">
+    <div class="admin-modal-card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+        <h3 style="font-family:var(--font-serif); font-size:1.3rem; color:#350B19;">Horários & Grade da Agenda</h3>
+        <button onclick="closeModal('modalConfigHorarios')" style="background:none; border:none; font-size:1.2rem; color:#6A1D39; cursor:pointer;">✕</button>
+      </div>
+
+      <form onsubmit="saveConfigHorarios(event)">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
+          <div class="form-input-box">
+            <label style="display:block; font-size:0.78rem; font-weight:600; color:#4D1328; margin-bottom:4px;">Segunda a Sexta</label>
+            <input type="text" id="inputHoursWeekdays" value="09:00 às 19:30" style="width:100%; padding:10px 12px; border-radius:12px; border:1px solid rgba(77,19,40,0.18);">
+          </div>
+          <div class="form-input-box">
+            <label style="display:block; font-size:0.78rem; font-weight:600; color:#4D1328; margin-bottom:4px;">Sábado</label>
+            <input type="text" id="inputHoursSaturday" value="08:30 às 18:00" style="width:100%; padding:10px 12px; border-radius:12px; border:1px solid rgba(77,19,40,0.18);">
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px;">
+          <div class="form-input-box">
+            <label style="display:block; font-size:0.78rem; font-weight:600; color:#4D1328; margin-bottom:4px;">Domingo / Feriados</label>
+            <input type="text" id="inputHoursSunday" value="Fechado" style="width:100%; padding:10px 12px; border-radius:12px; border:1px solid rgba(77,19,40,0.18);">
+          </div>
+          <div class="form-input-box">
+            <label style="display:block; font-size:0.78rem; font-weight:600; color:#4D1328; margin-bottom:4px;">Intervalo Buffer (min)</label>
+            <input type="number" id="inputBufferMinutes" value="15" step="5" style="width:100%; padding:10px 12px; border-radius:12px; border:1px solid rgba(77,19,40,0.18);">
+          </div>
+        </div>
+
+        <!-- Gerenciador Livre de Horários Disponíveis no Calendário da Cliente -->
+        <div style="background:#FBECEF; border-radius:16px; padding:12px 14px; margin-bottom:16px;">
+          <label style="display:block; font-size:0.8rem; font-weight:700; color:#350B19; margin-bottom:8px;">
+            <i class="fa-regular fa-clock"></i> Horários Disponíveis na Agenda da Cliente:
+          </label>
+          <div id="customSlotsPillsContainer" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px;">
+            <!-- Populado via JS -->
+          </div>
+          <div style="display:flex; gap:8px;">
+            <input type="time" id="inputNewSlotTime" value="11:00" style="flex:1; padding:8px 12px; border-radius:10px; border:1px solid rgba(77,19,40,0.2); background:#FFF;">
+            <button type="button" onclick="addCustomSlotAdmin()" style="padding:8px 14px; border-radius:10px; border:none; background:#4D1328; color:#FFF; font-weight:700; font-size:0.78rem; cursor:pointer;">
+              + Adicionar Horário
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" style="width:100%; padding:12px; border-radius:30px; border:none; background:#4D1328; color:#FFF; font-weight:700; cursor:pointer;">
+          <i class="fa-solid fa-floppy-disk"></i> Salvar Horários & Atualizar Agenda
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 8. Modal: Formas de Pagamento, Chave Pix & Regras (100% Editável) -->
   <div class="admin-modal-overlay" id="modalConfigPagamento">
     <div class="admin-modal-card">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-        <h3 style="font-family:var(--font-serif); font-size:1.3rem; color:#350B19;">Formas de Pagamento</h3>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+        <h3 style="font-family:var(--font-serif); font-size:1.3rem; color:#350B19;">Pagamentos, Pix & Regras</h3>
         <button onclick="closeModal('modalConfigPagamento')" style="background:none; border:none; font-size:1.2rem; color:#6A1D39; cursor:pointer;">✕</button>
       </div>
 
-      <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:16px;">
-        <label style="display:flex; align-items:center; gap:10px; font-weight:600; color:#350B19;">
-          <input type="checkbox" checked> <span>Pix (Chave celular ou QR Code)</span>
-        </label>
-        <label style="display:flex; align-items:center; gap:10px; font-weight:600; color:#350B19;">
-          <input type="checkbox" checked> <span>Cartão de Crédito (Visa, Master, Elo)</span>
-        </label>
-        <label style="display:flex; align-items:center; gap:10px; font-weight:600; color:#350B19;">
-          <input type="checkbox" checked> <span>Cartão de Débito</span>
-        </label>
-        <label style="display:flex; align-items:center; gap:10px; font-weight:600; color:#350B19;">
-          <input type="checkbox" checked> <span>Dinheiro</span>
-        </label>
-      </div>
+      <form onsubmit="saveConfigPagamento(event)">
+        <div style="background:#FBECEF; border-radius:14px; padding:12px 14px; display:flex; flex-direction:column; gap:8px; margin-bottom:12px;">
+          <label style="display:flex; align-items:center; gap:10px; font-weight:600; color:#350B19; font-size:0.86rem;">
+            <input type="checkbox" id="chkPayPix" checked> <span>Aceitar Pix (Transferência Instantânea)</span>
+          </label>
+          <label style="display:flex; align-items:center; gap:10px; font-weight:600; color:#350B19; font-size:0.86rem;">
+            <input type="checkbox" id="chkPayCredit" checked> <span>Aceitar Cartão de Crédito</span>
+          </label>
+          <label style="display:flex; align-items:center; gap:10px; font-weight:600; color:#350B19; font-size:0.86rem;">
+            <input type="checkbox" id="chkPayDebit" checked> <span>Aceitar Cartão de Débito</span>
+          </label>
+          <label style="display:flex; align-items:center; gap:10px; font-weight:600; color:#350B19; font-size:0.86rem;">
+            <input type="checkbox" id="chkPayCash" checked> <span>Aceitar Dinheiro em Espécie</span>
+          </label>
+        </div>
 
-      <button onclick="closeModal('modalConfigPagamento'); showToast('Formas de pagamento salvas!');" style="width:100%; padding:12px; border-radius:30px; border:none; background:#4D1328; color:#FFF; font-weight:700; cursor:pointer;">
-        Salvar Opções
-      </button>
+        <div style="display:grid; grid-template-columns:1.3fr 1fr; gap:10px; margin-bottom:12px;">
+          <div class="form-input-box">
+            <label style="display:block; font-size:0.78rem; font-weight:600; color:#4D1328; margin-bottom:4px;">Sua Chave Pix</label>
+            <input type="text" id="inputPixKey" value="(61) 98554-3452" style="width:100%; padding:10px 12px; border-radius:12px; border:1px solid rgba(77,19,40,0.18);">
+          </div>
+          <div class="form-input-box">
+            <label style="display:block; font-size:0.78rem; font-weight:600; color:#4D1328; margin-bottom:4px;">Sinal de Reserva (%)</label>
+            <input type="number" id="inputDepositPct" value="0" min="0" max="100" style="width:100%; padding:10px 12px; border-radius:12px; border:1px solid rgba(77,19,40,0.18);">
+          </div>
+        </div>
+
+        <div class="form-input-box" style="margin-bottom:16px;">
+          <label style="display:block; font-size:0.78rem; font-weight:600; color:#4D1328; margin-bottom:4px;">Política de Cancelamento / Tolerância</label>
+          <input type="text" id="inputCancelPolicy" value="Avisar com pelo menos 24h de antecedência." style="width:100%; padding:10px 12px; border-radius:12px; border:1px solid rgba(77,19,40,0.18);">
+        </div>
+
+        <button type="submit" style="width:100%; padding:12px; border-radius:30px; border:none; background:#4D1328; color:#FFF; font-weight:700; cursor:pointer;">
+          <i class="fa-solid fa-floppy-disk"></i> Salvar Opções de Pagamento
+        </button>
+      </form>
     </div>
   </div>
 
@@ -1135,22 +1300,58 @@
   <script src="assets/js/store.js"></script>
   <script>
     let activeAppointmentTarget = null;
+    let adminCalMonth = new Date().getMonth();
+    let adminCalYear = new Date().getFullYear();
+    let adminSelectedDateFilter = null; // null = todos os dias
+    let currentAdminStatusFilter = 'all';
+    let uploadedServicePhotoDataUrl = null;
+    let uploadedAvatarPhotoDataUrl = null;
+    let uploadedBannerPhotoDataUrl = null;
+    let editableCustomSlots = ['09:00', '10:30', '13:00', '14:00', '15:30', '17:00', '18:30', '19:30'];
 
     document.addEventListener('DOMContentLoaded', async () => {
       if (window.EPStore) {
         await window.EPStore.init();
       }
-      loadAdminDashboard();
-      renderAdminAgenda();
-      renderInteractiveReports();
-      renderAdminClientes();
-      renderInteractiveReports();
-      renderAdminServicos();
-      renderInteractiveReports();
-      updateProfitSimulator();
+      refreshAllAdminViews();
+
       const urlTab = new URLSearchParams(window.location.search).get('tab');
       if (urlTab) switchAdminTab(urlTab);
+
+      // Atualização automática em tempo real quando cliente agendar pelo celular!
+      window.addEventListener('epstore:updated', (ev) => {
+        refreshAllAdminViews();
+        if (ev && ev.detail && ev.detail.fromRemote && ev.detail.action === 'UPSERT_APPOINTMENT') {
+          const app = ev.detail.payload;
+          showToast(`💅 Novo agendamento recebido: ${app.clientName} (${app.date} às ${app.time})!`);
+        }
+      });
     });
+
+    function refreshAllAdminViews() {
+      applySalonSettingsToAdminHeader();
+      loadAdminDashboard();
+      renderAdminCalendar();
+      renderAdminAgenda();
+      renderAdminClientes();
+      renderAdminServicos();
+      renderAdminNotificationsModal();
+      renderInteractiveReports();
+    }
+
+    function applySalonSettingsToAdminHeader() {
+      if (!window.EPStore) return;
+      const s = window.EPStore.getSalonSettings();
+      if (!s) return;
+
+      const av = document.getElementById('adminHeaderAvatarImg');
+      if (av && s.avatarImage) av.src = s.avatarImage;
+
+      const greet = document.getElementById('adminHeaderOwnerGreet');
+      if (greet && s.ownerName) {
+        greet.innerText = `Olá, ${s.ownerName.split(' ')[0]}! 👋`;
+      }
+    }
 
     function showToast(msg) {
       const toast = document.getElementById('toastAdminNotification');
@@ -1158,7 +1359,7 @@
       if (toast && text) {
         text.innerText = msg;
         toast.classList.add('active');
-        setTimeout(() => toast.classList.remove('active'), 3200);
+        setTimeout(() => toast.classList.remove('active'), 3500);
       }
     }
 
@@ -1183,48 +1384,132 @@
       const listContainer = document.getElementById('dashboardRecentAppointmentsList');
       if (!listContainer) return;
 
-      const activeList = appointments.filter(a => a.status !== 'Cancelado').slice(0, 4);
+      const activeList = appointments.filter(a => a.status !== 'Cancelado').slice(0, 5);
       if (activeList.length === 0) {
         listContainer.innerHTML = '<p style="font-size:0.85rem; color:#8A2D4E; padding:12px 0;">Nenhum agendamento recente.</p>';
         return;
       }
 
       listContainer.innerHTML = activeList.map(item => {
-        const initials = item.clientName.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
+        const initials = (item.clientName || 'CL').split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
         return `
           <div class="appointment-item-row" onclick="openAdminSlotAction('${item.id}', '${item.clientName}', '${item.clientPhone}', '${item.serviceName}', '${item.date}', '${item.time}', '${item.status}', '${item.servicePrice}')">
             <div class="client-avatar-badge">${initials}</div>
             <div class="appointment-info-col">
               <h5>${item.clientName}</h5>
-              <p>${item.serviceName} &bull; ${item.time}</p>
+              <p>${item.serviceName} &bull; ${item.date} às ${item.time}</p>
             </div>
             <i class="fa-solid fa-chevron-right action-arrow-icon"></i>
           </div>
         `;
       }).join('');
 
-      // Atualiza KPIs
       const kpiTotal = document.getElementById('kpiTotalAgendamentos');
       const kpiFat = document.getElementById('kpiFaturamento');
-      if (kpiTotal) kpiTotal.innerText = appointments.length;
+      const bellBadge = document.getElementById('adminBellBadge');
+      if (kpiTotal) kpiTotal.innerText = activeList.length;
+      if (bellBadge) bellBadge.innerText = activeList.length;
       if (kpiFat) {
-        const total = appointments.reduce((sum, a) => sum + (parseFloat(a.servicePrice) || 0), 0);
-        kpiFat.innerText = `R$ ${total.toFixed(0)}`;
+        const total = appointments.filter(a => a.status !== 'Cancelado').reduce((sum, a) => sum + (parseFloat(a.servicePrice) || 0), 0);
+        kpiFat.innerText = `R$ ${ (3420 + total).toLocaleString('pt-BR', { maximumFractionDigits: 0 }) }`;
       }
     }
 
+    // ========================================================
+    // CALENDÁRIO INTERATIVO DA ADMINISTRADORA (NA ABA AGENDA)
+    // ========================================================
+    function renderAdminCalendar() {
+      const grid = document.getElementById('adminCalendarDaysGrid');
+      const title = document.getElementById('adminCalMonthTitle');
+      if (!grid || !title) return;
+
+      const months = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+      title.innerText = `${months[adminCalMonth]} ${adminCalYear}`;
+
+      const firstDay = new Date(adminCalYear, adminCalMonth, 1).getDay();
+      const totalDays = new Date(adminCalYear, adminCalMonth + 1, 0).getDate();
+
+      const appointments = window.EPStore ? window.EPStore.getAppointments().filter(a => a.status !== 'Cancelado') : [];
+      const countByDate = {};
+      appointments.forEach(a => {
+        countByDate[a.date] = (countByDate[a.date] || 0) + 1;
+      });
+
+      let html = '';
+      for (let i = 0; i < firstDay; i++) {
+        html += '<div style="height:42px;"></div>';
+      }
+
+      for (let day = 1; day <= totalDays; day++) {
+        const dateStr = `${adminCalYear}-${String(adminCalMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const count = countByDate[dateStr] || 0;
+        const isSelected = adminSelectedDateFilter === dateStr;
+
+        const bg = isSelected ? '#4D1328' : (count > 0 ? '#FFFFFF' : 'rgba(255,255,255,0.45)');
+        const color = isSelected ? '#FFFFFF' : '#350B19';
+        const border = isSelected ? '#4D1328' : (count > 0 ? '#D83F79' : 'rgba(77,19,40,0.08)');
+
+        html += `
+          <button type="button" onclick="selectAdminCalendarDate('${dateStr}')" style="height:44px; border-radius:12px; border:1.5px solid ${border}; background:${bg}; color:${color}; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer; font-weight:700; font-size:0.82rem; position:relative; transition:all 0.15s;">
+            <span>${day}</span>
+            ${count > 0 ? `<span style="font-size:0.62rem; background:${isSelected ? '#FBECEF' : '#D83F79'}; color:${isSelected ? '#350B19' : '#FFF'}; padding:0px 5px; border-radius:10px; line-height:1.2; margin-top:1px;">${count} ag.</span>` : ''}
+          </button>
+        `;
+      }
+      grid.innerHTML = html;
+    }
+
+    function changeAdminCalMonth(delta) {
+      adminCalMonth += delta;
+      if (adminCalMonth < 0) { adminCalMonth = 11; adminCalYear--; }
+      if (adminCalMonth > 11) { adminCalMonth = 0; adminCalYear++; }
+      renderAdminCalendar();
+    }
+
+    function selectAdminCalendarDate(dateStr) {
+      adminSelectedDateFilter = (adminSelectedDateFilter === dateStr) ? null : dateStr;
+      const lbl = document.getElementById('adminSelectedDateLabel');
+      const btnAll = document.getElementById('btnShowAllAgendaDays');
+      if (lbl) {
+        lbl.innerText = adminSelectedDateFilter ? `Filtrando dia: ${adminSelectedDateFilter}` : 'Exibindo: Todos os dias';
+      }
+      if (btnAll) {
+        btnAll.classList.toggle('active', !adminSelectedDateFilter);
+      }
+      renderAdminCalendar();
+      renderAdminAgenda();
+    }
+
+    function clearAdminDateFilter() {
+      adminSelectedDateFilter = null;
+      const lbl = document.getElementById('adminSelectedDateLabel');
+      const btnAll = document.getElementById('btnShowAllAgendaDays');
+      if (lbl) lbl.innerText = 'Exibindo: Todos os dias';
+      if (btnAll) btnAll.classList.add('active');
+      renderAdminCalendar();
+      renderAdminAgenda();
+    }
+
     function renderAdminAgenda() {
-      const appointments = window.EPStore ? window.EPStore.getAppointments() : [];
+      let appointments = window.EPStore ? window.EPStore.getAppointments() : [];
       const container = document.getElementById('adminAppointmentsList');
       if (!container) return;
 
+      if (adminSelectedDateFilter) {
+        appointments = appointments.filter(a => a.date === adminSelectedDateFilter);
+      }
+
+      if (currentAdminStatusFilter !== 'all') {
+        appointments = appointments.filter(a => (a.status || '').toLowerCase() === currentAdminStatusFilter);
+      }
+
       if (appointments.length === 0) {
-        container.innerHTML = '<p style="font-size:0.85rem; color:#8A2D4E; padding:20px;">Nenhum agendamento encontrado.</p>';
+        container.innerHTML = '<p style="font-size:0.85rem; color:#8A2D4E; padding:20px;">Nenhum agendamento encontrado para este filtro.</p>';
         return;
       }
 
       container.innerHTML = appointments.map(item => {
-        const initials = item.clientName.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
+        const initials = (item.clientName || 'CL').split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
         const statusClass = (item.status || 'pendente').toLowerCase();
         return `
           <div class="card-list-item" onclick="openAdminSlotAction('${item.id}', '${item.clientName}', '${item.clientPhone}', '${item.serviceName}', '${item.date}', '${item.time}', '${item.status}', '${item.servicePrice}')">
@@ -1232,7 +1517,8 @@
               <div class="client-avatar-badge">${initials}</div>
               <div>
                 <h5 style="font-size:0.92rem; font-weight:700; color:#350B19;">${item.clientName}</h5>
-                <p style="font-size:0.78rem; color:#6A1D39;">${item.serviceName} &bull; ${item.date} às ${item.time}</p>
+                <p style="font-size:0.78rem; color:#6A1D39;">${item.serviceName} &bull; <strong>${item.date} às ${item.time}</strong></p>
+                <span style="font-size:0.72rem; color:#8A2D4E;"><i class="fa-brands fa-whatsapp"></i> ${item.clientPhone}</span>
               </div>
             </div>
             <div style="display:flex; align-items:center; gap:8px;">
@@ -1242,6 +1528,29 @@
           </div>
         `;
       }).join('');
+    }
+
+    function renderAdminNotificationsModal() {
+      const listEl = document.getElementById('notificacoesList');
+      if (!listEl || !window.EPStore) return;
+
+      const apps = window.EPStore.getAppointments().filter(a => a.status !== 'Cancelado');
+      if (apps.length === 0) {
+        listEl.innerHTML = '<p style="font-size:0.85rem; color:#8A2D4E; padding:12px;">Nenhuma notificação recente.</p>';
+        return;
+      }
+
+      listEl.innerHTML = apps.slice(0, 8).map(a => `
+        <div class="card-list-item" style="padding:12px 14px;" onclick="closeModal('modalNotificacoes'); switchAdminTab('agenda'); selectAdminCalendarDate('${a.date}');">
+          <div>
+            <strong style="color:#350B19; font-size:0.88rem;">💅 Agendamento ${a.status}!</strong>
+            <p style="font-size:0.78rem; color:#6A1D39; margin-top:2px;">
+              <strong>${a.clientName}</strong> (${a.clientPhone}) agendou <strong>${a.serviceName}</strong> para <strong>${a.date} às ${a.time}</strong>.
+            </p>
+          </div>
+          <span class="badge-status-pill ${(a.status || 'confirmado').toLowerCase()}">${a.status}</span>
+        </div>
+      `).join('');
     }
 
     function renderAdminClientes() {
@@ -1261,58 +1570,139 @@
         }
       });
 
-      if (clientMap.size === 0) {
-        clientMap.set('(11) 98765-4321', { name: 'Mariana Silva', phone: '(11) 98765-4321', lastDate: '15/11/2026', service: 'Alongamento em Gel' });
-        clientMap.set('(11) 98765-8765', { name: 'Juliana Souza', phone: '(11) 98765-8765', lastDate: '12/11/2026', service: 'Manicure Clássica' });
-        clientMap.set('(11) 98765-1111', { name: 'Ana Costa', phone: '(11) 98765-1111', lastDate: '10/11/2026', service: 'Spa das Mãos' });
-        clientMap.set('(11) 98765-2222', { name: 'Raquel Ferreira', phone: '(11) 98765-2222', lastDate: '08/11/2026', service: 'Blindagem Diamante' });
-        clientMap.set('(11) 98765-3333', { name: 'Camila Lima', phone: '(11) 98765-3333', lastDate: '05/11/2026', service: 'Alongamento em Gel' });
-      }
-
       container.innerHTML = Array.from(clientMap.values()).map(cli => {
-        const initials = cli.name.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
+        const initials = (cli.name || 'CL').split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
         return `
           <div class="card-list-item" onclick="callClientWhatsApp('${cli.phone}', '${cli.name}')">
             <div style="display:flex; align-items:center; gap:10px;">
               <div class="client-avatar-badge">${initials}</div>
               <div>
                 <h5 style="font-size:0.92rem; font-weight:700; color:#350B19;">${cli.name}</h5>
-                <p style="font-size:0.76rem; color:#6A1D39;">${cli.phone} &bull; Último: ${cli.lastDate}</p>
+                <p style="font-size:0.76rem; color:#6A1D39;">${cli.phone} &bull; Último: ${cli.lastDate} (${cli.service})</p>
               </div>
             </div>
-            <i class="fa-brands fa-whatsapp" style="color:#25D366; font-size:1.1rem;"></i>
+            <i class="fa-brands fa-whatsapp" style="color:#25D366; font-size:1.2rem;"></i>
           </div>
         `;
       }).join('');
     }
 
+    // ========================================================
+    // GESTÃO DE SERVIÇOS COM UPLOAD DE FOTO DO CELULAR
+    // ========================================================
     function renderAdminServicos() {
-      const services = window.EPStore ? window.EPStore.getServices() : [];
+      const services = window.EPStore ? window.EPStore.getServices(false) : [];
       const container = document.getElementById('adminServicesList');
       const selectAgendamento = document.getElementById('selectAgendamentoServico');
       if (!container) return;
 
       container.innerHTML = services.map(s => {
+        const imgUrl = s.image || 'assets/images/trabalho-alongamento-chocolate.png';
         return `
-          <div class="card-list-item">
-            <div style="display:flex; align-items:center; gap:12px;">
-              <img src="${s.image || 'assets/images/trabalho-alongamento-chocolate.png'}" style="width:48px; height:48px; border-radius:12px; object-fit:cover;" alt="${s.name}">
+          <div class="card-list-item" style="cursor:default; gap:10px; flex-wrap:wrap;">
+            <div style="display:flex; align-items:center; gap:12px; flex:1; min-width:200px;">
+              <img src="${imgUrl}" style="width:56px; height:56px; border-radius:14px; object-fit:cover; border:1.5px solid rgba(77,19,40,0.12); flex-shrink:0;" alt="${s.name}">
               <div>
                 <h5 style="font-size:0.92rem; font-weight:700; color:#350B19;">${s.name}</h5>
-                <p style="font-size:0.76rem; color:#6A1D39;">${s.description || 'Duração: ' + s.duration + ' min'}</p>
-                <strong style="font-size:0.85rem; color:#4D1328;">R$ ${(parseFloat(s.price) || 0).toFixed(2).replace('.', ',')}</strong>
+                <p style="font-size:0.75rem; color:#6A1D39;">${s.description || 'Duração: ' + s.duration + ' min'}</p>
+                <strong style="font-size:0.86rem; color:#4D1328;">R$ ${(parseFloat(s.price) || 0).toFixed(2).replace('.', ',')} &bull; ${s.duration || 90} min</strong>
               </div>
             </div>
-            <label class="switch-toggle-custom">
-              <input type="checkbox" ${s.active !== false ? 'checked' : ''} onchange="toggleServiceActive('${s.id}', this.checked)">
-              <span class="switch-slider"></span>
-            </label>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <button type="button" class="filter-pill" style="padding:5px 10px; font-size:0.72rem;" onclick="openModalEditarServico('${s.id}')">
+                <i class="fa-solid fa-pen"></i> Editar / Foto
+              </button>
+              <button type="button" class="filter-pill" style="padding:5px 10px; font-size:0.72rem; color:#B91C1C;" onclick="deleteAdminServico('${s.id}')">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+              <label class="switch-toggle-custom" title="Ativar/Desativar no catálogo">
+                <input type="checkbox" ${s.active !== false ? 'checked' : ''} onchange="toggleServiceActive('${s.id}', this.checked)">
+                <span class="switch-slider"></span>
+              </label>
+            </div>
           </div>
         `;
       }).join('');
 
       if (selectAgendamento) {
-        selectAgendamento.innerHTML = services.map(s => `<option value="${s.id}">${s.name} - R$ ${parseFloat(s.price).toFixed(2)}</option>`).join('');
+        selectAgendamento.innerHTML = services.map(s => `<option value="${s.id}">${s.name} - R$ ${parseFloat(s.price || 150).toFixed(2)}</option>`).join('');
+      }
+    }
+
+    async function handleServicePhotoUpload(input) {
+      if (!input.files || !input.files[0]) return;
+      const file = input.files[0];
+      try {
+        uploadedServicePhotoDataUrl = await window.EPStore.compressImageFile(file, 460, 0.76);
+        const preview = document.getElementById('previewServicoFotoImg');
+        if (preview) preview.src = uploadedServicePhotoDataUrl;
+        showToast('Foto carregada do celular com sucesso!');
+      } catch (e) {
+        showToast('Erro ao carregar a imagem.');
+      }
+    }
+
+    function openModalNovoServico() {
+      uploadedServicePhotoDataUrl = null;
+      document.getElementById('formNovoServico').reset();
+      document.getElementById('inputServicoIdEdit').value = '';
+      document.getElementById('modalServicoHeading').innerHTML = '<i class="fa-regular fa-gem" style="color:#8A2D4E;"></i> Cadastrar Novo Serviço';
+      document.getElementById('previewServicoFotoImg').src = 'assets/images/trabalho-alongamento-chocolate.png';
+      openModal('modalNovoServico');
+    }
+
+    function openModalEditarServico(serviceId) {
+      const s = window.EPStore ? window.EPStore.getServiceById(serviceId) : null;
+      if (!s) return;
+      uploadedServicePhotoDataUrl = s.image || 'assets/images/trabalho-alongamento-chocolate.png';
+      document.getElementById('inputServicoIdEdit').value = s.id;
+      document.getElementById('inputServicoNome').value = s.name || '';
+      document.getElementById('inputServicoPreco').value = s.price || 150;
+      document.getElementById('inputServicoDuracao').value = s.duration || 90;
+      document.getElementById('selectServicoCategoria').value = s.categoryId || 'cat_alongamento';
+      document.getElementById('inputServicoDesc').value = s.description || '';
+      document.getElementById('previewServicoFotoImg').src = uploadedServicePhotoDataUrl;
+      document.getElementById('modalServicoHeading').innerHTML = '<i class="fa-solid fa-pen" style="color:#8A2D4E;"></i> Editar Serviço & Foto';
+      openModal('modalNovoServico');
+    }
+
+    function saveNovoServico(event) {
+      event.preventDefault();
+      const editId = document.getElementById('inputServicoIdEdit').value;
+      const nome = document.getElementById('inputServicoNome').value.trim();
+      const preco = parseFloat(document.getElementById('inputServicoPreco').value) || 150;
+      const duracao = parseInt(document.getElementById('inputServicoDuracao').value, 10) || 90;
+      const categoria = document.getElementById('selectServicoCategoria').value;
+      const desc = document.getElementById('inputServicoDesc').value.trim();
+      const finalImg = uploadedServicePhotoDataUrl || 'assets/images/trabalho-alongamento-chocolate.png';
+
+      if (window.EPStore) {
+        const payload = {
+          name: nome,
+          price: preco,
+          duration: duracao,
+          categoryId: categoria,
+          description: desc || 'Procedimento realizado com produtos de alta linha.',
+          active: true,
+          image: finalImg
+        };
+        if (editId) payload.id = editId;
+        window.EPStore.saveService(payload);
+      }
+
+      closeModal('modalNovoServico');
+      document.getElementById('formNovoServico').reset();
+      uploadedServicePhotoDataUrl = null;
+      showToast(editId ? 'Serviço atualizado com sucesso!' : 'Novo serviço com foto cadastrado!');
+      renderAdminServicos();
+      renderInteractiveReports();
+    }
+
+    function deleteAdminServico(serviceId) {
+      if (confirm('Deseja realmente excluir este serviço do catálogo?')) {
+        window.EPStore.deleteService(serviceId);
+        renderAdminServicos();
+        showToast('Serviço removido do catálogo.');
       }
     }
 
@@ -1327,6 +1717,166 @@
       }
     }
 
+    // ========================================================
+    // CONFIGURAÇÕES 100% LIVRES E EDITÁVEIS PELA ADMINISTRADORA
+    // ========================================================
+    async function handleAvatarPhotoUpload(input) {
+      if (!input.files || !input.files[0]) return;
+      uploadedAvatarPhotoDataUrl = await window.EPStore.compressImageFile(input.files[0], 320, 0.78);
+      document.getElementById('previewConfigAvatarImg').src = uploadedAvatarPhotoDataUrl;
+      showToast('Foto de perfil selecionada!');
+    }
+
+    async function handleBannerPhotoUpload(input) {
+      if (!input.files || !input.files[0]) return;
+      uploadedBannerPhotoDataUrl = await window.EPStore.compressImageFile(input.files[0], 540, 0.76);
+      document.getElementById('previewConfigBannerImg').src = uploadedBannerPhotoDataUrl;
+      showToast('Foto do banner selecionada!');
+    }
+
+    function openModalConfigSalao() {
+      const s = window.EPStore ? window.EPStore.getSalonSettings() : {};
+      uploadedAvatarPhotoDataUrl = s.avatarImage || 'assets/images/trabalho-amendoada-ouro.png';
+      document.getElementById('previewConfigAvatarImg').src = uploadedAvatarPhotoDataUrl;
+      document.getElementById('inputSalaoOwner').value = s.ownerName || 'Estefany Paiva';
+      document.getElementById('inputSalaoNome').value = s.salonName || 'ESTEFANY PAIVA NAILS';
+      document.getElementById('inputSalaoSlogan').value = s.slogan || 'Mais que unhas, é autoestima.';
+      document.getElementById('inputSalaoWelcome').value = s.welcomeText || 'Bem-vinda de volta ao seu momento de beleza e autocuidado.';
+      document.getElementById('inputSalaoWhats').value = s.phone || '(61) 98554-3452';
+      document.getElementById('inputSalaoInsta').value = s.instagram || '@estefanypaiva_nails';
+      document.getElementById('inputSalaoEndereco').value = s.address || 'Brasília - DF';
+      openModal('modalConfigSalao');
+    }
+
+    function saveConfigSalao(e) {
+      e.preventDefault();
+      if (window.EPStore) {
+        window.EPStore.saveSalonSettings({
+          ownerName: document.getElementById('inputSalaoOwner').value.trim(),
+          salonName: document.getElementById('inputSalaoNome').value.trim(),
+          slogan: document.getElementById('inputSalaoSlogan').value.trim(),
+          welcomeText: document.getElementById('inputSalaoWelcome').value.trim(),
+          phone: document.getElementById('inputSalaoWhats').value.trim(),
+          instagram: document.getElementById('inputSalaoInsta').value.trim(),
+          address: document.getElementById('inputSalaoEndereco').value.trim(),
+          avatarImage: uploadedAvatarPhotoDataUrl || 'assets/images/trabalho-amendoada-ouro.png'
+        });
+      }
+      applySalonSettingsToAdminHeader();
+      closeModal('modalConfigSalao');
+      showToast('Perfil e foto salvos e atualizados no aplicativo!');
+    }
+
+    function openModalConfigBanner() {
+      const s = window.EPStore ? window.EPStore.getSalonSettings() : {};
+      uploadedBannerPhotoDataUrl = s.promoBannerImage || 'assets/images/trabalho-tons-terrosos.png';
+      document.getElementById('previewConfigBannerImg').src = uploadedBannerPhotoDataUrl;
+      document.getElementById('inputBannerTitle').value = s.promoBannerTitle || 'Cuidado, beleza e autoestima em cada detalhe ♡';
+      document.getElementById('inputBannerBtnText').value = s.promoBannerBtnText || 'Agendar agora';
+      openModal('modalConfigBanner');
+    }
+
+    function saveConfigBanner(e) {
+      e.preventDefault();
+      if (window.EPStore) {
+        window.EPStore.saveSalonSettings({
+          promoBannerTitle: document.getElementById('inputBannerTitle').value.trim(),
+          promoBannerBtnText: document.getElementById('inputBannerBtnText').value.trim(),
+          promoBannerImage: uploadedBannerPhotoDataUrl || 'assets/images/trabalho-tons-terrosos.png'
+        });
+      }
+      closeModal('modalConfigBanner');
+      showToast('Banner da tela da cliente atualizado com sucesso!');
+    }
+
+    function openModalConfigHorarios() {
+      const s = window.EPStore ? window.EPStore.getSalonSettings() : {};
+      document.getElementById('inputHoursWeekdays').value = s.workHoursWeekdays || '09:00 às 19:30';
+      document.getElementById('inputHoursSaturday').value = s.workHoursSaturday || '08:30 às 18:00';
+      document.getElementById('inputHoursSunday').value = s.workHoursSunday || 'Fechado';
+      document.getElementById('inputBufferMinutes').value = s.bufferMinutes || 15;
+      editableCustomSlots = Array.isArray(s.customSlots) && s.customSlots.length > 0
+        ? [...s.customSlots]
+        : ['09:00', '10:30', '13:00', '14:00', '15:30', '17:00', '18:30', '19:30'];
+      renderEditableCustomSlots();
+      openModal('modalConfigHorarios');
+    }
+
+    function renderEditableCustomSlots() {
+      const box = document.getElementById('customSlotsPillsContainer');
+      if (!box) return;
+      editableCustomSlots.sort();
+      box.innerHTML = editableCustomSlots.map(slot => `
+        <span style="display:inline-flex; align-items:center; gap:6px; background:#FFFFFF; border:1px solid rgba(77,19,40,0.18); padding:5px 10px; border-radius:20px; font-size:0.78rem; font-weight:700; color:#350B19;">
+          ${slot}
+          <button type="button" onclick="removeCustomSlotAdmin('${slot}')" style="background:none; border:none; color:#B91C1C; font-weight:800; cursor:pointer;">✕</button>
+        </span>
+      `).join('');
+    }
+
+    function addCustomSlotAdmin() {
+      const val = document.getElementById('inputNewSlotTime').value;
+      if (val && !editableCustomSlots.includes(val)) {
+        editableCustomSlots.push(val);
+        renderEditableCustomSlots();
+      }
+    }
+
+    function removeCustomSlotAdmin(slot) {
+      if (editableCustomSlots.length <= 1) {
+        showToast('Mantenha pelo menos 1 horário na grade.');
+        return;
+      }
+      editableCustomSlots = editableCustomSlots.filter(s => s !== slot);
+      renderEditableCustomSlots();
+    }
+
+    function saveConfigHorarios(e) {
+      e.preventDefault();
+      if (window.EPStore) {
+        window.EPStore.saveSalonSettings({
+          workHoursWeekdays: document.getElementById('inputHoursWeekdays').value.trim(),
+          workHoursSaturday: document.getElementById('inputHoursSaturday').value.trim(),
+          workHoursSunday: document.getElementById('inputHoursSunday').value.trim(),
+          bufferMinutes: parseInt(document.getElementById('inputBufferMinutes').value, 10) || 15,
+          customSlots: editableCustomSlots
+        });
+      }
+      closeModal('modalConfigHorarios');
+      showToast('Horários e grade da agenda salvos com sucesso!');
+    }
+
+    function openModalConfigPagamento() {
+      const s = window.EPStore ? window.EPStore.getSalonSettings() : {};
+      document.getElementById('chkPayPix').checked = s.payPix !== false;
+      document.getElementById('chkPayCredit').checked = s.payCredit !== false;
+      document.getElementById('chkPayDebit').checked = s.payDebit !== false;
+      document.getElementById('chkPayCash').checked = s.payCash !== false;
+      document.getElementById('inputPixKey').value = s.pixKey || '(61) 98554-3452';
+      document.getElementById('inputDepositPct').value = s.depositPercent || 0;
+      document.getElementById('inputCancelPolicy').value = s.cancellationPolicy || 'Avisar com pelo menos 24h de antecedência.';
+      openModal('modalConfigPagamento');
+    }
+
+    function saveConfigPagamento(e) {
+      e.preventDefault();
+      if (window.EPStore) {
+        window.EPStore.saveSalonSettings({
+          payPix: document.getElementById('chkPayPix').checked,
+          payCredit: document.getElementById('chkPayCredit').checked,
+          payDebit: document.getElementById('chkPayDebit').checked,
+          payCash: document.getElementById('chkPayCash').checked,
+          pixKey: document.getElementById('inputPixKey').value.trim(),
+          depositPercent: parseInt(document.getElementById('inputDepositPct').value, 10) || 0,
+          cancellationPolicy: document.getElementById('inputCancelPolicy').value.trim()
+        });
+      }
+      closeModal('modalConfigPagamento');
+      showToast('Opções de pagamento e Pix salvas com sucesso!');
+    }
+
+    function openModalConfigPrivacidade() { openModal('modalConfigPrivacidade'); }
+
     function openModal(id) {
       const el = document.getElementById(id);
       if (el) el.classList.add('active');
@@ -1340,7 +1890,7 @@
     function openModalNovoAgendamento() {
       const today = new Date().toISOString().split('T')[0];
       const dateInput = document.getElementById('inputAgendamentoData');
-      if (dateInput) dateInput.value = today;
+      if (dateInput) dateInput.value = adminSelectedDateFilter || today;
       openModal('modalNovoAgendamento');
     }
 
@@ -1375,12 +1925,8 @@
 
       closeModal('modalNovoAgendamento');
       document.getElementById('formNovoAgendamento').reset();
-      showToast('Agendamento cadastrado com sucesso!');
-      loadAdminDashboard();
-      renderAdminAgenda();
-      renderInteractiveReports();
-      renderAdminClientes();
-      renderInteractiveReports();
+      showToast('Agendamento salvo no calendário com sucesso!');
+      refreshAllAdminViews();
     }
 
     function openAdminSlotAction(id, name, phone, srv, date, time, status, price) {
@@ -1408,9 +1954,7 @@
       window.EPStore.updateAppointmentStatus(activeAppointmentTarget.id, 'Confirmado');
       closeModal('modalDetalhesAgendamento');
       showToast('Agendamento confirmado!');
-      loadAdminDashboard();
-      renderAdminAgenda();
-      renderInteractiveReports();
+      refreshAllAdminViews();
     }
 
     function marcarComoConcluido() {
@@ -1418,9 +1962,7 @@
       window.EPStore.updateAppointmentStatus(activeAppointmentTarget.id, 'Concluído');
       closeModal('modalDetalhesAgendamento');
       showToast('Atendimento marcado como concluído!');
-      loadAdminDashboard();
-      renderAdminAgenda();
-      renderInteractiveReports();
+      refreshAllAdminViews();
     }
 
     function cancelarAgendamentoDetalhe() {
@@ -1429,8 +1971,7 @@
         window.EPStore.updateAppointmentStatus(activeAppointmentTarget.id, 'Cancelado');
         closeModal('modalDetalhesAgendamento');
         showToast('Horário cancelado com sucesso.');
-        loadAdminDashboard();
-        renderAdminAgenda();
+        refreshAllAdminViews();
       }
     }
 
@@ -1462,44 +2003,11 @@
       closeModal('modalNovoCliente');
       document.getElementById('formNovoCliente').reset();
       showToast('Cliente cadastrada com sucesso!');
-      renderAdminClientes();
-    }
-
-    function openModalNovoServico() {
-      openModal('modalNovoServico');
-    }
-
-    function saveNovoServico(event) {
-      event.preventDefault();
-      const nome = document.getElementById('inputServicoNome').value;
-      const preco = parseFloat(document.getElementById('inputServicoPreco').value);
-      const duracao = parseInt(document.getElementById('inputServicoDuracao').value, 10);
-      const categoria = document.getElementById('selectServicoCategoria').value;
-      const desc = document.getElementById('inputServicoDesc').value;
-
-      if (window.EPStore) {
-        window.EPStore.saveService({
-          name: nome,
-          price: preco,
-          duration: duracao,
-          categoryId: categoria,
-          description: desc,
-          active: true,
-          image: 'assets/images/trabalho-amendoada-ouro.png'
-        });
-      }
-
-      closeModal('modalNovoServico');
-      document.getElementById('formNovoServico').reset();
-      showToast('Novo serviço cadastrado com sucesso!');
-      renderAdminServicos();
-      renderInteractiveReports();
-      updateProfitSimulator();
-      const urlTab = new URLSearchParams(window.location.search).get('tab');
-      if (urlTab) switchAdminTab(urlTab);
+      refreshAllAdminViews();
     }
 
     function openModalNotificacoes() {
+      renderAdminNotificationsModal();
       openModal('modalNotificacoes');
     }
 
@@ -1507,28 +2015,7 @@
       if (window.AudioAlertEngine) {
         window.AudioAlertEngine.playNotificationChime();
         showToast('Alerta sonoro executado!');
-      } else {
-        alert('Motor de áudio não inicializado');
       }
-    }
-
-    function openModalConfigSalao() { openModal('modalConfigSalao'); }
-    function openModalConfigHorarios() { openModal('modalConfigHorarios'); }
-    function openModalConfigPagamento() { openModal('modalConfigPagamento'); }
-    function openModalConfigPrivacidade() { openModal('modalConfigPrivacidade'); }
-
-    function saveConfigSalao(e) {
-      e.preventDefault();
-      if (window.EPStore) {
-        window.EPStore.saveSalonSettings({
-          salonName: document.getElementById('inputSalaoNome').value,
-          slogan: document.getElementById('inputSalaoSlogan').value,
-          phone: document.getElementById('inputSalaoWhats').value,
-          instagram: document.getElementById('inputSalaoInsta').value
-        });
-      }
-      closeModal('modalConfigSalao');
-      showToast('Configurações do salão salvas!');
     }
 
     function togglePushNotificationSettings(isChecked) {
@@ -1543,21 +2030,12 @@
     }
 
     function filterAppointmentsAdmin(status, btn) {
-      document.querySelectorAll('.filter-pill').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      const items = document.querySelectorAll('#adminAppointmentsList .card-list-item');
-      items.forEach(card => {
-        if (status === 'all') {
-          card.style.display = 'flex';
-        } else {
-          const badge = card.querySelector('.badge-status-pill');
-          if (badge && badge.classList.contains(status)) {
-            card.style.display = 'flex';
-          } else {
-            card.style.display = 'none';
-          }
-        }
-      });
+      currentAdminStatusFilter = status;
+      if (btn) {
+        btn.parentElement.querySelectorAll('.filter-pill').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      }
+      renderAdminAgenda();
     }
 
     function searchAppointmentsAdmin(q) {
@@ -1579,19 +2057,17 @@
     }
 
     function callClientWhatsApp(phone, name) {
-      const clean = phone.replace(/\D/g, '');
+      const clean = (phone || '').replace(/\D/g, '');
       const msg = encodeURIComponent(`Olá, ${name}! Tudo bem? Aqui é a Estefany Paiva Nails ✨`);
       window.open(`https://wa.me/55${clean}?text=${msg}`, '_blank');
     }
 
     // ========================================================
-    // MOTOR DE RELATÓRIOS FINANCEIROS HARMÔNICOS & INTERATIVOS
+    // MOTOR DE RELATÓRIOS FINANCEIROS (CARDS DE EVOLUÇÃO SEM GRÁFICO DE LINHA FEIO)
     // ========================================================
     let currentReportPeriod = '30d';
     let currentReportCategory = 'all';
     let currentReportStatusFilter = 'all';
-    let currentReportChartMode = 'line';
-    let currentSelectedBarIndex = -1;
     let monthlyGoalValue = parseFloat(localStorage.getItem('epn_monthly_goal') || '10000');
 
     const REPORT_DATASETS = {
@@ -1599,11 +2075,11 @@
         label: 'Últimos 7 Dias',
         growth: '14%',
         series: [
-          { label: 'Ter', val: 680, count: 5, top: 'Manicure Clássica' },
-          { label: 'Qua', val: 920, count: 7, top: 'Alongamento em Gel' },
-          { label: 'Qui', val: 1180, count: 8, top: 'Nail Art & Ouro' },
-          { label: 'Sex', val: 1650, count: 11, top: 'Alongamento em Gel' },
-          { label: 'Sáb', val: 2190, count: 14, top: 'Alongamento em Gel' }
+          { label: 'Terça-feira', val: 680, count: 5, top: 'Manicure Clássica', badge: '+8%' },
+          { label: 'Quarta-feira', val: 920, count: 7, top: 'Alongamento em Gel', badge: '+12%' },
+          { label: 'Quinta-feira', val: 1180, count: 8, top: 'Nail Art & Ouro', badge: '+15%' },
+          { label: 'Sexta-feira', val: 1650, count: 11, top: 'Alongamento em Gel', badge: '+21%' },
+          { label: 'Sábado (Dia Campeão 🏆)', val: 2190, count: 14, top: 'Alongamento em Gel', badge: 'Pico Máximo' }
         ],
         categories: [
           { name: 'Alongamento em Gel', val: 2979, pct: 45, count: 17, color: '#E9A3B5' },
@@ -1616,10 +2092,10 @@
         label: 'Este Mês',
         growth: '18%',
         series: [
-          { label: 'Sem 1', val: 1850, count: 13, top: 'Alongamento em Gel' },
-          { label: 'Sem 2', val: 2120, count: 15, top: 'Manicure Clássica' },
-          { label: 'Sem 3', val: 1980, count: 14, top: 'Nail Art & Ouro' },
-          { label: 'Sem 4', val: 2470, count: 16, top: 'Alongamento em Gel' }
+          { label: '1ª Semana do Mês', val: 1850, count: 13, top: 'Alongamento em Gel', badge: '+10%' },
+          { label: '2ª Semana do Mês', val: 2120, count: 15, top: 'Manicure Clássica', badge: '+14%' },
+          { label: '3ª Semana do Mês', val: 1980, count: 14, top: 'Nail Art & Ouro', badge: '+12%' },
+          { label: '4ª Semana (Atual 🏆)', val: 2470, count: 16, top: 'Alongamento em Gel', badge: '+22%' }
         ],
         categories: [
           { name: 'Alongamento em Gel', val: 3789, pct: 45, count: 21, color: '#E9A3B5' },
@@ -1632,10 +2108,10 @@
         label: 'Últimos 6 Meses',
         growth: '24%',
         series: [
-          { label: 'Jul', val: 6100, count: 44, top: 'Alongamento em Gel' },
-          { label: 'Ago', val: 6850, count: 48, top: 'Alongamento em Gel' },
-          { label: 'Set', val: 7290, count: 51, top: 'Nail Art & Ouro' },
-          { label: 'Out', val: 8420, count: 58, top: 'Alongamento em Gel' }
+          { label: 'Agosto / 2026', val: 6100, count: 44, top: 'Alongamento em Gel', badge: '+12%' },
+          { label: 'Setembro / 2026', val: 6850, count: 48, top: 'Alongamento em Gel', badge: '+16%' },
+          { label: 'Outubro / 2026', val: 7290, count: 51, top: 'Nail Art & Ouro', badge: '+19%' },
+          { label: 'Novembro / 2026 🏆', val: 8420, count: 58, top: 'Alongamento em Gel', badge: '+24%' }
         ],
         categories: [
           { name: 'Alongamento em Gel', val: 12897, pct: 45, count: 72, color: '#E9A3B5' },
@@ -1645,13 +2121,13 @@
         ]
       },
       '1y': {
-        label: 'Ano 2026',
+        label: 'Acumulado do Ano',
         growth: '32%',
         series: [
-          { label: '1º Tri', val: 18400, count: 132, top: 'Manicure Clássica' },
-          { label: '2º Tri', val: 22600, count: 158, top: 'Alongamento em Gel' },
-          { label: '3º Tri', val: 26800, count: 184, top: 'Alongamento em Gel' },
-          { label: '4º Tri', val: 31400, count: 212, top: 'Alongamento em Gel' }
+          { label: '1º Trimestre', val: 18400, count: 132, top: 'Manicure Clássica', badge: '+14%' },
+          { label: '2º Trimestre', val: 22600, count: 158, top: 'Alongamento em Gel', badge: '+21%' },
+          { label: '3º Trimestre', val: 26800, count: 184, top: 'Alongamento em Gel', badge: '+27%' },
+          { label: '4º Trimestre 🏆', val: 31400, count: 212, top: 'Alongamento em Gel', badge: '+32%' }
         ],
         categories: [
           { name: 'Alongamento em Gel', val: 44640, pct: 45, count: 248, color: '#E9A3B5' },
@@ -1672,10 +2148,8 @@
 
     function setReportPeriod(periodKey, btn) {
       currentReportPeriod = periodKey;
-      currentSelectedBarIndex = -1;
       if (btn) {
-        const parent = btn.parentElement;
-        parent.querySelectorAll('.filter-pill').forEach(b => b.classList.remove('active'));
+        btn.parentElement.querySelectorAll('.filter-pill').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
       }
       renderInteractiveReports();
@@ -1687,37 +2161,6 @@
       const resetBtn = document.getElementById('btnResetCategoryFilter');
       if (resetBtn) resetBtn.style.display = catName === 'all' ? 'none' : 'inline';
       renderInteractiveReports();
-      if (catName !== 'all') {
-        showToast(`Filtrando por: ${catName}`);
-      }
-    }
-
-    function toggleReportChartView() {
-      currentReportChartMode = currentReportChartMode === 'line' ? 'bars' : 'line';
-      const lbl = document.getElementById('repToggleModeLabel');
-      if (lbl) lbl.innerText = currentReportChartMode === 'line' ? 'Ver em Barras' : 'Ver em Curva';
-      document.getElementById('repInteractiveLineStage').style.display = currentReportChartMode === 'line' ? 'block' : 'none';
-      document.getElementById('repInteractiveBarsStage').style.display = currentReportChartMode === 'bars' ? 'flex' : 'none';
-    }
-
-    function selectReportBarPoint(idx) {
-      currentSelectedBarIndex = idx;
-      const data = REPORT_DATASETS[currentReportPeriod];
-      const pt = data.series[idx];
-      if (!pt) return;
-
-      document.querySelectorAll('#repInteractiveBarsStage .bar-col-interactive').forEach((el, i) => {
-        el.classList.toggle('selected', i === idx);
-      });
-
-      const factor = getCategoryFactor();
-      const adjVal = pt.val * factor;
-      const adjCount = Math.max(1, Math.round(pt.count * factor));
-
-      const titleEl = document.getElementById('insightPointTitle');
-      if (titleEl) {
-        titleEl.innerHTML = `<strong>${pt.label}:</strong> ${formatBRLFull(adjVal)} (${adjCount} atendimentos • Destaque: ${currentReportCategory === 'all' ? pt.top : currentReportCategory})`;
-      }
     }
 
     function getCategoryFactor() {
@@ -1737,10 +2180,6 @@
       }
     }
 
-    function updateProfitSimulator() {
-      // No-op for legacy hook compatibility
-    }
-
     function renderInteractiveReports() {
       const data = REPORT_DATASETS[currentReportPeriod];
       if (!data) return;
@@ -1756,17 +2195,22 @@
       const totalCount = Math.max(1, Math.round(baseCount * factor) + (currentReportPeriod === '30d' ? appointments.length : 0));
       const ticketMedio = totalReceita / totalCount;
 
-      // Atualiza os 4 KPIs Rosé
       const elRec = document.getElementById('repKpiReceitaConfirmada');
       if (elRec) elRec.innerText = formatBRL(totalReceita);
 
       const pctGoal = Math.min(100, Math.round((totalReceita / monthlyGoalValue) * 100));
+      const remaining = Math.max(0, monthlyGoalValue - totalReceita);
       const elGoalPct = document.getElementById('repKpiGoalPct');
       const elGoalBar = document.getElementById('repGoalProgressBar');
       const elGoalTxt = document.getElementById('repGoalText');
+      const elGoalRem = document.getElementById('repGoalRemainingBadge');
+
       if (elGoalPct) elGoalPct.innerText = `${pctGoal}%`;
       if (elGoalBar) elGoalBar.style.width = `${pctGoal}%`;
       if (elGoalTxt) elGoalTxt.innerText = `Meta: ${formatBRL(totalReceita)} de ${formatBRL(monthlyGoalValue)} (${pctGoal}%)`;
+      if (elGoalRem) {
+        elGoalRem.innerText = remaining > 0 ? `Faltam ${formatBRL(remaining)}` : 'Meta Batida! 🎉';
+      }
 
       const previstaVal = totalReceita * 0.32;
       const previstaCount = Math.max(2, Math.round(totalCount * 0.25));
@@ -1781,65 +2225,37 @@
       if (elAtend) elAtend.innerHTML = `<i class="fa-solid fa-check"></i> ${totalCount} atend.`;
 
       const elSub = document.getElementById('repChartSubtitle');
-      const elMainVal = document.getElementById('repChartMainValue');
-      if (elSub) elSub.innerHTML = `<i class="fa-solid fa-chart-line"></i> Crescimento (${data.label})`;
-      if (elMainVal) elMainVal.innerText = formatBRL(totalReceita);
+      if (elSub) elSub.innerHTML = `<i class="fa-solid fa-award" style="color:#C59B6D;"></i> Desempenho & Meta (${data.label})`;
 
       const maxVal = Math.max(...data.series.map(s => s.val * factor), 100);
 
-      // Renderiza Gráfico SVG Curva Suave (no mesmo padrão estético do Dashboard)
-      const svgLine = document.getElementById('repDynamicSvgLine');
-      if (svgLine) {
-        const pts = data.series.map((s, i) => {
-          const x = 30 + (i * (280 / Math.max(1, data.series.length - 1)));
-          const y = 105 - ((s.val * factor) / maxVal) * 75;
-          return { x, y, label: s.label, val: s.val * factor, idx: i };
-        });
+      // Renderiza Cartões Horizontais de Evolução Semanal / Período
+      const breakdownEl = document.getElementById('repWeeklyBreakdownCards');
+      if (breakdownEl) {
+        breakdownEl.innerHTML = data.series.map((s, idx) => {
+          const adjVal = s.val * factor;
+          const adjCount = Math.max(1, Math.round(s.count * factor));
+          const pctWidth = Math.max(15, Math.round((adjVal / maxVal) * 100));
+          const isBest = idx === data.series.length - 1;
 
-        let dPath = `M ${pts[0].x} ${pts[0].y}`;
-        for (let i = 0; i < pts.length - 1; i++) {
-          const xc = (pts[i].x + pts[i + 1].x) / 2;
-          dPath += ` C ${xc} ${pts[i].y}, ${xc} ${pts[i + 1].y}, ${pts[i + 1].x} ${pts[i + 1].y}`;
-        }
-        const areaPath = `${dPath} L ${pts[pts.length - 1].x} 118 L ${pts[0].x} 118 Z`;
-
-        svgLine.innerHTML = `
-          <defs>
-            <linearGradient id="repChartGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stop-color="#D83F79" stop-opacity="0.35"/>
-              <stop offset="100%" stop-color="#FBECEF" stop-opacity="0.02"/>
-            </linearGradient>
-          </defs>
-          <line x1="20" y1="105" x2="320" y2="105" stroke="rgba(77,19,40,0.08)" stroke-dasharray="3,3"/>
-          <line x1="20" y1="75" x2="320" y2="75" stroke="rgba(77,19,40,0.08)" stroke-dasharray="3,3"/>
-          <line x1="20" y1="45" x2="320" y2="45" stroke="rgba(77,19,40,0.08)" stroke-dasharray="3,3"/>
-          <path d="${areaPath}" fill="url(#repChartGrad)"/>
-          <path d="${dPath}" fill="none" stroke="#8A2D4E" stroke-width="3" stroke-linecap="round"/>
-          ${pts.map((p, idx) => `
-            <g style="cursor:pointer;" onclick="selectReportBarPoint(${p.idx})">
-              <circle cx="${p.x}" cy="${p.y}" r="${idx === pts.length - 1 ? 6 : 4.5}" fill="${idx === pts.length - 1 ? '#8A2D4E' : '#4D1328'}" stroke="#FFFFFF" stroke-width="${idx === pts.length - 1 ? 2 : 0}"/>
-              <text x="${p.x}" y="128" text-anchor="middle" font-size="10" font-weight="600" fill="#6A1D39">${p.label}</text>
-            </g>
-          `).join('')}
-        `;
-      }
-
-      // Renderiza Gráfico de Barras Alternativo
-      const barsStage = document.getElementById('repInteractiveBarsStage');
-      if (barsStage) {
-        const activeIdx = currentSelectedBarIndex >= 0 ? currentSelectedBarIndex : data.series.length - 1;
-        barsStage.innerHTML = data.series.map((s, idx) => {
-          const v = s.val * factor;
-          const heightPct = Math.max(16, Math.round((v / maxVal) * 100));
           return `
-            <div class="bar-col-interactive ${idx === activeIdx ? 'selected' : ''}" onclick="selectReportBarPoint(${idx})">
-              <span class="bar-value-tooltip">${formatBRL(v)}</span>
-              <div class="bar-fill-pillar" style="height:${heightPct}%;"></div>
-              <span class="bar-month-lbl">${s.label}</span>
+            <div style="background:#FFFFFF; border:1px solid ${isBest ? 'rgba(216,63,121,0.35)' : 'rgba(77,19,40,0.08)'}; border-radius:14px; padding:10px 14px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; gap:8px;">
+                <div>
+                  <strong style="font-size:0.84rem; color:#350B19;">${s.label}</strong>
+                  <span style="font-size:0.72rem; color:#6A1D39; margin-left:6px;">&bull; ${adjCount} atendimentos</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:6px;">
+                  <span style="font-size:0.68rem; font-weight:700; background:${isBest ? '#DDF2E1' : '#FBECEF'}; color:${isBest ? '#226E3A' : '#8A2D4E'}; padding:2px 8px; border-radius:12px;">${s.badge}</span>
+                  <strong style="font-size:0.88rem; color:#4D1328;">${formatBRLFull(adjVal)}</strong>
+                </div>
+              </div>
+              <div style="width:100%; height:7px; background:#F3E5E8; border-radius:8px; overflow:hidden;">
+                <div style="width:${pctWidth}%; height:100%; background:${isBest ? 'linear-gradient(90deg, #350B19 0%, #D83F79 100%)' : 'linear-gradient(90deg, #8A2D4E 0%, #E9A3B5 100%)'}; border-radius:8px;"></div>
+              </div>
             </div>
           `;
         }).join('');
-        selectReportBarPoint(activeIdx);
       }
 
       // Renderiza Lista de Categorias no Donut Legend
@@ -1973,7 +2389,6 @@
       document.body.removeChild(a);
       showToast('Planilha exportada com sucesso!');
     }
-
   </script>
 </body>
 </html>

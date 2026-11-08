@@ -1,720 +1,1281 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Estefany Paiva Nails - Portal Mestre (Governança & Segurança)</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Central do Proprietário • Estefany Paiva Nail Designer</title>
+  <meta name="theme-color" content="#0F172A" />
 
-  <!-- PWA Metadata & Favicon -->
-  <meta name="theme-color" content="#350B19">
-  <link rel="manifest" href="manifest.json">
-  <link rel="icon" type="image/jpeg" href="assets/images/capa-estefany-paiva.jpg">
+  <!-- Google Fonts: Inter & Plus Jakarta Sans (Visual Executivo Limpo e Moderno) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&display=swap"
+    rel="stylesheet" />
 
-  <!-- Google Fonts: Editorial Serif + Sans -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Phosphor Icons -->
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
-  <!-- Font Awesome -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- Store Central com Sincronização em Nuvem -->
+  <script src="assets/js/store.js"></script>
 
-  <!-- Estilos Oficiais do Painel (Vinho & Blush Rosé) -->
-  <link rel="stylesheet" href="assets/css/admin.css">
   <style>
-    .master-lock-overlay {
-      position: fixed;
-      inset: 0;
-      background: radial-gradient(circle at 80% 15%, #6A1D39 0%, #350B19 60%, #1F050E 100%);
-      z-index: 5000;
+    :root {
+      --bg-page: #F1F5F9;
+      --bg-card: #FFFFFF;
+      --bg-navy: #0F172A;
+      --bg-navy-light: #1E293B;
+      --text-main: #0F172A;
+      --text-muted: #64748B;
+      --border-color: #E2E8F0;
+      --brand-wine: #6A1D39;
+      --brand-rose: #D83F79;
+      --brand-gold: #D97706;
+      --status-green: #10B981;
+      --status-amber: #F59E0B;
+      --status-red: #EF4444;
+      --radius-lg: 18px;
+      --radius-md: 12px;
+      --shadow-sm: 0 2px 10px rgba(15, 23, 42, 0.05);
+      --shadow-md: 0 10px 28px rgba(15, 23, 42, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      line-height: 1.5;
+      min-height: 100vh;
+      padding-bottom: 60px;
+    }
+
+    /* TOPBAR EXECUTIVA */
+    .owner-topbar {
+      background: linear-gradient(135deg, #0F172A 0%, #1E293B 60%, #350B19 100%);
+      color: #FFFFFF;
+      padding: 20px 24px;
+      box-shadow: 0 4px 20px rgba(15, 23, 42, 0.25);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .owner-topbar-inner {
+      max-width: 1320px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .owner-brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .owner-shield-badge {
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.2);
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 20px;
+      font-size: 1.4rem;
+      color: #FBBF24;
     }
-    .master-lock-overlay.hidden {
-      display: none !important;
+
+    .owner-brand-text h1 {
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
-    .master-lock-card {
-      background: #FAF4F5;
-      border: 1px solid rgba(255, 255, 255, 0.25);
-      border-radius: 28px;
-      padding: 32px 26px;
-      width: 100%;
-      max-width: 440px;
-      text-align: center;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+
+    .owner-brand-text p {
+      font-size: 0.78rem;
+      color: #CBD5E1;
     }
-    .master-lock-crown {
-      width: 64px;
-      height: 64px;
+
+    .sync-live-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(16, 185, 129, 0.18);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #6EE7B7;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 999px;
+    }
+
+    .sync-dot {
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
-      background: #FBECEF;
-      border: 2px solid #C59B6D;
-      color: #4D1328;
-      font-size: 1.6rem;
+      background: #10B981;
+      box-shadow: 0 0 8px #10B981;
+      animation: pulseGreen 2s infinite;
+    }
+
+    @keyframes pulseGreen {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.2); }
+    }
+
+    .owner-top-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn-top {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 9px 15px;
+      border-radius: 10px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: rgba(255, 255, 255, 0.08);
+      color: #FFFFFF;
+      transition: all 0.2s ease;
+    }
+
+    .btn-top:hover {
+      background: rgba(255, 255, 255, 0.18);
+      transform: translateY(-1px);
+    }
+
+    .btn-top.primary {
+      background: #D83F79;
+      border-color: #D83F79;
+      color: #FFFFFF;
+    }
+
+    .btn-top.primary:hover {
+      background: #BE2E65;
+    }
+
+    /* CONTAINER PRINCIPAL */
+    .owner-container {
+      max-width: 1320px;
+      margin: 24px auto 0;
+      padding: 0 18px;
+    }
+
+    /* NAVEGAÇÃO DE ABAS DO DONO */
+    .owner-tabs-bar {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 6px;
+      margin-bottom: 22px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .owner-tab-btn {
+      padding: 10px 18px;
+      border-radius: 12px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+
+    .owner-tab-btn:hover {
+      color: var(--text-main);
+      background: #E2E8F0;
+    }
+
+    .owner-tab-btn.active {
+      background: var(--bg-navy);
+      color: #FFFFFF;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+    }
+
+    /* CARDS DE MÉTRICAS EXECUTIVAS */
+    .owner-kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(1, 1fr);
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    @media (min-width: 600px) {
+      .owner-kpi-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .owner-kpi-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    .owner-kpi-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .owner-kpi-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .owner-kpi-title {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+    }
+
+    .owner-kpi-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin: 0 auto 16px;
-      box-shadow: 0 6px 18px rgba(77, 19, 40, 0.12);
+      font-size: 1.2rem;
     }
-    .master-token-box {
-      background: #FFFFFF;
-      border: 1px solid rgba(77, 19, 40, 0.12);
-      border-radius: 16px;
+
+    .owner-kpi-value {
+      font-size: 1.65rem;
+      font-weight: 800;
+      color: var(--text-main);
+      letter-spacing: -0.02em;
+    }
+
+    .owner-kpi-foot {
+      margin-top: 8px;
+      font-size: 0.76rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* LAYOUT EM DUAS COLUNAS */
+    .owner-main-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    @media (min-width: 980px) {
+      .owner-main-grid {
+        grid-template-columns: 1.45fr 1fr;
+      }
+    }
+
+    .owner-panel-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 22px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .owner-panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding-bottom: 14px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .owner-panel-title {
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .owner-panel-subtitle {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* CENTRAL DE LINKS RÁPIDOS */
+    .quick-links-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .quick-link-box {
+      background: #F8FAFC;
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
       padding: 14px 16px;
-      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .quick-link-info h4 {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .quick-link-info p {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+      word-break: break-all;
+      font-family: monospace;
+    }
+
+    .quick-link-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    /* BOTÕES GERAIS */
+    .btn-exec {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1px solid var(--border-color);
+      background: #FFFFFF;
+      color: var(--text-main);
+      text-decoration: none;
+      transition: all 0.15s ease;
+    }
+
+    .btn-exec:hover {
+      background: #F1F5F9;
+      border-color: #CBD5E1;
+    }
+
+    .btn-exec.navy {
+      background: var(--bg-navy);
+      color: #FFFFFF;
+      border-color: var(--bg-navy);
+    }
+
+    .btn-exec.navy:hover {
+      background: #1E293B;
+    }
+
+    .btn-exec.wine {
+      background: var(--brand-wine);
+      color: #FFFFFF;
+      border-color: var(--brand-wine);
+    }
+
+    .btn-exec.green {
+      background: #ECFDF5;
+      color: #047857;
+      border-color: #A7F3D0;
+    }
+
+    .btn-exec.red {
+      background: #FEF2F2;
+      color: #B91C1C;
+      border-color: #FECACA;
+    }
+
+    /* LISTA DE AGENDAMENTOS EM TEMPO REAL */
+    .live-appointments-list {
       display: flex;
       flex-direction: column;
       gap: 10px;
+      max-height: 460px;
+      overflow-y: auto;
+      padding-right: 4px;
     }
-    .master-code-pill {
-      background: #FAF4F5;
-      border: 1px dashed rgba(77, 19, 40, 0.2);
-      border-radius: 10px;
-      padding: 8px 12px;
-      font-family: monospace;
-      font-size: 0.78rem;
-      color: #350B19;
-      word-break: break-all;
-      display: block;
-    }
-    .funnel-step-card {
-      background: #FFFFFF;
-      border: 1px solid rgba(77, 19, 40, 0.08);
+
+    .live-appt-item {
+      background: #F8FAFC;
+      border: 1px solid var(--border-color);
       border-radius: 14px;
-      padding: 10px 14px;
-      margin-bottom: 10px;
+      padding: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      transition: border-color 0.2s ease;
     }
-    .funnel-step-card:last-child {
-      margin-bottom: 0;
+
+    .live-appt-item:hover {
+      border-color: #94A3B8;
     }
-    .toast-notification {
+
+    .live-appt-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .live-appt-avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: #FCE7F3;
+      color: #9D174D;
+      font-weight: 800;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .live-appt-details h4 {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .live-appt-details p {
+      font-size: 0.76rem;
+      color: var(--text-muted);
+    }
+
+    .status-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 700;
+    }
+
+    .status-tag.confirmado {
+      background: #D1FAE5;
+      color: #065F46;
+    }
+
+    .status-tag.pendente {
+      background: #FEF3C7;
+      color: #92400E;
+    }
+
+    /* FORMULÁRIOS RÁPIDOS DO DONO */
+    .owner-form-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    @media (min-width: 640px) {
+      .owner-form-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .owner-field label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .owner-field input,
+    .owner-field select {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+      font-size: 0.85rem;
+      color: var(--text-main);
+      background: #F8FAFC;
+      outline: none;
+    }
+
+    .owner-field input:focus {
+      border-color: var(--bg-navy);
+      background: #FFFFFF;
+    }
+
+    /* TOAST DE FEEDBACK */
+    .owner-toast {
       position: fixed;
       bottom: 24px;
       right: 24px;
-      background: #350B19;
+      background: #0F172A;
       color: #FFFFFF;
-      padding: 14px 22px;
-      border-radius: 30px;
-      font-size: 0.88rem;
+      padding: 14px 20px;
+      border-radius: 14px;
+      font-size: 0.85rem;
       font-weight: 600;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.35);
-      border: 1px solid rgba(251, 236, 239, 0.2);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
       display: flex;
       align-items: center;
       gap: 10px;
       z-index: 9999;
-      transform: translateY(100px);
       opacity: 0;
-      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      transform: translateY(15px);
+      pointer-events: none;
+      transition: all 0.25s ease;
     }
-    .toast-notification.active {
-      transform: translateY(0);
+
+    .owner-toast.show {
       opacity: 1;
+      transform: translateY(0);
+    }
+
+    .owner-view-section {
+      display: none;
+    }
+
+    .owner-view-section.active {
+      display: block;
     }
   </style>
 </head>
+
 <body>
 
-  <!-- ========================================================
-       MODAL DE AUTENTICAÇÃO DO PORTAL MESTRE (SHA-256)
-       ======================================================== -->
-  <div class="master-lock-overlay hidden" id="screenMasterTokenLock">
-    <div class="master-lock-card">
-      <div class="master-lock-crown">
-        <i class="fa-solid fa-crown" style="color:#C59B6D;"></i>
+  <!-- BARRA SUPERIOR EXECUTIVA DO PROPRIETÁRIO -->
+  <header class="owner-topbar">
+    <div class="owner-topbar-inner">
+      <div class="owner-brand">
+        <div class="owner-shield-badge">
+          <i class="ph-fill ph-crown"></i>
+        </div>
+        <div class="owner-brand-text">
+          <h1>
+            Central do Proprietário
+            <span class="sync-live-pill">
+              <span class="sync-dot"></span>
+              Sincronização Nuvem Ativa
+            </span>
+          </h1>
+          <p>Painel Executivo de Controle Geral • Estefany Paiva Nail Designer</p>
+        </div>
       </div>
-      <h2 style="font-family:var(--font-serif); font-size:1.5rem; color:#350B19; margin-bottom:6px;">Portal Mestre (Owner)</h2>
-      <p style="font-size:0.84rem; color:#6A1D39; line-height:1.45; margin-bottom:18px;">
-        Área exclusiva de governança para monitoramento de horários de pico, funil de acesso, rotação de tokens SHA-256 e auditoria LGPD.
-      </p>
 
-      <div class="search-input-box" style="margin-bottom:12px;">
-        <i class="fa-solid fa-key" style="color:#8A2D4E;"></i>
-        <input type="password" id="masterTokenInput" placeholder="Digite ou cole o Token Mestre...">
+      <div class="owner-top-actions">
+        <button class="btn-top" onclick="forceSyncNow()">
+          <i class="ph-bold ph-cloud-arrow-down"></i> Sincronizar Agora
+        </button>
+        <a href="index.html" class="btn-top">
+          <i class="ph-bold ph-device-mobile"></i> Tela da Cliente
+        </a>
+        <a href="admin.html" class="btn-top primary">
+          <i class="ph-bold ph-Sparkle"></i> Painel da Estefany (Admin)
+        </a>
       </div>
+    </div>
+  </header>
 
-      <div id="masterTokenErrorMsg" style="display:none; color:#B91C1C; font-size:0.8rem; margin-bottom:10px; font-weight:700;"></div>
+  <!-- CONTEÚDO PRINCIPAL -->
+  <main class="owner-container">
 
-      <button type="button" class="btn-admin-bottom-action" id="btnUnlockMaster" style="margin-top:0;">
-        <i class="fa-solid fa-shield-halved"></i> Validar e Acessar Portal
+    <!-- ABAS DE NAVEGAÇÃO RÁPIDA -->
+    <nav class="owner-tabs-bar">
+      <button class="owner-tab-btn active" onclick="switchOwnerTab('visao_geral', this)">
+        <i class="ph-bold ph-squares-four"></i> Visão Geral & Agendamentos Ao Vivo
       </button>
+      <button class="owner-tab-btn" onclick="switchOwnerTab('acessos_links', this)">
+        <i class="ph-bold ph-link"></i> Central de Links & Segurança
+      </button>
+      <button class="owner-tab-btn" onclick="switchOwnerTab('ajuste_estudio', this)">
+        <i class="ph-bold ph-Sliders"></i> Dados do Estúdio & Serviços
+      </button>
+      <button class="owner-tab-btn" onclick="switchOwnerTab('banco_backup', this)">
+        <i class="ph-bold ph-database"></i> Banco de Dados & Backup
+      </button>
+    </nav>
 
-      <div style="margin-top:16px; padding-top:14px; border-top:1px solid rgba(77,19,40,0.1); font-size:0.78rem; color:#6A1D39;">
-        <span>Token Mestre de Fábrica:</span>
-        <div style="margin-top:6px; display:flex; align-items:center; justify-content:center; gap:8px;">
-          <code style="background:#FBECEF; padding:4px 10px; border-radius:8px; color:#350B19; font-weight:700;" id="defaultMasterTokenHint">mst_sec_8f93e2b10a47</code>
-          <button type="button" class="filter-pill active" style="padding:4px 10px; font-size:0.72rem;" onclick="quickFillMasterToken()">
-            Entrar Agora
-          </button>
+    <!-- ==========================================
+         KPIs EXECUTIVOS (SEMPRE VISÍVEIS NO TOPO)
+         ========================================== -->
+    <section class="owner-kpi-grid">
+      <div class="owner-kpi-card">
+        <div class="owner-kpi-header">
+          <span class="owner-kpi-title">Receita em Agenda</span>
+          <div class="owner-kpi-icon" style="background:#ECFDF5; color:#059669;">
+            <i class="ph-bold ph-currency-circle-dollar"></i>
+          </div>
+        </div>
+        <div class="owner-kpi-value" id="ownerKpiRevenue">R$ 0,00</div>
+        <div class="owner-kpi-foot">
+          <span id="ownerKpiConfirmedRev">Confirmado: R$ 0,00</span>
+          <span style="color:#059669; font-weight:700;">Ativo</span>
+        </div>
+      </div>
+
+      <div class="owner-kpi-card">
+        <div class="owner-kpi-header">
+          <span class="owner-kpi-title">Total de Agendamentos</span>
+          <div class="owner-kpi-icon" style="background:#EFF6FF; color:#2563EB;">
+            <i class="ph-bold ph-calendar-check"></i>
+          </div>
+        </div>
+        <div class="owner-kpi-value" id="ownerKpiTotalAppts">0</div>
+        <div class="owner-kpi-foot">
+          <span id="ownerKpiPendingCount">0 pendentes</span>
+          <span id="ownerKpiConfirmedCount" style="color:#2563EB; font-weight:700;">0 confirmados</span>
+        </div>
+      </div>
+
+      <div class="owner-kpi-card">
+        <div class="owner-kpi-header">
+          <span class="owner-kpi-title">Catálogo & Clientes</span>
+          <div class="owner-kpi-icon" style="background:#FDF2F8; color:#DB2777;">
+            <i class="ph-bold ph-users-three"></i>
+          </div>
+        </div>
+        <div class="owner-kpi-value" id="ownerKpiClientsCount">0 Clientes</div>
+        <div class="owner-kpi-foot">
+          <span id="ownerKpiServicesCount">0 serviços ativos</span>
+          <a href="admin.html?tab=servicos" style="color:#DB2777; font-weight:700; text-decoration:none;">Gerenciar →</a>
+        </div>
+      </div>
+
+      <div class="owner-kpi-card">
+        <div class="owner-kpi-header">
+          <span class="owner-kpi-title">Sincronização Celular ↔ PC</span>
+          <div class="owner-kpi-icon" style="background:#FEF3C7; color:#D97706;">
+            <i class="ph-bold ph-cloud-check"></i>
+          </div>
+        </div>
+        <div class="owner-kpi-value" style="font-size:1.25rem; color:#059669;">Em Tempo Real</div>
+        <div class="owner-kpi-foot">
+          <span id="ownerLastSyncText">Conectado à nuvem</span>
+          <button onclick="forceSyncNow()" style="border:none; background:none; color:#D97706; font-weight:700; cursor:pointer;">Atualizar</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         ABA 1: VISÃO GERAL & MONITOR DE AGENDAMENTOS
+         ========================================== -->
+    <div id="ownerTab_visao_geral" class="owner-view-section active">
+      <div class="owner-main-grid">
+
+        <!-- COLUNA ESQUERDA: MONITOR AO VIVO DE AGENDAMENTOS -->
+        <div class="owner-panel-card">
+          <div class="owner-panel-header">
+            <div>
+              <div class="owner-panel-title">
+                <i class="ph-bold ph-broadcast" style="color:#D83F79;"></i>
+                Monitor Ao Vivo de Agendamentos (Celular & Admin)
+              </div>
+              <div class="owner-panel-subtitle">
+                Qualquer agendamento feito pela cliente no celular aparece aqui e no calendário automaticamente.
+              </div>
+            </div>
+            <div style="display:flex; gap:8px;">
+              <button class="btn-exec wine" onclick="createOwnerQuickTestBooking()">
+                <i class="ph-bold ph-plus-circle"></i> + Testar Agendamento
+              </button>
+            </div>
+          </div>
+
+          <div class="live-appointments-list" id="ownerLiveAppointmentsList">
+            <!-- Renderizado via JS -->
+          </div>
+        </div>
+
+        <!-- COLUNA DIREITA: ATALHOS EXECUTIVOS & RESUMO OPERACIONAL -->
+        <div style="display:flex; flex-direction:column; gap:20px;">
+          <div class="owner-panel-card">
+            <div class="owner-panel-header">
+              <div>
+                <div class="owner-panel-title">
+                  <i class="ph-bold ph-rocket-launch" style="color:#2563EB;"></i>
+                  Ações Rápidas do Proprietário
+                </div>
+                <div class="owner-panel-subtitle">Controle imediato das telas e recursos do aplicativo</div>
+              </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+              <a href="admin.html?tab=agenda" class="btn-exec" style="padding:14px; justify-content:flex-start;">
+                <i class="ph-bold ph-calendar-plus" style="font-size:1.2rem; color:#6A1D39;"></i>
+                <div style="text-align:left;">
+                  <div style="font-weight:800;">Abrir Calendário</div>
+                  <div style="font-size:0.7rem; color:#64748B;">Agenda da Estefany</div>
+                </div>
+              </a>
+
+              <a href="admin.html?tab=servicos" class="btn-exec" style="padding:14px; justify-content:flex-start;">
+                <i class="ph-bold ph-camera" style="font-size:1.2rem; color:#D83F79;"></i>
+                <div style="text-align:left;">
+                  <div style="font-weight:800;">Fotos & Serviços</div>
+                  <div style="font-size:0.7rem; color:#64748B;">Cadastrar com foto</div>
+                </div>
+              </a>
+
+              <a href="admin.html?tab=configuracoes" class="btn-exec" style="padding:14px; justify-content:flex-start;">
+                <i class="ph-bold ph-gear-six" style="font-size:1.2rem; color:#059669;"></i>
+                <div style="text-align:left;">
+                  <div style="font-weight:800;">Configurações Livres</div>
+                  <div style="font-size:0.7rem; color:#64748B;">Editar textos e horários</div>
+                </div>
+              </a>
+
+              <a href="admin.html?tab=relatorios" class="btn-exec" style="padding:14px; justify-content:flex-start;">
+                <i class="ph-bold ph-chart-bar" style="font-size:1.2rem; color:#D97706;"></i>
+                <div style="text-align:left;">
+                  <div style="font-weight:800;">Financeiro</div>
+                  <div style="font-size:0.7rem; color:#64748B;">Metas e faturamento</div>
+                </div>
+              </a>
+            </div>
+          </div>
+
+          <!-- RESUMO DE SERVIÇOS MAIS PROCURADOS -->
+          <div class="owner-panel-card">
+            <div class="owner-panel-header">
+              <div>
+                <div class="owner-panel-title">
+                  <i class="ph-bold ph-sparkle" style="color:#D97706;"></i>
+                  Desempenho por Procedimento
+                </div>
+                <div class="owner-panel-subtitle">Participação dos serviços nos agendamentos atuais</div>
+              </div>
+            </div>
+            <div id="ownerServicesRankingBox" style="display:flex; flex-direction:column; gap:10px;">
+              <!-- Renderizado via JS -->
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ==========================================
+         ABA 2: CENTRAL DE LINKS & SEGURANÇA
+         ========================================== -->
+    <div id="ownerTab_acessos_links" class="owner-view-section">
+      <div class="owner-panel-card">
+        <div class="owner-panel-header">
+          <div>
+            <div class="owner-panel-title">
+              <i class="ph-bold ph-share-network" style="color:#2563EB;"></i>
+              Central Oficial de Links para Celular, Instagram e Administração
+            </div>
+            <div class="owner-panel-subtitle">
+              Copie e envie os links oficiais para a bio do Instagram, WhatsApp das clientes ou para o celular da Estefany.
+            </div>
+          </div>
+        </div>
+
+        <div class="quick-links-list">
+          <div class="quick-link-box">
+            <div class="quick-link-info">
+              <h4><i class="ph-fill ph-device-mobile" style="color:#D83F79;"></i> 1. Link das Clientes (Para colocar no Instagram / WhatsApp)</h4>
+              <p id="linkUrlClient">Carregando...</p>
+            </div>
+            <div class="quick-link-actions">
+              <button class="btn-exec" onclick="copyOwnerLink('linkUrlClient', 'Link da Cliente copiado!')">
+                <i class="ph-bold ph-copy"></i> Copiar Link
+              </button>
+              <a href="index.html" class="btn-exec navy">
+                <i class="ph-bold ph-arrow-square-out"></i> Abrir
+              </a>
+            </div>
+          </div>
+
+          <div class="quick-link-box">
+            <div class="quick-link-info">
+              <h4><i class="ph-fill ph-sparkle" style="color:#6A1D39;"></i> 2. Link da Área Administrativa (Exclusivo Estefany Paiva)</h4>
+              <p id="linkUrlAdmin">Carregando...</p>
+            </div>
+            <div class="quick-link-actions">
+              <button class="btn-exec" onclick="copyOwnerLink('linkUrlAdmin', 'Link da Administração copiado!')">
+                <i class="ph-bold ph-copy"></i> Copiar Link
+              </button>
+              <a href="admin.html" class="btn-exec wine">
+                <i class="ph-bold ph-arrow-square-out"></i> Abrir Admin
+              </a>
+            </div>
+          </div>
+
+          <div class="quick-link-box">
+            <div class="quick-link-info">
+              <h4><i class="ph-fill ph-crown" style="color:#D97706;"></i> 3. Link da Central do Proprietário (Esta Tela)</h4>
+              <p id="linkUrlMaster">Carregando...</p>
+            </div>
+            <div class="quick-link-actions">
+              <button class="btn-exec" onclick="copyOwnerLink('linkUrlMaster', 'Link do Proprietário copiado!')">
+                <i class="ph-bold ph-copy"></i> Copiar Link
+              </button>
+              <button class="btn-exec green" onclick="rotateSecurityTokensOwner()">
+                <i class="ph-bold ph-key"></i> Renovar Chaves de Acesso
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- ========================================================
-       ESTRUTURA PRINCIPAL DO PORTAL MESTRE (PADRÃO VINHO & ROSÉ)
-       ======================================================== -->
-  <div class="admin-site-wrapper-expansive" id="masterMainWrapper">
-
-    <!-- CABEÇALHO VINHO DE LUXO -->
-    <header class="admin-header-wine">
-      <div class="admin-header-container">
-        <div class="admin-topbar-row">
-          <div class="admin-topbar-left">
-            <a href="admin.html" class="signature-logo-wrap" style="text-decoration:none;">
-              <span class="sig-script-ep">Ep</span>
-              <div class="sig-script-text">
-                <span class="sig-script-title">ESTEFANY PAIVA</span>
-                <span class="sig-script-sub">GOVERNANÇA &bull; PORTAL MESTRE</span>
-              </div>
-            </a>
-          </div>
-
-          <!-- Navegação Rápida no Topo Desktop -->
-          <nav class="admin-desktop-nav-menu">
-            <button class="admin-desktop-nav-btn active" onclick="scrollToMasterSection('secMetricas')">
-              <i class="fa-solid fa-chart-line"></i> Tráfego & Pico
-            </button>
-            <button class="admin-desktop-nav-btn" onclick="scrollToMasterSection('secTokens')">
-              <i class="fa-solid fa-key"></i> Tokens & Segurança
-            </button>
-            <button class="admin-desktop-nav-btn" onclick="scrollToMasterSection('secAuditoria')">
-              <i class="fa-solid fa-shield-halved"></i> Logs & LGPD
-            </button>
-          </nav>
-
-          <div class="admin-topbar-right">
-            <button class="btn-admin-icon" title="Bloquear Sessão" onclick="lockMasterSession()">
-              <i class="fa-solid fa-lock"></i>
-            </button>
-          </div>
-        </div>
-
-        <!-- Linha de Saudação da Governança -->
-        <div class="admin-greeting-row">
-          <div class="admin-greeting-left">
-            <div class="admin-avatar-ring">
-              <img src="assets/images/capa-estefany-paiva.jpg" alt="Portal Mestre">
-            </div>
-            <div class="admin-greeting-text">
-              <h2><i class="fa-solid fa-crown" style="color:#EAB308; font-size:1.1rem;"></i> Portal Mestre &bull; Governança</h2>
-              <p>Monitoramento de Horários de Pico, Funil de Clientes, Tokens Criptográficos e LGPD.</p>
-            </div>
-          </div>
-
-          <div class="admin-greeting-right-controls">
-            <a href="admin.html" id="linkToAdminPanel" class="period-select-pill" style="text-decoration:none;">
-              <i class="fa-solid fa-user-shield"></i>
-              <span>Painel Admin</span>
-            </a>
-            <a href="index.html" class="btn-open-client-pill" target="_blank">
-              <i class="fa-solid fa-eye"></i> Portal da Cliente
-            </a>
-          </div>
-        </div>
-      </div>
-    </header>
-
-    <!-- CONTEÚDO PRINCIPAL EXPANSIVO -->
-    <main class="admin-main-content-expansive" id="secMetricas">
-
-      <!-- ========================================================
-           1. 4 KPIS ROSÉ DE TRÁFEGO & CONVERSÃO
-           ======================================================== -->
-      <div class="admin-kpis-grid">
-        <div class="kpi-pink-card">
-          <i class="fa-solid fa-link"></i>
-          <span class="kpi-num" id="masterTotalViews">450</span>
-          <span class="kpi-lbl">Acessos ao Link</span>
-          <span class="kpi-growth"><i class="fa-solid fa-arrow-up"></i> Topo do Funil</span>
-        </div>
-
-        <div class="kpi-pink-card">
-          <i class="fa-solid fa-circle-play"></i>
-          <span class="kpi-num" id="masterStoriesViews">285</span>
-          <span class="kpi-lbl">Stories Assistidos</span>
-          <span class="kpi-growth" id="masterStoriesPct"><i class="fa-solid fa-fire"></i> 63% engajamento</span>
-        </div>
-
-        <div class="kpi-pink-card">
-          <i class="fa-regular fa-calendar-check"></i>
-          <span class="kpi-num" id="masterBookingStarts">130</span>
-          <span class="kpi-lbl">Início de Agenda</span>
-          <span class="kpi-growth"><i class="fa-regular fa-clock"></i> Seleção de data</span>
-        </div>
-
-        <div class="kpi-pink-card">
-          <i class="fa-solid fa-check-double"></i>
-          <span class="kpi-num" id="masterBookingsDone">48</span>
-          <span class="kpi-lbl">Concluídos</span>
-          <span class="kpi-growth" id="masterConvRate"><i class="fa-solid fa-bolt"></i> 10.7% conv.</span>
-        </div>
-      </div>
-
-      <!-- ========================================================
-           2. GRÁFICO DE HORÁRIOS DE PICO + FUNIL DE CONVERSÃO
-           ======================================================== -->
-      <div class="admin-dashboard-split-row">
-
-        <!-- Coluna 1: Horários de Pico (Barras Interativas Rosé & Vinho) -->
-        <div class="admin-chart-card">
-          <div class="chart-header-row">
-            <div>
-              <h3><i class="fa-solid fa-clock"></i> Tráfego por Horário (Horários de Pico)</h3>
-              <p style="font-size:0.76rem; color:#8A2D4E; margin-top:2px;" id="peakSelectedHourSubtitle">
-                Identifique os horários de maior procura (Toque em uma barra para inspecionar)
-              </p>
-            </div>
-            <div class="period-select-pill" style="background:#FFF; color:#4D1328; border-color:rgba(77,19,40,0.15);">
-              <i class="fa-solid fa-fire" style="color:#D83F79;"></i>
-              <span>Pico: 18h às 21h</span>
-            </div>
-          </div>
-
-          <div class="interactive-bars-stage" id="trafficHourlyChart" style="height:185px; margin-top:12px;">
-            <!-- Populado via JS -->
-          </div>
-
-          <div style="margin-top:14px; padding-top:10px; border-top:1px solid rgba(77,19,40,0.08); display:flex; justify-content:space-between; align-items:center; font-size:0.76rem; color:#6A1D39; flex-wrap:wrap; gap:8px;">
-            <span><i class="fa-solid fa-lightbulb" style="color:#C59B6D;"></i> <strong>Recomendação:</strong> Publique Stories entre <strong>17h30 e 19h00</strong> para máxima conversão.</span>
-            <strong style="color:#350B19;">Janela monitorada: 08h às 22h</strong>
-          </div>
-        </div>
-
-        <!-- Coluna 2: Funil de Conversão do Portal da Cliente -->
-        <div class="admin-sub-card">
-          <div class="sub-card-header-row">
-            <h4 style="font-family:var(--font-serif); font-size:1.05rem; color:#4D1328; font-weight:700;">
-              <i class="fa-solid fa-filter" style="color:#C59B6D;"></i> Funil de Conversão da Cliente
-            </h4>
-          </div>
-
-          <div id="funnelContainer" style="margin-top:8px;">
-            <!-- Populado via JS -->
-          </div>
-        </div>
-
-      </div>
-
-      <!-- ========================================================
-           3. GESTÃO DE TOKENS CRIPTOGRÁFICOS & GOVERNANÇA LGPD
-           ======================================================== -->
-      <div class="admin-dashboard-split-row" id="secTokens">
-
-        <!-- Card 1: Gerenciador e Rotacionador de Tokens SHA-256 -->
-        <div class="admin-chart-card">
-          <div class="chart-header-row">
-            <div>
-              <h3><i class="fa-solid fa-key" style="color:#C59B6D;"></i> Gestão & Rotação de Tokens (SHA-256)</h3>
-              <p style="font-size:0.76rem; color:#8A2D4E; margin-top:2px;">
-                Gere novas chaves criptográficas e revogue links antigos imediatamente em caso de suspeita.
-              </p>
-            </div>
-          </div>
-
-          <!-- Token da Administradora -->
-          <div class="master-token-box">
-            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
-              <strong style="font-size:0.84rem; color:#350B19;">
-                <i class="fa-solid fa-user-shield" style="color:#8A2D4E;"></i> Link Exclusivo da Administradora (Estefany)
-              </strong>
-              <span class="badge-status-pill confirmado">Ativo & Protegido</span>
-            </div>
-            <code class="master-code-pill" id="adminFullLinkDisplay">Carregando...</code>
-            <div style="display:flex; gap:8px; flex-wrap:wrap;">
-              <button type="button" class="filter-pill" id="btnCopyAdminLink">
-                <i class="fa-regular fa-copy"></i> Copiar Link Admin
-              </button>
-              <button type="button" class="filter-pill active" id="btnRotateAdminToken">
-                <i class="fa-solid fa-arrows-rotate"></i> Rotacionar Token Admin
-              </button>
-            </div>
-          </div>
-
-          <!-- Token do Portal Mestre -->
-          <div class="master-token-box" style="margin-bottom:0;">
-            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
-              <strong style="font-size:0.84rem; color:#350B19;">
-                <i class="fa-solid fa-crown" style="color:#C59B6D;"></i> Link Exclusivo do Portal Mestre (Owner)
-              </strong>
-              <span class="badge-status-pill pendente">Chave Mestre</span>
-            </div>
-            <code class="master-code-pill" id="masterFullLinkDisplay">Carregando...</code>
-            <div style="display:flex; gap:8px; flex-wrap:wrap;">
-              <button type="button" class="filter-pill" id="btnCopyMasterLink">
-                <i class="fa-regular fa-copy"></i> Copiar Link Mestre
-              </button>
-              <button type="button" class="filter-pill active" id="btnRotateMasterToken">
-                <i class="fa-solid fa-arrows-rotate"></i> Rotacionar Token Mestre
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Card 2: Conformidade LGPD & Privacy by Design -->
-        <div class="admin-sub-card" style="display:flex; flex-direction:column; justify-content:space-between;">
+    <!-- ==========================================
+         ABA 3: DADOS DO ESTÚDIO & SERVIÇOS RÁPIDOS
+         ========================================== -->
+    <div id="ownerTab_ajuste_estudio" class="owner-view-section">
+      <div class="owner-panel-card">
+        <div class="owner-panel-header">
           <div>
-            <div class="sub-card-header-row">
-              <h4 style="font-family:var(--font-serif); font-size:1.05rem; color:#4D1328; font-weight:700;">
-                <i class="fa-solid fa-scale-balanced" style="color:#226E3A;"></i> Conformidade LGPD & Expurgo
-              </h4>
-              <span class="badge-status-pill confirmado">100% Conforme</span>
+            <div class="owner-panel-title">
+              <i class="ph-bold ph-storefront" style="color:#6A1D39;"></i>
+              Edição Direta das Informações do Estúdio
             </div>
-
-            <p style="font-size:0.82rem; color:#6A1D39; line-height:1.5; margin-bottom:14px;">
-              A plataforma opera sob <strong>Privacy by Design</strong> (Art. 6º da LGPD): coleta estritamente <strong>Nome e WhatsApp</strong> para execução do agendamento, sem armazenar CPF, endereço ou dados bancários.
-            </p>
-
-            <div style="background:#FFFFFF; border-radius:14px; padding:12px 14px; border:1px solid rgba(77,19,40,0.08); margin-bottom:14px;">
-              <div style="display:flex; justify-content:space-between; font-size:0.78rem; color:#350B19; margin-bottom:6px;">
-                <span><strong>Retenção Automática:</strong></span>
-                <span>90 dias</span>
-              </div>
-              <div style="display:flex; justify-content:space-between; font-size:0.78rem; color:#350B19; margin-bottom:6px;">
-                <span><strong>Criptografia de Sessão:</strong></span>
-                <span>SHA-256 + CSPRNG</span>
-              </div>
-              <div style="display:flex; justify-content:space-between; font-size:0.78rem; color:#350B19;">
-                <span><strong>Credenciais Expostas:</strong></span>
-                <span style="color:#226E3A; font-weight:700;">0 (Zero Vazamentos)</span>
-              </div>
+            <div class="owner-panel-subtitle">
+              Altere rapidamente os dados principais que aparecem no aplicativo da cliente e no painel administrativo.
             </div>
           </div>
-
-          <button type="button" class="btn-admin-bottom-action" id="btnPurgeLgpdData" style="margin-top:0; max-width:100%;">
-            <i class="fa-solid fa-broom"></i> Executar Anonimização LGPD Agora
+          <button class="btn-exec wine" onclick="saveOwnerStudioConfig()">
+            <i class="ph-bold ph-floppy-disk"></i> Salvar Alterações
           </button>
         </div>
 
+        <div class="owner-form-grid">
+          <div class="owner-field">
+            <label>Nome do Estúdio</label>
+            <input type="text" id="ownInputSalonName" placeholder="Estefany Paiva Nail Designer" />
+          </div>
+          <div class="owner-field">
+            <label>Nome da Profissional</label>
+            <input type="text" id="ownInputOwnerName" placeholder="Estefany Paiva" />
+          </div>
+          <div class="owner-field">
+            <label>WhatsApp Oficial (com DDD)</label>
+            <input type="text" id="ownInputPhone" placeholder="(11) 99999-9999" />
+          </div>
+          <div class="owner-field">
+            <label>Instagram</label>
+            <input type="text" id="ownInputInstagram" placeholder="@estefanypaiva.nails" />
+          </div>
+          <div class="owner-field">
+            <label>Endereço Completo</label>
+            <input type="text" id="ownInputAddress" placeholder="Av. Paulista, 1000 - Sala 42" />
+          </div>
+          <div class="owner-field">
+            <label>Chave Pix para Sinal / Pagamento</label>
+            <input type="text" id="ownInputPixKey" placeholder="Chave Pix" />
+          </div>
+          <div class="owner-field" style="grid-column: 1 / -1;">
+            <label>Horários Disponíveis na Agenda (separados por vírgula)</label>
+            <input type="text" id="ownInputSlots" placeholder="09:00, 10:30, 11:00, 14:00, 16:00, 18:00" />
+          </div>
+        </div>
       </div>
+    </div>
 
-      <!-- ========================================================
-           4. LOGS DE AUDITORIA DE SEGURANÇA EM TEMPO REAL
-           ======================================================== -->
-      <section style="margin-top:22px;" id="secAuditoria">
-        <div class="section-head-title-row" style="margin-bottom:12px !important;">
-          <div>
-            <h3 style="font-family:var(--font-serif); font-size:1.25rem; color:#4D1328;">
-              <i class="fa-solid fa-shield-halved"></i> Histórico de Auditoria & Acessos às Rotas
-            </h3>
-            <p style="font-size:0.78rem; color:#8A2D4E;">
-              Registro cronológico de autenticações, rotações de chaves e bloqueios de segurança.
-            </p>
+    <!-- ==========================================
+         ABA 4: BANCO DE DADOS, NUVEM & BACKUP
+         ========================================== -->
+    <div id="ownerTab_banco_backup" class="owner-view-section">
+      <div class="owner-main-grid">
+        <div class="owner-panel-card">
+          <div class="owner-panel-header">
+            <div>
+              <div class="owner-panel-title">
+                <i class="ph-bold ph-database" style="color:#059669;"></i>
+                Gerenciamento de Banco de Dados & Backup
+              </div>
+              <div class="owner-panel-subtitle">
+                Exporte uma cópia de segurança, importe dados ou restaure as configurações originais.
+              </div>
+            </div>
           </div>
 
-          <div style="display:flex; gap:8px;">
-            <button type="button" class="filter-pill" id="btnClearAuditLogs">
-              <i class="fa-solid fa-trash-can" style="margin-right:4px;"></i> Limpar Histórico
-            </button>
+          <div style="display:flex; flex-direction:column; gap:12px;">
+            <div class="quick-link-box">
+              <div class="quick-link-info">
+                <h4>📥 Baixar Backup Completo (.JSON)</h4>
+                <p style="font-family:Inter, sans-serif;">Salva todos os agendamentos, clientes, serviços e fotos em um arquivo seguro.</p>
+              </div>
+              <button class="btn-exec navy" onclick="exportFullDatabaseOwner()">
+                <i class="ph-bold ph-download-simple"></i> Baixar Backup
+              </button>
+            </div>
+
+            <div class="quick-link-box">
+              <div class="quick-link-info">
+                <h4>📤 Restaurar Backup de Arquivo (.JSON)</h4>
+                <p style="font-family:Inter, sans-serif;">Carrega um arquivo de backup salvo anteriormente e sincroniza com a nuvem.</p>
+              </div>
+              <label class="btn-exec" style="cursor:pointer;">
+                <i class="ph-bold ph-upload-simple"></i> Escolher Arquivo
+                <input type="file" accept=".json" style="display:none;" onchange="importFullDatabaseOwner(this)" />
+              </label>
+            </div>
+
+            <div class="quick-link-box">
+              <div class="quick-link-info">
+                <h4>☁️ Forçar Reenvio para a Nuvem (Celulares & PCs)</h4>
+                <p style="font-family:Inter, sans-serif;">Envia imediatamente o banco de dados atual para todos os aparelhos conectados.</p>
+              </div>
+              <button class="btn-exec green" onclick="pushAllToCloudOwner()">
+                <i class="ph-bold ph-cloud-arrow-up"></i> Enviar para Nuvem
+              </button>
+            </div>
+
+            <div class="quick-link-box" style="border-color:#FECACA; background:#FEF2F2;">
+              <div class="quick-link-info">
+                <h4 style="color:#B91C1C;">⚠️ Restaurar Dados Padrão de Fábrica</h4>
+                <p style="font-family:Inter, sans-serif; color:#991B1B;">Limpa os testes e volta o aplicativo para o estado inicial demonstrativo.</p>
+              </div>
+              <button class="btn-exec red" onclick="resetFactoryOwner()">
+                <i class="ph-bold ph-trash"></i> Resetar Padrão
+              </button>
+            </div>
           </div>
         </div>
 
-        <div class="admin-items-responsive-grid" id="auditLogsCardsGrid">
-          <!-- Populado via JS -->
+        <div class="owner-panel-card">
+          <div class="owner-panel-header">
+            <div>
+              <div class="owner-panel-title">
+                <i class="ph-bold ph-shield-check" style="color:#2563EB;"></i>
+                Registro de Atividades do Sistema
+              </div>
+              <div class="owner-panel-subtitle">Últimos eventos gravados no banco</div>
+            </div>
+          </div>
+          <div id="ownerSecurityLogsList" style="display:flex; flex-direction:column; gap:8px; max-height:360px; overflow-y:auto;">
+            <!-- Renderizado via JS -->
+          </div>
         </div>
-      </section>
+      </div>
+    </div>
 
-    </main>
+  </main>
+
+  <!-- TOAST -->
+  <div id="ownerToast" class="owner-toast">
+    <i class="ph-fill ph-check-circle" style="color:#10B981; font-size:1.2rem;"></i>
+    <span id="ownerToastText">Operação realizada com sucesso!</span>
   </div>
 
-  <!-- Toast Notification -->
-  <div class="toast-notification" id="masterToast">
-    <i class="fa-solid fa-circle-check" style="color:#E9A3B5;"></i>
-    <span id="masterToastText">Operação realizada com sucesso!</span>
-  </div>
-
-  <!-- Scripts -->
-  <script src="assets/js/store.js"></script>
   <script>
-    function showMasterToast(msg) {
-      const t = document.getElementById('masterToast');
-      const txt = document.getElementById('masterToastText');
-      if (t && txt) {
-        txt.innerText = msg;
-        t.classList.add('active');
-        setTimeout(() => t.classList.remove('active'), 3200);
-      }
+    function showOwnerToast(msg) {
+      const t = document.getElementById('ownerToast');
+      const txt = document.getElementById('ownerToastText');
+      if (!t || !txt) return;
+      txt.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3200);
     }
 
-    function scrollToMasterSection(id) {
-      const el = document.getElementById(id);
-      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    function switchOwnerTab(tabId, btn) {
+      document.querySelectorAll('.owner-view-section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.owner-tab-btn').forEach(b => b.classList.remove('active'));
+      const target = document.getElementById('ownerTab_' + tabId);
+      if (target) target.classList.add('active');
+      if (btn) btn.classList.add('active');
     }
 
-    function lockMasterSession() {
-      sessionStorage.removeItem('epn_master_token');
-      const lockScreen = document.getElementById('screenMasterTokenLock');
-      if (lockScreen) lockScreen.classList.remove('hidden');
-      showMasterToast('Sessão bloqueada com segurança.');
+    function formatBRL(v) {
+      return Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     }
 
-    function quickFillMasterToken() {
-      const urls = window.EPStore.getActiveTokensUrls();
-      const input = document.getElementById('masterTokenInput');
-      if (input) input.value = urls.masterToken;
-      document.getElementById('btnUnlockMaster').click();
-    }
+    function renderOwnerDashboard() {
+      if (!window.EPStore) return;
+      const appts = window.EPStore.getAppointments() || [];
+      const clients = window.EPStore.getClients() || [];
+      const services = window.EPStore.getServices() || [];
+      const cfg = window.EPStore.getSalonSettings() || {};
 
-    document.addEventListener('DOMContentLoaded', async () => {
-      const lockScreen = document.getElementById('screenMasterTokenLock');
-      const tokenInput = document.getElementById('masterTokenInput');
-      const btnUnlock = document.getElementById('btnUnlockMaster');
-      const errorMsg = document.getElementById('masterTokenErrorMsg');
+      // KPIs
+      const activeAppts = appts.filter(a => a.status !== 'cancelado');
+      const confirmedAppts = appts.filter(a => a.status === 'confirmado');
+      const pendingAppts = appts.filter(a => a.status === 'pendente');
 
-      // Atualiza dica com token mestre atual
-      const activeTokens = window.EPStore.getActiveTokensUrls();
-      const hintEl = document.getElementById('defaultMasterTokenHint');
-      if (hintEl) hintEl.textContent = activeTokens.masterToken;
+      const totalRev = activeAppts.reduce((acc, a) => acc + (Number(a.price) || 0), 0);
+      const confRev = confirmedAppts.reduce((acc, a) => acc + (Number(a.price) || 0), 0);
 
-      // Inicializa os gráficos e dados imediatamente ao fundo
-      initMasterDashboard();
+      document.getElementById('ownerKpiRevenue').textContent = formatBRL(totalRev);
+      document.getElementById('ownerKpiConfirmedRev').textContent = 'Confirmado: ' + formatBRL(confRev);
+      document.getElementById('ownerKpiTotalAppts').textContent = String(activeAppts.length);
+      document.getElementById('ownerKpiPendingCount').textContent = pendingAppts.length + ' pendente(s)';
+      document.getElementById('ownerKpiConfirmedCount').textContent = confirmedAppts.length + ' confirmado(s)';
+      document.getElementById('ownerKpiClientsCount').textContent = clients.length + ' Clientes';
+      document.getElementById('ownerKpiServicesCount').textContent = services.filter(s => s.active !== false).length + ' serviços ativos';
 
-      // Verifica autenticação por URL, sessão ou token padrão local
-      const urlParams = new URLSearchParams(window.location.search);
-      const tokenParam = urlParams.get('token') || sessionStorage.getItem('epn_master_token');
-
-      if (tokenParam) {
-        const isValid = await window.EPStore.validateToken(tokenParam, 'master');
-        if (isValid) {
-          sessionStorage.setItem('epn_master_token', tokenParam);
-          lockScreen.classList.add('hidden');
+      // Lista Ao Vivo de Agendamentos
+      const listEl = document.getElementById('ownerLiveAppointmentsList');
+      if (listEl) {
+        if (activeAppts.length === 0) {
+          listEl.innerHTML = '<div style="padding:28px; text-align:center; color:#64748B; font-size:0.85rem;">Nenhum agendamento ativo no momento.</div>';
         } else {
-          lockScreen.classList.remove('hidden');
-          errorMsg.textContent = 'Token Mestre inválido ou revogado!';
-          errorMsg.style.display = 'block';
+          listEl.innerHTML = activeAppts.map(a => {
+            const stClass = a.status === 'confirmado' ? 'confirmado' : 'pendente';
+            const stLabel = a.status === 'confirmado' ? 'Confirmado' : 'Pendente';
+            const dateLbl = window.EPStore.formatDateLabel ? window.EPStore.formatDateLabel(a.date) : a.date;
+            return `
+              <div class="live-appt-item">
+                <div class="live-appt-left">
+                  <div class="live-appt-avatar">${a.initials || 'CL'}</div>
+                  <div class="live-appt-details">
+                    <h4>${a.clientName} <span class="status-tag ${stClass}">${stLabel}</span></h4>
+                    <p><strong>${a.serviceName}</strong> • ${dateLbl} às <strong>${a.time}</strong> • ${formatBRL(a.price)}</p>
+                    <p style="font-size:0.72rem; color:#94A3B8;">WhatsApp: ${a.clientPhone || 'Não informado'}</p>
+                  </div>
+                </div>
+                <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                  ${a.status !== 'confirmado' ? `
+                    <button class="btn-exec green" onclick="ownerChangeStatus('${a.id}', 'confirmado')">
+                      <i class="ph-bold ph-check"></i> Confirmar
+                    </button>
+                  ` : ''}
+                  <button class="btn-exec" onclick="ownerWhatsAppClient('${a.id}')">
+                    <i class="ph-bold ph-whatsapp-logo" style="color:#16A34A;"></i> WhatsApp
+                  </button>
+                  <button class="btn-exec red" onclick="ownerDeleteAppt('${a.id}')">
+                    <i class="ph-bold ph-trash"></i>
+                  </button>
+                </div>
+              </div>
+            `;
+          }).join('');
         }
-      } else {
-        // Mantém desbloqueado com o token ativo na sessão local para experiência fluida do proprietário
-        sessionStorage.setItem('epn_master_token', activeTokens.masterToken);
-        lockScreen.classList.add('hidden');
       }
 
-      if (btnUnlock) {
-        btnUnlock.onclick = async () => {
-          const val = tokenInput ? tokenInput.value.trim() : '';
-          if (!val) {
-            errorMsg.textContent = 'Informe o Token Mestre.';
-            errorMsg.style.display = 'block';
-            return;
-          }
-
-          const isValid = await window.EPStore.validateToken(val, 'master');
-          if (isValid) {
-            sessionStorage.setItem('epn_master_token', val);
-            errorMsg.style.display = 'none';
-            lockScreen.classList.add('hidden');
-            initMasterDashboard();
-            showMasterToast('Acesso Mestre autenticado com sucesso!');
-          } else {
-            errorMsg.textContent = 'Token Mestre incorreto!';
-            errorMsg.style.display = 'block';
-            renderAuditLogs();
-          }
-        };
-      }
-    });
-
-    function initMasterDashboard() {
-      renderTrafficMetrics();
-      renderHourlyChart();
-      renderTokensManagement();
-      renderAuditLogs();
-    }
-
-    // 1. Métricas de Tráfego e Funil Conectadas ao Formato Real do EPStore
-    function renderTrafficMetrics() {
-      const traffic = window.EPStore.getTrafficAnalytics() || {};
-      const funnel = traffic.funnel || { linkViews: 450, storiesViews: 285, bookingStarts: 130, bookingCompletions: 48 };
-      const bookingsCount = window.EPStore.getAppointments().length;
-
-      const linkViews = funnel.linkViews || 450;
-      const storiesViews = funnel.storiesViews || 285;
-      const bookingStarts = funnel.bookingStarts || 130;
-      const completions = Math.max(funnel.bookingCompletions || 48, bookingsCount);
-
-      const rate = linkViews > 0 ? ((completions / linkViews) * 100).toFixed(1) : '10.7';
-      const storiesPct = linkViews > 0 ? Math.round((storiesViews / linkViews) * 100) : 63;
-      const startsPct = linkViews > 0 ? Math.round((bookingStarts / linkViews) * 100) : 29;
-
-      document.getElementById('masterTotalViews').textContent = linkViews;
-      document.getElementById('masterStoriesViews').textContent = storiesViews;
-      document.getElementById('masterBookingStarts').textContent = bookingStarts;
-      document.getElementById('masterBookingsDone').textContent = completions;
-
-      const stEl = document.getElementById('masterStoriesPct');
-      if (stEl) stEl.innerHTML = `<i class="fa-solid fa-fire"></i> ${storiesPct}% engajamento`;
-
-      const convEl = document.getElementById('masterConvRate');
-      if (convEl) convEl.innerHTML = `<i class="fa-solid fa-bolt"></i> ${rate}% conv.`;
-
-      const funnelEl = document.getElementById('funnelContainer');
-      if (funnelEl) {
-        const steps = [
-          { label: '1. Acessos ao Link da Bio', count: `${linkViews} visitas`, pct: 100, color: '#8A2D4E' },
-          { label: '2. Visualizações de Stories', count: `${storiesViews} vídeos (${storiesPct}%)`, pct: storiesPct, color: '#D83F79' },
-          { label: '3. Abertura do Calendário', count: `${bookingStarts} clientes (${startsPct}%)`, pct: startsPct, color: '#C59B6D' },
-          { label: '4. Agendamentos Confirmados', count: `${completions} reservas (${rate}%)`, pct: Math.max(12, Math.round(parseFloat(rate))), color: '#226E3A' }
-        ];
-
-        funnelEl.innerHTML = steps.map(s => `
-          <div class="funnel-step-card">
-            <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.8rem; color:#350B19; margin-bottom:6px;">
-              <strong>${s.label}</strong>
-              <span style="font-weight:700; color:${s.color};">${s.count}</span>
-            </div>
-            <div style="width:100%; height:8px; background:#F3E5E8; border-radius:8px; overflow:hidden;">
-              <div style="width:${s.pct}%; height:100%; background:${s.color}; border-radius:8px;"></div>
-            </div>
-          </div>
-        `).join('');
-      }
-    }
-
-    // 2. Gráfico Interativo de Horários de Pico (08h às 22h)
-    function renderHourlyChart() {
-      const chartEl = document.getElementById('trafficHourlyChart');
-      if (!chartEl) return;
-
-      const traffic = window.EPStore.getTrafficAnalytics() || {};
-      const hourly = traffic.hourlyVisits || {};
-
-      // Horas principais de atendimento e pico (09h às 21h - 9 faixas que cabem perfeitamente no celular e PC)
-      const displayHours = [9, 10, 12, 14, 16, 18, 19, 20, 21];
-      const fallbackMap = { 9: 18, 10: 34, 12: 22, 14: 45, 16: 52, 18: 72, 19: 88, 20: 96, 21: 64 };
-
-      const values = displayHours.map(h => ({
-        hour: h,
-        count: (hourly[h] && hourly[h] > 0) ? hourly[h] : (fallbackMap[h] || 12)
-      }));
-
-      const maxCount = Math.max(...values.map(v => v.count), 10);
-
-      chartEl.innerHTML = values.map((item, idx) => {
-        const heightPct = Math.max(15, Math.round((item.count / maxCount) * 100));
-        const isPeak = item.hour >= 18 && item.hour <= 20;
-        return `
-          <div class="bar-col-interactive ${item.hour === 20 ? 'selected' : ''}" onclick="inspectPeakHour(${item.hour}, ${item.count}, this)">
-            <span class="bar-value-tooltip">${item.count}</span>
-            <div class="bar-fill-pillar" style="height:${heightPct}%; ${isPeak ? 'background:linear-gradient(180deg, #350B19 0%, #8A2D4E 100%);' : ''}"></div>
-            <span class="bar-month-lbl">${item.hour}h</span>
-          </div>
-        `;
-      }).join('');
-    }
-
-    function inspectPeakHour(hour, count, el) {
-      document.querySelectorAll('#trafficHourlyChart .bar-col-interactive').forEach(b => b.classList.remove('selected'));
-      if (el) el.classList.add('selected');
-      const sub = document.getElementById('peakSelectedHourSubtitle');
-      if (sub) {
-        const status = hour >= 18 && hour <= 21 ? '🔥 Horário de Pico Máximo' : 'Fluxo Normal de Acessos';
-        sub.innerHTML = `<strong>Faixa das ${hour}h00:</strong> ${count} acessos registrados (${status})`;
-      }
-    }
-
-    // 3. Gestão e Rotação de Tokens Criptográficos Conectados ao EPStore
-    function renderTokensManagement() {
-      const urls = window.EPStore.getActiveTokensUrls();
-
-      document.getElementById('adminFullLinkDisplay').textContent = urls.adminUrl;
-      document.getElementById('masterFullLinkDisplay').textContent = urls.masterUrl;
-
-      const adminBtn = document.getElementById('linkToAdminPanel');
-      if (adminBtn) adminBtn.href = urls.adminUrl;
-
-      const hintEl = document.getElementById('defaultMasterTokenHint');
-      if (hintEl) hintEl.textContent = urls.masterToken;
-
-      document.getElementById('btnCopyAdminLink').onclick = () => {
-        navigator.clipboard.writeText(urls.adminUrl);
-        showMasterToast('Link do Painel Admin copiado!');
-      };
-
-      document.getElementById('btnCopyMasterLink').onclick = () => {
-        navigator.clipboard.writeText(urls.masterUrl);
-        showMasterToast('Link do Portal Mestre copiado!');
-      };
-
-      document.getElementById('btnRotateAdminToken').onclick = async () => {
-        if (confirm('Gerar um novo Token para a Administradora e revogar o link antigo imediatamente?')) {
-          const res = await window.EPStore.rotateAdminToken();
-          renderTokensManagement();
-          renderAuditLogs();
-          showMasterToast(`Novo Token Admin gerado: ${res.token}`);
-        }
-      };
-
-      document.getElementById('btnRotateMasterToken').onclick = async () => {
-        if (confirm('Gerar um novo Token Mestre e atualizar a chave de segurança do proprietário?')) {
-          const res = await window.EPStore.rotateMasterToken();
-          sessionStorage.setItem('epn_master_token', res.token);
-          window.history.replaceState({}, '', `master.html?token=${res.token}`);
-          renderTokensManagement();
-          renderAuditLogs();
-          showMasterToast(`Novo Token Mestre gerado: ${res.token}`);
-        }
-      };
-
-      document.getElementById('btnPurgeLgpdData').onclick = () => {
-        const count = window.EPStore.purgeExpiredClientData();
-        renderAuditLogs();
-        showMasterToast(`Varredura LGPD concluída (${count} registro(s) antigos anonimizados).`);
-      };
-
-      document.getElementById('btnClearAuditLogs').onclick = () => {
-        if (confirm('Deseja limpar o histórico de logs de auditoria?')) {
-          localStorage.setItem('epn_sec_logs', '[]');
-          renderAuditLogs();
-          showMasterToast('Histórico de auditoria limpo.');
-        }
-      };
-    }
-
-    // 4. Renderização dos Logs de Auditoria em Cards Rosé (.card-list-item)
-    function renderAuditLogs() {
-      const logs = window.EPStore.getSecurityLogs() || [];
-      const grid = document.getElementById('auditLogsCardsGrid');
-      if (!grid) return;
-
-      if (logs.length === 0) {
-        grid.innerHTML = '<p style="font-size:0.85rem; color:#8A2D4E; padding:12px;">Nenhum evento de auditoria registrado no momento.</p>';
-        return;
-      }
-
-      grid.innerHTML = logs.slice(0, 12).map(log => {
-        const isAuth = (log.status || '').includes('AUTORIZADO');
-        const badgeClass = isAuth ? 'confirmado' : 'pendente';
-        const dateFormatted = new Date(log.timestamp).toLocaleString('pt-BR', {
-          day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
+      // Ranking de Serviços
+      const rankEl = document.getElementById('ownerServicesRankingBox');
+      if (rankEl) {
+        const counts = {};
+        activeAppts.forEach(a => {
+          const k = a.serviceName || 'Procedimento';
+          counts[k] = (counts[k] || 0) + 1;
         });
+        const entries = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+        const total = Math.max(1, activeAppts.length);
+        rankEl.innerHTML = entries.slice(0, 5).map(([name, qtd]) => {
+          const pct = Math.round((qtd / total) * 100);
+          return `
+            <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:12px; padding:10px 14px;">
+              <div style="display:flex; justify-content:space-between; font-size:0.82rem; font-weight:700; margin-bottom:6px;">
+                <span>${name}</span>
+                <span style="color:#6A1D39;">${qtd} agend. (${pct}%)</span>
+              </div>
+              <div style="height:6px; background:#E2E8F0; border-radius:99px; overflow:hidden;">
+                <div style="width:${pct}%; height:100%; background:linear-gradient(90deg, #6A1D39, #D83F79);"></div>
+              </div>
+            </div>
+          `;
+        }).join('') || '<div style="font-size:0.82rem; color:#64748B;">Sem dados suficientes.</div>';
+      }
 
-        return `
-          <div class="card-list-item" style="cursor:default;">
-            <div style="display:flex; align-items:center; gap:12px;">
-              <div class="client-avatar-badge" style="background:${isAuth ? '#DDF2E1' : '#FFF0CE'}; color:${isAuth ? '#226E3A' : '#8C5E00'};">
-                <i class="fa-solid ${isAuth ? 'fa-check' : 'fa-triangle-exclamation'}"></i>
-              </div>
-              <div>
-                <h5 style="font-size:0.9rem; font-weight:700; color:#350B19;">
-                  Rota <code>${log.route || '/master'}</code> &bull; ${log.device || 'Dispositivo Web'}
-                </h5>
-                <p style="font-size:0.75rem; color:#6A1D39;">
-                  ${log.notes || 'Verificação de acesso por token'} &bull; Sessão: <code>${log.sessionHash || 'ses_anon'}</code>
-                </p>
-              </div>
-            </div>
-            <div style="text-align:right; flex-shrink:0;">
-              <span class="badge-status-pill ${badgeClass}" style="display:inline-block; margin-bottom:4px;">
-                ${isAuth ? 'Autorizado' : 'Bloqueado'}
-              </span>
-              <span style="display:block; font-size:0.7rem; color:#8A2D4E;">${dateFormatted}</span>
-            </div>
+      // Links Oficiais
+      const base = window.location.origin + window.location.pathname.replace(/\/[^\/]*$/, '/');
+      document.getElementById('linkUrlClient').textContent = base + 'index.html';
+      document.getElementById('linkUrlAdmin').textContent = base + 'admin.html';
+      document.getElementById('linkUrlMaster').textContent = base + 'master.html';
+
+      // Preencher formulário de Configurações do Estúdio
+      document.getElementById('ownInputSalonName').value = cfg.salonName || '';
+      document.getElementById('ownInputOwnerName').value = cfg.ownerName || '';
+      document.getElementById('ownInputPhone').value = cfg.phone || '';
+      document.getElementById('ownInputInstagram').value = cfg.instagram || '';
+      document.getElementById('ownInputAddress').value = cfg.address || '';
+      document.getElementById('ownInputPixKey').value = cfg.pixKey || '';
+      document.getElementById('ownInputSlots').value = Array.isArray(cfg.customSlots) ? cfg.customSlots.join(', ') : '09:00, 11:00, 14:00, 16:00, 18:00';
+
+      // Logs
+      const logsEl = document.getElementById('ownerSecurityLogsList');
+      if (logsEl && window.EPStore.getAnalytics) {
+        const logs = (window.EPStore.getAnalytics().securityLogs || []).slice(0, 12);
+        logsEl.innerHTML = logs.map(l => `
+          <div style="padding:10px 12px; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:10px; font-size:0.78rem;">
+            <div style="font-weight:700; color:#0F172A;">${l.event || 'Evento do Sistema'}</div>
+            <div style="color:#64748B; font-size:0.72rem;">${new Date(l.ts).toLocaleString('pt-BR')}</div>
           </div>
-        `;
-      }).join('');
+        `).join('') || '<div style="font-size:0.8rem; color:#64748B;">Sem registros recentes.</div>';
+      }
     }
+
+    function ownerChangeStatus(id, status) {
+      window.EPStore.updateAppointmentStatus(id, status);
+      renderOwnerDashboard();
+      showOwnerToast('Status atualizado e sincronizado na nuvem!');
+    }
+
+    function ownerDeleteAppt(id) {
+      window.EPStore.deleteAppointment(id);
+      renderOwnerDashboard();
+      showOwnerToast('Agendamento removido!');
+    }
+
+    function ownerWhatsAppClient(id) {
+      const a = (window.EPStore.getAppointments() || []).find(x => x.id === id);
+      if (!a) return;
+      const digits = String(a.clientPhone || '').replace(/\D/g, '');
+      const phone = digits.length >= 10 ? ('55' + digits) : '5511999999999';
+      const msg = encodeURIComponent(`Olá ${a.clientName}! Aqui é do estúdio Estefany Paiva Nail Designer sobre seu horário de ${a.serviceName} (${a.date} às ${a.time}).`);
+      window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
+    }
+
+    function createOwnerQuickTestBooking() {
+      const names = ['Fernanda Oliveira', 'Gabriela Martins', 'Letícia Nunes', 'Amanda Ribeiro'];
+      const pick = names[Math.floor(Math.random() * names.length)];
+      const services = window.EPStore.getServices(true);
+      const srv = services[0] || { id: 'srv_1', name: 'Alongamento em Gel', price: 150 };
+      const today = window.EPStore.getTodayISO();
+      window.EPStore.addAppointment({
+        clientName: pick,
+        clientPhone: '(11) 99876-5432',
+        serviceId: srv.id,
+        serviceName: srv.name,
+        price: srv.price,
+        date: today,
+        time: '14:00',
+        status: 'confirmado'
+      });
+      renderOwnerDashboard();
+      showOwnerToast('Agendamento criado e enviado para o Admin e Calendário!');
+    }
+
+    function copyOwnerLink(elId, msg) {
+      const txt = document.getElementById(elId)?.textContent || '';
+      if (navigator.clipboard && txt) {
+        navigator.clipboard.writeText(txt);
+      }
+      showOwnerToast(msg);
+    }
+
+    async function rotateSecurityTokensOwner() {
+      if (window.EPStore && window.EPStore.rotateTokens) {
+        await window.EPStore.rotateTokens();
+        renderOwnerDashboard();
+        showOwnerToast('Chaves criptográficas renovadas com sucesso!');
+      }
+    }
+
+    function saveOwnerStudioConfig() {
+      const rawSlots = document.getElementById('ownInputSlots').value || '';
+      const customSlots = rawSlots.split(',').map(s => s.trim()).filter(Boolean);
+      window.EPStore.updateSalonSettings({
+        salonName: document.getElementById('ownInputSalonName').value.trim(),
+        ownerName: document.getElementById('ownInputOwnerName').value.trim(),
+        phone: document.getElementById('ownInputPhone').value.trim(),
+        instagram: document.getElementById('ownInputInstagram').value.trim(),
+        address: document.getElementById('ownInputAddress').value.trim(),
+        pixKey: document.getElementById('ownInputPixKey').value.trim(),
+        customSlots: customSlots.length > 0 ? customSlots : ['09:00', '11:00', '14:00', '16:00', '18:00']
+      });
+      renderOwnerDashboard();
+      showOwnerToast('Configurações do estúdio salvas e sincronizadas!');
+    }
+
+    function forceSyncNow() {
+      if (window.EPStore && window.EPStore.pullCloudEvents) {
+        window.EPStore.pullCloudEvents().then(() => {
+          renderOwnerDashboard();
+          document.getElementById('ownerLastSyncText').textContent = 'Sincronizado às ' + new Date().toLocaleTimeString('pt-BR');
+          showOwnerToast('Sincronizado com a nuvem em tempo real!');
+        });
+      }
+    }
+
+    function pushAllToCloudOwner() {
+      if (window.EPStore && window.EPStore.publishCloudSync) {
+        window.EPStore.publishCloudSync('full_snapshot', {});
+        showOwnerToast('Banco de dados enviado para todos os dispositivos!');
+      }
+    }
+
+    function exportFullDatabaseOwner() {
+      const raw = localStorage.getItem(window.EPStore.STORAGE_KEY);
+      const blob = new Blob([raw || '{}'], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `backup-estefany-nails-${window.EPStore.getTodayISO()}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showOwnerToast('Backup baixado com sucesso!');
+    }
+
+    function importFullDatabaseOwner(input) {
+      const file = input.files && input.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const parsed = JSON.parse(e.target.result);
+          if (parsed && parsed.appointments) {
+            window.EPStore.saveState(parsed);
+            window.EPStore.publishCloudSync('full_snapshot', {});
+            renderOwnerDashboard();
+            showOwnerToast('Backup restaurado e sincronizado!');
+          }
+        } catch (err) {
+          showOwnerToast('Arquivo JSON inválido.');
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function resetFactoryOwner() {
+      window.EPStore.resetToDefault();
+      renderOwnerDashboard();
+      showOwnerToast('Dados padrão restaurados!');
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      renderOwnerDashboard();
+      window.addEventListener('epstore:updated', () => {
+        renderOwnerDashboard();
+      });
+    });
   </script>
 </body>
+
 </html>

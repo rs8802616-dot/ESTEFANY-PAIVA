@@ -1,4 +1,4 @@
-const CACHE_NAME = 'estefany-nails-v6-luxury-wine';
+const CACHE_NAME = 'estefany-nails-v12-network-first';
 const STATIC_ASSETS = [
   './',
   './index.html',
@@ -8,24 +8,16 @@ const STATIC_ASSETS = [
   './assets/css/variables.css',
   './assets/css/client.css',
   './assets/css/admin.css',
-  './assets/js/store.js',
-  './assets/js/client.js',
-  './assets/js/admin.js',
-  './assets/images/capa-estefany-paiva.jpg',
-  './assets/images/trabalho-alongamento-chocolate.png',
-  './assets/images/trabalho-amendoada-ouro.png',
-  './assets/images/trabalho-tons-terrosos.png',
-  './assets/images/trabalho-francesa-estrela.png',
-  './assets/images/trabalho-perolada-glaze.png'
+  './assets/js/store.js'
 ];
 
 self.addEventListener('install', (event) => {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(STATIC_ASSETS).catch(err => console.log('Cache warn:', err));
+      return cache.addAll(STATIC_ASSETS).catch(() => {});
     })
   );
-  self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
@@ -39,41 +31,37 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
+// Estratégia Network-First: garante que celular e computador sempre carreguem a versão mais recente
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
+  if (event.request.url.includes('ntfy.sh')) return;
 
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        fetch(event.request).then((networkResponse) => {
-          if (networkResponse && networkResponse.status === 200) {
-            caches.open(CACHE_NAME).then(cache => cache.put(event.request, networkResponse));
-          }
-        }).catch(() => {});
-        return cachedResponse;
-      }
-      return fetch(event.request).catch(() => {
-        if (event.request.mode === 'navigate') {
-          return caches.match('./index.html');
+    fetch(event.request)
+      .then((networkResponse) => {
+        if (networkResponse && networkResponse.status === 200) {
+          const cloned = networkResponse.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, cloned)).catch(() => {});
         }
-      });
-    })
+        return networkResponse;
+      })
+      .catch(() => {
+        return caches.match(event.request).then((cachedResponse) => {
+          if (cachedResponse) return cachedResponse;
+          if (event.request.mode === 'navigate') {
+            return caches.match('./index.html');
+          }
+        });
+      })
   );
 });
 
-// Suporte a push notifications e abertura direta da notificação
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
       if (clientList.length > 0) {
-        let client = clientList[0];
-        for (let i = 0; i < clientList.length; i++) {
-          if (clientList[i].focused) {
-            client = clientList[i];
-          }
-        }
-        return client.focus();
+        return clientList[0].focus();
       }
       return clients.openWindow('./admin.html');
     })
