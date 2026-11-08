@@ -91,10 +91,11 @@
           </div>
         </div>
 
-        <!-- Linha de Saudação à Cliente -->
+        <!-- Linha de Saudação à Cliente (Toque no Perfil para abrir os Stories 24h estilo Instagram) -->
         <div class="wine-greeting-row">
-          <div class="greeting-avatar-ring">
+          <div class="greeting-avatar-ring has-active-story" id="clientProfileAvatarRing" onclick="openProfileStoryViewer()" title="Toque para ver os Stories do Dia (24h)">
             <img src="assets/images/trabalho-amendoada-ouro.png" id="clientHeaderAvatarImg" alt="Estefany Paiva">
+            <span class="avatar-story-badge" id="clientProfileStoryBadge">Stories</span>
           </div>
           <div class="greeting-text-area">
             <h2 id="clientGreetingHeading">Olá, <span id="clientGreetingName">Bem-vinda</span>! <i class="fa-regular fa-heart"></i></h2>
@@ -475,8 +476,12 @@
       </div>
 
       <div style="display:flex; flex-direction:column; gap:8px;">
+        <button onclick="openClientGoogleCalendarDirect()" style="width:100%; padding:13px; border-radius:30px; border:none; background:#1A73E8; color:#FFF; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; box-shadow:0 4px 12px rgba(26,115,232,0.3);">
+          <i class="fa-brands fa-google"></i> Salvar no Meu Google Agenda (Automático)
+        </button>
+
         <button onclick="downloadCalendarIcs()" style="width:100%; padding:12px; border-radius:30px; border:none; background:#4D1328; color:#FFF; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;">
-          <i class="fa-regular fa-calendar-arrow-down"></i> Adicionar ao Meu Calendário (.ics)
+          <i class="fa-regular fa-calendar-arrow-down"></i> Baixar p/ Calendário do Celular (.ics)
         </button>
 
         <button onclick="openWhatsAppChatDirect()" style="width:100%; padding:12px; border-radius:30px; border:none; background:#25D366; color:#FFF; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;">
@@ -606,6 +611,7 @@
       <div class="instagram-story-media-stage" id="instagramStoryMediaStage">
         <img id="storyMediaImg" src="assets/images/trabalho-alongamento-chocolate.png" alt="Story" style="display: block;">
         <video id="storyMediaVideo" autoplay muted loop playsinline style="display: none;"></video>
+        <div id="storyMediaCaptionOverlay" style="position:absolute; bottom:16px; left:12px; right:12px; background:rgba(0,0,0,0.65); backdrop-filter:blur(6px); color:#FFFFFF; padding:10px 14px; border-radius:14px; font-size:0.84rem; font-weight:600; text-align:center; z-index:8; display:none;"></div>
 
         <!-- Áreas de toque esquerda/direita -->
         <div class="instagram-story-tap-areas">
@@ -641,8 +647,12 @@
       </div>
 
       <div style="display:flex; flex-direction:column; gap:8px;">
-        <button onclick="downloadCalendarIcs()" style="width:100%; padding:12px; border-radius:30px; border:none; background:#4D1328; color:#FFF; font-weight:700; cursor:pointer;">
-          <i class="fa-regular fa-calendar-arrow-down"></i> Adicionar ao Meu Calendário
+        <button onclick="openClientGoogleCalendarDirect()" style="width:100%; padding:13px; border-radius:30px; border:none; background:#1A73E8; color:#FFF; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; box-shadow:0 4px 14px rgba(26,115,232,0.35);">
+          <i class="fa-brands fa-google"></i> Abrir & Salvar no Meu Google Agenda
+        </button>
+
+        <button onclick="downloadCalendarIcs()" style="width:100%; padding:11px; border-radius:30px; border:none; background:#4D1328; color:#FFF; font-weight:700; cursor:pointer;">
+          <i class="fa-regular fa-calendar-arrow-down"></i> Baixar p/ Calendário do Celular (.ics)
         </button>
 
         <button onclick="closeClientModal('modalBookingSuccess')" style="width:100%; padding:10px; border-radius:30px; border:1px solid rgba(77,19,40,0.2); background:transparent; color:#6A1D39; font-weight:600; cursor:pointer;">
@@ -750,6 +760,22 @@
 
       const promoImg = document.getElementById('clientPromoBannerImg');
       if (promoImg && s.promoBannerImage) promoImg.src = s.promoBannerImage;
+
+      updateProfileStoryRingClient();
+    }
+
+    function updateProfileStoryRingClient() {
+      if (!window.EPStore || !window.EPStore.getProfileStories) return;
+      const stories = window.EPStore.getProfileStories();
+      const ring = document.getElementById('clientProfileAvatarRing');
+      const badge = document.getElementById('clientProfileStoryBadge');
+      if (ring) {
+        ring.classList.toggle('has-active-story', stories.length > 0);
+      }
+      if (badge) {
+        badge.style.display = stories.length > 0 ? 'inline-block' : 'none';
+        badge.innerText = stories.length > 1 ? `Stories (${stories.length})` : 'Stories';
+      }
     }
 
     // Renderiza todos os serviços cadastrados no EPStore (incluindo novos serviços com foto do celular!)
@@ -943,12 +969,10 @@
         ? window.EPStore.getConfiguredSlots()
         : ['09:00', '10:30', '13:00', '14:00', '15:30', '17:00', '18:30', '19:30'];
 
-      const apps = window.EPStore ? window.EPStore.getAppointments() : [];
-      const dayApps = apps.filter(a => a.date === dateStr && a.status !== 'Cancelado');
-      const busyTimes = new Set(dayApps.map(a => a.time));
-
-      // REGRA DE OURO: HORÁRIOS AGENDADOS SOMEM AUTOMATICAMENTE PARA OUTROS CLIENTES!
-      const freeSlots = allSlots.filter(s => !busyTimes.has(s));
+      // Usa getAvailableSlots que já filtra tanto os agendamentos de clientes quanto os Compromissos Pessoais do Google Agenda da Administradora!
+      const freeSlots = (window.EPStore && window.EPStore.getAvailableSlots)
+        ? window.EPStore.getAvailableSlots(dateStr)
+        : allSlots;
 
       if (freeSlots.length === 0) {
         grid.innerHTML = `
@@ -1041,11 +1065,17 @@
       const dayApps = (window.EPStore.getAppointments() || []).filter(
         a => a.date === dateStr && a.status !== 'Cancelado' && a.status !== 'cancelado'
       );
-      if (dayApps.length === 0) {
+      const personalBlocks = window.EPStore.getPersonalBusyBlocks
+        ? window.EPStore.getPersonalBusyBlocks().filter(b => b.date === dateStr)
+        : [];
+
+      if (dayApps.length === 0 && personalBlocks.length === 0) {
         box.innerHTML = `<span style="color:#6A1D39;"><i class="fa-regular fa-calendar-check"></i> Dia <strong>${dateStr.split('-').reverse().join('/')}</strong> com horários livres para agendamento.</span>`;
       } else {
-        const times = dayApps.map(a => `<span style="display:inline-block; background:#FBECEF; border:1px solid rgba(77,19,40,0.15); padding:2px 8px; border-radius:10px; font-weight:700; margin:2px;">${a.time} (Reservado)</span>`).join(' ');
-        box.innerHTML = `<div style="margin-bottom:4px; font-weight:700; color:#350B19;"><i class="fa-solid fa-clock" style="color:#D83F79;"></i> Horários já preenchidos em ${dateStr.split('-').reverse().join('/')}:</div><div>${times}</div>`;
+        const appPills = dayApps.map(a => `<span style="display:inline-block; background:#FBECEF; border:1px solid rgba(77,19,40,0.15); padding:2px 8px; border-radius:10px; font-weight:700; margin:2px;">${a.time} (Reservado)</span>`);
+        const blockPills = personalBlocks.map(b => `<span style="display:inline-block; background:#FBECEF; border:1px solid rgba(77,19,40,0.15); padding:2px 8px; border-radius:10px; font-weight:700; margin:2px;">${b.allDay ? 'Dia Todo' : (b.startTime + ' às ' + b.endTime)} (Indisponível)</span>`);
+        const allPills = [...appPills, ...blockPills].join(' ');
+        box.innerHTML = `<div style="margin-bottom:4px; font-weight:700; color:#350B19;"><i class="fa-solid fa-clock" style="color:#D83F79;"></i> Horários já preenchidos ou fechados em ${dateStr.split('-').reverse().join('/')}:</div><div>${allPills}</div>`;
       }
     }
 
@@ -1143,8 +1173,19 @@
       document.getElementById('successDateTime').innerText = `${selectedDate.toLocaleDateString('pt-BR')} às ${bookedTime}`;
       document.getElementById('successClientName').innerText = name;
 
+      lastConfirmedClientBooking = savedApp || {
+        id: 'EP-' + Date.now(),
+        clientName: name,
+        clientPhone: phone,
+        serviceName: selectedService.name,
+        servicePrice: selectedService.price,
+        duration: 90,
+        date: dateStr,
+        time: bookedTime
+      };
+
       openClientModal('modalBookingSuccess');
-      showToast('Agendamento salvo no calendário e enviado para a Estefany!');
+      showToast('Agendamento confirmado! Toque em Salvar no Google Agenda para registrar no seu celular.');
     }
 
     function updateNextBookingBanner() {
@@ -1321,28 +1362,90 @@
     }
 
     function downloadCalendarIcs() {
-      const ics = `BEGIN:VCALENDAR
-VERSION:2.0
-PRODID:-//Estefany Paiva Nails//Agendamento//PT
-BEGIN:VEVENT
-SUMMARY:Estefany Paiva Nails - ${selectedService.name}
-DESCRIPTION:Seu momento de autocuidado com Estefany Paiva.
-LOCATION:Studio Estefany Paiva Nails - Brasília DF
-DTSTART;VALUE=DATE-TIME:${selectedDate.toISOString().replace(/[-:]/g, '').split('.')[0]}Z
-STATUS:CONFIRMED
-END:VEVENT
-END:VCALENDAR`;
-      const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
-      const link = document.createElement('a');
-      link.href = window.URL.createObjectURL(blob);
-      link.setAttribute('download', 'agendamento-estefany-paiva.ics');
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      showToast('Arquivo de calendário (.ics) baixado!');
+      const ownApps = getCurrentClientOwnAppointments();
+      const targetApp = lastConfirmedClientBooking || ownApps[0] || {
+        id: 'EP-' + Date.now(),
+        clientName: document.getElementById('clientNameInput')?.value || 'Cliente VIP',
+        serviceName: selectedService.name,
+        servicePrice: selectedService.price || 150,
+        duration: 90,
+        date: formatLocalYYYYMMDD(selectedDate),
+        time: selectedSlotTime || '14:00'
+      };
+      if (window.EPStore && window.EPStore.downloadIcsFile) {
+        window.EPStore.downloadIcsFile(targetApp);
+        showToast('Arquivo de calendário (.ics) baixado!');
+        return;
+      }
+    }
+
+    let lastConfirmedClientBooking = null;
+
+    function openClientGoogleCalendarDirect() {
+      const ownApps = getCurrentClientOwnAppointments();
+      const targetApp = lastConfirmedClientBooking || ownApps[0] || {
+        id: 'EP-' + Date.now(),
+        clientName: document.getElementById('clientNameInput')?.value || 'Cliente VIP',
+        serviceName: selectedService.name,
+        servicePrice: parseFloat(selectedService.price || 150),
+        duration: 90,
+        date: formatLocalYYYYMMDD(selectedDate),
+        time: selectedSlotTime || '14:00'
+      };
+      if (window.EPStore && window.EPStore.getGoogleCalendarUrl) {
+        const gcalUrl = window.EPStore.getGoogleCalendarUrl(targetApp);
+        window.open(gcalUrl, '_blank');
+        showToast('Abrindo seu Google Agenda para salvar o horário!');
+      }
     }
 
     let currentServiceStoryMedia = [];
+
+    function openProfileStoryViewer() {
+      if (!window.EPStore) return;
+      const stories = window.EPStore.getProfileStories ? window.EPStore.getProfileStories() : [];
+      const s = window.EPStore.getSalonSettings ? window.EPStore.getSalonSettings() : {};
+
+      if (stories.length === 0) {
+        // Caso não haja story extra nas últimas 24h, exibe a própria foto de perfil em destaque no Story Viewer
+        currentServiceStoryMedia = [{
+          type: 'image',
+          url: (s && s.avatarImage) ? s.avatarImage : 'assets/images/trabalho-amendoada-ouro.png',
+          caption: (s && s.slogan) ? s.slogan : 'Bem-vinda ao Studio Estefany Paiva Nails ✨',
+          createdAt: Date.now() - 3600000
+        }];
+      } else {
+        currentServiceStoryMedia = stories.map(st => ({
+          type: st.type || 'image',
+          url: st.url,
+          caption: st.caption || '',
+          createdAt: st.createdAt
+        }));
+      }
+
+      storyActiveService = null;
+      storyIndex = 0;
+
+      const userAv = document.getElementById('storyUserAvatarImg');
+      if (userAv && s && s.avatarImage) userAv.src = s.avatarImage;
+
+      const progRow = document.getElementById('instagramStoryProgressRow');
+      if (progRow) {
+        progRow.innerHTML = currentServiceStoryMedia.map((_, i) => `
+          <div class="instagram-progress-bar-bg">
+            <div id="instaStoryProg_${i}" class="instagram-progress-bar-fill"></div>
+          </div>
+        `).join('');
+      }
+
+      const btnBook = document.getElementById('btnStoryBookNow');
+      if (btnBook) {
+        btnBook.innerHTML = '<i class="fa-regular fa-calendar-check"></i> Agendar Meu Horário Agora ✨';
+      }
+
+      document.getElementById('modalStoryViewer').classList.add('active');
+      showStorySlide(0);
+    }
 
     function openStoryViewer(serviceId) {
       storyActiveService = serviceId;
@@ -1360,13 +1463,19 @@ END:VCALENDAR`;
         } else if (Array.isArray(srv.storiesVideos) && srv.storiesVideos.length > 0) {
           currentServiceStoryMedia = srv.storiesVideos.map(v => ({
             type: (v.mediaUrl && v.mediaUrl.endsWith('.mp4')) ? 'video' : 'image',
-            url: v.mediaUrl || srv.image
+            url: v.mediaUrl || srv.image,
+            caption: v.caption || srv.name
           }));
         } else {
-          currentServiceStoryMedia = [{ type: 'image', url: srv.image || 'assets/images/trabalho-alongamento-chocolate.png' }];
+          currentServiceStoryMedia = [{ type: 'image', url: srv.image || 'assets/images/trabalho-alongamento-chocolate.png', caption: srv.name }];
         }
       } else {
         currentServiceStoryMedia = [{ type: 'image', url: 'assets/images/trabalho-alongamento-chocolate.png' }];
+      }
+
+      const btnBook = document.getElementById('btnStoryBookNow');
+      if (btnBook) {
+        btnBook.innerHTML = '<i class="fa-regular fa-calendar-check"></i> Agendar Este Procedimento ✨';
       }
 
       // Atualiza avatar do topo do story
@@ -1407,6 +1516,24 @@ END:VCALENDAR`;
       const mediaItem = currentServiceStoryMedia[idx];
       const img = document.getElementById('storyMediaImg');
       const vid = document.getElementById('storyMediaVideo');
+      const capEl = document.getElementById('storyMediaCaptionOverlay');
+      const nameEl = document.getElementById('storyServiceName');
+
+      if (!storyActiveService && nameEl) {
+        const elapsed = (window.EPStore && window.EPStore.formatStoryElapsed)
+          ? window.EPStore.formatStoryElapsed(mediaItem.createdAt)
+          : 'Stories 24h';
+        nameEl.innerHTML = `Stories do Dia &bull; <span style="font-size:0.72rem; color:rgba(255,255,255,0.8);">${elapsed}</span>`;
+      }
+
+      if (capEl) {
+        if (mediaItem.caption) {
+          capEl.innerText = mediaItem.caption;
+          capEl.style.display = 'block';
+        } else {
+          capEl.style.display = 'none';
+        }
+      }
 
       if (mediaItem.type === 'video' && vid) {
         img.style.display = 'none';

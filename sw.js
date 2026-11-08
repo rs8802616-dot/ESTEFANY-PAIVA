@@ -1,4 +1,4 @@
-const CACHE_NAME = 'estefany-nails-v18-no-flash-inapp-preview';
+const CACHE_NAME = 'estefany-nails-v19-stories24h-gcal-contrast';
 const STATIC_ASSETS = [
   './',
   './index.html',

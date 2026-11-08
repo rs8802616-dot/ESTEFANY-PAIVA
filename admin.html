@@ -128,10 +128,12 @@
           </div>
 
           <div class="admin-greeting-right-controls">
-            <div class="period-select-pill">
-              <span>Hoje</span>
-              <i class="fa-solid fa-chevron-down" style="font-size:0.65rem;"></i>
-            </div>
+            <button type="button" onclick="openModalStoriesPerfilAdmin()" class="btn-open-client-pill" style="border:1px solid rgba(255,255,255,0.28); background:linear-gradient(90deg, #DD2A7B 0%, #F58529 100%); color:#FFF; cursor:pointer;">
+              <i class="fa-brands fa-instagram"></i> + Stories 24h
+            </button>
+            <button type="button" onclick="openModalGoogleAgendaAdmin()" class="btn-open-client-pill" style="border:1px solid rgba(255,255,255,0.28); background:#1A73E8; color:#FFF; cursor:pointer;">
+              <i class="fa-brands fa-google"></i> Google Agenda
+            </button>
             <button type="button" onclick="openClientPortalInApp()" class="btn-open-client-pill" style="border:none; cursor:pointer;">
               <i class="fa-solid fa-eye"></i> Portal da Cliente
             </button>
@@ -331,6 +333,9 @@
             <p style="font-size:0.78rem; color:#8A2D4E;">Agendamentos feitos pela cliente no celular sobem automaticamente para este calendário.</p>
           </div>
           <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="filter-pill" onclick="openModalGoogleAgendaAdmin()" style="background:#EFF6FF; color:#1D4ED8; border:1px solid #BFDBFE; cursor:pointer; font-weight:700;">
+              <i class="fa-brands fa-google"></i> Google Agenda & Compromissos Pessoais
+            </button>
             <button class="filter-pill" onclick="openModalConfigAgendaGrade()" style="background:#ECFDF5; color:#059669; border:1px solid #A7F3D0; cursor:pointer; font-weight:700;">
               <i class="fa-solid fa-calendar-days"></i> Abrir Agenda / Folgas
             </button>
@@ -635,6 +640,30 @@
         </div>
 
         <div class="admin-items-responsive-grid">
+          <!-- 00A. Stories do Perfil 24h (Estilo Instagram) -->
+          <div class="card-list-item" onclick="openModalStoriesPerfilAdmin()">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <div class="client-avatar-badge" style="background:linear-gradient(135deg, #DD2A7B 0%, #F58529 100%); color:#FFF;"><i class="fa-brands fa-instagram"></i></div>
+              <div>
+                <h5 style="font-size:0.92rem; font-weight:700; color:#350B19;">Stories do Perfil (24 Horas)</h5>
+                <p style="font-size:0.76rem; color:#6A1D39;">Postar fotos e vídeos nos stories da sua foto de perfil (expiram em 24h)</p>
+              </div>
+            </div>
+            <span class="filter-pill" style="padding:4px 10px; font-size:0.72rem; background:#FDF2F8; color:#DB2777; border-color:#FBCFE8;">Postar Story</span>
+          </div>
+
+          <!-- 00B. Integração Google Agenda & Bloqueio de Compromissos Pessoais -->
+          <div class="card-list-item" onclick="openModalGoogleAgendaAdmin()">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <div class="client-avatar-badge" style="background:#EFF6FF; color:#1D4ED8;"><i class="fa-brands fa-google"></i></div>
+              <div>
+                <h5 style="font-size:0.92rem; font-weight:700; color:#350B19;">Integração Google Agenda & Compromissos Pessoais</h5>
+                <p style="font-size:0.76rem; color:#6A1D39;">Bloquear horários de compromissos pessoais (ex: dia 10) e sincronizar Google Agenda</p>
+              </div>
+            </div>
+            <span class="filter-pill" style="padding:4px 10px; font-size:0.72rem; background:#EFF6FF; color:#1D4ED8; border-color:#BFDBFE;">Sincronizar</span>
+          </div>
+
           <!-- 0A. Controle de Abertura da Grade da Agenda (Semana, Mês, Ano Todo, Folgas) -->
           <div class="card-list-item" onclick="openModalConfigAgendaGrade()">
             <div style="display:flex; align-items:center; gap:12px;">
@@ -964,6 +993,10 @@
       <div style="display:flex; flex-direction:column; gap:8px;">
         <button id="btnWhatsDetalhe" onclick="abrirWhatsAppDetalhe()" style="width:100%; padding:12px; border-radius:30px; border:none; background:#25D366; color:#FFF; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;">
           <i class="fa-brands fa-whatsapp" style="font-size:1.2rem;"></i> Conversar no WhatsApp
+        </button>
+
+        <button onclick="salvarAgendamentoNoGoogleAgendaAdmin()" style="width:100%; padding:11px; border-radius:30px; border:none; background:#1A73E8; color:#FFF; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;">
+          <i class="fa-brands fa-google"></i> Enviar para Meu Google Agenda
         </button>
 
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
@@ -1678,6 +1711,136 @@
     </div>
   </div>
 
+  <!-- MODAL: STORIES DE 24 HORAS DO PERFIL (ESTILO INSTAGRAM) -->
+  <div class="admin-modal-overlay" id="modalStoriesPerfilAdmin">
+    <div class="admin-modal-card" style="max-height:92vh; overflow-y:auto;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+        <h3 style="font-family:var(--font-serif); font-size:1.3rem; color:#350B19;">
+          <i class="fa-brands fa-instagram" style="color:#DD2A7B;"></i> Stories do Perfil (24 Horas)
+        </h3>
+        <button onclick="closeModal('modalStoriesPerfilAdmin')" style="background:none; border:none; font-size:1.2rem; color:#6A1D39; cursor:pointer;">✕</button>
+      </div>
+
+      <p style="font-size:0.76rem; color:#6A1D39; margin-bottom:12px;">
+        Poste fotos ou vídeos nos seus Stories do Perfil! Quando a cliente tocar na sua foto de perfil lá no aplicativo, vai abrir igual ao Instagram. Cada story some sozinho após 24 horas.
+      </p>
+
+      <!-- Botões para adicionar Foto ou Vídeo nos Stories do Perfil -->
+      <div style="background:#FFF9FA; border:1px solid rgba(216,63,121,0.25); border-radius:16px; padding:14px; margin-bottom:14px;">
+        <div style="margin-bottom:10px;">
+          <label style="display:block; font-size:0.78rem; font-weight:700; color:#4D1328; margin-bottom:4px;">Legenda do Story (Opcional)</label>
+          <input type="text" id="inputProfileStoryCaption" placeholder="Ex: Unhas do dia maravilhosas ✨ Horários abertos!" style="width:100%; padding:9px 12px; border-radius:10px; border:1px solid rgba(77,19,40,0.18); background:#FFF;">
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
+          <label style="display:flex; align-items:center; justify-content:center; gap:6px; padding:10px; background:#FBECEF; border:1px solid rgba(77,19,40,0.15); border-radius:12px; font-size:0.76rem; font-weight:700; color:#4D1328; cursor:pointer;">
+            <i class="fa-solid fa-camera"></i> + Postar Foto (24h)
+            <input type="file" multiple accept="image/*" style="display:none;" onchange="handleUploadProfileStoryPhoto(this)">
+          </label>
+          <label style="display:flex; align-items:center; justify-content:center; gap:6px; padding:10px; background:#FBECEF; border:1px solid rgba(77,19,40,0.15); border-radius:12px; font-size:0.76rem; font-weight:700; color:#4D1328; cursor:pointer;">
+            <i class="fa-solid fa-video"></i> + Postar Vídeo (24h)
+            <input type="file" multiple accept="video/*" style="display:none;" onchange="handleUploadProfileStoryVideo(this)">
+          </label>
+        </div>
+
+        <button type="button" onclick="handleAddProfileStoryVideoUrlPrompt()" style="width:100%; padding:8px 10px; background:#FFF; border:1px dashed rgba(77,19,40,0.22); border-radius:10px; font-size:0.74rem; font-weight:600; color:#6A1D39; cursor:pointer;">
+          <i class="fa-solid fa-link"></i> Ou colar link de vídeo externo (MP4 / Reels)
+        </button>
+      </div>
+
+      <!-- Lista de Stories Ativos nas últimas 24h -->
+      <div style="margin-bottom:14px;">
+        <strong style="display:block; font-size:0.82rem; color:#350B19; margin-bottom:8px;">
+          <i class="fa-regular fa-clock"></i> Stories Ativos Agora (Expiram em 24h):
+        </strong>
+        <div id="adminProfileStoriesListContainer" style="display:flex; flex-direction:column; gap:8px; max-height:240px; overflow-y:auto;">
+          <!-- Populado via JS -->
+        </div>
+      </div>
+
+      <button type="button" onclick="closeModal('modalStoriesPerfilAdmin')" style="width:100%; padding:12px; border-radius:var(--radius-pill); background:#4D1328; color:#FFF; font-weight:700; border:none; cursor:pointer;">
+        Concluir
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL: INTEGRAÇÃO GOOGLE AGENDA & BLOQUEIO DE COMPROMISSOS PESSOAIS -->
+  <div class="admin-modal-overlay" id="modalGoogleAgendaAdmin">
+    <div class="admin-modal-card" style="max-height:92vh; overflow-y:auto;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+        <h3 style="font-family:var(--font-serif); font-size:1.25rem; color:#350B19;">
+          <i class="fa-brands fa-google" style="color:#1A73E8;"></i> Google Agenda & Compromissos Pessoais
+        </h3>
+        <button onclick="closeModal('modalGoogleAgendaAdmin')" style="background:none; border:none; font-size:1.2rem; color:#6A1D39; cursor:pointer;">✕</button>
+      </div>
+
+      <p style="font-size:0.76rem; color:#6A1D39; margin-bottom:12px;">
+        Quando você tiver um compromisso pessoal (ex: dia 10 à tarde), registre ou importe aqui do seu Google Agenda. O aplicativo entende automaticamente que esses horários estão ocupados e fecha esses horários para as clientes!
+      </p>
+
+      <!-- 1. Adicionar Compromisso Pessoal / Bloqueio de Horário -->
+      <form onsubmit="salvarCompromissoPessoalAdmin(event)" style="background:#FBECEF; border-radius:16px; padding:14px; margin-bottom:14px;">
+        <strong style="display:block; font-size:0.82rem; color:#350B19; margin-bottom:8px;">
+          <i class="fa-solid fa-calendar-minus" style="color:#D83F79;"></i> Fechar Horário por Compromisso Pessoal:
+        </strong>
+
+        <div class="form-input-box" style="margin-bottom:8px;">
+          <label style="display:block; font-size:0.75rem; font-weight:600; color:#4D1328; margin-bottom:3px;">Motivo / Compromisso Pessoal *</label>
+          <input type="text" id="inputPersonalBlockTitle" required placeholder="Ex: Consulta Médica / Compromisso Pessoal" style="width:100%; padding:8px 12px; border-radius:10px; border:1px solid rgba(77,19,40,0.18); background:#FFF;">
+        </div>
+
+        <div style="display:grid; grid-template-columns:1.2fr 1fr 1fr; gap:8px; margin-bottom:8px;">
+          <div class="form-input-box">
+            <label style="display:block; font-size:0.75rem; font-weight:600; color:#4D1328; margin-bottom:3px;">Data (Ex: Dia 10) *</label>
+            <input type="date" id="inputPersonalBlockDate" required style="width:100%; padding:8px 10px; border-radius:10px; border:1px solid rgba(77,19,40,0.18); background:#FFF;">
+          </div>
+          <div class="form-input-box">
+            <label style="display:block; font-size:0.75rem; font-weight:600; color:#4D1328; margin-bottom:3px;">Início *</label>
+            <input type="time" id="inputPersonalBlockStart" value="13:00" required style="width:100%; padding:8px 10px; border-radius:10px; border:1px solid rgba(77,19,40,0.18); background:#FFF;">
+          </div>
+          <div class="form-input-box">
+            <label style="display:block; font-size:0.75rem; font-weight:600; color:#4D1328; margin-bottom:3px;">Fim *</label>
+            <input type="time" id="inputPersonalBlockEnd" value="17:00" required style="width:100%; padding:8px 10px; border-radius:10px; border:1px solid rgba(77,19,40,0.18); background:#FFF;">
+          </div>
+        </div>
+
+        <label style="display:flex; align-items:center; gap:6px; font-size:0.76rem; font-weight:600; color:#350B19; margin-bottom:10px; cursor:pointer;">
+          <input type="checkbox" id="chkPersonalBlockAllDay"> Fechar o dia inteiro para este compromisso
+        </label>
+
+        <button type="submit" style="width:100%; padding:10px; border-radius:20px; border:none; background:#4D1328; color:#FFF; font-weight:700; font-size:0.8rem; cursor:pointer;">
+          <i class="fa-solid fa-lock"></i> Bloquear Horário na Agenda das Clientes
+        </button>
+      </form>
+
+      <!-- 2. Sincronizar / Importar e Exportar Google Agenda (.ics) -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:14px;">
+        <label style="display:flex; align-items:center; justify-content:center; gap:6px; padding:10px; border-radius:12px; background:#EFF6FF; color:#1D4ED8; border:1px solid #BFDBFE; font-size:0.74rem; font-weight:700; cursor:pointer; text-align:center;">
+          <i class="fa-solid fa-file-import"></i> Importar Meu Google Agenda (.ics)
+          <input type="file" accept=".ics,text/calendar" style="display:none;" onchange="handleImportGoogleCalendarIcsAdmin(this)">
+        </label>
+
+        <button type="button" onclick="exportAllAppointmentsToGoogleIcsAdmin()" style="padding:10px; border-radius:12px; background:#ECFDF5; color:#059669; border:1px solid #A7F3D0; font-size:0.74rem; font-weight:700; cursor:pointer;">
+          <i class="fa-solid fa-calendar-arrow-down"></i> Exportar Todos p/ Meu Google Agenda
+        </button>
+      </div>
+
+      <!-- 3. Lista de Compromissos Pessoais Ativos que estão bloqueando horários -->
+      <div style="margin-bottom:14px;">
+        <strong style="display:block; font-size:0.82rem; color:#350B19; margin-bottom:8px;">
+          <i class="fa-regular fa-calendar-xmark"></i> Seus Compromissos Pessoais Bloqueando Horários:
+        </strong>
+        <div id="adminPersonalBlocksListContainer" style="display:flex; flex-direction:column; gap:8px; max-height:200px; overflow-y:auto;">
+          <!-- Populado via JS -->
+        </div>
+      </div>
+
+      <button type="button" onclick="closeModal('modalGoogleAgendaAdmin')" style="width:100%; padding:12px; border-radius:var(--radius-pill); background:#4D1328; color:#FFF; font-weight:700; border:none; cursor:pointer;">
+        Fechar
+      </button>
+    </div>
+  </div>
+
   <!-- MODAL TELA CHEIA: VISUALIZAR PORTAL DA CLIENTE DENTRO DO ADMIN SEM SAIR DO LINK DO ADMINISTRADOR -->
   <div class="admin-modal-overlay" id="modalPortalClienteInApp" style="padding:0; background:rgba(15, 5, 10, 0.92); z-index:9500;">
     <div style="width:100%; height:100vh; display:flex; flex-direction:column; background:#FAF4F5; overflow:hidden;">
@@ -1854,6 +2017,12 @@
         countByDate[a.date] = (countByDate[a.date] || 0) + 1;
       });
 
+      const personalBlocks = (window.EPStore && window.EPStore.getPersonalBusyBlocks) ? window.EPStore.getPersonalBusyBlocks() : [];
+      const blockByDate = {};
+      personalBlocks.forEach(b => {
+        blockByDate[b.date] = (blockByDate[b.date] || 0) + 1;
+      });
+
       let html = '';
       for (let i = 0; i < firstDay; i++) {
         html += '<div style="height:42px;"></div>';
@@ -1862,16 +2031,17 @@
       for (let day = 1; day <= totalDays; day++) {
         const dateStr = `${adminCalYear}-${String(adminCalMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
         const count = countByDate[dateStr] || 0;
+        const bCount = blockByDate[dateStr] || 0;
         const isSelected = adminSelectedDateFilter === dateStr;
 
-        const bg = isSelected ? '#4D1328' : (count > 0 ? '#FFFFFF' : 'rgba(255,255,255,0.45)');
+        const bg = isSelected ? '#4D1328' : (count > 0 || bCount > 0 ? '#FFFFFF' : 'rgba(255,255,255,0.45)');
         const color = isSelected ? '#FFFFFF' : '#350B19';
-        const border = isSelected ? '#4D1328' : (count > 0 ? '#D83F79' : 'rgba(77,19,40,0.08)');
+        const border = isSelected ? '#4D1328' : (bCount > 0 ? '#1A73E8' : (count > 0 ? '#D83F79' : 'rgba(77,19,40,0.08)'));
 
         html += `
-          <button type="button" onclick="selectAdminCalendarDate('${dateStr}')" style="height:44px; border-radius:12px; border:1.5px solid ${border}; background:${bg}; color:${color}; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer; font-weight:700; font-size:0.82rem; position:relative; transition:all 0.15s;">
+          <button type="button" onclick="selectAdminCalendarDate('${dateStr}')" style="height:46px; border-radius:12px; border:1.5px solid ${border}; background:${bg}; color:${color}; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer; font-weight:700; font-size:0.82rem; position:relative; transition:all 0.15s;">
             <span>${day}</span>
-            ${count > 0 ? `<span style="font-size:0.62rem; background:${isSelected ? '#FBECEF' : '#D83F79'}; color:${isSelected ? '#350B19' : '#FFF'}; padding:0px 5px; border-radius:10px; line-height:1.2; margin-top:1px;">${count} ag.</span>` : ''}
+            ${count > 0 ? `<span class="badge-status-pill" style="font-size:0.58rem; background:${isSelected ? '#FBECEF' : '#D83F79'}; color:${isSelected ? '#350B19' : '#FFF'}; padding:0px 5px; border-radius:10px; line-height:1.2; margin-top:1px;">${count} ag.</span>` : (bCount > 0 ? `<span class="badge-status-pill" style="font-size:0.56rem; background:#1A73E8; color:#FFF; padding:0px 5px; border-radius:10px; line-height:1.2; margin-top:1px;">Pessoal</span>` : '')}
           </button>
         `;
       }
@@ -3291,6 +3461,235 @@
         modal.classList.remove('active');
       }
       refreshAllAdminViews();
+    }
+
+    // ========================================================
+    // STORIES DE 24H DO PERFIL (ADMINISTRADORA)
+    // ========================================================
+    function openModalStoriesPerfilAdmin() {
+      renderAdminProfileStoriesList();
+      openModal('modalStoriesPerfilAdmin');
+    }
+
+    function renderAdminProfileStoriesList() {
+      const container = document.getElementById('adminProfileStoriesListContainer');
+      if (!container || !window.EPStore) return;
+      const stories = window.EPStore.getProfileStories ? window.EPStore.getProfileStories() : [];
+
+      if (stories.length === 0) {
+        container.innerHTML = '<p style="font-size:0.78rem; color:#8A2D4E; padding:8px;">Nenhum story ativo nas últimas 24h. Poste uma foto ou vídeo acima!</p>';
+        return;
+      }
+
+      container.innerHTML = stories.map(st => {
+        const elapsed = window.EPStore.formatStoryElapsed ? window.EPStore.formatStoryElapsed(st.createdAt) : 'Ativo';
+        return `
+          <div style="display:flex; justify-content:space-between; align-items:center; background:#FFF; border:1px solid rgba(77,19,40,0.12); border-radius:12px; padding:8px 12px; gap:10px;">
+            <div style="display:flex; align-items:center; gap:10px;">
+              ${st.type === 'video'
+                ? `<video src="${st.url}" muted playsinline style="width:44px; height:44px; border-radius:10px; object-fit:cover; background:#000;"></video>`
+                : `<img src="${st.url}" style="width:44px; height:44px; border-radius:10px; object-fit:cover;" alt="Story">`
+              }
+              <div>
+                <strong style="font-size:0.82rem; color:#350B19; display:block;">${st.caption || (st.type === 'video' ? 'Vídeo nos Stories' : 'Foto nos Stories')}</strong>
+                <span style="font-size:0.7rem; color:#6A1D39;">Publicado ${elapsed} &bull; Expira em 24h</span>
+              </div>
+            </div>
+            <button type="button" onclick="excluirProfileStoryAdmin('${st.id}')" style="padding:6px 10px; border-radius:8px; border:none; background:#FFF0F3; color:#D83F79; font-size:0.75rem; cursor:pointer;">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function handleUploadProfileStoryPhoto(input) {
+      if (!input.files || input.files.length === 0) return;
+      const caption = (document.getElementById('inputProfileStoryCaption')?.value || '').trim();
+      for (let i = 0; i < input.files.length; i++) {
+        const dataUrl = await window.EPStore.compressImageFile(input.files[i], 720, 0.80);
+        window.EPStore.addProfileStory({ type: 'image', url: dataUrl, caption });
+      }
+      if (document.getElementById('inputProfileStoryCaption')) document.getElementById('inputProfileStoryCaption').value = '';
+      renderAdminProfileStoriesList();
+      showToast('Foto publicada nos seus Stories de 24h do Perfil!');
+    }
+
+    function handleUploadProfileStoryVideo(input) {
+      if (!input.files || input.files.length === 0) return;
+      const caption = (document.getElementById('inputProfileStoryCaption')?.value || '').trim();
+      Array.from(input.files).forEach(file => {
+        if (file.size > 8 * 1024 * 1024) {
+          showToast('Vídeo muito grande! Escolha um vídeo curto de até 8MB ou use um link.');
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          window.EPStore.addProfileStory({ type: 'video', url: ev.target.result, caption });
+          if (document.getElementById('inputProfileStoryCaption')) document.getElementById('inputProfileStoryCaption').value = '';
+          renderAdminProfileStoriesList();
+          showToast('Vídeo publicado nos seus Stories de 24h do Perfil!');
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function handleAddProfileStoryVideoUrlPrompt() {
+      const url = prompt('Cole o link do vídeo (MP4) para seus Stories 24h:', 'https://');
+      if (url && url.trim() && url !== 'https://') {
+        const caption = (document.getElementById('inputProfileStoryCaption')?.value || '').trim();
+        window.EPStore.addProfileStory({ type: 'video', url: url.trim(), caption });
+        renderAdminProfileStoriesList();
+        showToast('Vídeo adicionado aos Stories de 24h do Perfil!');
+      }
+    }
+
+    function excluirProfileStoryAdmin(id) {
+      window.EPStore.deleteProfileStory(id);
+      renderAdminProfileStoriesList();
+      showToast('Story removido do perfil.');
+    }
+
+    // ========================================================
+    // INTEGRAÇÃO GOOGLE AGENDA & BLOQUEIO DE COMPROMISSOS PESSOAIS
+    // ========================================================
+    function openModalGoogleAgendaAdmin() {
+      const dateInp = document.getElementById('inputPersonalBlockDate');
+      if (dateInp && !dateInp.value) {
+        dateInp.value = adminSelectedDateFilter || new Date().toISOString().split('T')[0];
+      }
+      renderAdminPersonalBlocksList();
+      openModal('modalGoogleAgendaAdmin');
+    }
+
+    function renderAdminPersonalBlocksList() {
+      const container = document.getElementById('adminPersonalBlocksListContainer');
+      if (!container || !window.EPStore) return;
+      const blocks = window.EPStore.getPersonalBusyBlocks ? window.EPStore.getPersonalBusyBlocks() : [];
+
+      if (blocks.length === 0) {
+        container.innerHTML = '<p style="font-size:0.78rem; color:#8A2D4E; padding:8px;">Nenhum compromisso pessoal bloqueando horários no momento.</p>';
+        return;
+      }
+
+      container.innerHTML = blocks.map(b => `
+        <div style="display:flex; justify-content:space-between; align-items:center; background:#FFF; border:1px solid rgba(26,115,232,0.22); border-radius:12px; padding:10px 12px; gap:10px;">
+          <div>
+            <strong style="font-size:0.84rem; color:#350B19; display:block;">
+              <i class="fa-brands fa-google" style="color:#1A73E8;"></i> ${b.title}
+            </strong>
+            <span style="font-size:0.74rem; color:#6A1D39;">
+              Data: <strong>${(b.date || '').split('-').reverse().join('/')}</strong> &bull; ${b.allDay ? 'Dia Inteiro Fechado' : `Das ${b.startTime} às ${b.endTime}`}
+            </span>
+          </div>
+          <button type="button" onclick="removerCompromissoPessoalAdmin('${b.id}')" style="padding:6px 10px; border-radius:8px; border:none; background:#FFF0F3; color:#D83F79; font-size:0.75rem; cursor:pointer;" title="Liberar horário">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        </div>
+      `).join('');
+    }
+
+    function salvarCompromissoPessoalAdmin(e) {
+      e.preventDefault();
+      const title = document.getElementById('inputPersonalBlockTitle').value.trim();
+      const date = document.getElementById('inputPersonalBlockDate').value;
+      const startTime = document.getElementById('inputPersonalBlockStart').value;
+      const endTime = document.getElementById('inputPersonalBlockEnd').value;
+      const allDay = document.getElementById('chkPersonalBlockAllDay').checked;
+
+      if (!date) return showToast('Selecione a data do compromisso pessoal!');
+
+      window.EPStore.addPersonalBusyBlock({
+        title: title || 'Compromisso Pessoal',
+        date,
+        startTime,
+        endTime,
+        allDay,
+        source: 'Compromisso Pessoal / Google Agenda'
+      });
+
+      document.getElementById('inputPersonalBlockTitle').value = '';
+      document.getElementById('chkPersonalBlockAllDay').checked = false;
+      renderAdminPersonalBlocksList();
+      renderAdminCalendar();
+      showToast(`Horário bloqueado em ${date.split('-').reverse().join('/')}! Clientes não verão esses horários.`);
+    }
+
+    function removerCompromissoPessoalAdmin(id) {
+      window.EPStore.deletePersonalBusyBlock(id);
+      renderAdminPersonalBlocksList();
+      renderAdminCalendar();
+      showToast('Compromisso removido e horário liberado na agenda!');
+    }
+
+    function handleImportGoogleCalendarIcsAdmin(input) {
+      if (!input.files || !input.files[0]) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const count = window.EPStore.importGoogleCalendarIcsBlocks(ev.target.result);
+        renderAdminPersonalBlocksList();
+        renderAdminCalendar();
+        showToast(`${count} compromisso(s) do seu Google Agenda importados e bloqueados automaticamente!`);
+      };
+      reader.readAsText(input.files[0]);
+    }
+
+    function salvarAgendamentoNoGoogleAgendaAdmin() {
+      if (!activeAppointmentTarget || !window.EPStore) return;
+      const url = window.EPStore.getGoogleCalendarUrl({
+        id: activeAppointmentTarget.id,
+        clientName: activeAppointmentTarget.name,
+        serviceName: activeAppointmentTarget.srv,
+        servicePrice: parseFloat(activeAppointmentTarget.price || 150),
+        duration: 90,
+        date: activeAppointmentTarget.date,
+        time: activeAppointmentTarget.time
+      });
+      window.open(url, '_blank');
+      showToast('Abrindo seu Google Agenda para salvar o atendimento!');
+    }
+
+    function exportAllAppointmentsToGoogleIcsAdmin() {
+      if (!window.EPStore) return;
+      const apps = window.EPStore.getAppointments().filter(a => a.status !== 'Cancelado');
+      if (apps.length === 0) return showToast('Nenhum agendamento ativo para exportar.');
+
+      const formatIcs = (d) => d.toISOString().replace(/-|:|\.\d\d\d/g, '');
+      const events = apps.map(app => {
+        const [year, month, day] = (app.date || '2026-11-08').split('-');
+        const [hour, min] = (app.time || '14:00').split(':');
+        const startObj = new Date(year, month - 1, day, hour, min);
+        const endObj = new Date(startObj.getTime() + (app.duration || 90) * 60000);
+        return [
+          'BEGIN:VEVENT',
+          `UID:${app.id}@estefanypaivanails.com`,
+          `DTSTAMP:${formatIcs(new Date())}`,
+          `DTSTART:${formatIcs(startObj)}`,
+          `DTEND:${formatIcs(endObj)}`,
+          `SUMMARY:Cliente: ${app.clientName} - ${app.serviceName}`,
+          `DESCRIPTION:WhatsApp: ${app.clientPhone} | Valor: R$ ${parseFloat(app.servicePrice || 150).toFixed(2)}`,
+          'LOCATION:Estefany Paiva Nails',
+          'STATUS:CONFIRMED',
+          'END:VEVENT'
+        ].join('\r\n');
+      });
+
+      const icsContent = [
+        'BEGIN:VCALENDAR',
+        'VERSION:2.0',
+        'PRODID:-//Estefany Paiva Nails//Agenda Completa//PT-BR',
+        'CALSCALE:GREGORIAN',
+        'METHOD:PUBLISH',
+        ...events,
+        'END:VCALENDAR'
+      ].join('\r\n');
+
+      const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'agenda_completa_estefany_paiva.ics';
+      link.click();
+      showToast('Arquivo .ics com todos os agendamentos baixado para o seu Google Agenda!');
     }
 
   </script>

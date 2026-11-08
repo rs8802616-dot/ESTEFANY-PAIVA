@@ -229,13 +229,48 @@ html, body {
 }
 
 .greeting-avatar-ring {
-  width: 60px;
-  height: 60px;
+  width: 68px;
+  height: 68px;
   border-radius: 50%;
-  padding: 2.5px;
-  background: linear-gradient(135deg, #E9A3B5 0%, #D83F79 50%, #FFFFFF 100%);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+  padding: 3.5px;
+  background: linear-gradient(45deg, #FEDA77 0%, #F58529 25%, #DD2A7B 55%, #8134AF 80%, #515BD4 100%);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
   flex-shrink: 0;
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.greeting-avatar-ring:hover {
+  transform: scale(1.05);
+}
+
+.greeting-avatar-ring.has-active-story {
+  animation: instaStoryPulse 2.4s infinite ease-in-out;
+}
+
+@keyframes instaStoryPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(221, 42, 123, 0.55), 0 4px 16px rgba(0,0,0,0.35); }
+  50% { box-shadow: 0 0 0 6px rgba(221, 42, 123, 0), 0 6px 20px rgba(0,0,0,0.45); }
+}
+
+.avatar-story-badge {
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(90deg, #DD2A7B 0%, #F58529 100%);
+  color: #FFFFFF !important;
+  font-size: 0.54rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  padding: 2px 7px;
+  border-radius: 10px;
+  border: 1.5px solid #350B19;
+  white-space: nowrap;
+  text-transform: uppercase;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+  pointer-events: none;
 }
 
 .greeting-avatar-ring img {
@@ -244,6 +279,7 @@ html, body {
   border-radius: 50%;
   object-fit: cover;
   display: block;
+  border: 2px solid #350B19;
 }
 
 .greeting-text-area h2 {
@@ -364,57 +400,57 @@ html, body {
 }
 
 /* ========================================================
-   3. BANNER PROMOCIONAL DESTAQUE COM ONDAS
+   3. BANNER PROMOCIONAL DESTAQUE COM ONDAS (AMPLIADO & ALTA DEFINIÇÃO)
    ======================================================== */
 .promo-card-wrapper {
-  margin-bottom: 22px;
+  margin-bottom: 26px;
   width: 100%;
 }
 
 .promo-highlight-card {
   background: linear-gradient(135deg, #FBECEF 0%, #F5D9DF 100%);
   border: 1px solid rgba(77, 19, 40, 0.08);
-  border-radius: 26px;
-  padding: 22px 24px;
-  min-height: 185px;
+  border-radius: 28px;
+  padding: 26px 28px;
+  min-height: 238px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  box-shadow: 0 8px 24px rgba(77, 19, 40, 0.08);
+  gap: 20px;
+  box-shadow: 0 12px 32px rgba(77, 19, 40, 0.11);
   position: relative;
   overflow: hidden;
   width: 100%;
 }
 
 .promo-text-side {
-  flex: 1.25;
+  flex: 1.2;
   z-index: 2;
 }
 
 .promo-text-side h3 {
   font-family: var(--font-serif);
   font-style: italic;
-  font-size: 1.4rem;
-  line-height: 1.32;
+  font-size: 1.62rem;
+  line-height: 1.28;
   color: #4D1328;
   font-weight: 700;
-  margin-bottom: 14px;
+  margin-bottom: 18px;
 }
 
 .btn-promo-wine-pill {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 11px 20px;
+  gap: 8px;
+  padding: 13px 24px;
   background: #4D1328;
   color: #FFFFFF;
   border-radius: var(--radius-pill);
-  font-size: 0.85rem;
+  font-size: 0.92rem;
   font-weight: 700;
   cursor: pointer;
   border: none;
-  box-shadow: 0 4px 12px rgba(77, 19, 40, 0.25);
+  box-shadow: 0 4px 14px rgba(77, 19, 40, 0.25);
   white-space: nowrap;
   transition: transform 0.2s, background 0.2s;
 }
@@ -425,18 +461,32 @@ html, body {
 }
 
 .promo-photo-side {
-  width: 160px;
-  height: 146px;
+  width: 205px;
+  height: 192px;
   flex-shrink: 0;
   z-index: 1;
+}
+
+@media (min-width: 768px) {
+  .promo-highlight-card {
+    min-height: 268px;
+    padding: 30px 34px;
+  }
+  .promo-text-side h3 {
+    font-size: 1.85rem;
+  }
+  .promo-photo-side {
+    width: 265px;
+    height: 226px;
+  }
 }
 
 .promo-photo-side img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 20px;
-  box-shadow: 0 6px 18px rgba(77, 19, 40, 0.16);
+  border-radius: 22px;
+  box-shadow: 0 8px 22px rgba(77, 19, 40, 0.18);
   display: block;
 }
 

@@ -14,7 +14,9 @@ const STORAGE_KEYS = {
   CATEGORIES: 'epn_categories',
   SERVICES: 'epn_services_with_stories',
   APPOINTMENTS: 'epn_appointments_lgpd',
-  SETTINGS: 'epn_salon_settings'
+  SETTINGS: 'epn_salon_settings',
+  PROFILE_STORIES: 'epn_profile_stories_24h',
+  PERSONAL_BUSY_BLOCKS: 'epn_personal_busy_blocks'
 };
 
 // ==========================================
@@ -641,6 +643,32 @@ window.EPStore = {
       localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(SEED_DATA.salonSettings));
     }
 
+    // 10. Stories de 24h do Perfil (Estilo Instagram)
+    if (!localStorage.getItem(STORAGE_KEYS.PROFILE_STORIES)) {
+      const now = Date.now();
+      localStorage.setItem(STORAGE_KEYS.PROFILE_STORIES, JSON.stringify([
+        {
+          id: 'pstory_seed_1',
+          type: 'image',
+          url: 'assets/images/trabalho-amendoada-ouro.png',
+          caption: 'Bom dia, maravilhosas! Agenda aberta com muito carinho ✨💅',
+          createdAt: now - (2 * 3600 * 1000)
+        },
+        {
+          id: 'pstory_seed_2',
+          type: 'image',
+          url: 'assets/images/trabalho-alongamento-chocolate.png',
+          caption: 'Resultado impecável de hoje no estúdio ♡',
+          createdAt: now - (1 * 3600 * 1000)
+        }
+      ]));
+    }
+
+    // 11. Compromissos Pessoais / Google Agenda da Administradora
+    if (!localStorage.getItem(STORAGE_KEYS.PERSONAL_BUSY_BLOCKS)) {
+      localStorage.setItem(STORAGE_KEYS.PERSONAL_BUSY_BLOCKS, JSON.stringify([]));
+    }
+
     // Aplica o tema visual no documento em tempo real
     this.applyThemeToDocument();
     this.startRealtimeSync();
@@ -1107,11 +1135,108 @@ window.EPStore = {
       #repWeeklyBreakdownCards > div,
       #listaMeusAgendamentosConteudo > div,
       #clientNotificationsDynamicList > div,
-      #cliDetHistoryList > div {
+      #cliDetHistoryList > div,
+      #adminCategoriasListContainer > div,
+      #adminProfileStoriesListContainer > div,
+      #adminPersonalBlocksListContainer > div {
         background: ${innerSurfaceBg} !important;
         color: ${textOnCard} !important;
         border-color: ${borderOnCard} !important;
       }
+
+      /* CORREÇÃO SEÇÃO POR SEÇÃO (INÍCIO, AGENDA, CLIENTES, SERVIÇOS, RELATÓRIOS, CONFIGURAÇÕES, AVALIAÇÕES E CLIENTE):
+         Qualquer sub-caixa ou linha interna com background claro hardcoded (#FFFFFF, #FFF, #FBECEF, #FAF4F5, #FFF9FA)
+         adapta automaticamente seu fundo e suas letras em Modo Preto / Paletas Escuras! */
+      .admin-chart-card div[style*="background:#FFFFFF"],
+      .admin-chart-card div[style*="background: #FFFFFF"],
+      .admin-chart-card div[style*="background:#FFF"],
+      .admin-chart-card div[style*="background:#FBECEF"],
+      .admin-chart-card div[style*="background:#FAF4F5"],
+      .admin-chart-card div[style*="background:#FFF9FA"],
+      .admin-sub-card div[style*="background:#FFFFFF"],
+      .admin-sub-card div[style*="background: #FFFFFF"],
+      .admin-sub-card div[style*="background:#FFF"],
+      .admin-sub-card div[style*="background:#FBECEF"],
+      .admin-sub-card div[style*="background:#FAF4F5"],
+      .admin-sub-card div[style*="background:#FFF9FA"],
+      .admin-modal-card div[style*="background:#FFFFFF"]:not(#liveColorPreviewBox),
+      .admin-modal-card div[style*="background:#FFF"]:not(#liveColorPreviewBox),
+      .admin-modal-card div[style*="background:#FBECEF"]:not(#liveColorPreviewBox),
+      .admin-modal-card div[style*="background:#FAF4F5"]:not(#liveColorPreviewBox),
+      .admin-modal-card div[style*="background:#FFF9FA"]:not(#liveColorPreviewBox),
+      .admin-modal-card label[style*="background:#FBECEF"],
+      .admin-modal-card button[style*="background:#FFF"],
+      .admin-modal-card button[style*="background:#FBECEF"],
+      .admin-modal-card select[style*="background:#FFF"],
+      .admin-modal-card select[style*="background:#FBECEF"],
+      .admin-modal-card input[style*="background:#FFF"],
+      .client-modal-card div[style*="background:#FBECEF"],
+      .client-modal-card div[style*="background:#FFFFFF"],
+      .client-modal-card div[style*="background:#FFF"],
+      .client-modal-card button[style*="background:#FBECEF"],
+      .client-modal-card input,
+      #bookingSection div[style*="background:#FBECEF"],
+      #bookingSection div[style*="background: #FBECEF"],
+      #bookingSection div[style*="background:#FFF0F3"],
+      #bookingSection div[style*="background: #FFF0F3"],
+      #bookingSection span[style*="background:#FBECEF"],
+      #customSlotsPillsContainer > span,
+      #adminCalendarDaysGrid button:not([style*="background:#4D1328"]):not([style*="background: #4D1328"]) {
+        background: ${innerSurfaceBg} !important;
+        color: ${textOnCard} !important;
+        border-color: ${borderOnCard} !important;
+      }
+
+      /* Garante que todos os textos, números, ícones e rótulos dentro dessas sub-caixas tenham contraste máximo */
+      .admin-chart-card div[style*="background:"] strong,
+      .admin-chart-card div[style*="background:"] h4,
+      .admin-chart-card div[style*="background:"] h5,
+      .admin-chart-card div[style*="background:"] span:not(.badge-status-pill),
+      .admin-sub-card div[style*="background:"] strong,
+      .admin-sub-card div[style*="background:"] h4,
+      .admin-sub-card div[style*="background:"] h5,
+      .admin-sub-card div[style*="background:"] span:not(.badge-status-pill):not(.bullet),
+      .admin-modal-card:not(#modalConfigCores) div[style*="background:"] strong,
+      .admin-modal-card:not(#modalConfigCores) div[style*="background:"] h4,
+      .admin-modal-card:not(#modalConfigCores) div[style*="background:"] span:not(.badge-status-pill),
+      .admin-modal-card label[style*="background:#FBECEF"],
+      .admin-modal-card button[style*="background:#FBECEF"],
+      .client-modal-card div[style*="background:#FBECEF"] h4,
+      .client-modal-card div[style*="background:#FBECEF"] strong,
+      .client-modal-card div[style*="background:#FBECEF"] p,
+      .client-modal-card div[style*="background:#FBECEF"] span,
+      .client-modal-card button[style*="background:#FBECEF"],
+      .client-modal-card button[style*="background:#FBECEF"] span,
+      .client-modal-card button[style*="background:#FBECEF"] i,
+      #calendarSelectedDayBookingsBox,
+      #calendarSelectedDayBookingsBox div,
+      #calendarSelectedDayBookingsBox span,
+      #calendarSelectedDayBookingsBox strong,
+      #adminCalendarDaysGrid button:not([style*="background:#4D1328"]) span:first-child {
+        color: ${textOnCard} !important;
+      }
+
+      /* Dia selecionado no calendário da Agenda Administrativa */
+      #adminCalendarDaysGrid button[style*="background:#4D1328"] {
+        background: ${prim} !important;
+        color: ${textOnPrim} !important;
+        border-color: ${sec} !important;
+      }
+      #adminCalendarDaysGrid button[style*="background:#4D1328"] span:first-child {
+        color: ${textOnPrim} !important;
+      }
+
+      /* Barras de progresso (Início, Relatórios, Avaliações) visíveis tanto no claro quanto no escuro */
+      #viewScreen_dashboard div[style*="height:8px"],
+      #viewScreen_relatorios div[style*="height:12px"],
+      #viewScreen_relatorios div[style*="height:7px"],
+      #viewScreen_avaliacoes div[style*="height:8px"] {
+        background: ${isDarkCard ? 'rgba(255,255,255,0.16)' : 'rgba(77,19,40,0.12)'} !important;
+      }
+      #viewScreen_avaliacoes div[style*="height:8px"] > div {
+        background: ${sec} !important;
+      }
+
       .booking-date-badge .day-num,
       .booking-date-badge .day-week,
       .booking-date-badge .day-month,
@@ -1377,6 +1502,130 @@ window.EPStore = {
     return this.saveSalonSettings(scheduleData);
   },
 
+  // ----------------------------------------------------
+  // STORIES DE 24H DO PERFIL (ESTILO INSTAGRAM)
+  // ----------------------------------------------------
+  getProfileStories() {
+    const raw = JSON.parse(localStorage.getItem(STORAGE_KEYS.PROFILE_STORIES) || '[]');
+    const now = Date.now();
+    // Mantém apenas os stories publicados nas últimas 24 horas (86.400.000 ms)
+    const active = raw.filter(item => item && item.url && (!item.createdAt || (now - item.createdAt) < 86400000));
+    if (active.length !== raw.length) {
+      localStorage.setItem(STORAGE_KEYS.PROFILE_STORIES, JSON.stringify(active));
+    }
+    return active;
+  },
+
+  addProfileStory(storyData) {
+    const list = this.getProfileStories();
+    const newStory = {
+      id: storyData.id || ('pstory_' + Date.now() + '_' + Math.floor(Math.random() * 1000)),
+      type: storyData.type || 'image',
+      url: storyData.url,
+      caption: (storyData.caption || '').trim(),
+      createdAt: storyData.createdAt || Date.now()
+    };
+    list.push(newStory);
+    localStorage.setItem(STORAGE_KEYS.PROFILE_STORIES, JSON.stringify(list));
+    this.publishCloudSync('UPSERT_PROFILE_STORY', newStory);
+    return list;
+  },
+
+  deleteProfileStory(id) {
+    const list = this.getProfileStories().filter(s => s.id !== id);
+    localStorage.setItem(STORAGE_KEYS.PROFILE_STORIES, JSON.stringify(list));
+    this.publishCloudSync('DELETE_PROFILE_STORY', { id });
+    return list;
+  },
+
+  formatStoryElapsed(createdAt) {
+    if (!createdAt) return 'Agora';
+    const diffMin = Math.max(1, Math.floor((Date.now() - createdAt) / 60000));
+    if (diffMin < 60) return `Há ${diffMin} min`;
+    const diffHours = Math.floor(diffMin / 60);
+    return `Há ${diffHours}h`;
+  },
+
+  // ----------------------------------------------------
+  // COMPROMISSOS PESSOAIS / INTEGRAÇÃO GOOGLE AGENDA DA ADMINISTRADORA
+  // ----------------------------------------------------
+  getPersonalBusyBlocks() {
+    return JSON.parse(localStorage.getItem(STORAGE_KEYS.PERSONAL_BUSY_BLOCKS) || '[]');
+  },
+
+  addPersonalBusyBlock(blockInput) {
+    const list = this.getPersonalBusyBlocks();
+    const newBlock = {
+      id: blockInput.id || ('gcal_busy_' + Date.now() + '_' + Math.floor(Math.random() * 1000)),
+      title: (blockInput.title || 'Compromisso Pessoal (Google Agenda)').trim(),
+      date: blockInput.date,
+      startTime: blockInput.startTime || '09:00',
+      endTime: blockInput.endTime || '18:00',
+      allDay: !!blockInput.allDay,
+      source: blockInput.source || 'Google Agenda',
+      createdAt: new Date().toISOString()
+    };
+    list.unshift(newBlock);
+    localStorage.setItem(STORAGE_KEYS.PERSONAL_BUSY_BLOCKS, JSON.stringify(list));
+    this.publishCloudSync('UPSERT_PERSONAL_BLOCK', newBlock);
+    return newBlock;
+  },
+
+  deletePersonalBusyBlock(id) {
+    const list = this.getPersonalBusyBlocks().filter(b => b.id !== id);
+    localStorage.setItem(STORAGE_KEYS.PERSONAL_BUSY_BLOCKS, JSON.stringify(list));
+    this.publishCloudSync('DELETE_PERSONAL_BLOCK', { id });
+    return list;
+  },
+
+  // Importa compromissos pessoais de arquivo .ics do Google Agenda da Administradora
+  importGoogleCalendarIcsBlocks(icsText) {
+    if (!icsText) return 0;
+    const events = icsText.split('BEGIN:VEVENT').slice(1);
+    let imported = 0;
+    events.forEach(ev => {
+      const dtStartMatch = ev.match(/DTSTART(?:;[^:]*)?:(\d{8})(?:T(\d{4})\d{2}Z?)?/);
+      const dtEndMatch = ev.match(/DTEND(?:;[^:]*)?:(\d{8})(?:T(\d{4})\d{2}Z?)?/);
+      const summaryMatch = ev.match(/SUMMARY:(.+)/);
+      if (dtStartMatch) {
+        const rawDate = dtStartMatch[1];
+        const dateStr = `${rawDate.slice(0, 4)}-${rawDate.slice(4, 6)}-${rawDate.slice(6, 8)}`;
+        const allDay = !dtStartMatch[2];
+        const startTime = dtStartMatch[2] ? `${dtStartMatch[2].slice(0, 2)}:${dtStartMatch[2].slice(2, 4)}` : '00:00';
+        const endTime = (dtEndMatch && dtEndMatch[2]) ? `${dtEndMatch[2].slice(0, 2)}:${dtEndMatch[2].slice(2, 4)}` : '23:59';
+        const title = summaryMatch ? summaryMatch[1].replace(/\r|\n/g, '').trim() : 'Compromisso Google Agenda';
+        this.addPersonalBusyBlock({
+          title,
+          date: dateStr,
+          startTime,
+          endTime,
+          allDay,
+          source: 'Google Agenda (.ics)'
+        });
+        imported++;
+      }
+    });
+    return imported;
+  },
+
+  // Verifica se um horário específico (ex: '14:00') no dia `dateStr` conflita com algum compromisso pessoal da administradora
+  isSlotBlockedByPersonalEvent(dateStr, slotTime) {
+    const blocks = this.getPersonalBusyBlocks().filter(b => b.date === dateStr);
+    if (blocks.length === 0) return false;
+    const toMin = (t) => {
+      const [h, m] = String(t || '00:00').split(':').map(n => parseInt(n, 10) || 0);
+      return h * 60 + m;
+    };
+    const slotMin = toMin(slotTime);
+    const slotEndMin = slotMin + 60; // Considera janela média de ocupação do slot
+    return blocks.some(b => {
+      if (b.allDay) return true;
+      const bStart = toMin(b.startTime);
+      const bEnd = toMin(b.endTime);
+      return (slotMin >= bStart && slotMin < bEnd) || (bStart >= slotMin && bStart < slotEndMin);
+    });
+  },
+
   getAvailableSlots(dateStr, durationMinutes = 60) {
     const appointments = this.getAppointments();
     const dayAppointments = appointments.filter(a => a.date === dateStr && a.status !== 'Cancelado');
@@ -1384,7 +1633,7 @@ window.EPStore = {
     const defaultSlots = this.getConfiguredSlots();
     const takenTimes = new Set(dayAppointments.map(a => a.time));
 
-    return defaultSlots.filter(slot => !takenTimes.has(slot));
+    return defaultSlots.filter(slot => !takenTimes.has(slot) && !this.isSlotBlockedByPersonalEvent(dateStr, slot));
   },
 
   // Criação de Agendamento Enxuto (Apenas Nome + Celular) - Persistência Garantida
@@ -1779,6 +2028,34 @@ window.EPStore = {
     } else if (action === 'DELETE_CATEGORY' && payload && payload.id) {
       const list = this.getCategories().filter(c => c.id !== payload.id);
       localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(list));
+      changed = true;
+    } else if (action === 'UPSERT_PROFILE_STORY' && payload && payload.id) {
+      const list = this.getProfileStories();
+      const idx = list.findIndex(s => s.id === payload.id);
+      if (idx >= 0) {
+        list[idx] = { ...list[idx], ...payload };
+      } else {
+        list.push(payload);
+      }
+      localStorage.setItem(STORAGE_KEYS.PROFILE_STORIES, JSON.stringify(list));
+      changed = true;
+    } else if (action === 'DELETE_PROFILE_STORY' && payload && payload.id) {
+      const list = this.getProfileStories().filter(s => s.id !== payload.id);
+      localStorage.setItem(STORAGE_KEYS.PROFILE_STORIES, JSON.stringify(list));
+      changed = true;
+    } else if (action === 'UPSERT_PERSONAL_BLOCK' && payload && payload.id) {
+      const list = this.getPersonalBusyBlocks();
+      const idx = list.findIndex(b => b.id === payload.id);
+      if (idx >= 0) {
+        list[idx] = { ...list[idx], ...payload };
+      } else {
+        list.unshift(payload);
+      }
+      localStorage.setItem(STORAGE_KEYS.PERSONAL_BUSY_BLOCKS, JSON.stringify(list));
+      changed = true;
+    } else if (action === 'DELETE_PERSONAL_BLOCK' && payload && payload.id) {
+      const list = this.getPersonalBusyBlocks().filter(b => b.id !== payload.id);
+      localStorage.setItem(STORAGE_KEYS.PERSONAL_BUSY_BLOCKS, JSON.stringify(list));
       changed = true;
     } else if (action === 'UPDATE_THEME' && payload) {
       const current = this.getTheme();
