@@ -629,6 +629,23 @@
     </div>
   </div>
 
+  <!-- 5B. Modal: Área de Agendamento Completa (Abre direto ao clicar em Agendar nos Stories, Catálogo ou Topo) -->
+  <div class="client-modal-overlay" id="modalAgendamentoPopup" style="z-index: 2100;">
+    <div class="client-modal-card" style="max-height: 94vh; padding: 22px 18px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+        <h3 style="font-family:var(--font-serif); font-size:1.3rem; color:#350B19; margin:0;">
+          <i class="fa-solid fa-calendar-plus" style="color:#D83F79;"></i> Agendar Meu Horário
+        </h3>
+        <button type="button" onclick="closeClientModal('modalAgendamentoPopup')" style="background:none; border:none; font-size:1.3rem; color:#6A1D39; cursor:pointer; padding:2px 6px;">✕</button>
+      </div>
+
+      <!-- Container onde o formulário e calendário completo de agendamento é carregado -->
+      <div id="modalBookingSectionHost">
+        <!-- O conteúdo de agendamento fica aqui -->
+      </div>
+    </div>
+  </div>
+
   <!-- 6. Modal: Confirmação de Sucesso -->
   <div class="client-modal-overlay" id="modalBookingSuccess">
     <div class="client-modal-card" style="text-align:center;">
@@ -929,17 +946,30 @@
     }
 
     function scrollToBooking() {
-      const el = document.getElementById('bookingSection');
-      if (el) el.scrollIntoView({ behavior: 'smooth' });
+      openBookingModalDirect();
+    }
+
+    function openBookingModalDirect() {
+      const wrapper = document.querySelector(".booking-section-wrapper");
+      const host = document.getElementById("modalBookingSectionHost");
+      if (wrapper && host && !host.contains(wrapper)) {
+        host.appendChild(wrapper);
+      }
+      openClientModal("modalAgendamentoPopup");
+      renderCalendar();
+      renderDynamicSlots();
     }
 
     function selectServiceForBooking(id, name, price, img) {
       selectedService = { id, name, price, image: img };
-      document.getElementById('selectedServiceTitle').innerText = name;
-      document.getElementById('selectedServiceMeta').innerText = `R$ ${parseFloat(price).toFixed(2).replace('.', ',')} • 90 minutos`;
-      document.getElementById('selectedServiceImg').src = img;
-      scrollToBooking();
-      showToast(`Serviço selecionado: ${name}`);
+      const titleEl = document.getElementById("selectedServiceTitle");
+      const metaEl = document.getElementById("selectedServiceMeta");
+      const imgEl = document.getElementById("selectedServiceImg");
+      if (titleEl) titleEl.innerText = name;
+      if (metaEl) metaEl.innerText = "R$ " + parseFloat(price).toFixed(2).replace(".", ",") + " • 90 minutos";
+      if (imgEl) imgEl.src = img;
+      openBookingModalDirect();
+      showToast("Serviço selecionado: " + name);
     }
 
     function renderDynamicSlots() {
@@ -1184,6 +1214,7 @@
         time: bookedTime
       };
 
+      closeClientModal('modalAgendamentoPopup');
       openClientModal('modalBookingSuccess');
       showToast('Agendamento confirmado! Toque em Salvar no Google Agenda para registrar no seu celular.');
     }

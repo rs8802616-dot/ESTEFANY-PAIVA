@@ -1,4 +1,4 @@
-const CACHE_NAME = 'estefany-nails-v21-chunk-photo-sync';
+const CACHE_NAME = 'estefany-nails-v22-booking-modal-popup';
 const STATIC_ASSETS = [
   './',
   './index.html',
