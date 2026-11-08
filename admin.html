@@ -119,7 +119,7 @@
         <div class="admin-greeting-row">
           <div class="admin-greeting-left">
             <div class="admin-avatar-ring">
-              <img src="assets/images/trabalho-amendoada-ouro.png" id="adminHeaderAvatarImg" alt="Estefany Paiva">
+              <img src="assets/images/trabalho-amendoada-ouro.png" id="adminHeaderAvatarImg" alt="Estefany Paiva" onclick="triggerDirectAvatarUpload()" style="cursor:pointer;" title="Toque para trocar a foto de perfil"><input type="file" id="directAvatarFileInput" accept="image/*" style="display:none;" onchange="handleDirectAvatarUpload(this)">
             </div>
             <div class="admin-greeting-text">
               <h2 id="adminHeaderOwnerGreet">Olá, Estefany! 👋</h2>
@@ -1065,9 +1065,48 @@
           </select>
         </div>
 
-        <div class="form-input-box" style="margin-bottom:16px;">
+        <div class="form-input-box" style="margin-bottom:14px;">
           <label style="display:block; font-size:0.8rem; font-weight:600; color:#4D1328; margin-bottom:4px;">Descrição Curta</label>
           <input type="text" id="inputServicoDesc" placeholder="Ex: Fortalecimento com camada de gel brilhante..." style="width:100%; padding:10px 14px; border-radius:12px; border:1px solid rgba(77,19,40,0.18);">
+        </div>
+
+        <!-- Mídias do Procedimento: Fotos e Vídeos ilimitados (Padrão Celular Instagram) -->
+        <div style="background:#FFF9FA; border:1px solid rgba(216,63,121,0.25); border-radius:16px; padding:14px; margin-bottom:16px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <strong style="font-size:0.82rem; color:#350B19;">
+              <i class="fa-brands fa-instagram" style="color:#D83F79;"></i> Status / Stories do Serviço
+            </strong>
+            <span style="font-size:0.7rem; color:#8A2D4E;">Quantas fotos ou vídeos quiser</span>
+          </div>
+
+          <div style="display:flex; gap:8px; margin-bottom:10px;">
+            <label style="flex:1; display:flex; align-items:center; justify-content:center; gap:6px; padding:9px 12px; background:#FBECEF; border:1px solid rgba(77,19,40,0.15); border-radius:10px; font-size:0.75rem; font-weight:700; color:#4D1328; cursor:pointer;">
+              <i class="fa-solid fa-images"></i> + Fotos da Galeria
+              <input type="file" multiple accept="image/*" style="display:none;" onchange="handleAddServiceMultiplePhotos(this)">
+            </label>
+            <button type="button" onclick="handleAddServiceVideoPrompt()" style="flex:1; display:flex; align-items:center; justify-content:center; gap:6px; padding:9px 12px; background:#FBECEF; border:1px solid rgba(77,19,40,0.15); border-radius:10px; font-size:0.75rem; font-weight:700; color:#4D1328; cursor:pointer;">
+              <i class="fa-solid fa-video"></i> + Vídeo (MP4/Link)
+            </button>
+          </div>
+
+          <div id="serviceMediaThumbnailsList" style="display:flex; gap:8px; overflow-x:auto; padding-bottom:6px; margin-bottom:12px;"></div>
+
+          <div style="text-align:center;">
+            <span style="font-size:0.7rem; font-weight:700; color:#8A2D4E; margin-bottom:6px; display:block;">
+              📱 Pré-visualização no Padrão Celular (Instagram Stories):
+            </span>
+            <div style="border-radius:20px; background:#000; padding:8px; width:100%; max-width:200px; margin:0 auto; aspect-ratio:9/16; position:relative; overflow:hidden; box-shadow:0 8px 24px rgba(0,0,0,0.35);">
+              <div style="position:absolute; top:8px; left:8px; right:8px; height:2px; background:rgba(255,255,255,0.4); border-radius:2px; z-index:10;">
+                <div style="width:50%; height:100%; background:#FFF;"></div>
+              </div>
+              <div style="position:absolute; top:14px; left:8px; display:flex; align-items:center; gap:4px; z-index:10;">
+                <div style="width:18px; height:18px; border-radius:50%; background:#D83F79; border:1px solid #FFF;"></div>
+                <span style="color:#FFF; font-size:0.6rem; font-weight:700;">Estefany Paiva</span>
+              </div>
+              <img id="serviceStoryPreviewImg" src="assets/images/trabalho-alongamento-chocolate.png" style="width:100%; height:100%; object-fit:cover; border-radius:14px; display:block;" alt="Prévia">
+              <video id="serviceStoryPreviewVideo" autoplay muted loop playsinline style="width:100%; height:100%; object-fit:cover; border-radius:14px; display:none;"></video>
+            </div>
+          </div>
         </div>
 
         <div style="display:flex; gap:10px;">
@@ -1996,7 +2035,7 @@
     // ========================================================
     async function handleAvatarPhotoUpload(input) {
       if (!input.files || !input.files[0]) return;
-      uploadedAvatarPhotoDataUrl = await window.EPStore.compressImageFile(input.files[0], 320, 0.78);
+      uploadedAvatarPhotoDataUrl = await window.EPStore.compressImageFile(input.files[0], 160, 0.65);
       document.getElementById('previewConfigAvatarImg').src = uploadedAvatarPhotoDataUrl;
       showToast('Foto de perfil selecionada!');
     }
@@ -2739,6 +2778,259 @@
         if (pVid) pVid.style.display = 'none';
         if (pImg) { pImg.style.display = 'block'; pImg.src = item.url; }
       }
+    }
+
+  
+    // ========================================================
+    // FICHA DETALHADA DA CLIENTE & WHATSAPP
+    // ========================================================
+    let currentModalClientPhone = '';
+    let currentModalClientName = '';
+
+    function openModalDetalhesCliente(phone) {
+      const appointments = window.EPStore ? window.EPStore.getAppointments() : [];
+      const clientApps = appointments.filter(a => a.clientPhone === phone);
+      if (clientApps.length === 0) return;
+
+      const client = clientApps[0];
+      currentModalClientPhone = client.clientPhone;
+      currentModalClientName = client.clientName;
+
+      document.getElementById('cliDetName').innerText = client.clientName;
+      document.getElementById('cliDetPhone').innerText = client.clientPhone;
+      
+      const initials = (client.clientName || 'CL').split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
+      document.getElementById('cliDetAvatar').innerText = initials;
+
+      const activeApps = clientApps.filter(a => a.status !== 'Cancelado' && a.status !== 'cancelado');
+      const totalSpent = activeApps.reduce((acc, a) => acc + (parseFloat(a.servicePrice || a.price || 0)), 0);
+
+      document.getElementById('cliDetTotalCount').innerText = activeApps.length;
+      document.getElementById('cliDetTotalSpent').innerText = `R$ ${totalSpent.toFixed(2).replace('.', ',')}`;
+
+      const histEl = document.getElementById('cliDetHistoryList');
+      if (histEl) {
+        histEl.innerHTML = clientApps.map(a => `
+          <div style="background:#FBECEF; border-radius:10px; padding:8px 12px; display:flex; justify-content:space-between; align-items:center; font-size:0.78rem;">
+            <div>
+              <strong style="color:#350B19;">${a.serviceName}</strong>
+              <div style="color:#6A1D39; font-size:0.72rem;">${a.date} às ${a.time} &bull; R$ ${parseFloat(a.servicePrice || a.price || 0).toFixed(2).replace('.', ',')}</div>
+            </div>
+            <span class="badge-status-pill ${(a.status || '').toLowerCase() === 'confirmado' ? 'confirmado' : 'pendente'}">${a.status}</span>
+          </div>
+        `).join('');
+      }
+
+      openModal('modalDetalhesCliente');
+    }
+
+    function openClientChatFromModal() {
+      if (!currentModalClientPhone) return;
+      const cleanPhone = currentModalClientPhone.replace(/\D/g, '');
+      const msg = encodeURIComponent(`Olá, ${currentModalClientName}! Tudo bem? Aqui é do estúdio Estefany Paiva Nails ✨`);
+      window.open(`https://wa.me/55${cleanPhone}?text=${msg}`, '_blank');
+    }
+
+    function bookForThisClientFromModal() {
+      closeModal('modalDetalhesCliente');
+      openModalNovoAgendamento();
+      const nameInput = document.getElementById('inputAgendamentoNome');
+      const phoneInput = document.getElementById('inputAgendamentoTelefone');
+      if (nameInput) nameInput.value = currentModalClientName;
+      if (phoneInput) phoneInput.value = currentModalClientPhone;
+    }
+
+    // ========================================================
+    // GESTÃO DE CATEGORIAS EDITÁVEIS E CRIAÇÃO DE NOVAS
+    // ========================================================
+    function openModalGerenciarCategorias() {
+      renderCategoriasListAdmin();
+      openModal('modalGerenciarCategorias');
+    }
+
+    function renderCategoriasListAdmin() {
+      const container = document.getElementById('adminCategoriasListContainer');
+      if (!container || !window.EPStore) return;
+      const cats = window.EPStore.getCategories();
+      const services = window.EPStore.getServices(false);
+
+      container.innerHTML = cats.map(c => {
+        const count = services.filter(s => s.categoryId === c.id).length;
+        return `
+          <div style="display:flex; justify-content:space-between; align-items:center; background:#FFF; border:1px solid rgba(77,19,40,0.1); border-radius:12px; padding:10px 14px;">
+            <div>
+              <strong style="font-size:0.85rem; color:#350B19;">${c.name}</strong>
+              <div style="font-size:0.72rem; color:#6A1D39;">${count} serviço(s) nesta categoria</div>
+            </div>
+            <div style="display:flex; gap:6px;">
+              <button type="button" onclick="editarCategoriaPrompt('${c.id}', '${c.name.replace(/'/g, "\'")}')" style="padding:5px 10px; border-radius:8px; border:none; background:#FBECEF; color:#4D1328; font-size:0.75rem; font-weight:700; cursor:pointer;">
+                <i class="fa-solid fa-pen"></i> Editar
+              </button>
+              <button type="button" onclick="excluirCategoriaAdmin('${c.id}')" style="padding:5px 10px; border-radius:8px; border:none; background:#FFF0F3; color:#D83F79; font-size:0.75rem; cursor:pointer;">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function salvarNovaCategoriaAdmin() {
+      const input = document.getElementById('inputNovaCategoriaNome');
+      const name = (input ? input.value : '').trim();
+      if (!name) return showToast('Digite o nome da nova categoria!');
+      window.EPStore.saveCategory({ name });
+      input.value = '';
+      renderCategoriasListAdmin();
+      populateCategoriesSelectAdmin();
+      showToast('Categoria criada e adicionada ao catálogo!');
+    }
+
+    function editarCategoriaPrompt(id, currentName) {
+      const novoNome = prompt('Editar nome da categoria:', currentName);
+      if (novoNome && novoNome.trim()) {
+        window.EPStore.saveCategory({ id, name: novoNome.trim() });
+        renderCategoriasListAdmin();
+        populateCategoriesSelectAdmin();
+        showToast('Categoria atualizada com sucesso!');
+      }
+    }
+
+    function excluirCategoriaAdmin(id) {
+      if (confirm('Deseja remover esta categoria?')) {
+        window.EPStore.deleteCategory(id);
+        renderCategoriasListAdmin();
+        populateCategoriesSelectAdmin();
+        showToast('Categoria removida!');
+      }
+    }
+
+    // ========================================================
+    // CONTROLE DE ABERTURA DA GRADE (SEMANA, MÊS, ANO) & FOLGAS
+    // ========================================================
+    function openModalConfigAgendaGrade() {
+      const s = window.EPStore ? window.EPStore.getSalonSettings() : {};
+      
+      const sel = document.getElementById('selectScheduleWindow');
+      if (sel) sel.value = s.scheduleWindow || 'month';
+
+      const allowedDays = s.workWeekdays || [1, 2, 3, 4, 5, 6];
+      [0, 1, 2, 3, 4, 5, 6].forEach(d => {
+        const chk = document.getElementById(`chkDay${d}`);
+        if (chk) chk.checked = allowedDays.includes(d);
+      });
+
+      renderFolgasCalendarAdmin();
+      openModal('modalConfigAgendaGrade');
+    }
+
+    function renderFolgasCalendarAdmin() {
+      const container = document.getElementById('adminFolgasCalendarGrid');
+      if (!container) return;
+      const s = window.EPStore ? window.EPStore.getSalonSettings() : {};
+      const blocked = s.blockedDates || [];
+
+      const today = new Date();
+      const year = today.getFullYear();
+      const month = today.getMonth();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+      let html = '';
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const isBlocked = blocked.includes(dateStr);
+        html += `
+          <button type="button" onclick="toggleFolgaDateAdmin('${dateStr}')" style="padding:8px 4px; border-radius:8px; border:none; font-size:0.75rem; font-weight:700; cursor:pointer; background:${isBlocked ? '#FFD4DC' : '#FFF'}; color:${isBlocked ? '#D83F79' : '#350B19'}; ${isBlocked ? 'text-decoration:line-through;' : ''}">
+            ${day}
+          </button>
+        `;
+      }
+      container.innerHTML = html;
+    }
+
+    function toggleFolgaDateAdmin(dateStr) {
+      if (window.EPStore && window.EPStore.toggleBlockedDate) {
+        window.EPStore.toggleBlockedDate(dateStr);
+        renderFolgasCalendarAdmin();
+        showToast('Disponibilidade da data atualizada!');
+      }
+    }
+
+    function salvarConfigAgendaGradeAdmin() {
+      const windowMode = document.getElementById('selectScheduleWindow').value;
+      const workWeekdays = [];
+      [0, 1, 2, 3, 4, 5, 6].forEach(d => {
+        const chk = document.getElementById(`chkDay${d}`);
+        if (chk && chk.checked) workWeekdays.push(d);
+      });
+
+      window.EPStore.saveSalonSettings({
+        scheduleWindow: windowMode,
+        workWeekdays: workWeekdays
+      });
+      closeModal('modalConfigAgendaGrade');
+      showToast('Grade e abertura da agenda salvas e sincronizadas!');
+    }
+
+    // ========================================================
+    // CORES DO TEMA & IDENTIDADE VISUAL (MUDA TUDO)
+    // ========================================================
+    function openModalConfigCores() {
+      const s = window.EPStore ? window.EPStore.getSalonSettings() : {};
+      const colors = s.themeColors || {
+        primaryColor: '#350B19',
+        secondaryColor: '#D83F79',
+        cardBgColor: '#FBECEF',
+        pageBgColor: '#FAF4F5'
+      };
+
+      document.getElementById('themePrimaryColor').value = colors.primaryColor || '#350B19';
+      document.getElementById('themeSecondaryColor').value = colors.secondaryColor || '#D83F79';
+      document.getElementById('themeCardBgColor').value = colors.cardBgColor || '#FBECEF';
+      document.getElementById('themePageBgColor').value = colors.pageBgColor || '#FAF4F5';
+
+      openModal('modalConfigCores');
+    }
+
+    function aplicarPaletaPreset(prim, sec, card, page) {
+      document.getElementById('themePrimaryColor').value = prim;
+      document.getElementById('themeSecondaryColor').value = sec;
+      document.getElementById('themeCardBgColor').value = card;
+      document.getElementById('themePageBgColor').value = page;
+      showToast('Paleta selecionada! Clique em Salvar e Aplicar Cores.');
+    }
+
+    function salvarConfigCoresAdmin() {
+      const colors = {
+        primaryColor: document.getElementById('themePrimaryColor').value,
+        secondaryColor: document.getElementById('themeSecondaryColor').value,
+        cardBgColor: document.getElementById('themeCardBgColor').value,
+        pageBgColor: document.getElementById('themePageBgColor').value
+      };
+
+      window.EPStore.saveSalonSettings({ themeColors: colors });
+      if (window.EPStore.saveTheme) {
+        window.EPStore.saveTheme(colors);
+      }
+      if (window.EPStore.applyThemeToDocument) {
+        window.EPStore.applyThemeToDocument();
+      }
+      closeModal('modalConfigCores');
+      showToast('Cores aplicadas em todo o aplicativo!');
+    }
+
+    function triggerDirectAvatarUpload() {
+      const inp = document.getElementById('directAvatarFileInput');
+      if (inp) inp.click();
+    }
+
+    async function handleDirectAvatarUpload(input) {
+      if (!input.files || !input.files[0]) return;
+      const compressedDataUrl = await window.EPStore.compressImageFile(input.files[0], 160, 0.65);
+      window.EPStore.saveSalonSettings({ avatarImage: compressedDataUrl });
+      const av = document.getElementById('adminHeaderAvatarImg');
+      if (av) av.src = compressedDataUrl;
+      showToast('Foto de perfil atualizada no celular e no computador!');
     }
 
   </script>

@@ -1033,12 +1033,12 @@
       const cfg = window.EPStore.getSalonSettings() || {};
 
       // KPIs
-      const activeAppts = appts.filter(a => a.status !== 'cancelado');
-      const confirmedAppts = appts.filter(a => a.status === 'confirmado');
-      const pendingAppts = appts.filter(a => a.status === 'pendente');
+      const activeAppts = appts.filter(a => (a.status || '').toLowerCase() !== 'cancelado');
+      const confirmedAppts = appts.filter(a => (a.status || '').toLowerCase() === 'confirmado');
+      const pendingAppts = appts.filter(a => (a.status || '').toLowerCase() === 'pendente');
 
-      const totalRev = activeAppts.reduce((acc, a) => acc + (Number(a.price) || 0), 0);
-      const confRev = confirmedAppts.reduce((acc, a) => acc + (Number(a.price) || 0), 0);
+      const totalRev = activeAppts.reduce((acc, a) => acc + (Number(a.servicePrice || a.price) || 0), 0);
+      const confRev = confirmedAppts.reduce((acc, a) => acc + (Number(a.servicePrice || a.price) || 0), 0);
 
       document.getElementById('ownerKpiRevenue').textContent = formatBRL(totalRev);
       document.getElementById('ownerKpiConfirmedRev').textContent = 'Confirmado: ' + formatBRL(confRev);
@@ -1055,8 +1055,8 @@
           listEl.innerHTML = '<div style="padding:28px; text-align:center; color:#64748B; font-size:0.85rem;">Nenhum agendamento ativo no momento.</div>';
         } else {
           listEl.innerHTML = activeAppts.map(a => {
-            const stClass = a.status === 'confirmado' ? 'confirmado' : 'pendente';
-            const stLabel = a.status === 'confirmado' ? 'Confirmado' : 'Pendente';
+            const stClass = (a.status || '').toLowerCase() === 'confirmado' ? 'confirmado' : 'pendente';
+            const stLabel = (a.status || '').toLowerCase() === 'confirmado' ? 'Confirmado' : 'Pendente';
             const dateLbl = window.EPStore.formatDateLabel ? window.EPStore.formatDateLabel(a.date) : a.date;
             return `
               <div class="live-appt-item">
@@ -1064,13 +1064,13 @@
                   <div class="live-appt-avatar">${a.initials || 'CL'}</div>
                   <div class="live-appt-details">
                     <h4>${a.clientName} <span class="status-tag ${stClass}">${stLabel}</span></h4>
-                    <p><strong>${a.serviceName}</strong> • ${dateLbl} às <strong>${a.time}</strong> • ${formatBRL(a.price)}</p>
+                    <p><strong>${a.serviceName}</strong> • ${dateLbl} às <strong>${a.time}</strong> • ${formatBRL(a.servicePrice || a.price)}</p>
                     <p style="font-size:0.72rem; color:#94A3B8;">WhatsApp: ${a.clientPhone || 'Não informado'}</p>
                   </div>
                 </div>
                 <div style="display:flex; gap:6px; flex-wrap:wrap;">
-                  ${a.status !== 'confirmado' ? `
-                    <button class="btn-exec green" onclick="ownerChangeStatus('${a.id}', 'confirmado')">
+                  ${(a.status || '').toLowerCase() !== 'confirmado' ? `
+                    <button class="btn-exec green" onclick="ownerChangeStatus('${a.id}', 'Confirmado')">
                       <i class="ph-bold ph-check"></i> Confirmar
                     </button>
                   ` : ''}

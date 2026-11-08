@@ -497,7 +497,7 @@
 
       <div style="text-align:center; margin-bottom:16px;">
         <div class="greeting-avatar-ring" style="width:72px; height:72px; margin:0 auto 10px;">
-          <img src="assets/images/trabalho-amendoada-ouro.png" alt="Perfil">
+          <img src="assets/images/trabalho-amendoada-ouro.png" id="profileModalAvatarImg" alt="Perfil">
         </div>
         <h4 style="font-family:var(--font-serif); font-size:1.2rem; color:#350B19;" id="profileModalClientName">Mariana Silva</h4>
         <p style="font-size:0.8rem; color:#8A2D4E;" id="profileModalClientPhone">Cliente VIP Estefany Paiva Nails</p>
@@ -587,45 +587,42 @@
     </div>
   </div>
 
-  <!-- 5. Modal: Instagram Stories (Prévia de Unhas com 3 Vídeos/Slides) -->
-  <div class="client-modal-overlay" id="modalStoryViewer" style="padding:0; background:rgba(0,0,0,0.92);">
-    <div style="position:relative; width:100%; max-width:420px; height:100vh; max-height:860px; display:flex; flex-direction:column; background:#000; overflow:hidden;">
-      <!-- Barras de Progresso dos Stories -->
-      <div style="position:absolute; top:12px; left:12px; right:12px; display:flex; gap:4px; z-index:20;">
-        <div style="flex:1; height:3px; background:rgba(255,255,255,0.3); border-radius:2px; overflow:hidden;">
-          <div id="storyProgress1" style="width:0%; height:100%; background:#FFF; transition:width 0.1s linear;"></div>
-        </div>
-        <div style="flex:1; height:3px; background:rgba(255,255,255,0.3); border-radius:2px; overflow:hidden;">
-          <div id="storyProgress2" style="width:0%; height:100%; background:#FFF; transition:width 0.1s linear;"></div>
-        </div>
-        <div style="flex:1; height:3px; background:rgba(255,255,255,0.3); border-radius:2px; overflow:hidden;">
-          <div id="storyProgress3" style="width:0%; height:100%; background:#FFF; transition:width 0.1s linear;"></div>
-        </div>
+  <!-- 5. Modal: Visualizador de Status / Stories no Padrão Celular Instagram (9:16) -->
+  <div class="client-modal-overlay" id="modalStoryViewer" style="padding: 10px; background: rgba(0, 0, 0, 0.94); backdrop-filter: blur(8px);">
+    <div class="instagram-story-modal-box">
+      <!-- Barras Dinâmicas de Progresso dos Stories -->
+      <div class="instagram-story-progress-row" id="instagramStoryProgressRow">
+        <!-- Gerado dinamicamente via JS -->
       </div>
 
-      <!-- Topbar do Story -->
-      <div style="position:absolute; top:24px; left:14px; right:14px; display:flex; justify-content:space-between; align-items:center; z-index:20; color:#FFF;">
-        <div style="display:flex; align-items:center; gap:8px;">
-          <div style="width:34px; height:34px; border-radius:50%; overflow:hidden; border:1.5px solid #FFF;">
-            <img src="assets/images/trabalho-amendoada-ouro.png" style="width:100%; height:100%; object-fit:cover;" alt="Estefany">
-          </div>
+      <!-- Topbar do Story (Estilo Instagram) -->
+      <div class="instagram-story-header">
+        <div class="instagram-story-user">
+          <img src="assets/images/trabalho-amendoada-ouro.png" id="storyUserAvatarImg" class="instagram-story-avatar" alt="Estefany">
           <div>
-            <strong style="font-size:0.85rem; display:block;">Estefany Paiva Nails</strong>
-            <span id="storyServiceName" style="font-size:0.7rem; color:rgba(255,255,255,0.8);">Alongamento em Gel</span>
+            <h4>Estefany Paiva <i class="fa-solid fa-circle-check" style="color: #3897F0; font-size: 0.8rem;"></i></h4>
+            <span id="storyServiceName">Alongamento em Gel &bull; Há 2h</span>
           </div>
         </div>
-        <button onclick="closeStoryViewer()" style="background:none; border:none; color:#FFF; font-size:1.4rem; cursor:pointer;">✕</button>
+        <button onclick="closeStoryViewer()" style="background: none; border: none; color: #FFFFFF; font-size: 1.4rem; cursor: pointer; padding: 4px;">✕</button>
       </div>
 
-      <!-- Imagem/Vídeo do Story -->
-      <div style="flex:1; width:100%; height:100%; position:relative; cursor:pointer;" onclick="handleStoryTap(event)">
-        <img id="storyMediaImg" src="assets/images/trabalho-alongamento-chocolate.png" style="width:100%; height:100%; object-fit:cover;" alt="Story Preview">
+      <!-- Mídia dos Stories (Suporta Imagens e Vídeos com Aspect Ratio de Celular) -->
+      <div class="instagram-story-media-stage" id="instagramStoryMediaStage">
+        <img id="storyMediaImg" src="assets/images/trabalho-alongamento-chocolate.png" alt="Story" style="display: block;">
+        <video id="storyMediaVideo" autoplay muted loop playsinline style="display: none;"></video>
+
+        <!-- Áreas de toque esquerda/direita -->
+        <div class="instagram-story-tap-areas">
+          <div class="instagram-story-tap-prev" onclick="handleStoryTapPrev()"></div>
+          <div class="instagram-story-tap-next" onclick="handleStoryTapNext()"></div>
+        </div>
       </div>
 
-      <!-- Botão de Ação CTA no Rodapé do Story -->
-      <div style="position:absolute; bottom:20px; left:16px; right:16px; z-index:20;">
-        <button id="btnStoryBookNow" onclick="agendarViaStory()" style="width:100%; padding:14px; border-radius:30px; border:none; background:#E9A3B5; color:#350B19; font-weight:800; font-size:0.95rem; cursor:pointer; box-shadow:0 4px 20px rgba(0,0,0,0.5);">
-          Agendar esta unha agora ✨
+      <!-- Botão de Agendamento Rápido no Rodapé -->
+      <div class="instagram-story-footer-action">
+        <button type="button" id="btnStoryBookNow" class="btn-book-from-story" onclick="agendarViaStory()">
+          <i class="fa-regular fa-calendar-check"></i> Agendar Este Procedimento ✨
         </button>
       </div>
     </div>
@@ -741,6 +738,14 @@
       if (avatarEl && s.avatarImage) {
         avatarEl.src = s.avatarImage;
       }
+      const profAv = document.getElementById('profileModalAvatarImg');
+      if (profAv && s.avatarImage) {
+        profAv.src = s.avatarImage;
+      }
+      const storyAv = document.getElementById('storyUserAvatarImg');
+      if (storyAv && s.avatarImage) {
+        storyAv.src = s.avatarImage;
+      }
 
       const promoTitle = document.getElementById('clientPromoBannerTitle');
       if (promoTitle && s.promoBannerTitle) promoTitle.innerText = s.promoBannerTitle;
@@ -756,31 +761,21 @@
     
     // Renderiza dinamicamente as pílulas de categorias cadastradas pela administradora
     function renderDynamicCategoryPills() {
-      const container = document.getElementById('clientCategoryFilterPillsRow');
+      const container = document.getElementById('clientCategoryTabs');
       if (!container || !window.EPStore) return;
       const cats = window.EPStore.getCategories();
       
-      let html = `<button class="filter-pill-wine ${activeClientCategory === 'all' ? 'active' : ''}" onclick="filterServicesByCategory('all', this)">Todas</button>`;
+      let html = `<button class="category-tab-pill ${activeClientCategory === 'all' ? 'active' : ''}" onclick="filterServicesByCategory('all', this)">Todos</button>`;
       cats.forEach(c => {
         const isActive = (activeClientCategory === c.id);
-        html += `<button class="filter-pill-wine ${isActive ? 'active' : ''}" onclick="filterServicesByCategory('${c.id}', this)">${c.name}</button>`;
+        html += `<button class="category-tab-pill ${isActive ? 'active' : ''}" onclick="filterServicesByCategory('${c.id}', this)">${c.name}</button>`;
       });
       container.innerHTML = html;
     }
 
-    // Aplica cores personalizadas do tema salvas pela administradora
     function applyDynamicThemeColorsToClient() {
-      if (!window.EPStore) return;
-      const theme = window.EPStore.getTheme ? window.EPStore.getTheme() : {};
-      const settings = window.EPStore.getSalonSettings ? window.EPStore.getSalonSettings() : {};
-      const colors = (settings && settings.themeColors) ? settings.themeColors : (theme || {});
-      
-      if (colors.primaryColor) {
-        document.documentElement.style.setProperty('--color-rose', colors.primaryColor);
-        document.documentElement.style.setProperty('--color-pink-btn', colors.primaryColor);
-      }
-      if (colors.secondaryColor) {
-        document.documentElement.style.setProperty('--color-pink-accent', colors.secondaryColor);
+      if (window.EPStore && window.EPStore.applyThemeToDocument) {
+        window.EPStore.applyThemeToDocument();
       }
     }
 
@@ -956,36 +951,34 @@
         'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
         'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
       ];
-      const lbl = document.getElementById('calMonthYearLabel');
-      if (lbl) lbl.innerText = `${monthNames[currentMonth]} ${currentYear}`;
+      const lbl = document.getElementById('calendarMonthTitle');
+      if (lbl) lbl.innerText = `${monthNames[currentCalMonth]} ${currentCalYear}`;
 
-      const daysGrid = document.getElementById('calDaysGrid');
+      const daysGrid = document.getElementById('calendarDaysGrid');
       if (!daysGrid) return;
       daysGrid.innerHTML = '';
 
-      const firstDayIndex = new Date(currentYear, currentMonth, 1).getDay();
-      const lastDayDate = new Date(currentYear, currentMonth + 1, 0).getDate();
+      const firstDayIndex = new Date(currentCalYear, currentCalMonth, 1).getDay();
+      const lastDayDate = new Date(currentCalYear, currentCalMonth + 1, 0).getDate();
 
       for (let i = 0; i < firstDayIndex; i++) {
         daysGrid.innerHTML += '<div class="cal-day-empty"></div>';
       }
 
-      // Agendamentos existentes para marcar dias com pontos
       const appointments = window.EPStore ? window.EPStore.getAppointments() : [];
       const bookedDatesSet = new Set(
-        appointments.filter(a => a.status !== 'Cancelado').map(a => a.date)
+        appointments.filter(a => a.status !== 'Cancelado' && a.status !== 'cancelado').map(a => a.date)
       );
 
-      const selectedDay = (selectedDate.getMonth() === currentMonth && selectedDate.getFullYear() === currentYear)
+      const selectedDay = (selectedDate.getMonth() === currentCalMonth && selectedDate.getFullYear() === currentCalYear)
         ? selectedDate.getDate()
         : null;
 
       for (let day = 1; day <= lastDayDate; day++) {
-        const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const dateStr = `${currentCalYear}-${String(currentCalMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
         const hasBooking = bookedDatesSet.has(dateStr);
         const isSelected = (day === selectedDay);
         
-        // Verifica se o dia está aberto para agendamento (respeita janela de abertura e folgas)
         const isDateOpen = window.EPStore && window.EPStore.isDateAvailableForBooking
           ? window.EPStore.isDateAvailableForBooking(dateStr)
           : true;
@@ -998,7 +991,7 @@
           `;
         } else {
           daysGrid.innerHTML += `
-            <button type="button" class="cal-day-btn ${isSelected ? 'selected' : ''} ${hasBooking ? 'has-booking' : ''}" onclick="selectCalendarDay(${day})">
+            <button type="button" class="cal-day-btn ${isSelected ? 'selected' : ''} ${hasBooking ? 'has-booking' : ''}" onclick="pickDay(${day})">
               ${day}
               ${hasBooking ? '<span class="cal-day-dot"></span>' : ''}
             </button>
@@ -1007,6 +1000,21 @@
       }
 
       renderSelectedDayBookingsBox();
+    }
+
+    function renderSelectedDayBookingsBox() {
+      const box = document.getElementById('calendarSelectedDayBookingsBox');
+      if (!box || !window.EPStore) return;
+      const dateStr = formatLocalYYYYMMDD(selectedDate);
+      const dayApps = (window.EPStore.getAppointments() || []).filter(
+        a => a.date === dateStr && a.status !== 'Cancelado' && a.status !== 'cancelado'
+      );
+      if (dayApps.length === 0) {
+        box.innerHTML = `<span style="color:#6A1D39;"><i class="fa-regular fa-calendar-check"></i> Dia <strong>${dateStr.split('-').reverse().join('/')}</strong> com horários livres para agendamento.</span>`;
+      } else {
+        const times = dayApps.map(a => `<span style="display:inline-block; background:#FBECEF; border:1px solid rgba(77,19,40,0.15); padding:2px 8px; border-radius:10px; font-weight:700; margin:2px;">${a.time} (Reservado)</span>`).join(' ');
+        box.innerHTML = `<div style="margin-bottom:4px; font-weight:700; color:#350B19;"><i class="fa-solid fa-clock" style="color:#D83F79;"></i> Horários já preenchidos em ${dateStr.split('-').reverse().join('/')}:</div><div>${times}</div>`;
+      }
     }
 
     function changeCalendarMonth(delta) {

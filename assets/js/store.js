@@ -817,12 +817,50 @@ window.EPStore = {
     const updated = { ...current, ...themeUpdates };
     localStorage.setItem(STORAGE_KEYS.THEME_CONFIG, JSON.stringify(updated));
     this.applyThemeToDocument();
+    this.publishCloudSync('UPDATE_THEME', updated);
     return updated;
   },
 
   applyThemeToDocument() {
     const theme = this.getTheme();
+    const settings = this.getSalonSettings ? this.getSalonSettings() : {};
+    const c = (settings && settings.themeColors) ? { ...theme, ...settings.themeColors } : theme;
     const root = document.documentElement;
+
+    const prim = c.primaryColor || '#350B19';
+    const sec = c.secondaryColor || '#D83F79';
+    const cardBg = c.cardBgColor || '#FBECEF';
+    const pageBg = c.pageBgColor || '#FAF4F5';
+
+    let dynStyle = document.getElementById('ep-dynamic-theme-overrides');
+    if (!dynStyle) {
+      dynStyle = document.createElement('style');
+      dynStyle.id = 'ep-dynamic-theme-overrides';
+      document.head.appendChild(dynStyle);
+    }
+    if (prim !== '#350B19' || sec !== '#D83F79' || cardBg !== '#FBECEF' || pageBg !== '#FAF4F5') {
+      dynStyle.textContent = `
+        :root {
+          --color-rose: ${prim} !important;
+          --color-pink-accent: ${sec} !important;
+        }
+        body, .client-site-wrapper-expansive, .admin-site-wrapper-expansive {
+          background-color: ${pageBg} !important;
+        }
+        .wine-header-curved-expansive, .admin-header-wine, .bottom-nav-wine-client, .bottom-nav-wine-admin {
+          background: linear-gradient(145deg, ${prim} 0%, ${sec} 140%) !important;
+        }
+        .btn-promo-wine-pill, .btn-confirm-booking-wine, .btn-select-service-pill, .btn-admin-bottom-action, .category-tab-pill.active, .filter-pill.active, .slot-chip-btn.active, .cal-day-btn.selected {
+          background: ${prim} !important;
+          color: #FFFFFF !important;
+        }
+        .card-action-squircle, .next-booking-banner, .service-card-lux, .card-list-item, .kpi-pink-card, .admin-sub-card, .admin-chart-card {
+          background-color: ${cardBg} !important;
+        }
+      `;
+    } else {
+      dynStyle.textContent = '';
+    }
 
     root.style.setProperty('--color-rose', theme.primaryColor || '#E9A3B5');
     root.style.setProperty('--color-pink-accent', theme.secondaryColor || '#D83F79');
@@ -1520,6 +1558,99 @@ window.EPStore = {
     localStorage.setItem(STORAGE_KEYS.APPOINTMENTS, JSON.stringify(list));
     this.publishCloudSync('DELETE_APPOINTMENT', { id });
     return list;
+  },
+
+  STORAGE_KEY: STORAGE_KEYS.APPOINTMENTS,
+
+  getTodayISO() {
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  },
+
+  formatDateLabel(dateStr) {
+    if (!dateStr) return 'Hoje';
+    const today = this.getTodayISO();
+    if (dateStr === today) return 'Hoje';
+    const parts = String(dateStr).split('-');
+    if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
+    return dateStr;
+  },
+
+  getClients() {
+    const apps = this.getAppointments() || [];
+    const map = new Map();
+    apps.forEach(a => {
+      const key = a.clientPhone || a.clientName || a.id;
+      if (!map.has(key)) {
+        map.set(key, {
+          name: a.clientName,
+          phone: a.clientPhone,
+          lastDate: a.date,
+          service: a.serviceName
+        });
+      }
+    });
+    return Array.from(map.values());
+  },
+
+  addAppointment(data) {
+    return this.createAppointment({
+      clientName: data.clientName,
+      clientPhone: data.clientPhone,
+      serviceId: data.serviceId,
+      serviceName: data.serviceName,
+      servicePrice: data.servicePrice || data.price || 150,
+      date: data.date || this.getTodayISO(),
+      time: data.time || '14:00',
+      status: data.status || 'Confirmado'
+    });
+  },
+
+  updateSalonSettings(newSettings) {
+    return this.saveSalonSettings(newSettings);
+  },
+
+  async rotateTokens() {
+    const adm = await this.rotateAdminToken();
+    const mst = await this.rotateMasterToken();
+    return { adm, mst };
+  },
+
+  getAnalytics() {
+    const logs = this.getSecurityLogs().map(l => ({
+      event: `${l.route || '/sistema'} • ${l.status || 'OK'} (${l.notes || l.device || ''})`,
+      ts: l.timestamp || new Date().toISOString()
+    }));
+    return {
+      ...this.getTrafficAnalytics(),
+      securityLogs: logs
+    };
+  },
+
+  saveState(parsedObj) {
+    if (!parsedObj) return;
+    if (Array.isArray(parsedObj)) {
+      localStorage.setItem(STORAGE_KEYS.APPOINTMENTS, JSON.stringify(parsedObj));
+    } else {
+      if (parsedObj.appointments) localStorage.setItem(STORAGE_KEYS.APPOINTMENTS, JSON.stringify(parsedObj.appointments));
+      if (parsedObj.services) localStorage.setItem(STORAGE_KEYS.SERVICES, JSON.stringify(parsedObj.services));
+      if (parsedObj.categories) localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(parsedObj.categories));
+      if (parsedObj.settings) localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(parsedObj.settings));
+    }
+    this.emitStoreUpdate({ action: 'RESTORE_BACKUP' });
+  },
+
+  resetToDefault() {
+    localStorage.setItem(STORAGE_KEYS.APPOINTMENTS, JSON.stringify(SEED_DATA.initialAppointments));
+    localStorage.setItem(STORAGE_KEYS.SERVICES, JSON.stringify(SEED_DATA.services));
+    localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(SEED_DATA.categories));
+    localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(SEED_DATA.salonSettings));
+    localStorage.setItem(STORAGE_KEYS.THEME_CONFIG, JSON.stringify(SEED_DATA.theme));
+    this.applyThemeToDocument();
+    this.emitStoreUpdate({ action: 'RESET_FACTORY' });
   }
 };
 
