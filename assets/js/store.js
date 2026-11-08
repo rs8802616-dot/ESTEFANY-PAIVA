@@ -1330,20 +1330,8 @@ window.EPStore = {
   // MOTOR GRÁFICO DE CONTRASTE INTELIGENTE (DOM RUNTIME ENGINE)
   // ========================================================
   initGraphicContrastObserver() {
-    if (this._graphicObserverInitialized || typeof MutationObserver === 'undefined' || !document.body) return;
+    // Observer desativado para evitar recalculos em loop e piscamentos de tela constantes
     this._graphicObserverInitialized = true;
-    let rafPending = false;
-    const obs = new MutationObserver(() => {
-      if (rafPending) return;
-      rafPending = true;
-      requestAnimationFrame(() => {
-        rafPending = false;
-        if (this._lastGraphicPalette) {
-          this.runSmartContrastGraphicEngine(this._lastGraphicPalette);
-        }
-      });
-    });
-    obs.observe(document.body, { childList: true, subtree: true });
   },
 
   parseCssColorToRgb(str) {
