@@ -587,44 +587,68 @@
     </div>
   </div>
 
-  <!-- 5. Modal: Visualizador de Status / Stories no Padrão Celular Instagram (9:16) -->
-  <div class="client-modal-overlay" id="modalStoryViewer" style="padding: 10px; background: rgba(0, 0, 0, 0.94); backdrop-filter: blur(8px);">
-    <div class="instagram-story-modal-box">
-      <!-- Barras Dinâmicas de Progresso dos Stories -->
+  <!-- 5. Visualizador de Stories 100% Tela Toda (Padrão Oficial Instagram Edge-to-Edge) -->
+  <div class="client-modal-overlay story-viewer-fullscreen-overlay" id="modalStoryViewer" style="z-index: 99999;">
+    <div class="instagram-story-modal-box" id="instagramStoryBox">
+      <!-- Barras Dinâmicas de Progresso dos Stories no Topo -->
       <div class="instagram-story-progress-row" id="instagramStoryProgressRow">
         <!-- Gerado dinamicamente via JS -->
       </div>
 
-      <!-- Topbar do Story (Estilo Instagram) -->
+      <!-- Topbar do Story (Estilo Instagram Oficial) -->
       <div class="instagram-story-header">
         <div class="instagram-story-user">
-          <img src="assets/images/trabalho-amendoada-ouro.png" id="storyUserAvatarImg" class="instagram-story-avatar" alt="Estefany">
-          <div>
-            <h4>Estefany Paiva <i class="fa-solid fa-circle-check" style="color: #3897F0; font-size: 0.8rem;"></i></h4>
-            <span id="storyServiceName">Alongamento em Gel &bull; Há 2h</span>
+          <div class="instagram-story-avatar-wrap">
+            <img src="assets/images/trabalho-amendoada-ouro.png" id="storyUserAvatarImg" class="instagram-story-avatar" alt="Estefany">
+          </div>
+          <div class="instagram-story-user-meta">
+            <h4>
+              <span id="storyAuthorName">Estefany Paiva</span>
+              <i class="fa-solid fa-circle-check" style="color: #3897F0; font-size: 0.78rem;"></i>
+              <span class="story-time-badge" id="storyTimeElapsed">Há 2h</span>
+            </h4>
+            <span class="story-subtitle-meta" id="storyServiceName">Alongamento em Gel</span>
           </div>
         </div>
-        <button onclick="closeStoryViewer()" style="background: none; border: none; color: #FFFFFF; font-size: 1.4rem; cursor: pointer; padding: 4px;">✕</button>
+        <div class="instagram-story-header-actions">
+          <button type="button" class="btn-story-ig-close" onclick="closeStoryViewer()" aria-label="Fechar">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
       </div>
 
-      <!-- Mídia dos Stories (Suporta Imagens e Vídeos com Aspect Ratio de Celular) -->
-      <div class="instagram-story-media-stage" id="instagramStoryMediaStage">
+      <!-- Mídia dos Stories (Foto ou Vídeo em 100% da Tela Toda com object-fit: cover) -->
+      <div class="instagram-story-media-stage" id="instagramStoryMediaStage"
+           onmousedown="pauseStory()" onmouseup="resumeStory()"
+           ontouchstart="pauseStory()" ontouchend="resumeStory()">
         <img id="storyMediaImg" src="assets/images/trabalho-alongamento-chocolate.png" alt="Story" style="display: block;">
-        <video id="storyMediaVideo" autoplay muted loop playsinline style="display: none;"></video>
-        <div id="storyMediaCaptionOverlay" style="position:absolute; bottom:16px; left:12px; right:12px; background:rgba(0,0,0,0.65); backdrop-filter:blur(6px); color:#FFFFFF; padding:10px 14px; border-radius:14px; font-size:0.84rem; font-weight:600; text-align:center; z-index:8; display:none;"></div>
+        <video id="storyMediaVideo" autoplay playsinline webkit-playsinline style="display: none;"></video>
+        <div id="storyMediaCaptionOverlay" class="instagram-story-caption-box" style="display: none;"></div>
 
-        <!-- Áreas de toque esquerda/direita -->
+        <!-- Efeito de Coração Flutuante ao Curtir -->
+        <div id="storyFloatingHeart" class="story-floating-heart"><i class="fa-solid fa-heart"></i></div>
+
+        <!-- Áreas de Toque Esquerda e Direita -->
         <div class="instagram-story-tap-areas">
           <div class="instagram-story-tap-prev" onclick="handleStoryTapPrev()"></div>
           <div class="instagram-story-tap-next" onclick="handleStoryTapNext()"></div>
         </div>
       </div>
 
-      <!-- Botão de Agendamento Rápido no Rodapé -->
+      <!-- Rodapé Oficial Estilo Instagram (Pílula de Mensagem/Agendamento + Curtir + WhatsApp) -->
       <div class="instagram-story-footer-action">
-        <button type="button" id="btnStoryBookNow" class="btn-book-from-story" onclick="agendarViaStory()">
-          <i class="fa-regular fa-calendar-check"></i> Agendar Este Procedimento ✨
-        </button>
+        <div class="story-ig-reply-pill" onclick="agendarViaStory()">
+          <i class="fa-regular fa-comment" style="font-size:0.95rem; color:#E9A3B5; margin-right:8px;"></i>
+          <span id="storyFooterActionText">Enviar mensagem / Agendar...</span>
+        </div>
+        <div class="story-ig-footer-buttons">
+          <button type="button" class="story-ig-icon-btn" onclick="likeStory(event)" aria-label="Curtir Story" id="btnStoryLike">
+            <i class="fa-regular fa-heart" id="storyHeartIcon"></i>
+          </button>
+          <button type="button" class="story-ig-icon-btn" onclick="shareStoryWhatsapp(event)" aria-label="WhatsApp">
+            <i class="fa-brands fa-whatsapp"></i>
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -1455,50 +1479,105 @@
     }
 
     let currentServiceStoryMedia = [];
+    let storyIsPaused = false;
+    let storySlideStartMs = 0;
+    let storySlideDurationMs = 5000;
 
-    function openProfileStoryViewer() {
-      if (!window.EPStore) return;
-      const stories = window.EPStore.getProfileStories ? window.EPStore.getProfileStories() : [];
-      const s = window.EPStore.getSalonSettings ? window.EPStore.getSalonSettings() : {};
+    // Utilitário para dividir qualquer vídeo maior que 60s em segmentos de até 60s (padrão Instagram)
+    function prepareStoryMediaSegments(rawList) {
+      const segments = [];
+      rawList.forEach((item, itemIdx) => {
+        if (item.type === 'video') {
+          const rawDur = parseFloat(item.duration) || 0;
+          if (rawDur > 60) {
+            const totalParts = Math.ceil(rawDur / 60);
+            for (let p = 0; p < totalParts; p++) {
+              const start = p * 60;
+              const end = Math.min((p + 1) * 60, rawDur);
+              segments.push({
+                ...item,
+                startTime: start,
+                endTime: end,
+                segmentDuration: end - start,
+                partText: `Parte ${p + 1}/${totalParts}`,
+                _segmented: true,
+                originalIndex: itemIdx
+              });
+            }
+          } else {
+            segments.push({
+              ...item,
+              startTime: 0,
+              endTime: rawDur > 0 ? Math.min(rawDur, 60) : 60,
+              segmentDuration: rawDur > 0 ? Math.min(rawDur, 60) : 60,
+              _segmented: false,
+              originalIndex: itemIdx
+            });
+          }
+        } else {
+          segments.push({
+            ...item,
+            segmentDuration: 5,
+            originalIndex: itemIdx
+          });
+        }
+      });
+      return segments;
+    }
 
-      if (stories.length === 0) {
-        // Caso não haja story extra nas últimas 24h, exibe a própria foto de perfil em destaque no Story Viewer
-        currentServiceStoryMedia = [{
-          type: 'image',
-          url: (s && s.avatarImage) ? s.avatarImage : 'assets/images/trabalho-amendoada-ouro.png',
-          caption: (s && s.slogan) ? s.slogan : 'Bem-vinda ao Studio Estefany Paiva Nails ✨',
-          createdAt: Date.now() - 3600000
-        }];
-      } else {
-        currentServiceStoryMedia = stories.map(st => ({
-          type: st.type || 'image',
-          url: st.url,
-          caption: st.caption || '',
-          createdAt: st.createdAt
-        }));
-      }
-
-      storyActiveService = null;
-      storyIndex = 0;
-
-      const userAv = document.getElementById('storyUserAvatarImg');
-      if (userAv && s && s.avatarImage) userAv.src = s.avatarImage;
-
+    function renderStoryProgressDashes() {
       const progRow = document.getElementById('instagramStoryProgressRow');
-      if (progRow) {
+      if (progRow && currentServiceStoryMedia) {
         progRow.innerHTML = currentServiceStoryMedia.map((_, i) => `
           <div class="instagram-progress-bar-bg">
             <div id="instaStoryProg_${i}" class="instagram-progress-bar-fill"></div>
           </div>
         `).join('');
       }
+    }
 
-      const btnBook = document.getElementById('btnStoryBookNow');
-      if (btnBook) {
-        btnBook.innerHTML = '<i class="fa-regular fa-calendar-check"></i> Agendar Meu Horário Agora ✨';
+    function openProfileStoryViewer() {
+      if (!window.EPStore) return;
+      const rawStories = window.EPStore.getProfileStories ? window.EPStore.getProfileStories() : [];
+      const s = window.EPStore.getSalonSettings ? window.EPStore.getSalonSettings() : {};
+
+      let rawList = [];
+      if (rawStories.length === 0) {
+        rawList = [{
+          type: 'image',
+          url: (s && s.avatarImage) ? s.avatarImage : 'assets/images/trabalho-amendoada-ouro.png',
+          caption: (s && s.slogan) ? s.slogan : 'Bem-vinda ao Studio Estefany Paiva Nails ✨',
+          createdAt: Date.now() - 3600000
+        }];
+      } else {
+        rawList = rawStories.map(st => ({
+          type: st.type || 'image',
+          url: st.url,
+          caption: st.caption || '',
+          duration: st.duration || 0,
+          createdAt: st.createdAt
+        }));
       }
 
-      document.getElementById('modalStoryViewer').classList.add('active');
+      currentServiceStoryMedia = prepareStoryMediaSegments(rawList);
+      storyActiveService = null;
+      storyIndex = 0;
+
+      const userAv = document.getElementById('storyUserAvatarImg');
+      if (userAv && s && s.avatarImage) userAv.src = s.avatarImage;
+
+      const authorName = document.getElementById('storyAuthorName');
+      if (authorName && s && s.ownerName) authorName.innerText = s.ownerName;
+
+      renderStoryProgressDashes();
+
+      const modal = document.getElementById('modalStoryViewer');
+      if (modal) {
+        modal.style.display = 'flex';
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+      }
+
       showStorySlide(0);
     }
 
@@ -1506,57 +1585,62 @@
       storyActiveService = serviceId;
       storyIndex = 0;
       const srv = window.EPStore ? window.EPStore.getServiceById(serviceId) : null;
+      let rawList = [];
+
       if (srv) {
         selectedService = { id: srv.id, name: srv.name, price: srv.price, image: srv.image };
-        const nameEl = document.getElementById('storyServiceName');
-        if (nameEl) nameEl.innerHTML = `${srv.name} &bull; <span style="font-size:0.7rem; color:rgba(255,255,255,0.75);">R$ ${parseFloat(srv.price || 150).toFixed(2).replace('.', ',')}</span>`;
-        
-        // Coleta todas as fotos e vídeos adicionados para este serviço
-        currentServiceStoryMedia = [];
         if (Array.isArray(srv.mediaList) && srv.mediaList.length > 0) {
-          currentServiceStoryMedia = srv.mediaList;
+          rawList = srv.mediaList;
         } else if (Array.isArray(srv.storiesVideos) && srv.storiesVideos.length > 0) {
-          currentServiceStoryMedia = srv.storiesVideos.map(v => ({
+          rawList = srv.storiesVideos.map(v => ({
             type: (v.mediaUrl && v.mediaUrl.endsWith('.mp4')) ? 'video' : 'image',
             url: v.mediaUrl || srv.image,
-            caption: v.caption || srv.name
+            caption: v.caption || srv.name,
+            duration: v.duration || 0
           }));
         } else {
-          currentServiceStoryMedia = [{ type: 'image', url: srv.image || 'assets/images/trabalho-alongamento-chocolate.png', caption: srv.name }];
+          rawList = [{ type: 'image', url: srv.image || 'assets/images/trabalho-alongamento-chocolate.png', caption: srv.name }];
         }
       } else {
-        currentServiceStoryMedia = [{ type: 'image', url: 'assets/images/trabalho-alongamento-chocolate.png' }];
+        rawList = [{ type: 'image', url: 'assets/images/trabalho-alongamento-chocolate.png' }];
       }
 
-      const btnBook = document.getElementById('btnStoryBookNow');
-      if (btnBook) {
-        btnBook.innerHTML = '<i class="fa-regular fa-calendar-check"></i> Agendar Este Procedimento ✨';
-      }
+      currentServiceStoryMedia = prepareStoryMediaSegments(rawList);
 
-      // Atualiza avatar do topo do story
       const s = window.EPStore ? window.EPStore.getSalonSettings() : {};
       const userAv = document.getElementById('storyUserAvatarImg');
       if (userAv && s.avatarImage) userAv.src = s.avatarImage;
 
-      // Renderiza as barrinhas de progresso
-      const progRow = document.getElementById('instagramStoryProgressRow');
-      if (progRow) {
-        progRow.innerHTML = currentServiceStoryMedia.map((_, i) => `
-          <div class="instagram-progress-bar-bg">
-            <div id="instaStoryProg_${i}" class="instagram-progress-bar-fill"></div>
-          </div>
-        `).join('');
+      const authorName = document.getElementById('storyAuthorName');
+      if (authorName && s.ownerName) authorName.innerText = s.ownerName;
+
+      renderStoryProgressDashes();
+
+      const modal = document.getElementById('modalStoryViewer');
+      if (modal) {
+        modal.style.display = 'flex';
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
       }
 
-      document.getElementById('modalStoryViewer').classList.add('active');
       showStorySlide(0);
     }
 
     function closeStoryViewer() {
-      document.getElementById('modalStoryViewer').classList.remove('active');
+      const modal = document.getElementById('modalStoryViewer');
+      if (modal) {
+        modal.classList.remove('active');
+        modal.style.display = 'none';
+        document.body.style.overflow = '';
+      }
       const vid = document.getElementById('storyMediaVideo');
-      if (vid) { vid.pause(); vid.style.display = 'none'; }
+      if (vid) {
+        vid.pause();
+        vid.style.display = 'none';
+        vid.src = '';
+      }
       if (storyTimer) clearInterval(storyTimer);
+      resumeStory();
     }
 
     function showStorySlide(idx) {
@@ -1572,17 +1656,27 @@
       const img = document.getElementById('storyMediaImg');
       const vid = document.getElementById('storyMediaVideo');
       const capEl = document.getElementById('storyMediaCaptionOverlay');
-      const nameEl = document.getElementById('storyServiceName');
+      const serviceNameEl = document.getElementById('storyServiceName');
+      const timeElapsedEl = document.getElementById('storyTimeElapsed');
 
-      if (!storyActiveService && nameEl) {
+      // Atualiza cabeçalho com tempo e parte (se houver corte de 60s)
+      if (timeElapsedEl) {
         const elapsed = (window.EPStore && window.EPStore.formatStoryElapsed)
           ? window.EPStore.formatStoryElapsed(mediaItem.createdAt)
-          : 'Stories 24h';
-        nameEl.innerHTML = `Stories do Dia &bull; <span style="font-size:0.72rem; color:rgba(255,255,255,0.8);">${elapsed}</span>`;
+          : 'Há 2h';
+        timeElapsedEl.innerText = mediaItem.partText ? `${elapsed} • ${mediaItem.partText}` : elapsed;
+      }
+
+      if (serviceNameEl) {
+        if (storyActiveService && selectedService) {
+          serviceNameEl.innerText = `${selectedService.name} • R$ ${parseFloat(selectedService.price || 150).toFixed(2).replace('.', ',')}`;
+        } else {
+          serviceNameEl.innerText = mediaItem.caption || 'Stories do Dia (24h)';
+        }
       }
 
       if (capEl) {
-        if (mediaItem.caption) {
+        if (mediaItem.caption && storyActiveService) {
           capEl.innerText = mediaItem.caption;
           capEl.style.display = 'block';
         } else {
@@ -1590,44 +1684,140 @@
         }
       }
 
+      if (storyTimer) clearInterval(storyTimer);
+
       if (mediaItem.type === 'video' && vid) {
-        img.style.display = 'none';
+        if (img) img.style.display = 'none';
         vid.style.display = 'block';
-        vid.src = mediaItem.url;
-        vid.play().catch(() => {});
+
+        const startTime = mediaItem.startTime || 0;
+        const endTime = mediaItem.endTime || 60;
+        const targetDuration = Math.min(mediaItem.segmentDuration || (endTime - startTime), 60);
+
+        if (vid.src !== mediaItem.url) {
+          vid.src = mediaItem.url;
+        }
+
+        const handleMetadata = () => {
+          // Se o vídeo for maior que 60s e ainda não tínhamos fatiado, fatia dinamicamente
+          if (vid.duration > 60 && !mediaItem._segmented) {
+            resegmentLoadedVideo(vid.duration, idx);
+            return;
+          }
+          try {
+            vid.currentTime = startTime;
+            vid.play().catch(() => {});
+          } catch(e) {}
+          startStoryPlaybackProgress(idx, targetDuration, vid, startTime, endTime);
+        };
+
+        if (vid.readyState >= 1) {
+          handleMetadata();
+        } else {
+          vid.onloadedmetadata = handleMetadata;
+          try {
+            vid.currentTime = startTime;
+            vid.play().catch(() => {});
+          } catch(e) {}
+          startStoryPlaybackProgress(idx, targetDuration, vid, startTime, endTime);
+        }
       } else if (img) {
-        if (vid) { vid.pause(); vid.style.display = 'none'; }
+        if (vid) {
+          vid.pause();
+          vid.style.display = 'none';
+          vid.src = '';
+        }
         img.style.display = 'block';
         img.src = mediaItem.url;
+        startStoryPlaybackProgress(idx, 5, null, 0, 5);
+      }
+    }
+
+    // Fatia o vídeo carregado em partes de 60s em tempo de execução caso a duração exceda 1 minuto
+    function resegmentLoadedVideo(totalDur, currentIdx) {
+      const item = currentServiceStoryMedia[currentIdx];
+      if (!item || totalDur <= 60) return;
+
+      const totalParts = Math.ceil(totalDur / 60);
+      const newSegments = [];
+      for (let p = 0; p < totalParts; p++) {
+        const start = p * 60;
+        const end = Math.min((p + 1) * 60, totalDur);
+        newSegments.push({
+          ...item,
+          startTime: start,
+          endTime: end,
+          segmentDuration: end - start,
+          partText: `Parte ${p + 1}/${totalParts}`,
+          _segmented: true
+        });
       }
 
-      // Atualiza estado das barrinhas
+      currentServiceStoryMedia.splice(currentIdx, 1, ...newSegments);
+      renderStoryProgressDashes();
+      showStorySlide(currentIdx);
+    }
+
+    function startStoryPlaybackProgress(idx, durationSecs, vidEl, startTime, endTime) {
+      // Atualiza barrinhas anteriores como 100% e seguintes como 0%
       currentServiceStoryMedia.forEach((_, i) => {
         const bar = document.getElementById(`instaStoryProg_${i}`);
-        if (bar) {
-          bar.style.width = (i < idx) ? '100%' : (i === idx ? '0%' : '0%');
-        }
+        if (bar) bar.style.width = (i < idx) ? '100%' : '0%';
       });
 
-      if (storyTimer) clearInterval(storyTimer);
-      let progress = 0;
+      storySlideStartMs = Date.now();
+      storySlideDurationMs = durationSecs * 1000;
+
       storyTimer = setInterval(() => {
-        progress += 2;
-        const currentBar = document.getElementById(`instaStoryProg_${idx}`);
-        if (currentBar) currentBar.style.width = `${progress}%`;
-        if (progress >= 100) {
+        if (storyIsPaused) return;
+
+        let pct = 0;
+        if (vidEl && !vidEl.paused && vidEl.currentTime) {
+          const currentInSegment = Math.max(0, vidEl.currentTime - startTime);
+          pct = (currentInSegment / durationSecs) * 100;
+          if (vidEl.currentTime >= endTime || vidEl.ended) {
+            pct = 100;
+          }
+        } else {
+          const elapsed = Date.now() - storySlideStartMs;
+          pct = (elapsed / storySlideDurationMs) * 100;
+        }
+
+        pct = Math.min(Math.max(pct, 0), 100);
+        const bar = document.getElementById(`instaStoryProg_${idx}`);
+        if (bar) bar.style.width = `${pct}%`;
+
+        if (pct >= 100) {
           clearInterval(storyTimer);
-          if (idx + 1 < currentServiceStoryMedia.length) {
-            showStorySlide(idx + 1);
+          if (storyIndex + 1 < currentServiceStoryMedia.length) {
+            showStorySlide(storyIndex + 1);
           } else {
             closeStoryViewer();
           }
         }
-      }, 100);
+      }, 50);
+    }
+
+    function pauseStory() {
+      storyIsPaused = true;
+      const box = document.getElementById('instagramStoryBox');
+      if (box) box.classList.add('paused');
+      const vid = document.getElementById('storyMediaVideo');
+      if (vid && !vid.paused) vid.pause();
+    }
+
+    function resumeStory() {
+      storyIsPaused = false;
+      const box = document.getElementById('instagramStoryBox');
+      if (box) box.classList.remove('paused');
+      const vid = document.getElementById('storyMediaVideo');
+      if (vid && vid.style.display !== 'none') vid.play().catch(() => {});
     }
 
     function handleStoryTapPrev() {
-      if (storyIndex > 0) showStorySlide(storyIndex - 1);
+      if (storyIndex > 0) {
+        showStorySlide(storyIndex - 1);
+      }
     }
 
     function handleStoryTapNext() {
@@ -1636,6 +1826,34 @@
       } else {
         closeStoryViewer();
       }
+    }
+
+    function likeStory(event) {
+      if (event) event.stopPropagation();
+      const heart = document.getElementById('storyHeartIcon');
+      const btn = document.getElementById('btnStoryLike');
+      const floating = document.getElementById('storyFloatingHeart');
+
+      if (heart) heart.className = 'fa-solid fa-heart';
+      if (btn) btn.classList.add('liked');
+
+      if (floating) {
+        floating.classList.remove('animate');
+        void floating.offsetWidth;
+        floating.classList.add('animate');
+        setTimeout(() => floating.classList.remove('animate'), 700);
+      }
+      showToast('Você curtiu este Story ❤️');
+    }
+
+    function shareStoryWhatsapp(event) {
+      if (event) event.stopPropagation();
+      pauseStory();
+      const srvName = (selectedService && selectedService.name) ? selectedService.name : 'Unhas e Nail Design';
+      const text = encodeURIComponent(`Olá Estefany! Vi seus Stories no aplicativo sobre "${srvName}" e quero agendar meu horário! ✨`);
+      const s = window.EPStore ? window.EPStore.getSalonSettings() : {};
+      const phone = (s && s.phone) ? s.phone.replace(/\D/g, '') : '5561985543452';
+      window.open(`https://wa.me/${phone}?text=${text}`, '_blank');
     }
 
     function agendarViaStory() {

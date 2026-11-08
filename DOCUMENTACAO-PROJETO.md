@@ -55,3 +55,9 @@ O sistema é uma aplicação web progressiva (PWA) de luxo para salão de estét
   2. **Correção Definitiva do Calendário (Zero Vazamento)**: Ajustada a grade do calendário (.calendar-days-grid e .calendar-weekdays-row) com colunas fluidas repeat(7, minmax(0, 1fr)), eliminando a quebra e corte da coluna de sábado (Sáb) nas laterais dos celulares.
   3. **Trava de Rolagem de Fundo**: Ao abrir o agendamento em tela cheia, o scroll do corpo da página é bloqueado (overflow: hidden) e restaurado ao fechar.
   4. **Atualização do Cache PWA**: Versão do Service Worker elevada para 'estefany-nails-v26-fullscreen-booking-calendar-fix'.
+- **v27**: Visualizador de Stories em Tela Toda (Padrão Oficial Instagram) e Fatiamento de Vídeos em 60s:
+  1. **Visualizador de Stories Edge-to-Edge (100% da Tela)**: O modal de Stories (#modalStoryViewer) agora ocupa 100% da tela do celular sem bordas pretas externas, com imagens e vídeos em 'object-fit: cover', barras de progresso finas no topo e cabeçalho nativo com avatar, nome da profissional, selo verificado e tempo decorrido.
+  2. **Rodapé Oficial Estilo Instagram**: Adicionada pílula de interação "Enviar mensagem / Agendar...", botão de curtir com coração flutuante animado e botão de WhatsApp direto para conversão.
+  3. **Segurar para Pausar (Press & Hold)**: Ao pressionar e segurar na tela, o story pausa a reprodução do vídeo e do timer, ocultando os controles suavemente; ao soltar, a reprodução é retomada automaticamente.
+  4. **Fatiamento Automático de Vídeos em Partes de até 1 Minuto (60s)**: Seguindo a regra do Instagram, vídeos com duração superior a 60 segundos são automaticamente fatiados em segmentos sucessivos de no máximo 60 segundos (Parte 1/2, Parte 2/2, etc.), cada um com sua barrinha independente no topo.
+  5. **Purga Automática de Cache**: Versão do Service Worker elevada para 'estefany-nails-v27-instagram-stories-fullscreen-60s-split'.

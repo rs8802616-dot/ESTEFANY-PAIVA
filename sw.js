@@ -1,4 +1,4 @@
-const CACHE_NAME = 'estefany-nails-v26-fullscreen-booking-calendar-fix';
+const CACHE_NAME = 'estefany-nails-v27-instagram-stories-fullscreen-60s-split';
 const STATIC_ASSETS = [
   './',
   './index.html',
