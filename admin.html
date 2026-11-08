@@ -424,9 +424,14 @@
             <h3 style="font-family:var(--font-serif); font-size:1.35rem; color:#4D1328;"><i class="fa-regular fa-gem"></i> Catálogo de Serviços</h3>
             <p style="font-size:0.78rem; color:#8A2D4E;">Cadastre novos serviços com foto da galeria do celular, edite preços ou ative/desative.</p>
           </div>
-          <button class="btn-open-client-pill" onclick="openModalNovoServico()" style="background:#4D1328; color:#FFF; cursor:pointer; border:none;">
-            <i class="fa-solid fa-camera"></i> + Novo Serviço com Foto
-          </button>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="filter-pill" onclick="openModalGerenciarCategorias()" style="background:#FBECEF; border:1px solid rgba(77,19,40,0.15); cursor:pointer;">
+              <i class="fa-solid fa-tags"></i> Categorias
+            </button>
+            <button class="btn-open-client-pill" onclick="openModalNovoServico()" style="background:#4D1328; color:#FFF; cursor:pointer; border:none;">
+              <i class="fa-solid fa-camera"></i> + Novo Serviço
+            </button>
+          </div>
         </div>
 
         <!-- Grade Responsiva de Serviços -->
@@ -623,6 +628,30 @@
         </div>
 
         <div class="admin-items-responsive-grid">
+          <!-- 0A. Controle de Abertura da Grade da Agenda (Semana, Mês, Ano Todo, Folgas) -->
+          <div class="card-list-item" onclick="openModalConfigAgendaGrade()">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <div class="client-avatar-badge" style="background:#ECFDF5; color:#059669;"><i class="fa-regular fa-calendar-check"></i></div>
+              <div>
+                <h5 style="font-size:0.92rem; font-weight:700; color:#350B19;">Grade da Agenda & Abertura</h5>
+                <p style="font-size:0.76rem; color:#6A1D39;">Abrir por semana, por mês ou ano todo, dias de atendimento e folgas</p>
+              </div>
+            </div>
+            <span class="filter-pill" style="padding:4px 10px; font-size:0.72rem; background:#ECFDF5; color:#059669; border-color:#A7F3D0;">Configurar</span>
+          </div>
+
+          <!-- 0B. Personalização de Cores & Identidade Visual -->
+          <div class="card-list-item" onclick="openModalConfigCores()">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <div class="client-avatar-badge" style="background:#FDF2F8; color:#DB2777;"><i class="fa-solid fa-palette"></i></div>
+              <div>
+                <h5 style="font-size:0.92rem; font-weight:700; color:#350B19;">Cores & Identidade Visual</h5>
+                <p style="font-size:0.76rem; color:#6A1D39;">Mudar cor de tudo (Vinho, Rosé, Dourado, Fundo e Cards)</p>
+              </div>
+            </div>
+            <span class="filter-pill" style="padding:4px 10px; font-size:0.72rem; background:#FDF2F8; color:#DB2777; border-color:#FBCFE8;">Personalizar</span>
+          </div>
+
           <!-- 1. Perfil, Foto, Nome, Slogan, WhatsApp e Endereço -->
           <div class="card-list-item" onclick="openModalConfigSalao()">
             <div style="display:flex; align-items:center; gap:12px;">
@@ -1290,6 +1319,245 @@
     </div>
   </div>
 
+  
+  <!-- MODAL: DETALHES COMPLETOS DA CLIENTE (CARD COM WHATSAPP) -->
+  <div class="admin-modal-overlay" id="modalDetalhesCliente">
+    <div class="admin-modal-card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <h3 style="font-family:var(--font-serif); font-size:1.3rem; color:#350B19;">
+          <i class="fa-regular fa-user" style="color:#D83F79;"></i> Ficha da Cliente
+        </h3>
+        <button onclick="closeModal('modalDetalhesCliente')" style="background:none; border:none; font-size:1.2rem; color:#6A1D39; cursor:pointer;">✕</button>
+      </div>
+
+      <div style="text-align:center; margin-bottom:18px;">
+        <div class="client-avatar-badge" id="cliDetAvatar" style="width:68px; height:68px; font-size:1.4rem; margin:0 auto 10px; background:#4D1328; color:#FFF;">
+          CL
+        </div>
+        <h4 style="font-family:var(--font-serif); font-size:1.3rem; color:#350B19;" id="cliDetName">Nome da Cliente</h4>
+        <p style="font-size:0.85rem; color:#6A1D39;" id="cliDetPhone">(61) 99999-9999</p>
+        <span class="badge-status-pill confirmado" id="cliDetTag" style="margin-top:4px; display:inline-block;">Cliente Ativa</span>
+      </div>
+
+      <!-- Resumo Financeiro da Cliente -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px;">
+        <div style="background:#FBECEF; border-radius:14px; padding:12px; text-align:center;">
+          <span style="font-size:0.72rem; color:#6A1D39; font-weight:700; text-transform:uppercase;">Atendimentos</span>
+          <h4 style="font-size:1.3rem; font-weight:800; color:#350B19;" id="cliDetTotalCount">0</h4>
+        </div>
+        <div style="background:#FBECEF; border-radius:14px; padding:12px; text-align:center;">
+          <span style="font-size:0.72rem; color:#6A1D39; font-weight:700; text-transform:uppercase;">Total Investido</span>
+          <h4 style="font-size:1.3rem; font-weight:800; color:#059669;" id="cliDetTotalSpent">R$ 0,00</h4>
+        </div>
+      </div>
+
+      <!-- Histórico de Procedimentos -->
+      <div style="margin-bottom:18px;">
+        <h5 style="font-size:0.85rem; font-weight:700; color:#4D1328; margin-bottom:8px;">
+          <i class="fa-solid fa-clock-rotate-left"></i> Histórico de Agendamentos
+        </h5>
+        <div id="cliDetHistoryList" style="display:flex; flex-direction:column; gap:8px; max-height:180px; overflow-y:auto;">
+          <!-- Populado via JS -->
+        </div>
+      </div>
+
+      <!-- Ações: Conversar no WhatsApp / Novo Agendamento -->
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        <button type="button" class="btn-promo-wine-pill" id="btnCliDetWhatsApp" onclick="openClientChatFromModal()" style="width:100%; justify-content:center; background:#25D366; font-size:0.92rem; padding:13px;">
+          <i class="fa-brands fa-whatsapp" style="font-size:1.2rem;"></i> Conversar no WhatsApp
+        </button>
+        <button type="button" class="btn-open-client-pill" onclick="bookForThisClientFromModal()" style="width:100%; justify-content:center; padding:11px; font-size:0.82rem;">
+          <i class="fa-solid fa-calendar-plus"></i> Novo Agendamento para Ela
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: GERENCIADOR DE CATEGORIAS -->
+  <div class="admin-modal-overlay" id="modalGerenciarCategorias">
+    <div class="admin-modal-card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <h3 style="font-family:var(--font-serif); font-size:1.3rem; color:#350B19;">
+          <i class="fa-solid fa-tags" style="color:#D83F79;"></i> Categorias do Catálogo
+        </h3>
+        <button onclick="closeModal('modalGerenciarCategorias')" style="background:none; border:none; font-size:1.2rem; color:#6A1D39; cursor:pointer;">✕</button>
+      </div>
+
+      <p style="font-size:0.78rem; color:#6A1D39; margin-bottom:14px;">
+        Crie e edite as categorias de serviços. Elas aparecem como filtros na tela da cliente e no cadastro de procedimentos.
+      </p>
+
+      <!-- Formulário: Criar Nova Categoria -->
+      <div style="background:#FBECEF; border-radius:16px; padding:14px; margin-bottom:16px;">
+        <label style="font-size:0.75rem; font-weight:700; color:#4D1328; display:block; margin-bottom:4px;">Nome da Nova Categoria</label>
+        <div style="display:flex; gap:8px;">
+          <input type="text" id="inputNovaCategoriaNome" placeholder="Ex: Alongamento em Fibra, Spa dos Pés..." style="flex:1; padding:9px 12px; border-radius:10px; border:1px solid rgba(77,19,40,0.15); font-size:0.85rem; outline:none;">
+          <button type="button" onclick="salvarNovaCategoriaAdmin()" style="padding:9px 16px; border-radius:10px; background:#4D1328; color:#FFF; font-weight:700; font-size:0.82rem; border:none; cursor:pointer;">
+            + Criar
+          </button>
+        </div>
+      </div>
+
+      <!-- Lista de Categorias Atuais -->
+      <div id="adminCategoriasListContainer" style="display:flex; flex-direction:column; gap:8px; max-height:260px; overflow-y:auto; margin-bottom:16px;">
+        <!-- Populado dinamicamente via JS -->
+      </div>
+
+      <button type="button" onclick="closeModal('modalGerenciarCategorias')" style="width:100%; padding:12px; border-radius:var(--radius-pill); background:#4D1328; color:#FFF; font-weight:700; border:none; cursor:pointer;">
+        Concluir
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL: CONTROLE DE GRADE DA AGENDA & ABERTURA (SEMANA, MÊS, FOLGAS) -->
+  <div class="admin-modal-overlay" id="modalConfigAgendaGrade">
+    <div class="admin-modal-card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <h3 style="font-family:var(--font-serif); font-size:1.3rem; color:#350B19;">
+          <i class="fa-regular fa-calendar-check" style="color:#059669;"></i> Grade da Agenda & Abertura
+        </h3>
+        <button onclick="closeModal('modalConfigAgendaGrade')" style="background:none; border:none; font-size:1.2rem; color:#6A1D39; cursor:pointer;">✕</button>
+      </div>
+
+      <!-- 1. Regra de Abertura de Período -->
+      <div style="margin-bottom:16px;">
+        <label style="font-size:0.78rem; font-weight:700; color:#4D1328; display:block; margin-bottom:6px;">
+          📅 Janela de Abertura para Clientes
+        </label>
+        <select id="selectScheduleWindow" style="width:100%; padding:11px 12px; border-radius:12px; border:1px solid rgba(77,19,40,0.15); background:#FBECEF; color:#350B19; font-weight:700; font-size:0.85rem; outline:none;">
+          <option value="month">Apenas o Mês Atual (Abre mês a mês conforme passa)</option>
+          <option value="week">Apenas a Semana Atual (Abre semana a semana)</option>
+          <option value="30days">Próximos 30 Dias Corridos</option>
+          <option value="year">Ano Todo Aberto (Sem restrição de data)</option>
+        </select>
+        <p style="font-size:0.72rem; color:#6A1D39; margin-top:4px;">
+          Os dias fora da janela escolhida ficam automaticamente bloqueados na tela da cliente.
+        </p>
+      </div>
+
+      <!-- 2. Dias da Semana de Atendimento -->
+      <div style="margin-bottom:16px;">
+        <label style="font-size:0.78rem; font-weight:700; color:#4D1328; display:block; margin-bottom:6px;">
+          ⏰ Dias da Semana que Atende
+        </label>
+        <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:8px;">
+          <label style="display:flex; align-items:center; gap:5px; font-size:0.78rem; font-weight:600; cursor:pointer;">
+            <input type="checkbox" id="chkDay1" value="1"> Seg
+          </label>
+          <label style="display:flex; align-items:center; gap:5px; font-size:0.78rem; font-weight:600; cursor:pointer;">
+            <input type="checkbox" id="chkDay2" value="2"> Ter
+          </label>
+          <label style="display:flex; align-items:center; gap:5px; font-size:0.78rem; font-weight:600; cursor:pointer;">
+            <input type="checkbox" id="chkDay3" value="3"> Qua
+          </label>
+          <label style="display:flex; align-items:center; gap:5px; font-size:0.78rem; font-weight:600; cursor:pointer;">
+            <input type="checkbox" id="chkDay4" value="4"> Qui
+          </label>
+          <label style="display:flex; align-items:center; gap:5px; font-size:0.78rem; font-weight:600; cursor:pointer;">
+            <input type="checkbox" id="chkDay5" value="5"> Sex
+          </label>
+          <label style="display:flex; align-items:center; gap:5px; font-size:0.78rem; font-weight:600; cursor:pointer;">
+            <input type="checkbox" id="chkDay6" value="6"> Sáb
+          </label>
+          <label style="display:flex; align-items:center; gap:5px; font-size:0.78rem; font-weight:600; cursor:pointer;">
+            <input type="checkbox" id="chkDay0" value="0"> Dom
+          </label>
+        </div>
+      </div>
+
+      <!-- 3. Calendário de Bloqueio Manual de Folgas -->
+      <div style="margin-bottom:18px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+          <label style="font-size:0.78rem; font-weight:700; color:#4D1328;">
+            🚫 Bloqueio de Folgas / Dias Específicos
+          </label>
+          <span style="font-size:0.7rem; color:#8A2D4E;">Clique no dia para bloquear/liberar</span>
+        </div>
+        <div id="adminFolgasCalendarGrid" style="display:grid; grid-template-columns:repeat(7, 1fr); gap:4px; background:#FBECEF; padding:10px; border-radius:14px; text-align:center;">
+          <!-- Populado via JS -->
+        </div>
+      </div>
+
+      <button type="button" onclick="salvarConfigAgendaGradeAdmin()" style="width:100%; padding:13px; border-radius:var(--radius-pill); background:#4D1328; color:#FFF; font-weight:700; border:none; cursor:pointer;">
+        Salvar Regras da Agenda
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL: PERSONALIZAÇÃO DE CORES & IDENTIDADE VISUAL -->
+  <div class="admin-modal-overlay" id="modalConfigCores">
+    <div class="admin-modal-card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <h3 style="font-family:var(--font-serif); font-size:1.3rem; color:#350B19;">
+          <i class="fa-solid fa-palette" style="color:#DB2777;"></i> Cores & Identidade Visual
+        </h3>
+        <button onclick="closeModal('modalConfigCores')" style="background:none; border:none; font-size:1.2rem; color:#6A1D39; cursor:pointer;">✕</button>
+      </div>
+
+      <p style="font-size:0.78rem; color:#6A1D39; margin-bottom:14px;">
+        Personalize as cores de todo o aplicativo. As mudanças são aplicadas na hora na tela da cliente e no painel administrativo.
+      </p>
+
+      <!-- Paletas Pré-definidas de Luxo -->
+      <div style="margin-bottom:16px;">
+        <label style="font-size:0.75rem; font-weight:700; color:#4D1328; display:block; margin-bottom:6px;">Paletas Prontas (1-Clique)</label>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+          <button type="button" onclick="aplicarPaletaPreset('#350B19', '#D83F79', '#FBECEF', '#FAF4F5')" style="padding:9px; border-radius:10px; border:1px solid #350B19; background:#FAF4F5; font-size:0.75rem; font-weight:700; color:#350B19; cursor:pointer;">
+            🍷 Vinho & Rosé Luxo
+          </button>
+          <button type="button" onclick="aplicarPaletaPreset('#2B1E16', '#C59B6D', '#F8F2ED', '#FAF7F2')" style="padding:9px; border-radius:10px; border:1px solid #C59B6D; background:#FAF7F2; font-size:0.75rem; font-weight:700; color:#2B1E16; cursor:pointer;">
+            🥂 Champagne & Ouro
+          </button>
+          <button type="button" onclick="aplicarPaletaPreset('#4A0E2E', '#E0218A', '#FDE8F3', '#FFF5F9')" style="padding:9px; border-radius:10px; border:1px solid #E0218A; background:#FFF5F9; font-size:0.75rem; font-weight:700; color:#4A0E2E; cursor:pointer;">
+            🌸 Pink Barbie Glam
+          </button>
+          <button type="button" onclick="aplicarPaletaPreset('#18181B', '#E0A96D', '#27272A', '#09090B')" style="padding:9px; border-radius:10px; border:1px solid #E0A96D; background:#18181B; font-size:0.75rem; font-weight:700; color:#FFF; cursor:pointer;">
+            🖤 Black & Rosé Gold
+          </button>
+        </div>
+      </div>
+
+      <!-- Seletores de Cores Personalizados -->
+      <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:18px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; background:#FBECEF; padding:10px 14px; border-radius:12px;">
+          <div>
+            <strong style="font-size:0.82rem; color:#350B19;">Cor Primária (Vinho / Topbar)</strong>
+            <div style="font-size:0.7rem; color:#6A1D39;">Cabeçalhos, botões principais e destaques</div>
+          </div>
+          <input type="color" id="themePrimaryColor" value="#350B19" style="width:40px; height:32px; border:none; cursor:pointer; background:none;">
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; background:#FBECEF; padding:10px 14px; border-radius:12px;">
+          <div>
+            <strong style="font-size:0.82rem; color:#350B19;">Cor Secundária (Rosé / Destaque)</strong>
+            <div style="font-size:0.7rem; color:#6A1D39;">Pílulas ativas, ícones de atenção e badges</div>
+          </div>
+          <input type="color" id="themeSecondaryColor" value="#D83F79" style="width:40px; height:32px; border:none; cursor:pointer; background:none;">
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; background:#FBECEF; padding:10px 14px; border-radius:12px;">
+          <div>
+            <strong style="font-size:0.82rem; color:#350B19;">Fundo dos Cards (Rosé Suave)</strong>
+            <div style="font-size:0.7rem; color:#6A1D39;">Superfície dos cards de serviços e agendamentos</div>
+          </div>
+          <input type="color" id="themeCardBgColor" value="#FBECEF" style="width:40px; height:32px; border:none; cursor:pointer; background:none;">
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; background:#FBECEF; padding:10px 14px; border-radius:12px;">
+          <div>
+            <strong style="font-size:0.82rem; color:#350B19;">Fundo da Página (Creme / Fundo Geral)</strong>
+            <div style="font-size:0.7rem; color:#6A1D39;">Cor de base do aplicativo</div>
+          </div>
+          <input type="color" id="themePageBgColor" value="#FAF4F5" style="width:40px; height:32px; border:none; cursor:pointer; background:none;">
+        </div>
+      </div>
+
+      <button type="button" onclick="salvarConfigCoresAdmin()" style="width:100%; padding:13px; border-radius:var(--radius-pill); background:#4D1328; color:#FFF; font-weight:700; border:none; cursor:pointer;">
+        Salvar e Aplicar Cores
+      </button>
+    </div>
+  </div>
+
   <!-- Toast Notification Feedback -->
   <div class="toast-notification" id="toastAdminNotification">
     <i class="fa-solid fa-circle-check" style="color:#25D366;"></i>
@@ -1573,7 +1841,7 @@
       container.innerHTML = Array.from(clientMap.values()).map(cli => {
         const initials = (cli.name || 'CL').split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
         return `
-          <div class="card-list-item" onclick="callClientWhatsApp('${cli.phone}', '${cli.name}')">
+          <div class="card-list-item" onclick="openModalDetalhesCliente('${cli.phone}')">
             <div style="display:flex; align-items:center; gap:10px;">
               <div class="client-avatar-badge">${initials}</div>
               <div>
@@ -1644,10 +1912,13 @@
 
     function openModalNovoServico() {
       uploadedServicePhotoDataUrl = null;
+      currentServiceMediaList = [];
       document.getElementById('formNovoServico').reset();
       document.getElementById('inputServicoIdEdit').value = '';
       document.getElementById('modalServicoHeading').innerHTML = '<i class="fa-regular fa-gem" style="color:#8A2D4E;"></i> Cadastrar Novo Serviço';
       document.getElementById('previewServicoFotoImg').src = 'assets/images/trabalho-alongamento-chocolate.png';
+      populateCategoriesSelectAdmin();
+      renderServiceMediaThumbnails();
       openModal('modalNovoServico');
     }
 
@@ -1655,14 +1926,16 @@
       const s = window.EPStore ? window.EPStore.getServiceById(serviceId) : null;
       if (!s) return;
       uploadedServicePhotoDataUrl = s.image || 'assets/images/trabalho-alongamento-chocolate.png';
+      currentServiceMediaList = Array.isArray(s.mediaList) ? [...s.mediaList] : (Array.isArray(s.storiesVideos) ? s.storiesVideos.map(v => ({ type: 'image', url: v.mediaUrl || s.image })) : [{ type: 'image', url: uploadedServicePhotoDataUrl }]);
       document.getElementById('inputServicoIdEdit').value = s.id;
       document.getElementById('inputServicoNome').value = s.name || '';
       document.getElementById('inputServicoPreco').value = s.price || 150;
       document.getElementById('inputServicoDuracao').value = s.duration || 90;
-      document.getElementById('selectServicoCategoria').value = s.categoryId || 'cat_alongamento';
+      populateCategoriesSelectAdmin(s.categoryId || '');
       document.getElementById('inputServicoDesc').value = s.description || '';
+      document.getElementById('modalServicoHeading').innerHTML = '<i class="fa-regular fa-gem" style="color:#8A2D4E;"></i> Editar Serviço';
       document.getElementById('previewServicoFotoImg').src = uploadedServicePhotoDataUrl;
-      document.getElementById('modalServicoHeading').innerHTML = '<i class="fa-solid fa-pen" style="color:#8A2D4E;"></i> Editar Serviço & Foto';
+      renderServiceMediaThumbnails();
       openModal('modalNovoServico');
     }
 
@@ -1684,7 +1957,8 @@
           categoryId: categoria,
           description: desc || 'Procedimento realizado com produtos de alta linha.',
           active: true,
-          image: finalImg
+          image: finalImg,
+          mediaList: currentServiceMediaList && currentServiceMediaList.length > 0 ? currentServiceMediaList : [{ type: 'image', url: finalImg }]
         };
         if (editId) payload.id = editId;
         window.EPStore.saveService(payload);
@@ -2389,6 +2663,84 @@
       document.body.removeChild(a);
       showToast('Planilha exportada com sucesso!');
     }
+  
+    // ========================================================
+    // GERENCIAMENTO DE MÚLTIPLAS FOTOS E VÍDEOS POR SERVIÇO
+    // ========================================================
+    let currentServiceMediaList = [];
+
+    function populateCategoriesSelectAdmin(selectedId = '') {
+      const select = document.getElementById('selectServicoCategoria');
+      if (!select || !window.EPStore) return;
+      const cats = window.EPStore.getCategories();
+      select.innerHTML = cats.map(c => `
+        <option value="${c.id}" ${c.id === selectedId ? 'selected' : ''}>${c.name}</option>
+      `).join('');
+    }
+
+    async function handleAddServiceMultiplePhotos(input) {
+      if (!input.files || input.files.length === 0) return;
+      for (let i = 0; i < input.files.length; i++) {
+        const dataUrl = await window.EPStore.compressImageFile(input.files[i], 360, 0.65);
+        currentServiceMediaList.push({ type: 'image', url: dataUrl });
+      }
+      renderServiceMediaThumbnails();
+      showToast(`${input.files.length} foto(s) adicionada(s) aos stories!`);
+    }
+
+    function handleAddServiceVideoPrompt() {
+      const url = prompt('Cole o link do vídeo (MP4 ou URL de vídeo curto):', 'https://');
+      if (url && url.trim() && url !== 'https://') {
+        currentServiceMediaList.push({ type: 'video', url: url.trim() });
+        renderServiceMediaThumbnails();
+        showToast('Vídeo adicionado aos stories!');
+      }
+    }
+
+    function removeServiceMediaItem(idx) {
+      currentServiceMediaList.splice(idx, 1);
+      renderServiceMediaThumbnails();
+    }
+
+    function renderServiceMediaThumbnails() {
+      const container = document.getElementById('serviceMediaThumbnailsList');
+      if (!container) return;
+
+      if (currentServiceMediaList.length === 0) {
+        container.innerHTML = '<span style="font-size:0.75rem; color:#8A2D4E; padding:6px;">Nenhuma mídia extra adicionada.</span>';
+        const pImg = document.getElementById('serviceStoryPreviewImg');
+        const pVid = document.getElementById('serviceStoryPreviewVideo');
+        if (pImg) { pImg.style.display = 'block'; pImg.src = uploadedServicePhotoDataUrl || 'assets/images/trabalho-alongamento-chocolate.png'; }
+        if (pVid) { pVid.style.display = 'none'; }
+        return;
+      }
+
+      container.innerHTML = currentServiceMediaList.map((m, idx) => `
+        <div style="position:relative; width:52px; height:52px; border-radius:10px; overflow:hidden; flex-shrink:0; border:1px solid #D83F79; background:#000;">
+          ${m.type === 'video' ? '<span style="position:absolute; top:2px; left:2px; background:rgba(0,0,0,0.6); color:#FFF; font-size:0.6rem; padding:1px 3px; border-radius:3px;">🎥</span>' : ''}
+          <img src="${m.url}" style="width:100%; height:100%; object-fit:cover;" onclick="previewThisMediaInMockup(${idx})">
+          <button type="button" onclick="removeServiceMediaItem(${idx})" style="position:absolute; top:2px; right:2px; background:rgba(216,63,121,0.9); color:#FFF; border:none; width:16px; height:16px; border-radius:50%; font-size:0.6rem; cursor:pointer; display:flex; align-items:center; justify-content:center;">✕</button>
+        </div>
+      `).join('');
+
+      // Atualiza preview no mockup com a primeira mídia
+      previewThisMediaInMockup(0);
+    }
+
+    function previewThisMediaInMockup(idx) {
+      const item = currentServiceMediaList[idx];
+      if (!item) return;
+      const pImg = document.getElementById('serviceStoryPreviewImg');
+      const pVid = document.getElementById('serviceStoryPreviewVideo');
+      if (item.type === 'video') {
+        if (pImg) pImg.style.display = 'none';
+        if (pVid) { pVid.style.display = 'block'; pVid.src = item.url; }
+      } else {
+        if (pVid) pVid.style.display = 'none';
+        if (pImg) { pImg.style.display = 'block'; pImg.src = item.url; }
+      }
+    }
+
   </script>
 </body>
 </html>

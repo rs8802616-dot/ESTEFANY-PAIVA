@@ -697,7 +697,9 @@
       if (window.EPStore) {
         await window.EPStore.init();
       }
+      applyDynamicThemeColorsToClient();
       applyDynamicSalonSettingsToClient();
+      renderDynamicCategoryPills();
       renderDynamicClientServices();
       restoreClientSavedData();
       renderCalendar();
@@ -707,7 +709,9 @@
 
       // Atualiza automaticamente quando houver qualquer mudança no Admin ou em outro aparelho
       window.addEventListener('epstore:updated', () => {
+        applyDynamicThemeColorsToClient();
         applyDynamicSalonSettingsToClient();
+        renderDynamicCategoryPills();
         renderDynamicClientServices();
         renderCalendar();
         renderDynamicSlots();
@@ -749,6 +753,37 @@
     }
 
     // Renderiza todos os serviços cadastrados no EPStore (incluindo novos serviços com foto do celular!)
+    
+    // Renderiza dinamicamente as pílulas de categorias cadastradas pela administradora
+    function renderDynamicCategoryPills() {
+      const container = document.getElementById('clientCategoryFilterPillsRow');
+      if (!container || !window.EPStore) return;
+      const cats = window.EPStore.getCategories();
+      
+      let html = `<button class="filter-pill-wine ${activeClientCategory === 'all' ? 'active' : ''}" onclick="filterServicesByCategory('all', this)">Todas</button>`;
+      cats.forEach(c => {
+        const isActive = (activeClientCategory === c.id);
+        html += `<button class="filter-pill-wine ${isActive ? 'active' : ''}" onclick="filterServicesByCategory('${c.id}', this)">${c.name}</button>`;
+      });
+      container.innerHTML = html;
+    }
+
+    // Aplica cores personalizadas do tema salvas pela administradora
+    function applyDynamicThemeColorsToClient() {
+      if (!window.EPStore) return;
+      const theme = window.EPStore.getTheme ? window.EPStore.getTheme() : {};
+      const settings = window.EPStore.getSalonSettings ? window.EPStore.getSalonSettings() : {};
+      const colors = (settings && settings.themeColors) ? settings.themeColors : (theme || {});
+      
+      if (colors.primaryColor) {
+        document.documentElement.style.setProperty('--color-rose', colors.primaryColor);
+        document.documentElement.style.setProperty('--color-pink-btn', colors.primaryColor);
+      }
+      if (colors.secondaryColor) {
+        document.documentElement.style.setProperty('--color-pink-accent', colors.secondaryColor);
+      }
+    }
+
     function renderDynamicClientServices() {
       const container = document.getElementById('clientServicesCarousel');
       if (!container || !window.EPStore) return;
@@ -859,6 +894,24 @@
       if (!grid) return;
 
       const dateStr = formatLocalYYYYMMDD(selectedDate);
+      
+      // Verifica se o dia está disponível pela janela de abertura e folgas da administradora
+      const isDayOpen = window.EPStore && window.EPStore.isDateAvailableForBooking
+        ? window.EPStore.isDateAvailableForBooking(dateStr)
+        : true;
+
+      if (!isDayOpen) {
+        grid.innerHTML = `
+          <div style="grid-column: 1 / -1; padding: 18px 16px; text-align: center; background: #FBECEF; border: 1px dashed rgba(77, 19, 40, 0.25); border-radius: 18px; color: #4D1328;">
+            <i class="fa-regular fa-calendar-xmark" style="font-size: 1.4rem; color: #8A2D4E; margin-bottom: 6px; display: block;"></i>
+            <strong>Agenda Fechada para este Período</strong>
+            <p style="font-size: 0.78rem; color: #6A1D39; margin-top: 4px;">A profissional não está atendendo nesta data ou a abertura desta semana/mês ainda não foi liberada.</p>
+          </div>
+        `;
+        selectedSlotTime = '';
+        return;
+      }
+
       const allSlots = window.EPStore && window.EPStore.getConfiguredSlots
         ? window.EPStore.getConfiguredSlots()
         : ['09:00', '10:30', '13:00', '14:00', '15:30', '17:00', '18:30', '19:30'];
@@ -867,42 +920,29 @@
       const dayApps = apps.filter(a => a.date === dateStr && a.status !== 'Cancelado');
       const busyTimes = new Set(dayApps.map(a => a.time));
 
-      if (busyTimes.has(selectedSlotTime)) {
-        const firstFree = allSlots.find(s => !busyTimes.has(s));
-        if (firstFree) selectedSlotTime = firstFree;
+      // REGRA DE OURO: HORÁRIOS AGENDADOS SOMEM AUTOMATICAMENTE PARA OUTROS CLIENTES!
+      const freeSlots = allSlots.filter(s => !busyTimes.has(s));
+
+      if (freeSlots.length === 0) {
+        grid.innerHTML = `
+          <div style="grid-column: 1 / -1; padding: 16px; text-align: center; background: #FFF0F3; border: 1px solid rgba(216, 63, 121, 0.2); border-radius: 18px; color: #6A1D39;">
+            <i class="fa-solid fa-hourglass-end" style="color: #D83F79; font-size: 1.2rem; margin-bottom: 4px; display: block;"></i>
+            <strong>Todos os horários deste dia já foram preenchidos!</strong>
+            <p style="font-size: 0.78rem; color: #8A2D4E; margin-top: 2px;">Escolha outro dia disponível no calendário acima.</p>
+          </div>
+        `;
+        selectedSlotTime = '';
+        return;
       }
 
-      grid.innerHTML = allSlots.map(slot => {
-        const isBusy = busyTimes.has(slot);
-        const isActive = !isBusy && slot === selectedSlotTime;
-        if (isBusy) {
-          return `<button type="button" class="slot-chip-btn booked-slot" onclick="showToast('Este horário (${slot}) já está agendado no calendário!')">${slot} ✓</button>`;
-        }
+      if (!freeSlots.includes(selectedSlotTime)) {
+        selectedSlotTime = freeSlots[0];
+      }
+
+      grid.innerHTML = freeSlots.map(slot => {
+        const isActive = (slot === selectedSlotTime);
         return `<button type="button" class="slot-chip-btn ${isActive ? 'active' : ''}" onclick="selectSlot(this, '${slot}')">${slot}</button>`;
       }).join('');
-
-      // Atualiza o resumo de agendamentos dentro do próprio card do calendário
-      const summaryBox = document.getElementById('calendarSelectedDayBookingsBox');
-      if (summaryBox) {
-        const formattedDay = selectedDate.toLocaleDateString('pt-BR');
-        if (dayApps.length === 0) {
-          summaryBox.innerHTML = `<span style="color:#6A1D39;"><i class="fa-regular fa-calendar-check" style="color:#226E3A;"></i> <strong>${formattedDay}:</strong> Todos os horários livres para agendamento.</span>`;
-        } else {
-          summaryBox.innerHTML = `
-            <div style="margin-bottom:6px; font-weight:700; color:#350B19;">
-              <i class="fa-solid fa-calendar-check" style="color:#D83F79;"></i> Horários agendados no calendário em ${formattedDay}:
-            </div>
-            <div style="display:flex; flex-direction:column; gap:5px;">
-              ${dayApps.map(a => `
-                <div style="background:#FBECEF; border:1px solid rgba(216,63,121,0.2); border-radius:10px; padding:6px 10px; display:flex; justify-content:space-between; align-items:center;">
-                  <span><strong>${a.time}</strong> &bull; ${a.serviceName} (${a.clientName.split(' ')[0]})</span>
-                  <span style="background:#DDF2E1; color:#226E3A; font-size:0.68rem; font-weight:700; padding:2px 8px; border-radius:20px;">Agendado</span>
-                </div>
-              `).join('')}
-            </div>
-          `;
-        }
-      }
     }
 
     function selectSlot(btn, time) {
@@ -912,36 +952,61 @@
     }
 
     function renderCalendar() {
-      const grid = document.getElementById('calendarDaysGrid');
-      const title = document.getElementById('calendarMonthTitle');
-      if (!grid) return;
+      const monthNames = [
+        'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+        'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+      ];
+      const lbl = document.getElementById('calMonthYearLabel');
+      if (lbl) lbl.innerText = `${monthNames[currentMonth]} ${currentYear}`;
 
-      const months = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
-      title.innerText = `${months[currentCalMonth]} ${currentCalYear}`;
+      const daysGrid = document.getElementById('calDaysGrid');
+      if (!daysGrid) return;
+      daysGrid.innerHTML = '';
 
-      const firstDay = new Date(currentCalYear, currentCalMonth, 1).getDay();
-      const totalDays = new Date(currentCalYear, currentCalMonth + 1, 0).getDate();
+      const firstDayIndex = new Date(currentYear, currentMonth, 1).getDay();
+      const lastDayDate = new Date(currentYear, currentMonth + 1, 0).getDate();
 
-      const apps = window.EPStore ? window.EPStore.getAppointments().filter(a => a.status !== 'Cancelado') : [];
-      const bookedDatesSet = new Set(apps.map(a => a.date));
-
-      let html = '';
-      for (let i = 0; i < firstDay; i++) {
-        html += '<span class="cal-day-cell disabled"></span>';
+      for (let i = 0; i < firstDayIndex; i++) {
+        daysGrid.innerHTML += '<div class="cal-day-empty"></div>';
       }
 
-      for (let day = 1; day <= totalDays; day++) {
-        const dStr = `${currentCalYear}-${String(currentCalMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-        const hasBooking = bookedDatesSet.has(dStr);
-        const isSelected = day === selectedDate.getDate() && currentCalMonth === selectedDate.getMonth() && currentCalYear === selectedDate.getFullYear();
-        html += `
-          <button type="button" class="cal-day-cell ${isSelected ? 'selected' : ''} ${hasBooking ? 'has-booking' : ''}" onclick="pickDay(${day})" title="${hasBooking ? 'Possui horário agendado' : 'Disponível'}">
-            <span>${day}</span>
-            ${hasBooking ? '<span class="cal-day-dot"></span>' : ''}
-          </button>
-        `;
+      // Agendamentos existentes para marcar dias com pontos
+      const appointments = window.EPStore ? window.EPStore.getAppointments() : [];
+      const bookedDatesSet = new Set(
+        appointments.filter(a => a.status !== 'Cancelado').map(a => a.date)
+      );
+
+      const selectedDay = (selectedDate.getMonth() === currentMonth && selectedDate.getFullYear() === currentYear)
+        ? selectedDate.getDate()
+        : null;
+
+      for (let day = 1; day <= lastDayDate; day++) {
+        const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const hasBooking = bookedDatesSet.has(dateStr);
+        const isSelected = (day === selectedDay);
+        
+        // Verifica se o dia está aberto para agendamento (respeita janela de abertura e folgas)
+        const isDateOpen = window.EPStore && window.EPStore.isDateAvailableForBooking
+          ? window.EPStore.isDateAvailableForBooking(dateStr)
+          : true;
+
+        if (!isDateOpen) {
+          daysGrid.innerHTML += `
+            <button type="button" class="cal-day-btn day-closed-blocked" onclick="showToast('Data indisponível: agenda fechada para este período ou folga da profissional!')" title="Agenda fechada para esta data">
+              ${day}
+            </button>
+          `;
+        } else {
+          daysGrid.innerHTML += `
+            <button type="button" class="cal-day-btn ${isSelected ? 'selected' : ''} ${hasBooking ? 'has-booking' : ''}" onclick="selectCalendarDay(${day})">
+              ${day}
+              ${hasBooking ? '<span class="cal-day-dot"></span>' : ''}
+            </button>
+          `;
+        }
       }
-      grid.innerHTML = html;
+
+      renderSelectedDayBookingsBox();
     }
 
     function changeCalendarMonth(delta) {
@@ -1232,6 +1297,8 @@ END:VCALENDAR`;
       showToast('Arquivo de calendário (.ics) baixado!');
     }
 
+    let currentServiceStoryMedia = [];
+
     function openStoryViewer(serviceId) {
       storyActiveService = serviceId;
       storyIndex = 0;
@@ -1239,54 +1306,108 @@ END:VCALENDAR`;
       if (srv) {
         selectedService = { id: srv.id, name: srv.name, price: srv.price, image: srv.image };
         const nameEl = document.getElementById('storyServiceName');
-        if (nameEl) nameEl.innerText = srv.name;
+        if (nameEl) nameEl.innerHTML = `${srv.name} &bull; <span style="font-size:0.7rem; color:rgba(255,255,255,0.75);">R$ ${parseFloat(srv.price || 150).toFixed(2).replace('.', ',')}</span>`;
+        
+        // Coleta todas as fotos e vídeos adicionados para este serviço
+        currentServiceStoryMedia = [];
+        if (Array.isArray(srv.mediaList) && srv.mediaList.length > 0) {
+          currentServiceStoryMedia = srv.mediaList;
+        } else if (Array.isArray(srv.storiesVideos) && srv.storiesVideos.length > 0) {
+          currentServiceStoryMedia = srv.storiesVideos.map(v => ({
+            type: (v.mediaUrl && v.mediaUrl.endsWith('.mp4')) ? 'video' : 'image',
+            url: v.mediaUrl || srv.image
+          }));
+        } else {
+          currentServiceStoryMedia = [{ type: 'image', url: srv.image || 'assets/images/trabalho-alongamento-chocolate.png' }];
+        }
+      } else {
+        currentServiceStoryMedia = [{ type: 'image', url: 'assets/images/trabalho-alongamento-chocolate.png' }];
       }
+
+      // Atualiza avatar do topo do story
+      const s = window.EPStore ? window.EPStore.getSalonSettings() : {};
+      const userAv = document.getElementById('storyUserAvatarImg');
+      if (userAv && s.avatarImage) userAv.src = s.avatarImage;
+
+      // Renderiza as barrinhas de progresso
+      const progRow = document.getElementById('instagramStoryProgressRow');
+      if (progRow) {
+        progRow.innerHTML = currentServiceStoryMedia.map((_, i) => `
+          <div class="instagram-progress-bar-bg">
+            <div id="instaStoryProg_${i}" class="instagram-progress-bar-fill"></div>
+          </div>
+        `).join('');
+      }
+
       document.getElementById('modalStoryViewer').classList.add('active');
       showStorySlide(0);
     }
 
     function closeStoryViewer() {
       document.getElementById('modalStoryViewer').classList.remove('active');
+      const vid = document.getElementById('storyMediaVideo');
+      if (vid) { vid.pause(); vid.style.display = 'none'; }
       if (storyTimer) clearInterval(storyTimer);
     }
 
     function showStorySlide(idx) {
-      storyIndex = idx;
-      const img = document.getElementById('storyMediaImg');
-      const srv = window.EPStore && storyActiveService ? window.EPStore.getServiceById(storyActiveService) : null;
-      if (srv && srv.image && idx === 0) {
-        img.src = srv.image;
-      } else {
-        img.src = storyImages[idx % storyImages.length];
+      if (!currentServiceStoryMedia || currentServiceStoryMedia.length === 0) return;
+      if (idx < 0) idx = 0;
+      if (idx >= currentServiceStoryMedia.length) {
+        closeStoryViewer();
+        return;
       }
 
-      [1, 2, 3].forEach(n => {
-        const bar = document.getElementById(`storyProgress${n}`);
-        if (bar) bar.style.width = (n - 1 < idx) ? '100%' : (n - 1 === idx ? '0%' : '0%');
+      storyIndex = idx;
+      const mediaItem = currentServiceStoryMedia[idx];
+      const img = document.getElementById('storyMediaImg');
+      const vid = document.getElementById('storyMediaVideo');
+
+      if (mediaItem.type === 'video' && vid) {
+        img.style.display = 'none';
+        vid.style.display = 'block';
+        vid.src = mediaItem.url;
+        vid.play().catch(() => {});
+      } else if (img) {
+        if (vid) { vid.pause(); vid.style.display = 'none'; }
+        img.style.display = 'block';
+        img.src = mediaItem.url;
+      }
+
+      // Atualiza estado das barrinhas
+      currentServiceStoryMedia.forEach((_, i) => {
+        const bar = document.getElementById(`instaStoryProg_${i}`);
+        if (bar) {
+          bar.style.width = (i < idx) ? '100%' : (i === idx ? '0%' : '0%');
+        }
       });
 
       if (storyTimer) clearInterval(storyTimer);
       let progress = 0;
       storyTimer = setInterval(() => {
         progress += 2;
-        const currentBar = document.getElementById(`storyProgress${idx + 1}`);
+        const currentBar = document.getElementById(`instaStoryProg_${idx}`);
         if (currentBar) currentBar.style.width = `${progress}%`;
         if (progress >= 100) {
           clearInterval(storyTimer);
-          if (idx < 2) showStorySlide(idx + 1);
-          else closeStoryViewer();
+          if (idx + 1 < currentServiceStoryMedia.length) {
+            showStorySlide(idx + 1);
+          } else {
+            closeStoryViewer();
+          }
         }
       }, 100);
     }
 
-    function handleStoryTap(e) {
-      const rect = e.currentTarget.getBoundingClientRect();
-      const clickX = e.clientX - rect.left;
-      if (clickX < rect.width / 2) {
-        if (storyIndex > 0) showStorySlide(storyIndex - 1);
+    function handleStoryTapPrev() {
+      if (storyIndex > 0) showStorySlide(storyIndex - 1);
+    }
+
+    function handleStoryTapNext() {
+      if (storyIndex + 1 < currentServiceStoryMedia.length) {
+        showStorySlide(storyIndex + 1);
       } else {
-        if (storyIndex < 2) showStorySlide(storyIndex + 1);
-        else closeStoryViewer();
+        closeStoryViewer();
       }
     }
 

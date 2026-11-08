@@ -197,7 +197,19 @@ const SEED_DATA = {
     bufferMinutes: 15,
     minNoticeHours: 2,
     maxFutureDays: 45,
-    retentionDays: 90
+    retentionDays: 90,
+    // Controle de abertura da grade da agenda
+    scheduleWindow: 'month', // 'week' (semana atual), 'month' (mês atual), 'year' (ano todo), '30days'
+    workWeekdays: [1, 2, 3, 4, 5, 6], // 0=Dom, 1=Seg, 2=Ter, 3=Qua, 4=Qui, 5=Sex, 6=Sáb
+    blockedDates: [], // Datas específicas bloqueadas pela administradora (ex: ['2026-11-20'])
+    themeColors: {
+      primaryColor: '#350B19',
+      secondaryColor: '#D83F79',
+      accentColor: '#8A2D4E',
+      cardBgColor: '#FBECEF',
+      pageBgColor: '#FAF4F5',
+      textColor: '#350B19'
+    }
   },
 
   theme: {
@@ -881,20 +893,38 @@ window.EPStore = {
   // ----------------------------------------------------
   // CATEGORIAS & SERVIÇOS COM STORIES
   // ----------------------------------------------------
+  // ----------------------------------------------------
+  // GESTÃO AVANÇADA DE CATEGORIAS (CRUD + NUVEM)
+  // ----------------------------------------------------
   getCategories() {
-    return JSON.parse(localStorage.getItem(STORAGE_KEYS.CATEGORIES) || '[]');
+    return JSON.parse(localStorage.getItem(STORAGE_KEYS.CATEGORIES) || JSON.stringify(SEED_DATA.categories));
   },
 
   saveCategory(cat) {
     const list = this.getCategories();
-    if (!cat.id) cat.id = 'cat_' + Date.now();
+    if (!cat.id) {
+      cat.id = 'cat_' + Date.now();
+    }
     const idx = list.findIndex(c => c.id === cat.id);
+    let saved = cat;
     if (idx >= 0) {
       list[idx] = { ...list[idx], ...cat };
+      saved = list[idx];
     } else {
+      cat.order = list.length + 1;
       list.push(cat);
+      saved = cat;
     }
     localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(list));
+    this.publishCloudSync('UPSERT_CATEGORY', saved);
+    return list;
+  },
+
+  deleteCategory(catId) {
+    let list = this.getCategories();
+    list = list.filter(c => c.id !== catId);
+    localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(list));
+    this.publishCloudSync('DELETE_CATEGORY', { id: catId });
     return list;
   },
 
@@ -949,6 +979,71 @@ window.EPStore = {
   },
 
   // Retorna slots disponíveis para a data escolhida
+  // ----------------------------------------------------
+  // REGRAS DE GRADE DE AGENDA & DIAS DISPONÍVEIS
+  // ----------------------------------------------------
+  isDateAvailableForBooking(dateStr) {
+    if (!dateStr) return false;
+    const settings = this.getSalonSettings();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const parts = dateStr.split('-');
+    if (parts.length !== 3) return false;
+    const targetDate = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+    targetDate.setHours(0, 0, 0, 0);
+
+    // Não permite datas passadas
+    if (targetDate < today) return false;
+
+    // 1. Verifica se a data está na lista de bloqueios manuais
+    const blocked = settings.blockedDates || [];
+    if (blocked.includes(dateStr)) return false;
+
+    // 2. Verifica se o dia da semana é atendido (0=Dom, 1=Seg, etc.)
+    const weekday = targetDate.getDay();
+    const allowedDays = settings.workWeekdays || [1, 2, 3, 4, 5, 6];
+    if (!allowedDays.includes(weekday)) return false;
+
+    // 3. Verifica a regra da janela de abertura da agenda
+    const windowMode = settings.scheduleWindow || 'month';
+    if (windowMode === 'week') {
+      // Apenas a semana atual (até o próximo domingo)
+      const currentDay = today.getDay();
+      const daysUntilSunday = (7 - currentDay) % 7;
+      const endOfWeek = new Date(today);
+      endOfWeek.setDate(today.getDate() + daysUntilSunday);
+      endOfWeek.setHours(23, 59, 59, 999);
+      if (targetDate > endOfWeek) return false;
+    } else if (windowMode === 'month') {
+      // Apenas o mês atual vigente
+      if (targetDate.getMonth() !== today.getMonth() || targetDate.getFullYear() !== today.getFullYear()) {
+        return false;
+      }
+    } else if (windowMode === '30days') {
+      const maxDate = new Date(today);
+      maxDate.setDate(today.getDate() + 30);
+      if (targetDate > maxDate) return false;
+    }
+    // 'year' ou 'all' permite o ano todo
+    return true;
+  },
+
+  toggleBlockedDate(dateStr) {
+    const settings = this.getSalonSettings();
+    let blocked = settings.blockedDates || [];
+    if (blocked.includes(dateStr)) {
+      blocked = blocked.filter(d => d !== dateStr);
+    } else {
+      blocked.push(dateStr);
+    }
+    return this.saveSalonSettings({ blockedDates: blocked });
+  },
+
+  updateScheduleSettings(scheduleData) {
+    return this.saveSalonSettings(scheduleData);
+  },
+
   getAvailableSlots(dateStr, durationMinutes = 60) {
     const appointments = this.getAppointments();
     const dayAppointments = appointments.filter(a => a.date === dateStr && a.status !== 'Cancelado');
@@ -1181,7 +1276,7 @@ window.EPStore = {
   // ----------------------------------------------------
   // COMPRESSÃO DE IMAGEM DO CELULAR / GALERIA (BASE64 LEVE)
   // ----------------------------------------------------
-  compressImageFile(file, maxWidth = 420, quality = 0.72) {
+  compressImageFile(file, maxWidth = 360, quality = 0.65) {
     return new Promise((resolve, reject) => {
       if (!file) return reject(new Error('Nenhum arquivo selecionado'));
       const reader = new FileReader();
@@ -1318,6 +1413,26 @@ window.EPStore = {
     } else if (action === 'DELETE_SERVICE' && payload && payload.id) {
       const list = this.getServices(false).filter(s => s.id !== payload.id);
       localStorage.setItem(STORAGE_KEYS.SERVICES, JSON.stringify(list));
+      changed = true;
+        } else if (action === 'UPSERT_CATEGORY' && payload && payload.id) {
+      const list = this.getCategories();
+      const idx = list.findIndex(c => c.id === payload.id);
+      if (idx >= 0) {
+        list[idx] = { ...list[idx], ...payload };
+      } else {
+        list.push(payload);
+      }
+      localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(list));
+      changed = true;
+    } else if (action === 'DELETE_CATEGORY' && payload && payload.id) {
+      const list = this.getCategories().filter(c => c.id !== payload.id);
+      localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(list));
+      changed = true;
+    } else if (action === 'UPDATE_THEME' && payload) {
+      const current = this.getTheme();
+      const updated = { ...current, ...payload };
+      localStorage.setItem(STORAGE_KEYS.THEME_CONFIG, JSON.stringify(updated));
+      this.applyThemeToDocument();
       changed = true;
     } else if (action === 'UPDATE_SETTINGS' && payload) {
       const current = this.getSalonSettings();

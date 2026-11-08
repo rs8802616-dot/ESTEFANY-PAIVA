@@ -1,4 +1,4 @@
-const CACHE_NAME = 'estefany-nails-v12-network-first';
+const CACHE_NAME = 'estefany-nails-v14-instagram-stories-hd';
 const STATIC_ASSETS = [
   './',
   './index.html',

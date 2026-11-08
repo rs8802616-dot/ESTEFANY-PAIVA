@@ -1378,3 +1378,168 @@ html, body {
   border: 1px dashed rgba(138, 45, 78, 0.35) !important;
   font-size: 0.75rem !important;
 }
+
+/* ========================================================
+   ESTILOS DE STATUS / STORIES NO FORMATO REAL DE INSTAGRAM (9:16)
+   ======================================================== */
+.instagram-story-modal-box {
+  position: relative;
+  width: 100%;
+  max-width: 414px;
+  aspect-ratio: 9/16;
+  max-height: 92vh;
+  display: flex;
+  flex-direction: column;
+  background: #000000;
+  border-radius: 32px;
+  overflow: hidden;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.6);
+}
+
+.instagram-story-progress-row {
+  position: absolute;
+  top: 14px;
+  left: 12px;
+  right: 12px;
+  display: flex;
+  gap: 5px;
+  z-index: 25;
+}
+
+.instagram-progress-bar-bg {
+  flex: 1;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.35);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.instagram-progress-bar-fill {
+  width: 0%;
+  height: 100%;
+  background: #FFFFFF;
+  transition: width 0.1s linear;
+}
+
+.instagram-story-header {
+  position: absolute;
+  top: 26px;
+  left: 12px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 25;
+  color: #FFFFFF;
+}
+
+.instagram-story-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.instagram-story-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 2px solid #D83F79;
+  object-fit: cover;
+}
+
+.instagram-story-user h4 {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.instagram-story-user span {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.instagram-story-media-stage {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0F172A;
+}
+
+.instagram-story-media-stage img,
+.instagram-story-media-stage video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.instagram-story-tap-areas {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  z-index: 20;
+}
+
+.instagram-story-tap-prev {
+  width: 40%;
+  height: 100%;
+  cursor: pointer;
+}
+
+.instagram-story-tap-next {
+  width: 60%;
+  height: 100%;
+  cursor: pointer;
+}
+
+.instagram-story-footer-action {
+  position: absolute;
+  bottom: 20px;
+  left: 16px;
+  right: 16px;
+  z-index: 25;
+}
+
+.btn-book-from-story {
+  width: 100%;
+  padding: 14px 20px;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(135deg, #D83F79 0%, #4D1328 100%);
+  color: #FFFFFF;
+  border: none;
+  font-size: 0.95rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: transform 0.15s ease;
+}
+
+.btn-book-from-story:hover {
+  transform: scale(1.02);
+}
+
+/* Dias de agenda fechada / folga no calendário da cliente */
+.cal-day-btn.day-closed-blocked {
+  opacity: 0.35 !important;
+  cursor: not-allowed !important;
+  background: #EDE6E8 !important;
+  color: #9C828A !important;
+  text-decoration: line-through !important;
+  border-color: transparent !important;
+}
+
+.cal-day-btn.day-closed-blocked:hover {
+  background: #EDE6E8 !important;
+  color: #9C828A !important;
+  transform: none !important;
+}
