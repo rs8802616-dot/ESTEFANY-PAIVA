@@ -856,19 +856,18 @@ window.EPStore = {
     const textOnPrim = isLightPrim ? '#18181B' : '#FFFFFF';
 
     const textOnCard = (!autoContrast && c.textColor) ? c.textColor : (isDarkCard ? '#FFFFFF' : (prim.toLowerCase() !== '#350b19' && lumPrim < 0.35 ? prim : '#27131A'));
-    const subOnCard = isDarkCard ? 'rgba(255, 255, 255, 0.78)' : (prim.toLowerCase() !== '#350b19' && lumPrim < 0.35 ? sec : '#5C2235');
-    const borderOnCard = isDarkCard ? 'rgba(255, 255, 255, 0.14)' : 'rgba(77, 19, 40, 0.12)';
+    const subOnCard = isDarkCard ? 'rgba(255, 255, 255, 0.80)' : (prim.toLowerCase() !== '#350b19' && lumPrim < 0.35 ? sec : '#5C2235');
+    const borderOnCard = isDarkCard ? 'rgba(255, 255, 255, 0.16)' : 'rgba(77, 19, 40, 0.12)';
     const innerSurfaceBg = isDarkCard ? 'rgba(255, 255, 255, 0.08)' : '#FFFFFF';
 
     const textOnPage = (!autoContrast && c.textColor) ? c.textColor : (isDarkPage ? '#FFFFFF' : (prim.toLowerCase() !== '#350b19' && lumPrim < 0.35 ? prim : '#350B19'));
-    const subOnPage = isDarkPage ? 'rgba(255, 255, 255, 0.75)' : '#6A1D39';
+    const subOnPage = isDarkPage ? 'rgba(255, 255, 255, 0.78)' : '#6A1D39';
 
     let dynStyle = document.getElementById('ep-dynamic-theme-overrides');
     if (!dynStyle) {
       dynStyle = document.createElement('style');
       dynStyle.id = 'ep-dynamic-theme-overrides';
     }
-    // Sempre move para o final do <head> para ter prioridade sobre todos os CSS externos e inline
     document.head.appendChild(dynStyle);
 
     dynStyle.textContent = `
@@ -890,9 +889,16 @@ window.EPStore = {
       .client-site-wrapper-expansive,
       .admin-site-wrapper-expansive,
       .client-main-content-expansive,
+      .admin-main-content-expansive,
       .admin-main-container {
         background-color: ${pageBg} !important;
         color: ${textOnPage} !important;
+      }
+
+      /* Onda curva inferior do cabeçalho acompanha a cor de fundo da página */
+      .client-header-wine::after,
+      .admin-header-wine::after {
+        background: ${pageBg} !important;
       }
 
       /* Títulos de seções na página (Cliente e Admin) */
@@ -901,7 +907,8 @@ window.EPStore = {
       .section-head-title-row h4,
       .booking-card-header h3,
       .booking-header-title h3,
-      .slots-section-label {
+      .slots-section-label,
+      .time-slots-label {
         color: ${textOnPage} !important;
       }
       .section-head-row a,
@@ -925,17 +932,22 @@ window.EPStore = {
       }
       .client-header-wine h1,
       .client-header-wine h2,
-      .client-header-wine span,
+      .client-header-wine span:not(.badge-bell-count),
       .client-header-wine p,
       .admin-header-wine h1,
       .admin-header-wine h2,
-      .admin-header-wine span,
+      .admin-header-wine span:not(.badge-bell-count),
       .admin-header-wine p {
         color: ${textOnPrim} !important;
       }
+      .admin-desktop-nav-btn.active,
+      .client-desktop-nav a.active {
+        background: ${cardBg} !important;
+        color: ${textOnCard} !important;
+      }
 
       /* Botões principais e pílulas ativas com contraste automático */
-      .btn-promo-wine-pill,
+      .btn-promo-wine-pill:not([style*="#25D366"]),
       .btn-confirm-booking-wine,
       .btn-admin-bottom-action,
       .category-tab-pill.active,
@@ -950,8 +962,8 @@ window.EPStore = {
         color: ${textOnPrim} !important;
         border-color: ${sec} !important;
       }
-      .btn-promo-wine-pill span,
-      .btn-promo-wine-pill i,
+      .btn-promo-wine-pill:not([style*="#25D366"]) span,
+      .btn-promo-wine-pill:not([style*="#25D366"]) i,
       .btn-confirm-booking-wine span,
       .btn-confirm-booking-wine i,
       .nav-item-wine.active span,
@@ -967,13 +979,18 @@ window.EPStore = {
       .promo-highlight-card,
       .next-booking-banner,
       .service-card-lux,
+      .booking-clean-card,
       .booking-unified-card,
       .booking-section-wrapper,
       .card-list-item,
+      .appointment-item-row,
+      .slot-client-row,
       .kpi-pink-card,
+      .report-kpi-box,
       .admin-sub-card,
       .admin-chart-card,
       .admin-action-btn-squircle,
+      .category-interactive-item,
       .client-modal-card,
       .admin-modal-card {
         background: ${cardBg} !important;
@@ -981,7 +998,7 @@ window.EPStore = {
         border-color: ${borderOnCard} !important;
       }
 
-      /* Adaptação automática de TODOS os nomes, títulos e valores dentro dos cards */
+      /* Adaptação automática de TODOS os nomes, títulos e valores dentro dos cards (inclusive inline styles!) */
       .quick-action-card span,
       .card-action-squircle span,
       .promo-text-side h3,
@@ -993,12 +1010,21 @@ window.EPStore = {
       .service-selected-banner h5,
       .calendar-month-header h4,
       .form-input-box label,
+      .card-list-item h4,
       .card-list-item h5,
       .card-list-item strong,
+      .appointment-item-row h5,
       .appointment-info-col h5,
+      .slot-client-info h5,
       .kpi-pink-card .kpi-num,
+      .report-kpi-val,
+      .admin-sub-card h2,
+      .admin-sub-card h3,
       .admin-sub-card h4,
+      .admin-sub-card h5,
+      .admin-sub-card strong,
       .admin-chart-card h3,
+      .admin-chart-card h4,
       .admin-chart-card strong,
       .donut-legend-item strong,
       .admin-action-btn-squircle span,
@@ -1006,9 +1032,15 @@ window.EPStore = {
       .client-modal-card h4,
       .client-modal-card h5,
       .client-modal-card strong,
+      .client-modal-card label,
       .admin-modal-card h3,
       .admin-modal-card h4,
-      .admin-modal-card label {
+      .admin-modal-card h5,
+      .admin-modal-card strong,
+      .admin-modal-card label,
+      #listaMeusAgendamentosConteudo h5,
+      #clientNotificationsDynamicList strong,
+      #notificacoesList strong {
         color: ${textOnCard} !important;
       }
 
@@ -1016,19 +1048,37 @@ window.EPStore = {
       .booking-banner-info p,
       .booking-info-mid span,
       .booking-info-mid i,
+      .booking-prof-meta span,
+      .booking-time-meta span,
       .service-desc-snippet,
       .selected-service-info p,
       .service-selected-banner p,
       .card-list-item p,
-      .card-list-item span:not(.badge-status-pill),
+      .card-list-item span:not(.badge-status-pill):not(.filter-pill),
+      .appointment-item-row p,
       .appointment-info-col p,
+      .slot-client-info p,
       .kpi-pink-card .kpi-lbl,
+      .report-kpi-label,
+      .report-kpi-sub,
+      .admin-sub-card p,
+      .admin-sub-card span:not(.badge-status-pill):not(.bullet),
       .admin-chart-card p,
+      .admin-chart-card span:not(.badge-status-pill),
       .donut-legend-item span,
       .calendar-weekdays-row span,
       .client-modal-card p,
-      .admin-modal-card p {
+      .admin-modal-card p,
+      #listaMeusAgendamentosConteudo p,
+      #clientNotificationsDynamicList p,
+      #notificacoesList p {
         color: ${subOnCard} !important;
+      }
+
+      /* Avatar de iniciais das clientes nos cards */
+      .client-avatar-badge {
+        background: ${prim} !important;
+        color: ${textOnPrim} !important;
       }
 
       /* Ícones de destaque acompanham a cor secundária ou contraste */
@@ -1037,11 +1087,13 @@ window.EPStore = {
       .kpi-pink-card > i,
       .admin-action-btn-squircle i,
       .section-head-row h3 i,
-      .section-head-title-row h3 i {
+      .section-head-title-row h3 i,
+      .btn-cal-nav,
+      .btn-cal-nav i {
         color: ${isDarkCard ? sec : prim} !important;
       }
 
-      /* Sub-caixas internas (calendário, inputs, resumos) */
+      /* Sub-caixas internas (calendário, inputs, resumos, blocos internos) */
       .calendar-box-container,
       .calendar-card-inline,
       .selected-service-summary-bar,
@@ -1051,7 +1103,11 @@ window.EPStore = {
       .search-input-box,
       .input-icon-field,
       .form-input-box input,
-      .form-input-box select {
+      .form-input-box select,
+      #repWeeklyBreakdownCards > div,
+      #listaMeusAgendamentosConteudo > div,
+      #clientNotificationsDynamicList > div,
+      #cliDetHistoryList > div {
         background: ${innerSurfaceBg} !important;
         color: ${textOnCard} !important;
         border-color: ${borderOnCard} !important;
@@ -1063,7 +1119,9 @@ window.EPStore = {
       .booking-date-block .date-day-week,
       .booking-date-block .date-month-name,
       .input-icon-field input,
-      .search-input-box input {
+      .search-input-box input,
+      .form-input-box input,
+      .form-input-box select {
         color: ${textOnCard} !important;
       }
 
@@ -1075,8 +1133,9 @@ window.EPStore = {
       .btn-details-soft-pill,
       .btn-details-soft-pill span,
       .btn-details-soft-pill i,
-      .cal-day-btn:not(.selected),
-      .cal-day-cell:not(.selected) {
+      .btn-details-pink-pill,
+      .cal-day-btn:not(.selected):not(.day-closed-blocked),
+      .cal-day-cell:not(.selected):not(.disabled) {
         background: ${innerSurfaceBg} !important;
         color: ${textOnCard} !important;
         border-color: ${borderOnCard} !important;
@@ -1647,12 +1706,14 @@ window.EPStore = {
     return null;
   },
 
-  applyIncomingSyncEvent(msgObj, notifyIfNewBooking = false) {
+  applyIncomingSyncEvent(msgObj, notifyIfNewBooking = false, options = {}) {
     if (!msgObj || !msgObj.action) return false;
     if (msgObj.syncId && this._processedSyncIds.has(msgObj.syncId)) return false;
     if (msgObj.syncId) this._processedSyncIds.add(msgObj.syncId);
 
+    const deferRender = !!options.deferRender;
     let changed = false;
+    let themeOrSettingsChanged = false;
     const { action, payload } = msgObj;
 
     if (action === 'UPSERT_APPOINTMENT' && payload && payload.id) {
@@ -1705,7 +1766,7 @@ window.EPStore = {
       const list = this.getServices(false).filter(s => s.id !== payload.id);
       localStorage.setItem(STORAGE_KEYS.SERVICES, JSON.stringify(list));
       changed = true;
-        } else if (action === 'UPSERT_CATEGORY' && payload && payload.id) {
+    } else if (action === 'UPSERT_CATEGORY' && payload && payload.id) {
       const list = this.getCategories();
       const idx = list.findIndex(c => c.id === payload.id);
       if (idx >= 0) {
@@ -1726,7 +1787,7 @@ window.EPStore = {
       const curSet = this.getSalonSettings();
       curSet.themeColors = { ...(curSet.themeColors || {}), ...payload };
       localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(curSet));
-      this.applyThemeToDocument();
+      themeOrSettingsChanged = true;
       changed = true;
     } else if (action === 'UPDATE_SETTINGS' && payload) {
       const current = this.getSalonSettings();
@@ -1736,11 +1797,14 @@ window.EPStore = {
         const curTheme = this.getTheme();
         localStorage.setItem(STORAGE_KEYS.THEME_CONFIG, JSON.stringify({ ...curTheme, ...payload.themeColors }));
       }
-      this.applyThemeToDocument();
+      themeOrSettingsChanged = true;
       changed = true;
     }
 
-    if (changed) {
+    if (changed && !deferRender) {
+      if (themeOrSettingsChanged) {
+        this.applyThemeToDocument();
+      }
       this.emitStoreUpdate({ action, payload, fromRemote: true });
     }
     return changed;
@@ -1759,10 +1823,15 @@ window.EPStore = {
         try {
           const envelope = JSON.parse(line);
           const msgObj = await this.parseEnvelopeToSyncMessage(envelope);
-          if (msgObj && this.applyIncomingSyncEvent(msgObj, notifyNew)) {
+          // deferRender: true evita que histórico de 48h pisque várias cores antigas uma por uma na tela!
+          if (msgObj && this.applyIncomingSyncEvent(msgObj, notifyNew, { deferRender: true })) {
             anyChanged = true;
           }
         } catch (innerErr) {}
+      }
+      if (anyChanged) {
+        this.applyThemeToDocument();
+        this.emitStoreUpdate({ action: 'BATCH_CLOUD_SYNC', fromRemote: true });
       }
       return anyChanged;
     } catch (e) {
@@ -1792,10 +1861,10 @@ window.EPStore = {
       }
     } catch (e) {}
 
-    // 3. SSE em tempo real da nuvem (Celular <-> PC instantâneo)
+    // 3. SSE em tempo real da nuvem (Apenas eventos novos a partir de agora - since=now evita replay de cores antigas!)
     try {
       if ('EventSource' in window) {
-        this._sseSource = new EventSource(`https://ntfy.sh/${this.CLOUD_TOPIC}/sse`);
+        this._sseSource = new EventSource(`https://ntfy.sh/${this.CLOUD_TOPIC}/sse?since=now`);
         this._sseSource.onmessage = async (ev) => {
           try {
             const envelope = JSON.parse(ev.data);
