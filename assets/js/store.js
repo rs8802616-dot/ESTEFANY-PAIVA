@@ -821,6 +821,17 @@ window.EPStore = {
     return updated;
   },
 
+  // Utilitário de luminância relativa para contraste inteligente de letras e títulos
+  getLuminance(hex) {
+    const clean = String(hex || '#FFFFFF').replace('#', '');
+    const full = clean.length === 3 ? clean.split('').map(c => c + c).join('') : clean;
+    const r = parseInt(full.slice(0, 2) || 'ff', 16) / 255;
+    const g = parseInt(full.slice(2, 4) || 'ff', 16) / 255;
+    const b = parseInt(full.slice(4, 6) || 'ff', 16) / 255;
+    const a = [r, g, b].map(v => (v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4)));
+    return 0.2126 * a[0] + 0.7152 * a[1] + 0.0722 * a[2];
+  },
+
   applyThemeToDocument() {
     const theme = this.getTheme();
     const settings = this.getSalonSettings ? this.getSalonSettings() : {};
@@ -832,30 +843,213 @@ window.EPStore = {
     const cardBg = c.cardBgColor || '#FBECEF';
     const pageBg = c.pageBgColor || '#FAF4F5';
 
+    // Calcula luminância para adaptar automaticamente as cores de todos os textos, nomes e ícones
+    const lumPrim = this.getLuminance(prim);
+    const lumCard = this.getLuminance(cardBg);
+    const lumPage = this.getLuminance(pageBg);
+
+    const isDarkCard = lumCard < 0.42;
+    const isDarkPage = lumPage < 0.42;
+    const isLightPrim = lumPrim > 0.52;
+
+    // Se a usuária escolheu uma cor de texto manual e não ativou contraste automático, respeita; caso contrário, adapta automaticamente
+    const autoContrast = c.autoContrast !== false;
+    const textOnPrim = isLightPrim ? '#18181B' : '#FFFFFF';
+    const subOnPrim = isLightPrim ? 'rgba(24, 24, 27, 0.78)' : 'rgba(255, 255, 255, 0.85)';
+
+    const textOnCard = (!autoContrast && c.textColor) ? c.textColor : (isDarkCard ? '#FFFFFF' : (prim !== '#350B19' && lumPrim < 0.35 ? prim : '#27131A'));
+    const subOnCard = isDarkCard ? 'rgba(255, 255, 255, 0.78)' : (prim !== '#350B19' && lumPrim < 0.35 ? sec : '#5C2235');
+    const borderOnCard = isDarkCard ? 'rgba(255, 255, 255, 0.14)' : 'rgba(77, 19, 40, 0.12)';
+    const innerSurfaceBg = isDarkCard ? 'rgba(255, 255, 255, 0.08)' : '#FFFFFF';
+
+    const textOnPage = (!autoContrast && c.textColor) ? c.textColor : (isDarkPage ? '#FFFFFF' : (prim !== '#350B19' && lumPrim < 0.35 ? prim : '#350B19'));
+    const subOnPage = isDarkPage ? 'rgba(255, 255, 255, 0.75)' : '#6A1D39';
+
     let dynStyle = document.getElementById('ep-dynamic-theme-overrides');
     if (!dynStyle) {
       dynStyle = document.createElement('style');
       dynStyle.id = 'ep-dynamic-theme-overrides';
       document.head.appendChild(dynStyle);
     }
-    if (prim !== '#350B19' || sec !== '#D83F79' || cardBg !== '#FBECEF' || pageBg !== '#FAF4F5') {
+
+    if (prim !== '#350B19' || sec !== '#D83F79' || cardBg !== '#FBECEF' || pageBg !== '#FAF4F5' || c.textColor) {
       dynStyle.textContent = `
         :root {
           --color-rose: ${prim} !important;
           --color-pink-accent: ${sec} !important;
+          --theme-prim: ${prim};
+          --theme-sec: ${sec};
+          --theme-card-bg: ${cardBg};
+          --theme-page-bg: ${pageBg};
+          --theme-text-card: ${textOnCard};
+          --theme-sub-card: ${subOnCard};
+          --theme-text-page: ${textOnPage};
         }
-        body, .client-site-wrapper-expansive, .admin-site-wrapper-expansive {
+
+        /* Fundo geral da página e textos externos */
+        body,
+        .site-wrapper-expansive,
+        .client-site-wrapper-expansive,
+        .admin-site-wrapper-expansive,
+        .client-main-content-expansive,
+        .admin-main-container {
           background-color: ${pageBg} !important;
+          color: ${textOnPage} !important;
         }
-        .wine-header-curved-expansive, .admin-header-wine, .bottom-nav-wine-client, .bottom-nav-wine-admin {
-          background: linear-gradient(145deg, ${prim} 0%, ${sec} 140%) !important;
+
+        /* Títulos de seções na página */
+        .section-head-row h3,
+        .section-head-title-row h3,
+        .section-head-title-row h4,
+        .booking-card-header h3 {
+          color: ${textOnPage} !important;
         }
-        .btn-promo-wine-pill, .btn-confirm-booking-wine, .btn-select-service-pill, .btn-admin-bottom-action, .category-tab-pill.active, .filter-pill.active, .slot-chip-btn.active, .cal-day-btn.selected {
+        .section-head-row a,
+        .section-head-title-row p,
+        .booking-card-header p,
+        .view-all-link {
+          color: ${subOnPage} !important;
+        }
+
+        /* Cabeçalho superior e barras de navegação inferiores */
+        .client-header-wine,
+        .wine-header-curved-expansive,
+        .admin-header-wine,
+        .bottom-nav-wine-client,
+        .bottom-nav-wine-admin {
+          background: linear-gradient(145deg, ${prim} 0%, ${sec} 145%) !important;
+          color: ${textOnPrim} !important;
+        }
+        .client-header-wine h1,
+        .client-header-wine h2,
+        .client-header-wine span,
+        .client-header-wine p,
+        .admin-header-wine h1,
+        .admin-header-wine h2,
+        .admin-header-wine span,
+        .admin-header-wine p {
+          color: ${textOnPrim} !important;
+        }
+
+        /* Botões principais e pílulas ativas com contraste automático */
+        .btn-promo-wine-pill,
+        .btn-confirm-booking-wine,
+        .btn-admin-bottom-action,
+        .category-tab-pill.active,
+        .filter-pill.active,
+        .slot-chip-btn.active,
+        .cal-day-btn.selected,
+        .cal-day-cell.selected,
+        .nav-tab-btn.active,
+        .admin-nav-tab-btn.active {
           background: ${prim} !important;
-          color: #FFFFFF !important;
+          color: ${textOnPrim} !important;
+          border-color: ${sec} !important;
         }
-        .card-action-squircle, .next-booking-banner, .service-card-lux, .card-list-item, .kpi-pink-card, .admin-sub-card, .admin-chart-card {
-          background-color: ${cardBg} !important;
+        .btn-promo-wine-pill span,
+        .btn-promo-wine-pill i,
+        .btn-confirm-booking-wine i {
+          color: ${textOnPrim} !important;
+        }
+
+        /* Superfície de todos os cards (Cliente e Admin) */
+        .quick-action-card,
+        .card-action-squircle,
+        .promo-highlight-card,
+        .next-booking-banner,
+        .service-card-lux,
+        .booking-unified-card,
+        .card-list-item,
+        .kpi-pink-card,
+        .admin-sub-card,
+        .admin-chart-card,
+        .admin-action-btn-squircle,
+        .client-modal-card,
+        .admin-modal-card {
+          background: ${cardBg} !important;
+          color: ${textOnCard} !important;
+          border-color: ${borderOnCard} !important;
+        }
+
+        /* Adaptação automática de TODOS os nomes, títulos e valores dentro dos cards */
+        .quick-action-card span,
+        .promo-text-side h3,
+        .booking-banner-info h4,
+        .service-details-box h4,
+        .service-price-val,
+        .selected-service-info h4,
+        .calendar-month-header h4,
+        .card-list-item h5,
+        .card-list-item strong,
+        .appointment-info-col h5,
+        .kpi-pink-card .kpi-num,
+        .admin-sub-card h4,
+        .admin-chart-card h3,
+        .admin-chart-card strong,
+        .donut-legend-item strong,
+        .admin-action-btn-squircle span,
+        .client-modal-card h3,
+        .client-modal-card h4,
+        .admin-modal-card h3,
+        .admin-modal-card h4,
+        .admin-modal-card label {
+          color: ${textOnCard} !important;
+        }
+
+        /* Adaptação automática de descrições, subtítulos e legendas nos cards */
+        .booking-banner-info p,
+        .service-desc-snippet,
+        .selected-service-info p,
+        .card-list-item p,
+        .card-list-item span:not(.badge-status-pill),
+        .appointment-info-col p,
+        .kpi-pink-card .kpi-lbl,
+        .admin-chart-card p,
+        .donut-legend-item span,
+        .calendar-weekdays-row span,
+        .client-modal-card p,
+        .admin-modal-card p {
+          color: ${subOnCard} !important;
+        }
+
+        /* Ícones de destaque acompanham a cor secundária ou contraste */
+        .quick-action-icon-circle i,
+        .kpi-pink-card > i,
+        .admin-action-btn-squircle i,
+        .section-head-row h3 i,
+        .section-head-title-row h3 i {
+          color: ${isDarkCard ? sec : prim} !important;
+        }
+
+        /* Sub-caixas internas (calendário, inputs, resumos) */
+        .calendar-box-container,
+        .selected-service-summary-bar,
+        .booking-date-badge,
+        .search-input-box,
+        .input-icon-field {
+          background: ${innerSurfaceBg} !important;
+          color: ${textOnCard} !important;
+          border-color: ${borderOnCard} !important;
+        }
+        .booking-date-badge .day-num,
+        .booking-date-badge .day-week,
+        .booking-date-badge .day-month,
+        .input-icon-field input,
+        .search-input-box input {
+          color: ${textOnCard} !important;
+        }
+
+        /* Botões secundários e pílulas não-ativas */
+        .category-tab-pill:not(.active),
+        .filter-pill:not(.active),
+        .slot-chip-btn:not(.active),
+        .btn-select-service-pill,
+        .btn-details-soft-pill,
+        .cal-day-btn:not(.selected),
+        .cal-day-cell:not(.selected) {
+          background: ${innerSurfaceBg} !important;
+          color: ${textOnCard} !important;
+          border-color: ${borderOnCard} !important;
         }
       `;
     } else {
@@ -1043,27 +1237,42 @@ window.EPStore = {
     const allowedDays = settings.workWeekdays || [1, 2, 3, 4, 5, 6];
     if (!allowedDays.includes(weekday)) return false;
 
+    // 2.5 Verifica se o mês específico está liberado pela administradora (0=Jan .. 11=Dez)
+    const targetMonth = targetDate.getMonth();
+    if (Array.isArray(settings.allowedMonths) && settings.allowedMonths.length > 0) {
+      if (!settings.allowedMonths.includes(targetMonth)) return false;
+    }
+
     // 3. Verifica a regra da janela de abertura da agenda
     const windowMode = settings.scheduleWindow || 'month';
     if (windowMode === 'week') {
-      // Apenas a semana atual (até o próximo domingo)
+      // Apenas a semana atual (até o próximo domingo; quando a semana acaba, avança automaticamente para a próxima)
       const currentDay = today.getDay();
       const daysUntilSunday = (7 - currentDay) % 7;
       const endOfWeek = new Date(today);
-      endOfWeek.setDate(today.getDate() + daysUntilSunday);
+      endOfWeek.setDate(today.getDate() + (daysUntilSunday === 0 ? 7 : daysUntilSunday));
       endOfWeek.setHours(23, 59, 59, 999);
       if (targetDate > endOfWeek) return false;
     } else if (windowMode === 'month') {
-      // Apenas o mês atual vigente
-      if (targetDate.getMonth() !== today.getMonth() || targetDate.getFullYear() !== today.getFullYear()) {
+      // Apenas o mês atual vigente (se faltar menos de 2 dias para acabar o mês, abre também o próximo mês automaticamente)
+      const daysInCurrMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+      const isNearMonthEnd = (daysInCurrMonth - today.getDate()) <= 2;
+      const sameMonth = (targetDate.getMonth() === today.getMonth() && targetDate.getFullYear() === today.getFullYear());
+      const nextMonthDate = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+      const isNextMonth = isNearMonthEnd && (targetDate.getMonth() === nextMonthDate.getMonth() && targetDate.getFullYear() === nextMonthDate.getFullYear());
+      if (!sameMonth && !isNextMonth) {
         return false;
       }
     } else if (windowMode === '30days') {
       const maxDate = new Date(today);
       maxDate.setDate(today.getDate() + 30);
       if (targetDate > maxDate) return false;
+    } else if (windowMode === 'custom_months') {
+      // Respeita estritamente os meses marcados em settings.allowedMonths
+      const allowedM = settings.allowedMonths || [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+      if (!allowedM.includes(targetMonth)) return false;
     }
-    // 'year' ou 'all' permite o ano todo
+    // 'year' ou 'all' permite o ano todo (respeitando allowedMonths se configurado)
     return true;
   },
 
@@ -1312,9 +1521,9 @@ window.EPStore = {
   },
 
   // ----------------------------------------------------
-  // COMPRESSÃO DE IMAGEM DO CELULAR / GALERIA (BASE64 LEVE)
+  // COMPRESSÃO DE IMAGEM DO CELULAR / GALERIA (ALTA NITIDEZ)
   // ----------------------------------------------------
-  compressImageFile(file, maxWidth = 360, quality = 0.65) {
+  compressImageFile(file, maxWidth = 650, quality = 0.78) {
     return new Promise((resolve, reject) => {
       if (!file) return reject(new Error('Nenhum arquivo selecionado'));
       const reader = new FileReader();
@@ -1378,13 +1587,13 @@ window.EPStore = {
 
     // 2. Nuvem (Sincroniza Celular <-> Computador / Tablet instantaneamente)
     try {
-      let safePayload = payload;
-      // Se a imagem for base64 muito grande (> 45KB), mantém na nuvem versão compacta para caber no limite de pacote
       const serialized = JSON.stringify(msgObj);
-      if (serialized.length < 60000) {
+      if (serialized.length < 180000) {
         await fetch(`https://ntfy.sh/${this.CLOUD_TOPIC}`, {
           method: 'POST',
-          body: serialized
+          headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+          body: serialized,
+          cache: 'no-store'
         });
       }
     } catch (err) {
@@ -1487,7 +1696,9 @@ window.EPStore = {
 
   async pullCloudEvents(notifyNew = false) {
     try {
-      const resp = await fetch(`https://ntfy.sh/${this.CLOUD_TOPIC}/json?poll=1&since=48h`);
+      const resp = await fetch(`https://ntfy.sh/${this.CLOUD_TOPIC}/json?poll=1&since=48h&_t=${Date.now()}`, {
+        cache: 'no-store'
+      });
       if (!resp.ok) return false;
       const text = await resp.text();
       const lines = text.split('\n').filter(Boolean);

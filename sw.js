@@ -1,4 +1,4 @@
-const CACHE_NAME = 'estefany-nails-v15-zero-errors';
+const CACHE_NAME = 'estefany-nails-v16-full-complete';
 const STATIC_ASSETS = [
   './',
   './index.html',

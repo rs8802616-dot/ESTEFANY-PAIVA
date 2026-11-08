@@ -181,48 +181,47 @@
           </div>
         </div>
 
-        <!-- Linha 2 do Dashboard: Gráfico de Crescimento + Donut de Serviços -->
+        <!-- Linha 2 do Dashboard: Balanço de Crescimento & Meta Mensal + Donut de Serviços -->
         <div class="admin-dashboard-split-row">
-          <!-- Card "Seu crescimento" (Gráfico de Linha em Curva SVG) -->
+          <!-- Card "Seu Crescimento & Meta deste Mês" (Substitui o gráfico de linha antigo por barras e indicadores reais) -->
           <div class="admin-chart-card">
             <div class="chart-header-row">
-              <h3><i class="fa-solid fa-chart-line"></i> Seu crescimento</h3>
-              <div class="period-select-pill" style="background:#FFF; color:#4D1328; border-color:rgba(77,19,40,0.15);">
-                <span>Últimos 4 meses</span>
-                <i class="fa-solid fa-chevron-down" style="font-size:0.65rem;"></i>
+              <div>
+                <h3><i class="fa-solid fa-award" style="color:#C59B6D;"></i> Crescimento & Meta deste Mês</h3>
+                <p style="font-size:0.75rem; color:#8A2D4E; margin-top:2px;">Acompanhamento semanal de atendimentos e faturamento</p>
+              </div>
+              <button type="button" class="filter-pill" onclick="switchAdminTab('relatorios')" style="background:#FFF; color:#4D1328; font-size:0.74rem; padding:5px 12px;">
+                Ver Relatório Completo &gt;
+              </button>
+            </div>
+
+            <!-- Progresso da Meta Mensal -->
+            <div style="background:#FFFFFF; border:1px solid rgba(77,19,40,0.08); border-radius:16px; padding:12px 14px; margin:12px 0;">
+              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-bottom:6px;">
+                <span style="font-size:0.82rem; font-weight:700; color:#350B19;">
+                  <i class="fa-solid fa-trophy" style="color:#C59B6D;"></i> <span id="dashGoalSummaryText">Meta Mensal: R$ 8.915 de R$ 10.000 (89%)</span>
+                </span>
+                <span style="font-size:0.72rem; font-weight:700; background:#DDF2E1; color:#226E3A; padding:3px 10px; border-radius:20px;">
+                  <i class="fa-solid fa-arrow-trend-up"></i> +18% vs mês anterior
+                </span>
+              </div>
+              <div style="width:100%; height:9px; background:#F3E5E8; border-radius:10px; overflow:hidden;">
+                <div id="dashGoalProgressBar" style="width:89%; height:100%; background:linear-gradient(90deg, #4D1328 0%, #D83F79 100%); border-radius:10px;"></div>
               </div>
             </div>
 
-            <div style="position:relative; width:100%; height:160px; margin-top:14px;">
-              <div class="chart-badge-highlight">
-                R$ 3.420
+            <!-- Resumo das Semanas do Mês -->
+            <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:8px;">
+              <div style="background:#FFFFFF; border:1px solid rgba(77,19,40,0.08); border-radius:12px; padding:9px 12px;">
+                <span style="font-size:0.7rem; color:#6A1D39; display:block;">1ª e 2ª Semana</span>
+                <strong style="font-size:0.92rem; color:#350B19;">R$ 4.020,00</strong>
+                <span style="font-size:0.68rem; color:#226E3A; display:block; font-weight:700;">28 atendimentos</span>
               </div>
-              <!-- Gráfico SVG com curva suave -->
-              <svg viewBox="0 0 340 130" style="width:100%; height:100%; overflow:visible;">
-                <defs>
-                  <linearGradient id="adminChartGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stop-color="#D83F79" stop-opacity="0.35"/>
-                    <stop offset="100%" stop-color="#FBECEF" stop-opacity="0.02"/>
-                  </linearGradient>
-                </defs>
-                <line x1="20" y1="105" x2="320" y2="105" stroke="rgba(77,19,40,0.08)" stroke-dasharray="3,3"/>
-                <line x1="20" y1="75" x2="320" y2="75" stroke="rgba(77,19,40,0.08)" stroke-dasharray="3,3"/>
-                <line x1="20" y1="45" x2="320" y2="45" stroke="rgba(77,19,40,0.08)" stroke-dasharray="3,3"/>
-                <line x1="20" y1="15" x2="320" y2="15" stroke="rgba(77,19,40,0.08)" stroke-dasharray="3,3"/>
-
-                <path d="M 30 105 C 80 95, 120 75, 170 72 C 220 70, 260 65, 310 40 L 310 120 L 30 120 Z" fill="url(#adminChartGrad)"/>
-                <path d="M 30 105 C 80 95, 120 75, 170 72 C 220 70, 260 65, 310 40" fill="none" stroke="#8A2D4E" stroke-width="3" stroke-linecap="round"/>
-
-                <circle cx="30" cy="105" r="4.5" fill="#4D1328"/>
-                <circle cx="120" cy="75" r="4.5" fill="#4D1328"/>
-                <circle cx="210" cy="70" r="4.5" fill="#4D1328"/>
-                <circle cx="310" cy="40" r="5.5" fill="#8A2D4E" stroke="#FFFFFF" stroke-width="2"/>
-
-                <text x="24" y="128" font-size="10" font-weight="600" fill="#6A1D39">Jul</text>
-                <text x="112" y="128" font-size="10" font-weight="600" fill="#6A1D39">Ago</text>
-                <text x="204" y="128" font-size="10" font-weight="600" fill="#6A1D39">Set</text>
-                <text x="302" y="128" font-size="10" font-weight="600" fill="#6A1D39">Out</text>
-              </svg>
+              <div style="background:#FFFFFF; border:1px solid rgba(216,63,121,0.3); border-radius:12px; padding:9px 12px;">
+                <span style="font-size:0.7rem; color:#6A1D39; display:block;">3ª e 4ª Semana (Atual)</span>
+                <strong style="font-size:0.92rem; color:#4D1328;" id="dashCurrentWeeksVal">R$ 4.895,00</strong>
+                <span style="font-size:0.68rem; color:#D83F79; display:block; font-weight:700;">Ritmo recorde 🔥</span>
+              </div>
             </div>
           </div>
 
@@ -331,9 +330,17 @@
             </h3>
             <p style="font-size:0.78rem; color:#8A2D4E;">Agendamentos feitos pela cliente no celular sobem automaticamente para este calendário.</p>
           </div>
-          <button class="btn-open-client-pill" onclick="openModalNovoAgendamento()" style="background:#4D1328; color:#FFF; cursor:pointer; border:none;">
-            <i class="fa-solid fa-plus"></i> Novo Agendamento
-          </button>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="filter-pill" onclick="openModalConfigAgendaGrade()" style="background:#ECFDF5; color:#059669; border:1px solid #A7F3D0; cursor:pointer; font-weight:700;">
+              <i class="fa-solid fa-calendar-days"></i> Abrir Agenda / Folgas
+            </button>
+            <button class="filter-pill" onclick="openModalConfigHorarios()" style="background:#FBECEF; color:#4D1328; border:1px solid rgba(77,19,40,0.15); cursor:pointer; font-weight:700;">
+              <i class="fa-regular fa-clock"></i> Horários
+            </button>
+            <button class="btn-open-client-pill" onclick="openModalNovoAgendamento()" style="background:#4D1328; color:#FFF; cursor:pointer; border:none;">
+              <i class="fa-solid fa-plus"></i> Novo Agendamento
+            </button>
+          </div>
         </div>
 
         <!-- Calendário Visual Interativo da Administradora -->
@@ -1055,7 +1062,12 @@
         </div>
 
         <div class="form-input-box" style="margin-bottom:12px;">
-          <label style="display:block; font-size:0.8rem; font-weight:600; color:#4D1328; margin-bottom:4px;">Categoria *</label>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+            <label style="font-size:0.8rem; font-weight:600; color:#4D1328;">Categoria *</label>
+            <button type="button" onclick="openModalGerenciarCategorias()" style="background:none; border:none; color:#D83F79; font-size:0.75rem; font-weight:700; cursor:pointer; text-decoration:underline;">
+              + Criar / Editar Categorias
+            </button>
+          </div>
           <select id="selectServicoCategoria" required style="width:100%; padding:10px 14px; border-radius:12px; border:1px solid rgba(77,19,40,0.18); background:#FFF;">
             <option value="cat_alongamento">Alongamento em Gel</option>
             <option value="cat_esmalte">Esmaltação em Gel</option>
@@ -1079,13 +1091,19 @@
             <span style="font-size:0.7rem; color:#8A2D4E;">Quantas fotos ou vídeos quiser</span>
           </div>
 
-          <div style="display:flex; gap:8px; margin-bottom:10px;">
-            <label style="flex:1; display:flex; align-items:center; justify-content:center; gap:6px; padding:9px 12px; background:#FBECEF; border:1px solid rgba(77,19,40,0.15); border-radius:10px; font-size:0.75rem; font-weight:700; color:#4D1328; cursor:pointer;">
-              <i class="fa-solid fa-images"></i> + Fotos da Galeria
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
+            <label style="display:flex; align-items:center; justify-content:center; gap:6px; padding:9px 10px; background:#FBECEF; border:1px solid rgba(77,19,40,0.15); border-radius:10px; font-size:0.74rem; font-weight:700; color:#4D1328; cursor:pointer;">
+              <i class="fa-solid fa-images"></i> + Fotos (Quantas quiser)
               <input type="file" multiple accept="image/*" style="display:none;" onchange="handleAddServiceMultiplePhotos(this)">
             </label>
-            <button type="button" onclick="handleAddServiceVideoPrompt()" style="flex:1; display:flex; align-items:center; justify-content:center; gap:6px; padding:9px 12px; background:#FBECEF; border:1px solid rgba(77,19,40,0.15); border-radius:10px; font-size:0.75rem; font-weight:700; color:#4D1328; cursor:pointer;">
-              <i class="fa-solid fa-video"></i> + Vídeo (MP4/Link)
+            <label style="display:flex; align-items:center; justify-content:center; gap:6px; padding:9px 10px; background:#FBECEF; border:1px solid rgba(77,19,40,0.15); border-radius:10px; font-size:0.74rem; font-weight:700; color:#4D1328; cursor:pointer;">
+              <i class="fa-solid fa-film"></i> + Vídeo do Celular
+              <input type="file" multiple accept="video/*" style="display:none;" onchange="handleAddServiceVideoFile(this)">
+            </label>
+          </div>
+          <div style="margin-bottom:10px;">
+            <button type="button" onclick="handleAddServiceVideoPrompt()" style="width:100%; padding:7px 10px; background:#FFF; border:1px dashed rgba(77,19,40,0.22); border-radius:10px; font-size:0.72rem; font-weight:600; color:#6A1D39; cursor:pointer;">
+              <i class="fa-solid fa-link"></i> Ou colar link de vídeo externo (MP4 / Instagram)
             </button>
           </div>
 
@@ -1448,34 +1466,61 @@
     </div>
   </div>
 
-  <!-- MODAL: CONTROLE DE GRADE DA AGENDA & ABERTURA (SEMANA, MÊS, FOLGAS) -->
+  <!-- MODAL: CONTROLE DE GRADE DA AGENDA & ABERTURA (SEMANA, MÊS, MESES DO ANO, FOLGAS) -->
   <div class="admin-modal-overlay" id="modalConfigAgendaGrade">
-    <div class="admin-modal-card">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+    <div class="admin-modal-card" style="max-height:92vh; overflow-y:auto;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
         <h3 style="font-family:var(--font-serif); font-size:1.3rem; color:#350B19;">
           <i class="fa-regular fa-calendar-check" style="color:#059669;"></i> Grade da Agenda & Abertura
         </h3>
         <button onclick="closeModal('modalConfigAgendaGrade')" style="background:none; border:none; font-size:1.2rem; color:#6A1D39; cursor:pointer;">✕</button>
       </div>
 
-      <!-- 1. Regra de Abertura de Período -->
-      <div style="margin-bottom:16px;">
+      <!-- 1. Regra de Abertura de Período (Por Semana, Por Mês, Meses Específicos ou Ano Todo) -->
+      <div style="margin-bottom:14px;">
         <label style="font-size:0.78rem; font-weight:700; color:#4D1328; display:block; margin-bottom:6px;">
-          📅 Janela de Abertura para Clientes
+          📅 Modo de Abertura da Agenda para Clientes
         </label>
-        <select id="selectScheduleWindow" style="width:100%; padding:11px 12px; border-radius:12px; border:1px solid rgba(77,19,40,0.15); background:#FBECEF; color:#350B19; font-weight:700; font-size:0.85rem; outline:none;">
-          <option value="month">Apenas o Mês Atual (Abre mês a mês conforme passa)</option>
-          <option value="week">Apenas a Semana Atual (Abre semana a semana)</option>
+        <select id="selectScheduleWindow" style="width:100%; padding:11px 12px; border-radius:12px; border:1px solid rgba(77,19,40,0.15); background:#FBECEF; color:#350B19; font-weight:700; font-size:0.84rem; outline:none;">
+          <option value="month">Apenas por Mês (Finalizou o mês, passa p/ o próximo)</option>
+          <option value="week">Apenas por Semana (Finalizou a semana, passa p/ a próxima)</option>
+          <option value="custom_months">Escolher Meses Específicos do Ano (Abaixo)</option>
           <option value="30days">Próximos 30 Dias Corridos</option>
-          <option value="year">Ano Todo Aberto (Sem restrição de data)</option>
+          <option value="year">Agenda Aberta o Ano Todo</option>
         </select>
-        <p style="font-size:0.72rem; color:#6A1D39; margin-top:4px;">
-          Os dias fora da janela escolhida ficam automaticamente bloqueados na tela da cliente.
+        <p style="font-size:0.71rem; color:#6A1D39; margin-top:4px;">
+          Quando uma cliente agenda um horário (ex: 19:00 do dia 8), ele some automaticamente para as outras clientes.
         </p>
       </div>
 
+      <!-- 1.5 Escolher os Meses do Ano Abertos (Jan a Dez) -->
+      <div style="margin-bottom:14px; background:#FFF9FA; border:1px solid rgba(77,19,40,0.1); border-radius:14px; padding:10px 12px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+          <label style="font-size:0.76rem; font-weight:700; color:#4D1328;">
+            🗓️ Meses Liberados para Agendamento:
+          </label>
+          <button type="button" onclick="toggleAllAllowedMonthsAdmin()" style="background:none; border:none; font-size:0.7rem; font-weight:700; color:#D83F79; cursor:pointer; text-decoration:underline;">
+            Marcar/Desmarcar Todos
+          </button>
+        </div>
+        <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:6px; font-size:0.75rem; font-weight:600;">
+          <label style="display:flex; align-items:center; gap:4px; cursor:pointer;"><input type="checkbox" class="chkAllowedMonth" value="0" checked> Jan</label>
+          <label style="display:flex; align-items:center; gap:4px; cursor:pointer;"><input type="checkbox" class="chkAllowedMonth" value="1" checked> Fev</label>
+          <label style="display:flex; align-items:center; gap:4px; cursor:pointer;"><input type="checkbox" class="chkAllowedMonth" value="2" checked> Mar</label>
+          <label style="display:flex; align-items:center; gap:4px; cursor:pointer;"><input type="checkbox" class="chkAllowedMonth" value="3" checked> Abr</label>
+          <label style="display:flex; align-items:center; gap:4px; cursor:pointer;"><input type="checkbox" class="chkAllowedMonth" value="4" checked> Mai</label>
+          <label style="display:flex; align-items:center; gap:4px; cursor:pointer;"><input type="checkbox" class="chkAllowedMonth" value="5" checked> Jun</label>
+          <label style="display:flex; align-items:center; gap:4px; cursor:pointer;"><input type="checkbox" class="chkAllowedMonth" value="6" checked> Jul</label>
+          <label style="display:flex; align-items:center; gap:4px; cursor:pointer;"><input type="checkbox" class="chkAllowedMonth" value="7" checked> Ago</label>
+          <label style="display:flex; align-items:center; gap:4px; cursor:pointer;"><input type="checkbox" class="chkAllowedMonth" value="8" checked> Set</label>
+          <label style="display:flex; align-items:center; gap:4px; cursor:pointer;"><input type="checkbox" class="chkAllowedMonth" value="9" checked> Out</label>
+          <label style="display:flex; align-items:center; gap:4px; cursor:pointer;"><input type="checkbox" class="chkAllowedMonth" value="10" checked> Nov</label>
+          <label style="display:flex; align-items:center; gap:4px; cursor:pointer;"><input type="checkbox" class="chkAllowedMonth" value="11" checked> Dez</label>
+        </div>
+      </div>
+
       <!-- 2. Dias da Semana de Atendimento -->
-      <div style="margin-bottom:16px;">
+      <div style="margin-bottom:14px;">
         <label style="font-size:0.78rem; font-weight:700; color:#4D1328; display:block; margin-bottom:6px;">
           ⏰ Dias da Semana que Atende
         </label>
@@ -1504,95 +1549,131 @@
         </div>
       </div>
 
-      <!-- 3. Calendário de Bloqueio Manual de Folgas -->
-      <div style="margin-bottom:18px;">
+      <!-- 3. Calendário Interativo de Datas de Atendimento vs Folgas (Com Navegação de Mês) -->
+      <div style="margin-bottom:16px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
           <label style="font-size:0.78rem; font-weight:700; color:#4D1328;">
-            🚫 Bloqueio de Folgas / Dias Específicos
+            🗓️ Calendário: Escolha as Datas que Atende ou Não Atende
           </label>
-          <span style="font-size:0.7rem; color:#8A2D4E;">Clique no dia para bloquear/liberar</span>
         </div>
-        <div id="adminFolgasCalendarGrid" style="display:grid; grid-template-columns:repeat(7, 1fr); gap:4px; background:#FBECEF; padding:10px; border-radius:14px; text-align:center;">
-          <!-- Populado via JS -->
+        <div style="background:#FBECEF; padding:10px; border-radius:14px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <button type="button" onclick="changeFolgasCalMonth(-1)" style="border:none; background:#FFF; color:#4D1328; width:28px; height:28px; border-radius:50%; cursor:pointer; font-weight:700;">&lt;</button>
+            <strong id="folgasCalMonthLabel" style="font-size:0.85rem; color:#350B19;">Novembro 2026</strong>
+            <button type="button" onclick="changeFolgasCalMonth(1)" style="border:none; background:#FFF; color:#4D1328; width:28px; height:28px; border-radius:50%; cursor:pointer; font-weight:700;">&gt;</button>
+          </div>
+          <div style="display:grid; grid-template-columns:repeat(7, 1fr); gap:4px; text-align:center; font-size:0.68rem; font-weight:700; color:#8A2D4E; margin-bottom:4px;">
+            <span>D</span><span>S</span><span>T</span><span>Q</span><span>Q</span><span>S</span><span>S</span>
+          </div>
+          <div id="adminFolgasCalendarGrid" style="display:grid; grid-template-columns:repeat(7, 1fr); gap:4px; text-align:center;">
+            <!-- Populado via JS -->
+          </div>
+          <div style="display:flex; justify-content:center; gap:14px; margin-top:8px; font-size:0.7rem;">
+            <span><span style="display:inline-block; width:10px; height:10px; background:#FFF; border:1px solid #059669; border-radius:3px;"></span> Dia que Atende</span>
+            <span><span style="display:inline-block; width:10px; height:10px; background:#FFD4DC; border:1px solid #D83F79; border-radius:3px;"></span> Não Atende (Folga)</span>
+          </div>
         </div>
       </div>
 
       <button type="button" onclick="salvarConfigAgendaGradeAdmin()" style="width:100%; padding:13px; border-radius:var(--radius-pill); background:#4D1328; color:#FFF; font-weight:700; border:none; cursor:pointer;">
-        Salvar Regras da Agenda
+        Salvar Regras e Calendário da Agenda
       </button>
     </div>
   </div>
 
-  <!-- MODAL: PERSONALIZAÇÃO DE CORES & IDENTIDADE VISUAL -->
+  <!-- MODAL: PERSONALIZAÇÃO DE CORES & IDENTIDADE VISUAL (COM CONTRASTE AUTOMÁTICO DE LETRAS) -->
   <div class="admin-modal-overlay" id="modalConfigCores">
-    <div class="admin-modal-card">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+    <div class="admin-modal-card" style="max-height:92vh; overflow-y:auto;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
         <h3 style="font-family:var(--font-serif); font-size:1.3rem; color:#350B19;">
           <i class="fa-solid fa-palette" style="color:#DB2777;"></i> Cores & Identidade Visual
         </h3>
         <button onclick="closeModal('modalConfigCores')" style="background:none; border:none; font-size:1.2rem; color:#6A1D39; cursor:pointer;">✕</button>
       </div>
 
-      <p style="font-size:0.78rem; color:#6A1D39; margin-bottom:14px;">
-        Personalize as cores de todo o aplicativo. As mudanças são aplicadas na hora na tela da cliente e no painel administrativo.
+      <p style="font-size:0.76rem; color:#6A1D39; margin-bottom:12px;">
+        Escolha qualquer cor! As cores dos nomes, títulos e letras se adaptam automaticamente para garantir leitura perfeita.
       </p>
 
       <!-- Paletas Pré-definidas de Luxo -->
-      <div style="margin-bottom:16px;">
+      <div style="margin-bottom:14px;">
         <label style="font-size:0.75rem; font-weight:700; color:#4D1328; display:block; margin-bottom:6px;">Paletas Prontas (1-Clique)</label>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
-          <button type="button" onclick="aplicarPaletaPreset('#350B19', '#D83F79', '#FBECEF', '#FAF4F5')" style="padding:9px; border-radius:10px; border:1px solid #350B19; background:#FAF4F5; font-size:0.75rem; font-weight:700; color:#350B19; cursor:pointer;">
-            🍷 Vinho & Rosé Luxo
+          <button type="button" onclick="aplicarPaletaPreset('#350B19', '#D83F79', '#FBECEF', '#FAF4F5', '#350B19')" style="padding:9px; border-radius:10px; border:1px solid #350B19; background:#FAF4F5; font-size:0.74rem; font-weight:700; color:#350B19; cursor:pointer;">
+            🍷 Vinho & Rosé (Padrão)
           </button>
-          <button type="button" onclick="aplicarPaletaPreset('#2B1E16', '#C59B6D', '#F8F2ED', '#FAF7F2')" style="padding:9px; border-radius:10px; border:1px solid #C59B6D; background:#FAF7F2; font-size:0.75rem; font-weight:700; color:#2B1E16; cursor:pointer;">
+          <button type="button" onclick="aplicarPaletaPreset('#2B1E16', '#C59B6D', '#F8F2ED', '#FAF7F2', '#2B1E16')" style="padding:9px; border-radius:10px; border:1px solid #C59B6D; background:#FAF7F2; font-size:0.74rem; font-weight:700; color:#2B1E16; cursor:pointer;">
             🥂 Champagne & Ouro
           </button>
-          <button type="button" onclick="aplicarPaletaPreset('#4A0E2E', '#E0218A', '#FDE8F3', '#FFF5F9')" style="padding:9px; border-radius:10px; border:1px solid #E0218A; background:#FFF5F9; font-size:0.75rem; font-weight:700; color:#4A0E2E; cursor:pointer;">
+          <button type="button" onclick="aplicarPaletaPreset('#4A0E2E', '#E0218A', '#FDE8F3', '#FFF5F9', '#4A0E2E')" style="padding:9px; border-radius:10px; border:1px solid #E0218A; background:#FFF5F9; font-size:0.74rem; font-weight:700; color:#4A0E2E; cursor:pointer;">
             🌸 Pink Barbie Glam
           </button>
-          <button type="button" onclick="aplicarPaletaPreset('#18181B', '#E0A96D', '#27272A', '#09090B')" style="padding:9px; border-radius:10px; border:1px solid #E0A96D; background:#18181B; font-size:0.75rem; font-weight:700; color:#FFF; cursor:pointer;">
+          <button type="button" onclick="aplicarPaletaPreset('#18181B', '#E0A96D', '#27272A', '#09090B', '#FFFFFF')" style="padding:9px; border-radius:10px; border:1px solid #E0A96D; background:#18181B; font-size:0.74rem; font-weight:700; color:#FFF; cursor:pointer;">
             🖤 Black & Rosé Gold
           </button>
         </div>
       </div>
 
+      <!-- Pré-visualização em Tempo Real de Como Ficam os Nomes e Letras -->
+      <div id="liveColorPreviewBox" style="border-radius:16px; padding:12px 14px; margin-bottom:14px; border:1px solid rgba(77,19,40,0.15); background:#FBECEF; transition:all 0.2s;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+          <strong id="livePreviewHeading" style="font-family:var(--font-serif); font-size:1rem; color:#350B19;">Alongamento em Gel ✨</strong>
+          <span id="livePreviewBadge" style="background:#350B19; color:#FFF; padding:3px 10px; border-radius:20px; font-size:0.72rem; font-weight:700;">R$ 180,00</span>
+        </div>
+        <p id="livePreviewSubtext" style="font-size:0.76rem; color:#6A1D39; margin:0;">
+          Pré-visualização ao vivo: os nomes e textos acompanham automaticamente a cor escolhida!
+        </p>
+      </div>
+
       <!-- Seletores de Cores Personalizados -->
-      <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:18px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; background:#FBECEF; padding:10px 14px; border-radius:12px;">
+      <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:14px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; background:#FBECEF; padding:9px 12px; border-radius:12px;">
           <div>
-            <strong style="font-size:0.82rem; color:#350B19;">Cor Primária (Vinho / Topbar)</strong>
-            <div style="font-size:0.7rem; color:#6A1D39;">Cabeçalhos, botões principais e destaques</div>
+            <strong style="font-size:0.8rem; color:#350B19;">Cor Primária (Cabeçalho & Botões)</strong>
           </div>
-          <input type="color" id="themePrimaryColor" value="#350B19" style="width:40px; height:32px; border:none; cursor:pointer; background:none;">
+          <input type="color" id="themePrimaryColor" value="#350B19" oninput="updateLiveColorPreviewModal()" style="width:40px; height:30px; border:none; cursor:pointer; background:none;">
         </div>
 
-        <div style="display:flex; justify-content:space-between; align-items:center; background:#FBECEF; padding:10px 14px; border-radius:12px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; background:#FBECEF; padding:9px 12px; border-radius:12px;">
           <div>
-            <strong style="font-size:0.82rem; color:#350B19;">Cor Secundária (Rosé / Destaque)</strong>
-            <div style="font-size:0.7rem; color:#6A1D39;">Pílulas ativas, ícones de atenção e badges</div>
+            <strong style="font-size:0.8rem; color:#350B19;">Cor Secundária (Destaques & Ícones)</strong>
           </div>
-          <input type="color" id="themeSecondaryColor" value="#D83F79" style="width:40px; height:32px; border:none; cursor:pointer; background:none;">
+          <input type="color" id="themeSecondaryColor" value="#D83F79" oninput="updateLiveColorPreviewModal()" style="width:40px; height:30px; border:none; cursor:pointer; background:none;">
         </div>
 
-        <div style="display:flex; justify-content:space-between; align-items:center; background:#FBECEF; padding:10px 14px; border-radius:12px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; background:#FBECEF; padding:9px 12px; border-radius:12px;">
           <div>
-            <strong style="font-size:0.82rem; color:#350B19;">Fundo dos Cards (Rosé Suave)</strong>
-            <div style="font-size:0.7rem; color:#6A1D39;">Superfície dos cards de serviços e agendamentos</div>
+            <strong style="font-size:0.8rem; color:#350B19;">Fundo dos Cards</strong>
           </div>
-          <input type="color" id="themeCardBgColor" value="#FBECEF" style="width:40px; height:32px; border:none; cursor:pointer; background:none;">
+          <input type="color" id="themeCardBgColor" value="#FBECEF" oninput="updateLiveColorPreviewModal()" style="width:40px; height:30px; border:none; cursor:pointer; background:none;">
         </div>
 
-        <div style="display:flex; justify-content:space-between; align-items:center; background:#FBECEF; padding:10px 14px; border-radius:12px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; background:#FBECEF; padding:9px 12px; border-radius:12px;">
           <div>
-            <strong style="font-size:0.82rem; color:#350B19;">Fundo da Página (Creme / Fundo Geral)</strong>
-            <div style="font-size:0.7rem; color:#6A1D39;">Cor de base do aplicativo</div>
+            <strong style="font-size:0.8rem; color:#350B19;">Fundo Geral da Página</strong>
           </div>
-          <input type="color" id="themePageBgColor" value="#FAF4F5" style="width:40px; height:32px; border:none; cursor:pointer; background:none;">
+          <input type="color" id="themePageBgColor" value="#FAF4F5" oninput="updateLiveColorPreviewModal()" style="width:40px; height:30px; border:none; cursor:pointer; background:none;">
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; background:#FBECEF; padding:9px 12px; border-radius:12px;">
+          <div>
+            <strong style="font-size:0.8rem; color:#350B19;">Adaptação Automática das Letras</strong>
+            <div style="font-size:0.68rem; color:#6A1D39;">Ajusta os nomes sozinhos para leitura perfeita</div>
+          </div>
+          <input type="checkbox" id="chkThemeAutoContrast" checked onchange="updateLiveColorPreviewModal()" style="width:18px; height:18px; cursor:pointer;">
+        </div>
+
+        <div id="manualTextColorRow" style="display:flex; justify-content:space-between; align-items:center; background:#FBECEF; padding:9px 12px; border-radius:12px;">
+          <div>
+            <strong style="font-size:0.8rem; color:#350B19;">Cor das Letras / Nomes (Opcional)</strong>
+            <div style="font-size:0.68rem; color:#6A1D39;">Desmarque o automático acima se quiser escolher manualmente</div>
+          </div>
+          <input type="color" id="themeTextColor" value="#350B19" oninput="document.getElementById('chkThemeAutoContrast').checked = false; updateLiveColorPreviewModal();" style="width:40px; height:30px; border:none; cursor:pointer; background:none;">
         </div>
       </div>
 
       <button type="button" onclick="salvarConfigCoresAdmin()" style="width:100%; padding:13px; border-radius:var(--radius-pill); background:#4D1328; color:#FFF; font-weight:700; border:none; cursor:pointer;">
-        Salvar e Aplicar Cores
+        Salvar e Aplicar Cores em Tudo
       </button>
     </div>
   </div>
@@ -1940,10 +2021,18 @@
       if (!input.files || !input.files[0]) return;
       const file = input.files[0];
       try {
-        uploadedServicePhotoDataUrl = await window.EPStore.compressImageFile(file, 460, 0.76);
+        uploadedServicePhotoDataUrl = await window.EPStore.compressImageFile(file, 650, 0.78);
         const preview = document.getElementById('previewServicoFotoImg');
         if (preview) preview.src = uploadedServicePhotoDataUrl;
-        showToast('Foto carregada do celular com sucesso!');
+        const storyImg = document.getElementById('serviceStoryPreviewImg');
+        if (storyImg) { storyImg.style.display = 'block'; storyImg.src = uploadedServicePhotoDataUrl; }
+        if (currentServiceMediaList.length === 0) {
+          currentServiceMediaList.push({ type: 'image', url: uploadedServicePhotoDataUrl });
+        } else {
+          currentServiceMediaList[0] = { type: 'image', url: uploadedServicePhotoDataUrl };
+        }
+        renderServiceMediaThumbnails();
+        showToast('Foto em alta qualidade carregada com pré-visualização no padrão celular!');
       } catch (e) {
         showToast('Erro ao carregar a imagem.');
       }
@@ -2035,16 +2124,16 @@
     // ========================================================
     async function handleAvatarPhotoUpload(input) {
       if (!input.files || !input.files[0]) return;
-      uploadedAvatarPhotoDataUrl = await window.EPStore.compressImageFile(input.files[0], 160, 0.65);
+      uploadedAvatarPhotoDataUrl = await window.EPStore.compressImageFile(input.files[0], 260, 0.78);
       document.getElementById('previewConfigAvatarImg').src = uploadedAvatarPhotoDataUrl;
-      showToast('Foto de perfil selecionada!');
+      showToast('Foto de perfil atualizada na pré-visualização! Clique em Salvar Perfil.');
     }
 
     async function handleBannerPhotoUpload(input) {
       if (!input.files || !input.files[0]) return;
-      uploadedBannerPhotoDataUrl = await window.EPStore.compressImageFile(input.files[0], 540, 0.76);
+      uploadedBannerPhotoDataUrl = await window.EPStore.compressImageFile(input.files[0], 720, 0.80);
       document.getElementById('previewConfigBannerImg').src = uploadedBannerPhotoDataUrl;
-      showToast('Foto do banner selecionada!');
+      showToast('Foto do banner em alta definição pronta na pré-visualização!');
     }
 
     function openModalConfigSalao() {
@@ -2720,11 +2809,28 @@
     async function handleAddServiceMultiplePhotos(input) {
       if (!input.files || input.files.length === 0) return;
       for (let i = 0; i < input.files.length; i++) {
-        const dataUrl = await window.EPStore.compressImageFile(input.files[i], 360, 0.65);
+        const dataUrl = await window.EPStore.compressImageFile(input.files[i], 650, 0.78);
         currentServiceMediaList.push({ type: 'image', url: dataUrl });
       }
       renderServiceMediaThumbnails();
-      showToast(`${input.files.length} foto(s) adicionada(s) aos stories!`);
+      showToast(`${input.files.length} foto(s) em alta qualidade adicionada(s) aos stories!`);
+    }
+
+    function handleAddServiceVideoFile(input) {
+      if (!input.files || input.files.length === 0) return;
+      Array.from(input.files).forEach(file => {
+        if (file.size > 8 * 1024 * 1024) {
+          showToast('Vídeo muito grande! Escolha um vídeo curto de até 8MB ou use um link.');
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          currentServiceMediaList.push({ type: 'video', url: ev.target.result });
+          renderServiceMediaThumbnails();
+          showToast('Vídeo do celular adicionado aos stories com pré-visualização!');
+        };
+        reader.readAsDataURL(file);
+      });
     }
 
     function handleAddServiceVideoPrompt() {
@@ -2755,15 +2861,17 @@
       }
 
       container.innerHTML = currentServiceMediaList.map((m, idx) => `
-        <div style="position:relative; width:52px; height:52px; border-radius:10px; overflow:hidden; flex-shrink:0; border:1px solid #D83F79; background:#000;">
-          ${m.type === 'video' ? '<span style="position:absolute; top:2px; left:2px; background:rgba(0,0,0,0.6); color:#FFF; font-size:0.6rem; padding:1px 3px; border-radius:3px;">🎥</span>' : ''}
-          <img src="${m.url}" style="width:100%; height:100%; object-fit:cover;" onclick="previewThisMediaInMockup(${idx})">
-          <button type="button" onclick="removeServiceMediaItem(${idx})" style="position:absolute; top:2px; right:2px; background:rgba(216,63,121,0.9); color:#FFF; border:none; width:16px; height:16px; border-radius:50%; font-size:0.6rem; cursor:pointer; display:flex; align-items:center; justify-content:center;">✕</button>
+        <div style="position:relative; width:56px; height:56px; border-radius:10px; overflow:hidden; flex-shrink:0; border:1.5px solid #D83F79; background:#18181B; cursor:pointer;" onclick="previewThisMediaInMockup(${idx})">
+          ${m.type === 'video'
+            ? `<video src="${m.url}" muted playsinline style="width:100%; height:100%; object-fit:cover;"></video><span style="position:absolute; bottom:2px; left:2px; background:rgba(0,0,0,0.75); color:#FFF; font-size:0.55rem; padding:1px 4px; border-radius:4px;">▶ Vídeo</span>`
+            : `<img src="${m.url}" style="width:100%; height:100%; object-fit:cover;">`
+          }
+          <button type="button" onclick="event.stopPropagation(); removeServiceMediaItem(${idx})" style="position:absolute; top:2px; right:2px; background:rgba(216,63,121,0.95); color:#FFF; border:none; width:16px; height:16px; border-radius:50%; font-size:0.6rem; cursor:pointer; display:flex; align-items:center; justify-content:center;">✕</button>
         </div>
       `).join('');
 
-      // Atualiza preview no mockup com a primeira mídia
-      previewThisMediaInMockup(0);
+      // Atualiza preview no mockup com a última mídia adicionada
+      previewThisMediaInMockup(currentServiceMediaList.length - 1);
     }
 
     function previewThisMediaInMockup(idx) {
@@ -2906,8 +3014,11 @@
     }
 
     // ========================================================
-    // CONTROLE DE ABERTURA DA GRADE (SEMANA, MÊS, ANO) & FOLGAS
+    // CONTROLE DE ABERTURA DA GRADE (SEMANA, MÊS, MESES DO ANO) & FOLGAS
     // ========================================================
+    let folgasCalMonth = new Date().getMonth();
+    let folgasCalYear = new Date().getFullYear();
+
     function openModalConfigAgendaGrade() {
       const s = window.EPStore ? window.EPStore.getSalonSettings() : {};
       
@@ -2920,27 +3031,58 @@
         if (chk) chk.checked = allowedDays.includes(d);
       });
 
+      const allowedMonths = Array.isArray(s.allowedMonths) && s.allowedMonths.length > 0
+        ? s.allowedMonths
+        : [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+      document.querySelectorAll('.chkAllowedMonth').forEach(chk => {
+        chk.checked = allowedMonths.includes(parseInt(chk.value, 10));
+      });
+
+      folgasCalMonth = new Date().getMonth();
+      folgasCalYear = new Date().getFullYear();
       renderFolgasCalendarAdmin();
       openModal('modalConfigAgendaGrade');
     }
 
+    function toggleAllAllowedMonthsAdmin() {
+      const boxes = Array.from(document.querySelectorAll('.chkAllowedMonth'));
+      const allChecked = boxes.every(b => b.checked);
+      boxes.forEach(b => { b.checked = !allChecked; });
+    }
+
+    function changeFolgasCalMonth(delta) {
+      folgasCalMonth += delta;
+      if (folgasCalMonth < 0) { folgasCalMonth = 11; folgasCalYear--; }
+      if (folgasCalMonth > 11) { folgasCalMonth = 0; folgasCalYear++; }
+      renderFolgasCalendarAdmin();
+    }
+
     function renderFolgasCalendarAdmin() {
       const container = document.getElementById('adminFolgasCalendarGrid');
+      const lbl = document.getElementById('folgasCalMonthLabel');
       if (!container) return;
+
+      const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+      if (lbl) lbl.innerText = `${monthNames[folgasCalMonth]} ${folgasCalYear}`;
+
       const s = window.EPStore ? window.EPStore.getSalonSettings() : {};
       const blocked = s.blockedDates || [];
+      const allowedDays = s.workWeekdays || [1, 2, 3, 4, 5, 6];
 
-      const today = new Date();
-      const year = today.getFullYear();
-      const month = today.getMonth();
-      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const firstDayIdx = new Date(folgasCalYear, folgasCalMonth, 1).getDay();
+      const daysInMonth = new Date(folgasCalYear, folgasCalMonth + 1, 0).getDate();
 
       let html = '';
+      for (let i = 0; i < firstDayIdx; i++) {
+        html += '<div></div>';
+      }
+
       for (let day = 1; day <= daysInMonth; day++) {
-        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-        const isBlocked = blocked.includes(dateStr);
+        const dateStr = `${folgasCalYear}-${String(folgasCalMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const weekday = new Date(folgasCalYear, folgasCalMonth, day).getDay();
+        const isBlocked = blocked.includes(dateStr) || !allowedDays.includes(weekday);
         html += `
-          <button type="button" onclick="toggleFolgaDateAdmin('${dateStr}')" style="padding:8px 4px; border-radius:8px; border:none; font-size:0.75rem; font-weight:700; cursor:pointer; background:${isBlocked ? '#FFD4DC' : '#FFF'}; color:${isBlocked ? '#D83F79' : '#350B19'}; ${isBlocked ? 'text-decoration:line-through;' : ''}">
+          <button type="button" onclick="toggleFolgaDateAdmin('${dateStr}')" style="padding:7px 2px; border-radius:8px; border:1px solid ${isBlocked ? '#D83F79' : '#A7F3D0'}; font-size:0.74rem; font-weight:700; cursor:pointer; background:${isBlocked ? '#FFD4DC' : '#FFFFFF'}; color:${isBlocked ? '#D83F79' : '#065F46'}; ${isBlocked ? 'text-decoration:line-through;' : ''}" title="${isBlocked ? 'Não atende (clique para liberar)' : 'Atende (clique para folgar)'}">
             ${day}
           </button>
         `;
@@ -2952,7 +3094,8 @@
       if (window.EPStore && window.EPStore.toggleBlockedDate) {
         window.EPStore.toggleBlockedDate(dateStr);
         renderFolgasCalendarAdmin();
-        showToast('Disponibilidade da data atualizada!');
+        renderAdminCalendar();
+        showToast('Dia atualizado no calendário de atendimento!');
       }
     }
 
@@ -2964,16 +3107,23 @@
         if (chk && chk.checked) workWeekdays.push(d);
       });
 
+      const allowedMonths = [];
+      document.querySelectorAll('.chkAllowedMonth').forEach(chk => {
+        if (chk.checked) allowedMonths.push(parseInt(chk.value, 10));
+      });
+
       window.EPStore.saveSalonSettings({
         scheduleWindow: windowMode,
-        workWeekdays: workWeekdays
+        workWeekdays: workWeekdays,
+        allowedMonths: allowedMonths.length > 0 ? allowedMonths : [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
       });
       closeModal('modalConfigAgendaGrade');
-      showToast('Grade e abertura da agenda salvas e sincronizadas!');
+      renderAdminCalendar();
+      showToast('Grade, meses abertos e calendário salvos e sincronizados!');
     }
 
     // ========================================================
-    // CORES DO TEMA & IDENTIDADE VISUAL (MUDA TUDO)
+    // CORES DO TEMA & IDENTIDADE VISUAL (COM CONTRASTE AUTOMÁTICO DE LETRAS)
     // ========================================================
     function openModalConfigCores() {
       const s = window.EPStore ? window.EPStore.getSalonSettings() : {};
@@ -2981,31 +3131,83 @@
         primaryColor: '#350B19',
         secondaryColor: '#D83F79',
         cardBgColor: '#FBECEF',
-        pageBgColor: '#FAF4F5'
+        pageBgColor: '#FAF4F5',
+        textColor: '#350B19',
+        autoContrast: true
       };
 
       document.getElementById('themePrimaryColor').value = colors.primaryColor || '#350B19';
       document.getElementById('themeSecondaryColor').value = colors.secondaryColor || '#D83F79';
       document.getElementById('themeCardBgColor').value = colors.cardBgColor || '#FBECEF';
       document.getElementById('themePageBgColor').value = colors.pageBgColor || '#FAF4F5';
+      const txtInp = document.getElementById('themeTextColor');
+      if (txtInp) txtInp.value = colors.textColor || '#350B19';
+      const chkAuto = document.getElementById('chkThemeAutoContrast');
+      if (chkAuto) chkAuto.checked = colors.autoContrast !== false;
 
+      updateLiveColorPreviewModal();
       openModal('modalConfigCores');
     }
 
-    function aplicarPaletaPreset(prim, sec, card, page) {
+    function updateLiveColorPreviewModal() {
+      const prim = document.getElementById('themePrimaryColor')?.value || '#350B19';
+      const sec = document.getElementById('themeSecondaryColor')?.value || '#D83F79';
+      const cardBg = document.getElementById('themeCardBgColor')?.value || '#FBECEF';
+      const autoContrast = document.getElementById('chkThemeAutoContrast')?.checked !== false;
+      const manualTxt = document.getElementById('themeTextColor')?.value || '#350B19';
+
+      const lumCard = window.EPStore && window.EPStore.getLuminance ? window.EPStore.getLuminance(cardBg) : 0.85;
+      const lumPrim = window.EPStore && window.EPStore.getLuminance ? window.EPStore.getLuminance(prim) : 0.1;
+
+      const isDarkCard = lumCard < 0.42;
+      const isLightPrim = lumPrim > 0.52;
+
+      const textOnCard = !autoContrast ? manualTxt : (isDarkCard ? '#FFFFFF' : (lumPrim < 0.35 ? prim : '#27131A'));
+      const subOnCard = isDarkCard ? 'rgba(255,255,255,0.78)' : (lumPrim < 0.35 ? sec : '#5C2235');
+      const textOnPrim = isLightPrim ? '#18181B' : '#FFFFFF';
+
+      if (autoContrast && document.getElementById('themeTextColor')) {
+        document.getElementById('themeTextColor').value = isDarkCard ? '#FFFFFF' : (lumPrim < 0.35 ? prim : '#27131A');
+      }
+
+      const box = document.getElementById('liveColorPreviewBox');
+      const head = document.getElementById('livePreviewHeading');
+      const badge = document.getElementById('livePreviewBadge');
+      const sub = document.getElementById('livePreviewSubtext');
+
+      if (box) box.style.background = cardBg;
+      if (head) head.style.color = textOnCard;
+      if (sub) sub.style.color = subOnCard;
+      if (badge) {
+        badge.style.background = prim;
+        badge.style.color = textOnPrim;
+      }
+    }
+
+    function aplicarPaletaPreset(prim, sec, card, page, txt = '#350B19') {
       document.getElementById('themePrimaryColor').value = prim;
       document.getElementById('themeSecondaryColor').value = sec;
       document.getElementById('themeCardBgColor').value = card;
       document.getElementById('themePageBgColor').value = page;
+      if (document.getElementById('themeTextColor')) {
+        document.getElementById('themeTextColor').value = txt;
+      }
+      if (document.getElementById('chkThemeAutoContrast')) {
+        document.getElementById('chkThemeAutoContrast').checked = true;
+      }
+      updateLiveColorPreviewModal();
       showToast('Paleta selecionada! Clique em Salvar e Aplicar Cores.');
     }
 
     function salvarConfigCoresAdmin() {
+      const autoContrast = document.getElementById('chkThemeAutoContrast')?.checked !== false;
       const colors = {
         primaryColor: document.getElementById('themePrimaryColor').value,
         secondaryColor: document.getElementById('themeSecondaryColor').value,
         cardBgColor: document.getElementById('themeCardBgColor').value,
-        pageBgColor: document.getElementById('themePageBgColor').value
+        pageBgColor: document.getElementById('themePageBgColor').value,
+        textColor: document.getElementById('themeTextColor')?.value || '#350B19',
+        autoContrast: autoContrast
       };
 
       window.EPStore.saveSalonSettings({ themeColors: colors });
@@ -3016,7 +3218,7 @@
         window.EPStore.applyThemeToDocument();
       }
       closeModal('modalConfigCores');
-      showToast('Cores aplicadas em todo o aplicativo!');
+      showToast('Cores e contraste das letras aplicados em todo o aplicativo!');
     }
 
     function triggerDirectAvatarUpload() {
