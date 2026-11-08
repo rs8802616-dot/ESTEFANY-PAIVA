@@ -1218,9 +1218,10 @@ window.EPStore = {
       .admin-modal-card:not(#modalConfigCores) div[style*="background:"] h4,
       .admin-modal-card:not(#modalConfigCores) div[style*="background:"] span:not(.badge-status-pill),
       .admin-modal-card form[style*="background:"] strong,
-      .admin-modal-card form[style*="background:"] label,
+      .admin-modal-card form[style*="background:"] label:not([style*="#4D1328"]):not([style*="#350B19"]),
       .admin-modal-card form[style*="background:"] span,
-      .admin-modal-card label[style*="background:"],
+      .admin-modal-card label[style*="background:#FBECEF"],
+      .admin-modal-card label[style*="background:#EFF6FF"],
       .admin-modal-card button[style*="background:#FBECEF"],
       .admin-modal-card button[style*="background:#FFF"],
       .admin-modal-card button[style*="background:#ECFDF5"],
@@ -2108,11 +2109,16 @@ window.EPStore = {
 
   // ----------------------------------------------------
   // SINCRONIZAÇÃO EM TEMPO REAL ENTRE CELULAR E PC (CLOUD + LOCAL)
+  // Suporta fragmentação automática (Chunking) para sincronizar FOTOS de Perfil,
+  // Banners, Serviços e Stories instantaneamente entre todos os aparelhos sem limite de 4KB!
   // ----------------------------------------------------
   CLOUD_TOPIC: 'ep_nails_studio_sync_2026_paiva',
   _syncChannel: null,
   _sseSource: null,
   _processedSyncIds: new Set(),
+  _processedEnvelopeIds: new Set(),
+  _chunkBuffers: {},
+  _lastPollUnixTime: 0,
 
   emitStoreUpdate(detail = {}) {
     try {
@@ -2139,36 +2145,88 @@ window.EPStore = {
       }
     } catch (e) {}
 
+    this.emitStoreUpdate({ action, payload });
+
     // 2. Nuvem (Sincroniza Celular <-> Computador / Tablet instantaneamente)
+    // Mensagens <= 3600 bytes vão em 1 pacote JSON inline; mensagens com fotos Base64 (> 3600 bytes)
+    // são divididas automaticamente em partes (SYNC_CHUNK) de 3400 bytes para evitar bloqueio de anexo!
     try {
       const serialized = JSON.stringify(msgObj);
-      if (serialized.length < 220000) {
+      if (serialized.length <= 3600) {
         await fetch(`https://ntfy.sh/${this.CLOUD_TOPIC}`, {
           method: 'POST',
           headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
           body: serialized,
           cache: 'no-store'
         });
+      } else if (serialized.length <= 180000) {
+        const chunkSize = 3300;
+        const totalChunks = Math.ceil(serialized.length / chunkSize);
+        const groupId = msgObj.syncId;
+        for (let i = 0; i < totalChunks; i++) {
+          const part = serialized.slice(i * chunkSize, (i + 1) * chunkSize);
+          const chunkEnvelope = JSON.stringify({
+            action: 'SYNC_CHUNK',
+            groupId,
+            idx: i,
+            total: totalChunks,
+            data: part,
+            ts: msgObj.ts
+          });
+          await fetch(`https://ntfy.sh/${this.CLOUD_TOPIC}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+            body: chunkEnvelope,
+            cache: 'no-store'
+          });
+          if (totalChunks > 1 && i < totalChunks - 1) {
+            await new Promise(r => setTimeout(r, 90));
+          }
+        }
       }
     } catch (err) {
       console.warn('Aviso de sincronização em nuvem:', err);
     }
-
-    this.emitStoreUpdate({ action, payload });
   },
 
   async parseEnvelopeToSyncMessage(envelope) {
     if (!envelope || envelope.event !== 'message') return null;
+    if (envelope.id && this._processedEnvelopeIds.has(envelope.id)) return null;
+    if (envelope.id) this._processedEnvelopeIds.add(envelope.id);
+    if (envelope.time && envelope.time > this._lastPollUnixTime) {
+      this._lastPollUnixTime = envelope.time;
+    }
+
     try {
       if (envelope.attachment && envelope.attachment.url) {
-        if (this._processedSyncIds.has(envelope.id)) return null;
-        this._processedSyncIds.add(envelope.id);
         const attResp = await fetch(envelope.attachment.url, { cache: 'no-store' });
         if (!attResp.ok) return null;
         return await attResp.json();
       }
       if (envelope.message && envelope.message.startsWith('{')) {
-        return JSON.parse(envelope.message);
+        const parsed = JSON.parse(envelope.message);
+        if (parsed && parsed.action === 'SYNC_CHUNK' && parsed.groupId) {
+          if (this._processedSyncIds.has(parsed.groupId)) return null;
+          if (!this._chunkBuffers[parsed.groupId]) {
+            this._chunkBuffers[parsed.groupId] = {
+              total: parsed.total,
+              parts: new Array(parsed.total).fill(null),
+              received: 0
+            };
+          }
+          const buf = this._chunkBuffers[parsed.groupId];
+          if (buf.parts[parsed.idx] === null) {
+            buf.parts[parsed.idx] = parsed.data;
+            buf.received++;
+          }
+          if (buf.received === buf.total) {
+            const fullJson = buf.parts.join('');
+            delete this._chunkBuffers[parsed.groupId];
+            return JSON.parse(fullJson);
+          }
+          return null;
+        }
+        return parsed;
       }
     } catch (e) {}
     return null;
@@ -2308,7 +2366,8 @@ window.EPStore = {
 
   async pullCloudEvents(notifyNew = false) {
     try {
-      const resp = await fetch(`https://ntfy.sh/${this.CLOUD_TOPIC}/json?poll=1&since=48h&_t=${Date.now()}`, {
+      const sinceParam = this._lastPollUnixTime > 0 ? this._lastPollUnixTime : '12h';
+      const resp = await fetch(`https://ntfy.sh/${this.CLOUD_TOPIC}/json?poll=1&since=${sinceParam}&_t=${Date.now()}`, {
         cache: 'no-store'
       });
       if (!resp.ok) return false;
@@ -2319,7 +2378,7 @@ window.EPStore = {
         try {
           const envelope = JSON.parse(line);
           const msgObj = await this.parseEnvelopeToSyncMessage(envelope);
-          // deferRender: true evita que histórico de 48h pisque várias cores antigas uma por uma na tela!
+          // deferRender: true evita que histórico pisque várias cores antigas uma por uma na tela!
           if (msgObj && this.applyIncomingSyncEvent(msgObj, notifyNew, { deferRender: true })) {
             anyChanged = true;
           }
@@ -2373,10 +2432,10 @@ window.EPStore = {
       }
     } catch (e) {}
 
-    // 4. Polling de segurança a cada 4 segundos (garante recebimento imediato no celular e no PC)
+    // 4. Polling incremental de segurança a cada 12 segundos (o SSE já entrega em tempo real < 1s; isso evita erro 429 de limite de requisições)
     setInterval(() => {
       this.pullCloudEvents(true);
-    }, 4000);
+    }, 12000);
   },
 
   deleteAppointment(id) {

@@ -2325,16 +2325,24 @@
     // ========================================================
     async function handleAvatarPhotoUpload(input) {
       if (!input.files || !input.files[0]) return;
-      uploadedAvatarPhotoDataUrl = await window.EPStore.compressImageFile(input.files[0], 260, 0.78);
+      uploadedAvatarPhotoDataUrl = await window.EPStore.compressImageFile(input.files[0], 220, 0.72);
       document.getElementById('previewConfigAvatarImg').src = uploadedAvatarPhotoDataUrl;
-      showToast('Foto de perfil atualizada na pré-visualização! Clique em Salvar Perfil.');
+      // Salva e sincroniza imediatamente a nova foto de perfil com todos os aparelhos!
+      if (window.EPStore && window.EPStore.saveSalonSettings) {
+        window.EPStore.saveSalonSettings({ avatarImage: uploadedAvatarPhotoDataUrl });
+        applySalonSettingsToAdminHeader();
+      }
+      showToast('Foto de perfil atualizada e sincronizada com todos os aparelhos!');
     }
 
     async function handleBannerPhotoUpload(input) {
       if (!input.files || !input.files[0]) return;
-      uploadedBannerPhotoDataUrl = await window.EPStore.compressImageFile(input.files[0], 720, 0.80);
+      uploadedBannerPhotoDataUrl = await window.EPStore.compressImageFile(input.files[0], 640, 0.76);
       document.getElementById('previewConfigBannerImg').src = uploadedBannerPhotoDataUrl;
-      showToast('Foto do banner em alta definição pronta na pré-visualização!');
+      if (window.EPStore && window.EPStore.saveSalonSettings) {
+        window.EPStore.saveSalonSettings({ promoBannerImage: uploadedBannerPhotoDataUrl });
+      }
+      showToast('Foto do banner atualizada e sincronizada em todos os aparelhos!');
     }
 
     function openModalConfigSalao() {
