@@ -1,4 +1,4 @@
-const CACHE_NAME = 'estefany-nails-v29-no-test-image-flash';
+const CACHE_NAME = 'estefany-nails-v30-fix-videos-playback-and-upload';
 const STATIC_ASSETS = [
   './',
   './index.html',

@@ -3118,25 +3118,54 @@
 
     function handleAddServiceVideoFile(input) {
       if (!input.files || input.files.length === 0) return;
-      Array.from(input.files).forEach(file => {
-        if (file.size > 8 * 1024 * 1024) {
-          showToast('Vídeo muito grande! Escolha um vídeo curto de até 8MB ou use um link.');
-          return;
-        }
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-          currentServiceMediaList.push({ type: 'video', url: ev.target.result });
+      const files = Array.from(input.files);
+      input.value = '';
+
+      (async () => {
+        for (const file of files) {
+          if (file.size > 80 * 1024 * 1024) {
+            showToast('Vídeo muito grande! Escolha um vídeo de até 80MB.');
+            continue;
+          }
+
+          showToast('Adicionando vídeo ao catálogo do serviço...');
+          const meta = await window.EPStore.extractVideoMetaAndThumbnail(file);
+          const stored = await window.EPStore.storeMediaBlob(file);
+          const localUrl = (stored && stored.id) ? stored.id : (stored && stored.objectUrl ? stored.objectUrl : '');
+
+          const mediaItem = {
+            type: 'video',
+            url: localUrl,
+            thumbnail: meta.thumbnail,
+            duration: meta.duration || 60
+          };
+
+          if (!uploadedServicePhotoDataUrl && meta.thumbnail) {
+            uploadedServicePhotoDataUrl = meta.thumbnail;
+            const pImg = document.getElementById('serviceStoryPreviewImg');
+            if (pImg) pImg.src = uploadedServicePhotoDataUrl;
+          }
+
+          currentServiceMediaList.push(mediaItem);
           renderServiceMediaThumbnails();
-          showToast('Vídeo do celular adicionado aos stories com pré-visualização!');
-        };
-        reader.readAsDataURL(file);
-      });
+          showToast('Vídeo do celular adicionado aos stories do serviço com sucesso!');
+
+          window.EPStore.uploadVideoToCloud(file).then(cloudUrl => {
+            if (cloudUrl) {
+              mediaItem.cloudUrl = cloudUrl;
+              console.log('Vídeo do serviço enviado para a nuvem:', cloudUrl);
+            }
+          }).catch(err => {
+            console.warn('Erro ao sincronizar vídeo do serviço:', err);
+          });
+        }
+      })();
     }
 
     function handleAddServiceVideoPrompt() {
       const url = prompt('Cole o link do vídeo (MP4 ou URL de vídeo curto):', 'https://');
       if (url && url.trim() && url !== 'https://') {
-        currentServiceMediaList.push({ type: 'video', url: url.trim() });
+        currentServiceMediaList.push({ type: 'video', url: url.trim(), duration: 60 });
         renderServiceMediaThumbnails();
         showToast('Vídeo adicionado aos stories!');
       }
@@ -3160,17 +3189,22 @@
         return;
       }
 
-      container.innerHTML = currentServiceMediaList.map((m, idx) => `
-        <div style="position:relative; width:56px; height:56px; border-radius:10px; overflow:hidden; flex-shrink:0; border:1.5px solid #D83F79; background:#18181B; cursor:pointer;" onclick="previewThisMediaInMockup(${idx})">
-          ${m.type === 'video'
-            ? `<video src="${m.url}" muted playsinline style="width:100%; height:100%; object-fit:cover;"></video><span style="position:absolute; bottom:2px; left:2px; background:rgba(0,0,0,0.75); color:#FFF; font-size:0.55rem; padding:1px 4px; border-radius:4px;">▶ Vídeo</span>`
-            : `<img src="${m.url}" style="width:100%; height:100%; object-fit:cover;">`
-          }
-          <button type="button" onclick="event.stopPropagation(); removeServiceMediaItem(${idx})" style="position:absolute; top:2px; right:2px; background:rgba(216,63,121,0.95); color:#FFF; border:none; width:16px; height:16px; border-radius:50%; font-size:0.6rem; cursor:pointer; display:flex; align-items:center; justify-content:center;">✕</button>
-        </div>
-      `).join('');
+      container.innerHTML = currentServiceMediaList.map((m, idx) => {
+        const displayUrl = (window.EPStore && window.EPStore.resolveMediaUrlSync)
+          ? window.EPStore.resolveMediaUrlSync(m.url, m.cloudUrl || m.thumbnail)
+          : (m.cloudUrl || m.url);
 
-      // Atualiza preview no mockup com a última mídia adicionada
+        return `
+          <div style="position:relative; width:56px; height:56px; border-radius:10px; overflow:hidden; flex-shrink:0; border:1.5px solid #D83F79; background:#18181B; cursor:pointer;" onclick="previewThisMediaInMockup(${idx})">
+            ${m.type === 'video'
+              ? `<video src="${displayUrl}" muted playsinline style="width:100%; height:100%; object-fit:cover;"></video><span style="position:absolute; bottom:2px; left:2px; background:rgba(0,0,0,0.75); color:#FFF; font-size:0.55rem; padding:1px 4px; border-radius:4px;">▶ Vídeo</span>`
+              : `<img src="${displayUrl}" style="width:100%; height:100%; object-fit:cover;">`
+            }
+            <button type="button" onclick="event.stopPropagation(); removeServiceMediaItem(${idx})" style="position:absolute; top:2px; right:2px; background:rgba(216,63,121,0.95); color:#FFF; border:none; width:16px; height:16px; border-radius:50%; font-size:0.6rem; cursor:pointer; display:flex; align-items:center; justify-content:center;">✕</button>
+          </div>
+        `;
+      }).join('');
+
       previewThisMediaInMockup(currentServiceMediaList.length - 1);
     }
 
@@ -3179,16 +3213,30 @@
       if (!item) return;
       const pImg = document.getElementById('serviceStoryPreviewImg');
       const pVid = document.getElementById('serviceStoryPreviewVideo');
+      const displayUrl = (window.EPStore && window.EPStore.resolveMediaUrlSync)
+        ? window.EPStore.resolveMediaUrlSync(item.url, item.cloudUrl || item.thumbnail)
+        : (item.cloudUrl || item.url);
+
       if (item.type === 'video') {
         if (pImg) pImg.style.display = 'none';
-        if (pVid) { pVid.style.display = 'block'; pVid.src = item.url; }
+        if (pVid) {
+          pVid.style.display = 'block';
+          pVid.src = displayUrl;
+          pVid.muted = true;
+          pVid.play().catch(() => {});
+        }
       } else {
-        if (pVid) pVid.style.display = 'none';
-        if (pImg) { pImg.style.display = 'block'; pImg.src = item.url; }
+        if (pVid) {
+          pVid.pause();
+          pVid.style.display = 'none';
+        }
+        if (pImg) {
+          pImg.style.display = 'block';
+          pImg.src = displayUrl;
+        }
       }
     }
 
-  
     // ========================================================
     // FICHA DETALHADA DA CLIENTE & WHATSAPP
     // ========================================================
@@ -3574,7 +3622,7 @@
       openModal('modalStoriesPerfilAdmin');
     }
 
-    function renderAdminProfileStoriesList() {
+        function renderAdminProfileStoriesList() {
       const container = document.getElementById('adminProfileStoriesListContainer');
       if (!container || !window.EPStore) return;
       const stories = window.EPStore.getProfileStories ? window.EPStore.getProfileStories() : [];
@@ -3586,21 +3634,33 @@
 
       container.innerHTML = stories.map(st => {
         const elapsed = window.EPStore.formatStoryElapsed ? window.EPStore.formatStoryElapsed(st.createdAt) : 'Ativo';
+        const displayUrl = (window.EPStore.resolveMediaUrlSync)
+          ? window.EPStore.resolveMediaUrlSync(st.url, st.cloudUrl || st.thumbnail)
+          : (st.cloudUrl || st.url);
+
         return `
           <div style="display:flex; justify-content:space-between; align-items:center; background:#FFF; border:1px solid rgba(77,19,40,0.12); border-radius:12px; padding:8px 12px; gap:10px;">
             <div style="display:flex; align-items:center; gap:10px;">
               ${st.type === 'video'
-                ? `<video src="${st.url}" muted playsinline style="width:44px; height:44px; border-radius:10px; object-fit:cover; background:#000;"></video>`
-                : `<img src="${st.url}" style="width:44px; height:44px; border-radius:10px; object-fit:cover;" alt="Story">`
+                ? `<div style="position:relative; width:44px; height:44px; border-radius:10px; overflow:hidden; background:#000; flex-shrink:0;">
+                     <video src="${displayUrl}" muted playsinline loop autoplay style="width:100%; height:100%; object-fit:cover;"></video>
+                     <span style="position:absolute; bottom:1px; left:2px; font-size:0.55rem; color:#FFF; background:rgba(0,0,0,0.7); padding:1px 3px; border-radius:3px;">▶ ${st.duration ? st.duration + 's' : 'Vídeo'}</span>
+                   </div>`
+                : `<img src="${displayUrl}" style="width:44px; height:44px; border-radius:10px; object-fit:cover;" alt="Story">`
               }
               <div>
                 <strong style="font-size:0.82rem; color:#350B19; display:block;">${st.caption || (st.type === 'video' ? 'Vídeo nos Stories' : 'Foto nos Stories')}</strong>
-                <span style="font-size:0.7rem; color:#6A1D39;">Publicado ${elapsed} &bull; Expira em 24h</span>
+                <span style="font-size:0.7rem; color:#6A1D39;">Publicado ${elapsed} &bull; Expira em 24h ${st.duration > 60 ? `&bull; Dividido em partes` : ''}</span>
               </div>
             </div>
-            <button type="button" onclick="excluirProfileStoryAdmin('${st.id}')" style="padding:6px 10px; border-radius:8px; border:none; background:#FFF0F3; color:#D83F79; font-size:0.75rem; cursor:pointer;">
-              <i class="fa-solid fa-trash"></i>
-            </button>
+            <div style="display:flex; align-items:center; gap:6px;">
+              <a href="index.html" target="_blank" style="text-decoration:none; padding:6px 10px; border-radius:8px; border:1px solid rgba(216,63,121,0.25); background:#FFF0F3; color:#D83F79; font-size:0.72rem; font-weight:600; display:flex; align-items:center; gap:4px;">
+                <i class="fa-solid fa-play"></i> Ver
+              </a>
+              <button type="button" onclick="excluirProfileStoryAdmin('${st.id}')" style="padding:6px 10px; border-radius:8px; border:none; background:#FFF0F3; color:#D83F79; font-size:0.75rem; cursor:pointer;" title="Excluir Story">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </div>
           </div>
         `;
       }).join('');
@@ -3609,8 +3669,10 @@
     async function handleUploadProfileStoryPhoto(input) {
       if (!input.files || input.files.length === 0) return;
       const caption = (document.getElementById('inputProfileStoryCaption')?.value || '').trim();
-      for (let i = 0; i < input.files.length; i++) {
-        const dataUrl = await window.EPStore.compressImageFile(input.files[i], 720, 0.80);
+      const files = Array.from(input.files);
+      input.value = '';
+      for (let i = 0; i < files.length; i++) {
+        const dataUrl = await window.EPStore.compressImageFile(files[i], 720, 0.80);
         window.EPStore.addProfileStory({ type: 'image', url: dataUrl, caption });
       }
       if (document.getElementById('inputProfileStoryCaption')) document.getElementById('inputProfileStoryCaption').value = '';
@@ -3618,39 +3680,60 @@
       showToast('Foto publicada nos seus Stories de 24h do Perfil!');
     }
 
-    function handleUploadProfileStoryVideo(input) {
+    async function handleUploadProfileStoryVideo(input) {
       if (!input.files || input.files.length === 0) return;
       const caption = (document.getElementById('inputProfileStoryCaption')?.value || '').trim();
-      Array.from(input.files).forEach(file => {
-        if (file.size > 25 * 1024 * 1024) {
-          showToast('Vídeo muito grande! Escolha um vídeo de até 25MB ou use um link.');
-          return;
+      const files = Array.from(input.files);
+      input.value = '';
+
+      for (const file of files) {
+        if (file.size > 100 * 1024 * 1024) {
+          showToast('Vídeo muito grande! Escolha um vídeo de até 100MB.');
+          continue;
         }
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-          const tempVid = document.createElement('video');
-          tempVid.preload = 'metadata';
-          tempVid.onloadedmetadata = () => {
-            const dur = Math.round(tempVid.duration || 0);
-            window.EPStore.addProfileStory({ type: 'video', url: ev.target.result, caption, duration: dur });
-            if (document.getElementById('inputProfileStoryCaption')) document.getElementById('inputProfileStoryCaption').value = '';
-            renderAdminProfileStoriesList();
-            if (dur > 60) {
-              showToast(`Vídeo de ${dur}s adicionado! Será dividido automaticamente em partes de até 1 minuto (padrão Instagram).`);
-            } else {
-              showToast('Vídeo publicado nos seus Stories de 24h do Perfil!');
-            }
-          };
-          tempVid.onerror = () => {
-            window.EPStore.addProfileStory({ type: 'video', url: ev.target.result, caption, duration: 60 });
-            if (document.getElementById('inputProfileStoryCaption')) document.getElementById('inputProfileStoryCaption').value = '';
-            renderAdminProfileStoriesList();
-            showToast('Vídeo publicado nos seus Stories de 24h do Perfil!');
-          };
-          tempVid.src = ev.target.result;
-        };
-        reader.readAsDataURL(file);
-      });
+
+        showToast('Processando e otimizando vídeo do celular...');
+
+        // 1. Extrai metadados e frame de thumbnail rapidamente
+        const meta = await window.EPStore.extractVideoMetaAndThumbnail(file);
+        const durationSecs = meta.duration || 60;
+
+        // 2. Salva o binário completo no IndexedDB local para reprodução imediata sem estourar o localStorage
+        const stored = await window.EPStore.storeMediaBlob(file);
+        const localUrl = (stored && stored.id) ? stored.id : (stored && stored.objectUrl ? stored.objectUrl : '');
+
+        // 3. Adiciona aos Stories locais
+        const newStoryId = 'pstory_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+        window.EPStore.addProfileStory({
+          id: newStoryId,
+          type: 'video',
+          url: localUrl,
+          thumbnail: meta.thumbnail,
+          caption: caption,
+          duration: durationSecs
+        });
+
+        if (document.getElementById('inputProfileStoryCaption')) {
+          document.getElementById('inputProfileStoryCaption').value = '';
+        }
+        renderAdminProfileStoriesList();
+
+        if (durationSecs > 60) {
+          showToast(`Vídeo de ${durationSecs}s publicado! Será dividido automaticamente em partes de até 1 min (Instagram).`);
+        } else {
+          showToast(`Vídeo de ${durationSecs}s publicado com sucesso nos Stories 24h!`);
+        }
+
+        // 4. Em segundo plano: envia para streaming na nuvem para sincronizar com todos os celulares e clientes
+        window.EPStore.uploadVideoToCloud(file).then(cloudUrl => {
+          if (cloudUrl) {
+            window.EPStore.updateProfileStoryCloudUrl(newStoryId, cloudUrl);
+            console.log('Vídeo sincronizado na nuvem com sucesso:', cloudUrl);
+          }
+        }).catch(err => {
+          console.warn('Erro silencioso no upload para nuvem do vídeo:', err);
+        });
+      }
     }
 
     function handleAddProfileStoryVideoUrlPrompt() {

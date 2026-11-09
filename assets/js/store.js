@@ -558,6 +558,9 @@ const SEED_DATA = {
 // ==========================================
 window.EPStore = {
   async init() {
+    // 0. Pre-carregamento imediato de videos e fotos do cofre IndexedDB
+    try { this.preloadAllMediaBlobs(); } catch(e) {}
+
     // 1. Configurações de Segurança e Tokens (hashes SHA-256)
     if (!localStorage.getItem(STORAGE_KEYS.SECURITY_TOKENS)) {
       const adminHash = await CryptoUtils.sha256(SEED_DATA.initialTokens.adminToken);
@@ -1615,8 +1618,40 @@ window.EPStore = {
     } else {
       list.push(serviceData);
     }
-    localStorage.setItem(STORAGE_KEYS.SERVICES, JSON.stringify(list));
-    this.publishCloudSync('UPSERT_SERVICE', savedItem);
+
+    try {
+      localStorage.setItem(STORAGE_KEYS.SERVICES, JSON.stringify(list));
+    } catch(e) {
+      console.warn('QuotaExceeded ao salvar servicos no localStorage, limpando videos pesados em Base64:', e);
+      // Remove campos data:video pesados mantendo apenas idb:// ou urls remotas
+      const safeList = list.map(s => {
+        if (!s.mediaList || !Array.isArray(s.mediaList)) return s;
+        return {
+          ...s,
+          mediaList: s.mediaList.map(m => {
+            if (m.url && typeof m.url === 'string' && m.url.startsWith('data:video')) {
+              return { ...m, url: m.cloudUrl || m.thumbnail || '' };
+            }
+            return m;
+          })
+        };
+      });
+      try {
+        localStorage.setItem(STORAGE_KEYS.SERVICES, JSON.stringify(safeList));
+      } catch(e2) {}
+    }
+
+    // Publica sincronizacao com URLs leves
+    const syncItem = { ...savedItem };
+    if (Array.isArray(syncItem.mediaList)) {
+      syncItem.mediaList = syncItem.mediaList.map(m => {
+        if (m.url && typeof m.url === 'string' && m.url.startsWith('data:video')) {
+          return { ...m, url: m.cloudUrl || m.thumbnail || '' };
+        }
+        return m;
+      });
+    }
+    this.publishCloudSync('UPSERT_SERVICE', syncItem);
     return list;
   },
 
@@ -1725,6 +1760,255 @@ window.EPStore = {
     return this.saveSalonSettings(scheduleData);
   },
 
+  // ====================================================
+  // COFRE DE MIDIA BINARIA (INDEXEDDB) PARA VIDEOS E FOTOS PESADAS
+  // Elimina o erro QuotaExceededError (5MB do localStorage) permitindo videos longos
+  // ====================================================
+  _mediaDbPromise: null,
+  _mediaObjectUrlCache: {},
+
+  _openMediaDB() {
+    if (this._mediaDbPromise) return this._mediaDbPromise;
+    this._mediaDbPromise = new Promise((resolve) => {
+      try {
+        if (typeof indexedDB === 'undefined') {
+          resolve(null);
+          return;
+        }
+        const req = indexedDB.open('epn_media_vault_db', 1);
+        req.onupgradeneeded = (e) => {
+          const db = e.target.result;
+          if (!db.objectStoreNames.contains('media_blobs')) {
+            db.createObjectStore('media_blobs', { keyPath: 'id' });
+          }
+        };
+        req.onsuccess = (e) => resolve(e.target.result);
+        req.onerror = (e) => {
+          console.warn('Erro ao abrir IndexedDB:', e);
+          resolve(null);
+        };
+      } catch (err) {
+        console.warn('IndexedDB nao suportado:', err);
+        resolve(null);
+      }
+    });
+    return this._mediaDbPromise;
+  },
+
+  async storeMediaBlob(blobOrFile, customId = '') {
+    if (!blobOrFile) return null;
+    const isVideo = (blobOrFile.type && blobOrFile.type.startsWith('video/')) || (blobOrFile.name && blobOrFile.name.match(/\.(mp4|mov|webm|m4v)$/i));
+    const prefix = isVideo ? 'idb://vid_' : 'idb://img_';
+    const id = customId || (prefix + Date.now() + '_' + Math.random().toString(36).substring(2, 9));
+
+    let objectUrl = '';
+    try {
+      if (typeof URL !== 'undefined' && URL.createObjectURL) {
+        objectUrl = URL.createObjectURL(blobOrFile);
+        this._mediaObjectUrlCache[id] = objectUrl;
+      }
+    } catch(e) {
+      console.warn('Erro ao gerar ObjectURL local:', e);
+    }
+
+    try {
+      const db = await this._openMediaDB();
+      if (db) {
+        await new Promise((resolve, reject) => {
+          const tx = db.transaction('media_blobs', 'readwrite');
+          const store = tx.objectStore('media_blobs');
+          const record = {
+            id,
+            blob: blobOrFile,
+            mimeType: blobOrFile.type || (isVideo ? 'video/mp4' : 'image/jpeg'),
+            size: blobOrFile.size || 0,
+            createdAt: Date.now()
+          };
+          const putReq = store.put(record);
+          putReq.onsuccess = () => resolve(true);
+          putReq.onerror = (err) => reject(err);
+        });
+      }
+    } catch(err) {
+      console.warn('Falha ao persistir no IndexedDB:', err);
+    }
+
+    return { id, objectUrl };
+  },
+
+  async getMediaBlob(id) {
+    if (!id || typeof id !== 'string' || !id.startsWith('idb://')) return null;
+    try {
+      const db = await this._openMediaDB();
+      if (!db) return null;
+      return new Promise((resolve) => {
+        const tx = db.transaction('media_blobs', 'readonly');
+        const store = tx.objectStore('media_blobs');
+        const req = store.get(id);
+        req.onsuccess = () => resolve(req.result ? req.result.blob : null);
+        req.onerror = () => resolve(null);
+      });
+    } catch(e) {
+      return null;
+    }
+  },
+
+  resolveMediaUrlSync(url, fallbackUrl = '') {
+    if (!url) return fallbackUrl || '';
+    if (typeof url === 'string' && url.startsWith('idb://')) {
+      if (this._mediaObjectUrlCache && this._mediaObjectUrlCache[url]) {
+        return this._mediaObjectUrlCache[url];
+      }
+      return fallbackUrl || '';
+    }
+    return url;
+  },
+
+  async resolveMediaUrlAsync(url, fallbackUrl = '') {
+    if (!url) return fallbackUrl || '';
+    if (typeof url === 'string' && url.startsWith('idb://')) {
+      if (this._mediaObjectUrlCache && this._mediaObjectUrlCache[url]) {
+        return this._mediaObjectUrlCache[url];
+      }
+      const blob = await this.getMediaBlob(url);
+      if (blob && typeof URL !== 'undefined' && URL.createObjectURL) {
+        try {
+          const objUrl = URL.createObjectURL(blob);
+          this._mediaObjectUrlCache[url] = objUrl;
+          return objUrl;
+        } catch(e) {}
+      }
+      return fallbackUrl || '';
+    }
+    return url;
+  },
+
+  async preloadAllMediaBlobs() {
+    try {
+      const db = await this._openMediaDB();
+      if (!db) return;
+      const tx = db.transaction('media_blobs', 'readonly');
+      const store = tx.objectStore('media_blobs');
+      const req = store.openCursor();
+      req.onsuccess = (e) => {
+        const cursor = e.target.result;
+        if (cursor) {
+          const val = cursor.value;
+          if (val && val.id && val.blob && !this._mediaObjectUrlCache[val.id]) {
+            try {
+              if (typeof URL !== 'undefined' && URL.createObjectURL) {
+                this._mediaObjectUrlCache[val.id] = URL.createObjectURL(val.blob);
+              }
+            } catch(err) {}
+          }
+          cursor.continue();
+        }
+      };
+    } catch(err) {
+      console.warn('Erro ao pre-carregar midia do IndexedDB:', err);
+    }
+  },
+
+  // ====================================================
+  // EXTRACAO ULTRA-RAPIDA DE DURACAO E THUMBNAIL DE VIDEO
+  // ====================================================
+  async extractVideoMetaAndThumbnail(file) {
+    return new Promise((resolve) => {
+      try {
+        if (!file || typeof URL === 'undefined' || !URL.createObjectURL) {
+          resolve({ duration: 60, thumbnail: '' });
+          return;
+        }
+        const tempUrl = URL.createObjectURL(file);
+        const vid = document.createElement('video');
+        vid.preload = 'metadata';
+        vid.muted = true;
+        vid.playsInline = true;
+
+        let resolved = false;
+        const finish = (duration = 60, thumbnail = '') => {
+          if (resolved) return;
+          resolved = true;
+          try { URL.revokeObjectURL(tempUrl); } catch(e) {}
+          resolve({ duration: Math.max(1, Math.round(duration)), thumbnail });
+        };
+
+        const timeout = setTimeout(() => {
+          finish(60, '');
+        }, 6000);
+
+        vid.onloadedmetadata = () => {
+          const dur = vid.duration || 60;
+          try {
+            vid.currentTime = Math.min(1.0, dur / 2);
+          } catch(e) {
+            finish(dur, '');
+          }
+        };
+
+        vid.onseeked = () => {
+          clearTimeout(timeout);
+          let thumb = '';
+          try {
+            const canvas = document.createElement('canvas');
+            canvas.width = 360;
+            canvas.height = 640;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(vid, 0, 0, 360, 640);
+            thumb = canvas.toDataURL('image/jpeg', 0.70);
+          } catch(e) {
+            console.warn('Canvas thumbnail error:', e);
+          }
+          finish(vid.duration || 60, thumb);
+        };
+
+        vid.onerror = () => {
+          clearTimeout(timeout);
+          finish(60, '');
+        };
+
+        vid.src = tempUrl;
+      } catch(e) {
+        resolve({ duration: 60, thumbnail: '' });
+      }
+    });
+  },
+
+  // ====================================================
+  // UPLOAD DE VIDEO PARA STREAMING PUBLICO (CROSS-DEVICE)
+  // Gera URL direta https://ntfy.sh/file/...mp4 sem limite de localStorage
+  // ====================================================
+  async uploadVideoToCloud(file) {
+    if (!file) return null;
+    try {
+      const topic = 'ep_nails_media_files_2026_paiva';
+      const cleanFileName = (file.name || 'story.mp4').replace(/[^a-zA-Z0-9._-]/g, '_');
+      const uploadUrl = 'https://ntfy.sh/' + topic + '?filename=' + encodeURIComponent(cleanFileName);
+
+      const response = await fetch(uploadUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': file.type || 'video/mp4'
+        },
+        body: file
+      });
+
+      if (!response.ok) {
+        console.warn('Falha no upload do video:', response.status);
+        return null;
+      }
+
+      const resData = await response.json();
+      if (resData && resData.attachment && resData.attachment.url) {
+        return resData.attachment.url;
+      }
+      return null;
+    } catch(err) {
+      console.warn('Erro ao enviar video para nuvem:', err);
+      return null;
+    }
+  },
+
   // ----------------------------------------------------
   // STORIES DE 24H DO PERFIL (ESTILO INSTAGRAM)
   // ----------------------------------------------------
@@ -1745,13 +2029,47 @@ window.EPStore = {
       id: storyData.id || ('pstory_' + Date.now() + '_' + Math.floor(Math.random() * 1000)),
       type: storyData.type || 'image',
       url: storyData.url,
+      cloudUrl: storyData.cloudUrl || '',
+      thumbnail: storyData.thumbnail || '',
       caption: (storyData.caption || '').trim(),
+      duration: Math.round(storyData.duration || 0),
       createdAt: storyData.createdAt || Date.now()
     };
     list.push(newStory);
-    localStorage.setItem(STORAGE_KEYS.PROFILE_STORIES, JSON.stringify(list));
-    this.publishCloudSync('UPSERT_PROFILE_STORY', newStory);
+
+    try {
+      localStorage.setItem(STORAGE_KEYS.PROFILE_STORIES, JSON.stringify(list));
+    } catch(e) {
+      console.warn('QuotaExceeded ao salvar stories no localStorage, salvando versao limpa:', e);
+      const cleanList = list.map(item => ({
+        ...item,
+        url: (typeof item.url === 'string' && item.url.startsWith('data:video')) ? (item.cloudUrl || item.thumbnail || '') : item.url
+      }));
+      try {
+        localStorage.setItem(STORAGE_KEYS.PROFILE_STORIES, JSON.stringify(cleanList));
+      } catch(e2) {}
+    }
+
+    // Publica sincronizacao leve na nuvem
+    const syncPayload = { ...newStory };
+    if (typeof syncPayload.url === 'string' && syncPayload.url.startsWith('data:video')) {
+      syncPayload.url = syncPayload.cloudUrl || syncPayload.thumbnail || '';
+    }
+    this.publishCloudSync('UPSERT_PROFILE_STORY', syncPayload);
     return list;
+  },
+
+  updateProfileStoryCloudUrl(storyId, cloudUrl) {
+    if (!storyId || !cloudUrl) return;
+    const list = this.getProfileStories();
+    const item = list.find(s => s.id === storyId);
+    if (item) {
+      item.cloudUrl = cloudUrl;
+      try {
+        localStorage.setItem(STORAGE_KEYS.PROFILE_STORIES, JSON.stringify(list));
+      } catch(e) {}
+      this.publishCloudSync('UPSERT_PROFILE_STORY', item);
+    }
   },
 
   deleteProfileStory(id) {

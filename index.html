@@ -558,7 +558,10 @@
             <span class="story-subtitle-meta" id="storyServiceName">Alongamento em Gel</span>
           </div>
         </div>
-        <div class="instagram-story-header-actions">
+        <div class="instagram-story-header-actions" style="display:flex; align-items:center; gap:8px;">
+          <button type="button" id="btnStorySoundToggle" class="btn-story-ig-close" onclick="toggleStorySound(event)" aria-label="Som" style="display:none;" title="Ativar/Desativar Som">
+            <i class="fa-solid fa-volume-high" id="storySoundIcon"></i>
+          </button>
           <button type="button" class="btn-story-ig-close" onclick="closeStoryViewer()" aria-label="Fechar">
             <i class="fa-solid fa-xmark"></i>
           </button>
@@ -567,8 +570,9 @@
 
       <!-- Mídia dos Stories (Foto ou Vídeo em 100% da Tela Toda com object-fit: cover) -->
       <div class="instagram-story-media-stage" id="instagramStoryMediaStage"
-           onmousedown="pauseStory()" onmouseup="resumeStory()"
-           ontouchstart="pauseStory()" ontouchend="resumeStory()">
+           onmousedown="handleStoryPressStart(event)" onmouseup="handleStoryPressEnd(event)"
+           ontouchstart="handleStoryPressStart(event)" ontouchend="handleStoryPressEnd(event)"
+           ontouchcancel="handleStoryPressEnd(event)">
         <img id="storyMediaImg" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Story" style="display: block;">
         <video id="storyMediaVideo" autoplay playsinline webkit-playsinline style="display: none;"></video>
         <div id="storyMediaCaptionOverlay" class="instagram-story-caption-box" style="display: none;"></div>
@@ -1456,12 +1460,54 @@
     let storyIsPaused = false;
     let storySlideStartMs = 0;
     let storySlideDurationMs = 5000;
+    let storyPressHoldTimer = null;
+    let storyIsLongPressing = false;
+    let storyIsMuted = false;
 
-    // Utilitário para dividir qualquer vídeo maior que 60s em segmentos de até 60s (padrão Instagram)
+    function handleStoryPressStart(event) {
+      clearTimeout(storyPressHoldTimer);
+      storyIsLongPressing = false;
+      // Aguarda 180ms para diferenciar toque rapido (proximo/anterior) de segurar (pausar)
+      storyPressHoldTimer = setTimeout(() => {
+        storyIsLongPressing = true;
+        pauseStory();
+      }, 180);
+    }
+
+    function handleStoryPressEnd(event) {
+      clearTimeout(storyPressHoldTimer);
+      if (storyIsLongPressing) {
+        resumeStory();
+        storyIsLongPressing = false;
+      }
+    }
+
+    function toggleStorySound(event) {
+      if (event) event.stopPropagation();
+      const vid = document.getElementById('storyMediaVideo');
+      if (!vid) return;
+      storyIsMuted = !storyIsMuted;
+      vid.muted = storyIsMuted;
+      updateStorySoundIcon(!storyIsMuted);
+    }
+
+    function updateStorySoundIcon(hasSound) {
+      const icon = document.getElementById('storySoundIcon');
+      if (icon) {
+        if (hasSound) {
+          icon.className = 'fa-solid fa-volume-high';
+        } else {
+          icon.className = 'fa-solid fa-volume-xmark';
+        }
+      }
+    }
+
+    // Utilitario para dividir qualquer video maior que 60s em segmentos de ate 60s (padrao Instagram)
     function prepareStoryMediaSegments(rawList) {
       const segments = [];
       rawList.forEach((item, itemIdx) => {
-        if (item.type === 'video') {
+        const isVideo = item.type === 'video' || (typeof item.url === 'string' && (item.url.includes('.mp4') || item.url.includes('.webm') || item.url.startsWith('idb://vid_') || item.url.startsWith('data:video/')));
+        if (isVideo) {
           const rawDur = parseFloat(item.duration) || 0;
           if (rawDur > 60) {
             const totalParts = Math.ceil(rawDur / 60);
@@ -1470,10 +1516,11 @@
               const end = Math.min((p + 1) * 60, rawDur);
               segments.push({
                 ...item,
+                type: 'video',
                 startTime: start,
                 endTime: end,
                 segmentDuration: end - start,
-                partText: `Parte ${p + 1}/${totalParts}`,
+                partText: 'Parte ' + (p + 1) + '/' + totalParts,
                 _segmented: true,
                 originalIndex: itemIdx
               });
@@ -1481,6 +1528,7 @@
           } else {
             segments.push({
               ...item,
+              type: 'video',
               startTime: 0,
               endTime: rawDur > 0 ? Math.min(rawDur, 60) : 60,
               segmentDuration: rawDur > 0 ? Math.min(rawDur, 60) : 60,
@@ -1491,6 +1539,7 @@
         } else {
           segments.push({
             ...item,
+            type: 'image',
             segmentDuration: 5,
             originalIndex: itemIdx
           });
@@ -1527,6 +1576,8 @@
         rawList = rawStories.map(st => ({
           type: st.type || 'image',
           url: st.url,
+          cloudUrl: st.cloudUrl || '',
+          thumbnail: st.thumbnail || '',
           caption: st.caption || '',
           duration: st.duration || 0,
           createdAt: st.createdAt
@@ -1564,7 +1615,14 @@
       if (srv) {
         selectedService = { id: srv.id, name: srv.name, price: srv.price, image: srv.image };
         if (Array.isArray(srv.mediaList) && srv.mediaList.length > 0) {
-          rawList = srv.mediaList;
+          rawList = srv.mediaList.map(m => ({
+            type: m.type || 'image',
+            url: m.url,
+            cloudUrl: m.cloudUrl || '',
+            thumbnail: m.thumbnail || '',
+            caption: m.caption || srv.name,
+            duration: m.duration || 0
+          }));
         } else if (Array.isArray(srv.storiesVideos) && srv.storiesVideos.length > 0) {
           rawList = srv.storiesVideos.map(v => ({
             type: (v.mediaUrl && v.mediaUrl.endsWith('.mp4')) ? 'video' : 'image',
@@ -1601,6 +1659,14 @@
     }
 
     function closeStoryViewer() {
+      if (storyTimer) {
+        clearInterval(storyTimer);
+        storyTimer = null;
+      }
+      clearTimeout(storyPressHoldTimer);
+      storyIsLongPressing = false;
+      storyIsPaused = false;
+
       const modal = document.getElementById('modalStoryViewer');
       if (modal) {
         modal.classList.remove('active');
@@ -1613,11 +1679,11 @@
         vid.style.display = 'none';
         vid.src = '';
       }
-      if (storyTimer) clearInterval(storyTimer);
-      resumeStory();
+      const soundBtn = document.getElementById('btnStorySoundToggle');
+      if (soundBtn) soundBtn.style.display = 'none';
     }
 
-    function showStorySlide(idx) {
+    async function showStorySlide(idx) {
       if (!currentServiceStoryMedia || currentServiceStoryMedia.length === 0) return;
       if (idx < 0) idx = 0;
       if (idx >= currentServiceStoryMedia.length) {
@@ -1632,18 +1698,18 @@
       const capEl = document.getElementById('storyMediaCaptionOverlay');
       const serviceNameEl = document.getElementById('storyServiceName');
       const timeElapsedEl = document.getElementById('storyTimeElapsed');
+      const soundBtn = document.getElementById('btnStorySoundToggle');
 
-      // Atualiza cabeçalho com tempo e parte (se houver corte de 60s)
       if (timeElapsedEl) {
         const elapsed = (window.EPStore && window.EPStore.formatStoryElapsed)
           ? window.EPStore.formatStoryElapsed(mediaItem.createdAt)
-          : 'Há 2h';
-        timeElapsedEl.innerText = mediaItem.partText ? `${elapsed} • ${mediaItem.partText}` : elapsed;
+          : 'Ha 2h';
+        timeElapsedEl.innerText = mediaItem.partText ? (elapsed + ' • ' + mediaItem.partText) : elapsed;
       }
 
       if (serviceNameEl) {
         if (storyActiveService && selectedService) {
-          serviceNameEl.innerText = `${selectedService.name} • R$ ${parseFloat(selectedService.price || 150).toFixed(2).replace('.', ',')}`;
+          serviceNameEl.innerText = selectedService.name + ' • R$ ' + parseFloat(selectedService.price || 150).toFixed(2).replace('.', ',');
         } else {
           serviceNameEl.innerText = mediaItem.caption || 'Stories do Dia (24h)';
         }
@@ -1658,30 +1724,57 @@
         }
       }
 
-      if (storyTimer) clearInterval(storyTimer);
+      if (storyTimer) {
+        clearInterval(storyTimer);
+        storyTimer = null;
+      }
 
-      if (mediaItem.type === 'video' && vid) {
+      const isVideo = mediaItem.type === 'video' || (typeof mediaItem.url === 'string' && (mediaItem.url.includes('.mp4') || mediaItem.url.includes('.webm') || mediaItem.url.startsWith('idb://vid_') || mediaItem.url.startsWith('data:video/')));
+
+      if (isVideo && vid) {
         if (img) img.style.display = 'none';
         vid.style.display = 'block';
+        if (soundBtn) soundBtn.style.display = 'flex';
+
+        // Resolve URL (IndexedDB blob ou URL remota em nuvem)
+        let resolvedUrl = mediaItem.url;
+        if (window.EPStore && window.EPStore.resolveMediaUrlAsync) {
+          resolvedUrl = await window.EPStore.resolveMediaUrlAsync(mediaItem.url, mediaItem.cloudUrl || mediaItem.thumbnail);
+        }
 
         const startTime = mediaItem.startTime || 0;
         const endTime = mediaItem.endTime || 60;
         const targetDuration = Math.min(mediaItem.segmentDuration || (endTime - startTime), 60);
 
-        if (vid.src !== mediaItem.url) {
-          vid.src = mediaItem.url;
+        if (vid.src !== resolvedUrl) {
+          vid.src = resolvedUrl;
         }
 
+        vid.muted = storyIsMuted;
+        updateStorySoundIcon(!storyIsMuted);
+
+        const playVideoWithAudioFallback = () => {
+          try {
+            vid.currentTime = startTime;
+            const playPromise = vid.play();
+            if (playPromise !== undefined) {
+              playPromise.catch(err => {
+                console.warn('Autoplay com som bloqueado pelo navegador, ativando modo mudo:', err);
+                vid.muted = true;
+                storyIsMuted = true;
+                updateStorySoundIcon(false);
+                vid.play().catch(() => {});
+              });
+            }
+          } catch(e) {}
+        };
+
         const handleMetadata = () => {
-          // Se o vídeo for maior que 60s e ainda não tínhamos fatiado, fatia dinamicamente
           if (vid.duration > 60 && !mediaItem._segmented) {
             resegmentLoadedVideo(vid.duration, idx);
             return;
           }
-          try {
-            vid.currentTime = startTime;
-            vid.play().catch(() => {});
-          } catch(e) {}
+          playVideoWithAudioFallback();
           startStoryPlaybackProgress(idx, targetDuration, vid, startTime, endTime);
         };
 
@@ -1689,10 +1782,7 @@
           handleMetadata();
         } else {
           vid.onloadedmetadata = handleMetadata;
-          try {
-            vid.currentTime = startTime;
-            vid.play().catch(() => {});
-          } catch(e) {}
+          playVideoWithAudioFallback();
           startStoryPlaybackProgress(idx, targetDuration, vid, startTime, endTime);
         }
       } else if (img) {
@@ -1701,13 +1791,19 @@
           vid.style.display = 'none';
           vid.src = '';
         }
+        if (soundBtn) soundBtn.style.display = 'none';
         img.style.display = 'block';
-        img.src = mediaItem.url;
+
+        let resolvedUrl = mediaItem.url;
+        if (window.EPStore && window.EPStore.resolveMediaUrlAsync) {
+          resolvedUrl = await window.EPStore.resolveMediaUrlAsync(mediaItem.url, mediaItem.cloudUrl);
+        }
+        img.src = resolvedUrl;
         startStoryPlaybackProgress(idx, 5, null, 0, 5);
       }
     }
 
-    // Fatia o vídeo carregado em partes de 60s em tempo de execução caso a duração exceda 1 minuto
+    // Fatia o video carregado em partes de 60s em tempo de execucao caso a duracao exceda 1 minuto
     function resegmentLoadedVideo(totalDur, currentIdx) {
       const item = currentServiceStoryMedia[currentIdx];
       if (!item || totalDur <= 60) return;
@@ -1719,10 +1815,11 @@
         const end = Math.min((p + 1) * 60, totalDur);
         newSegments.push({
           ...item,
+          type: 'video',
           startTime: start,
           endTime: end,
           segmentDuration: end - start,
-          partText: `Parte ${p + 1}/${totalParts}`,
+          partText: 'Parte ' + (p + 1) + '/' + totalParts,
           _segmented: true
         });
       }
@@ -1733,9 +1830,13 @@
     }
 
     function startStoryPlaybackProgress(idx, durationSecs, vidEl, startTime, endTime) {
-      // Atualiza barrinhas anteriores como 100% e seguintes como 0%
+      if (storyTimer) {
+        clearInterval(storyTimer);
+        storyTimer = null;
+      }
+
       currentServiceStoryMedia.forEach((_, i) => {
-        const bar = document.getElementById(`instaStoryProg_${i}`);
+        const bar = document.getElementById('instaStoryProg_' + i);
         if (bar) bar.style.width = (i < idx) ? '100%' : '0%';
       });
 
@@ -1746,23 +1847,23 @@
         if (storyIsPaused) return;
 
         let pct = 0;
-        if (vidEl && !vidEl.paused && vidEl.currentTime) {
+        if (vidEl && (vidEl.ended || vidEl.currentTime >= endTime - 0.12)) {
+          pct = 100;
+        } else if (vidEl && vidEl.currentTime !== undefined && !vidEl.paused) {
           const currentInSegment = Math.max(0, vidEl.currentTime - startTime);
           pct = (currentInSegment / durationSecs) * 100;
-          if (vidEl.currentTime >= endTime || vidEl.ended) {
-            pct = 100;
-          }
         } else {
           const elapsed = Date.now() - storySlideStartMs;
           pct = (elapsed / storySlideDurationMs) * 100;
         }
 
         pct = Math.min(Math.max(pct, 0), 100);
-        const bar = document.getElementById(`instaStoryProg_${idx}`);
-        if (bar) bar.style.width = `${pct}%`;
+        const bar = document.getElementById('instaStoryProg_' + idx);
+        if (bar) bar.style.width = pct + '%';
 
         if (pct >= 100) {
           clearInterval(storyTimer);
+          storyTimer = null;
           if (storyIndex + 1 < currentServiceStoryMedia.length) {
             showStorySlide(storyIndex + 1);
           } else {
