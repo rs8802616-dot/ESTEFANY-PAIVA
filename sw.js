@@ -1,4 +1,4 @@
-const CACHE_NAME = 'estefany-nails-v27-instagram-stories-fullscreen-60s-split';
+const CACHE_NAME = 'estefany-nails-v28-fix-profile-photo-sync';
 const STATIC_ASSETS = [
   './',
   './index.html',

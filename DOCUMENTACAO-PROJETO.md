@@ -61,3 +61,11 @@ O sistema é uma aplicação web progressiva (PWA) de luxo para salão de estét
   3. **Segurar para Pausar (Press & Hold)**: Ao pressionar e segurar na tela, o story pausa a reprodução do vídeo e do timer, ocultando os controles suavemente; ao soltar, a reprodução é retomada automaticamente.
   4. **Fatiamento Automático de Vídeos em Partes de até 1 Minuto (60s)**: Seguindo a regra do Instagram, vídeos com duração superior a 60 segundos são automaticamente fatiados em segmentos sucessivos de no máximo 60 segundos (Parte 1/2, Parte 2/2, etc.), cada um com sua barrinha independente no topo.
   5. **Purga Automática de Cache**: Versão do Service Worker elevada para 'estefany-nails-v27-instagram-stories-fullscreen-60s-split'.
+- **v28**: Correção da foto de perfil que não atualizava nos outros aparelhos:
+  1. **Causa**: `saveSalonSettings()` enviava para a nuvem (ntfy) o objeto de configurações INTEIRO, incluindo banners e imagens em Base64. O pacote ficava enorme (acima do limite de 180KB, sendo descartado sem aviso) ou gerava dezenas de partes, batendo no limite de requisições (erro 429). Resultado: a foto nova nunca chegava no celular da cliente, que continuava mostrando a imagem padrão.
+  2. **Envio só do que mudou (delta)**: agora apenas os campos alterados são publicados, com um carimbo `settingsUpdatedAt`; a foto de perfil (pequena) chega em poucos pacotes.
+  3. **Reenvio com nova tentativa**: `_postToCloud()` tenta de novo automaticamente em caso de erro 429/rede (até 4 tentativas).
+  4. **Retrato do perfil (snapshot)**: ao abrir o painel admin, `publishProfileSnapshot()` reenvia foto + dados principais (no máximo a cada 4h), porque o histórico da nuvem expira em ~12h e aparelhos que abrem depois não recebiam nada.
+  5. **Proteção contra eventos antigos**: um evento de configuração mais antigo não sobrescreve uma alteração mais nova.
+  6. **Limitação conhecida**: sem banco de dados próprio, a sincronização depende do canal ntfy (histórico de ~12h). Para garantia total e permanente, o ideal é um backend (ex: Firebase/Supabase).
+  7. Cache do Service Worker: `estefany-nails-v28-fix-profile-photo-sync`.

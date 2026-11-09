@@ -1915,6 +1915,9 @@
         console.error('refreshAllAdminViews caught:', err);
       }
 
+      // Reenvia a foto/perfil atual para a nuvem (garante que celulares que abrirem depois recebam a foto)
+      try { if (window.EPStore && window.EPStore.publishProfileSnapshot) window.EPStore.publishProfileSnapshot(false); } catch (e) {}
+
       const urlTab = new URLSearchParams(window.location.search).get('tab') || 'dashboard';
       switchAdminTab(urlTab);
 

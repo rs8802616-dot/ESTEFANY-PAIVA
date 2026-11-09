@@ -1512,9 +1512,32 @@ window.EPStore = {
   saveSalonSettings(newSettings) {
     const current = this.getSalonSettings();
     const updated = { ...current, ...newSettings };
+    updated.settingsUpdatedAt = Date.now();
     localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(updated));
-    this.publishCloudSync('UPDATE_SETTINGS', updated);
+    // Envia para a nuvem SOMENTE os campos alterados (delta). Antes era enviado o objeto
+    // inteiro (com banners/fotos em Base64), o que estourava o limite e a foto nunca
+    // chegava nos outros aparelhos.
+    this.publishCloudSync('UPDATE_SETTINGS', { ...newSettings, settingsUpdatedAt: updated.settingsUpdatedAt });
     return updated;
+  },
+
+  // Republica um "retrato" do perfil (foto + dados principais) para que aparelhos que
+  // abrirem o app depois também recebam a foto atual (o histórico da nuvem expira em ~12h).
+  publishProfileSnapshot(force = false) {
+    try {
+      const SNAP_KEY = 'epn_last_profile_snapshot_ts';
+      const last = parseInt(localStorage.getItem(SNAP_KEY) || '0', 10);
+      if (!force && Date.now() - last < 4 * 3600 * 1000) return false;
+      const st = this.getSalonSettings();
+      const snap = {};
+      ['avatarImage', 'ownerName', 'salonName', 'slogan', 'welcomeMessage', 'phone', 'whatsapp', 'instagram', 'address', 'themeColors', 'settingsUpdatedAt']
+        .forEach(k => { if (st[k] !== undefined) snap[k] = st[k]; });
+      localStorage.setItem(SNAP_KEY, String(Date.now()));
+      this.publishCloudSync('UPDATE_SETTINGS', snap);
+      return true;
+    } catch (e) {
+      return false;
+    }
   },
 
   // ----------------------------------------------------
@@ -2117,6 +2140,25 @@ window.EPStore = {
     } catch (e) {}
   },
 
+  async _postToCloud(body) {
+    for (let attempt = 0; attempt < 4; attempt++) {
+      try {
+        const r = await fetch(`https://ntfy.sh/${this.CLOUD_TOPIC}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+          body,
+          cache: 'no-store'
+        });
+        if (r.ok) return true;
+        // 429 = limite de requisições: espera e tenta de novo
+        await new Promise(res => setTimeout(res, 2500 * (attempt + 1)));
+      } catch (e) {
+        await new Promise(res => setTimeout(res, 2000 * (attempt + 1)));
+      }
+    }
+    return false;
+  },
+
   async publishCloudSync(action, payload) {
     const msgObj = {
       syncId: 'sync_' + Date.now() + '_' + Math.floor(Math.random() * 10000),
@@ -2144,13 +2186,8 @@ window.EPStore = {
     try {
       const serialized = JSON.stringify(msgObj);
       if (serialized.length <= 3600) {
-        await fetch(`https://ntfy.sh/${this.CLOUD_TOPIC}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
-          body: serialized,
-          cache: 'no-store'
-        });
-      } else if (serialized.length <= 180000) {
+        await this._postToCloud(serialized);
+      } else if (serialized.length <= 400000) {
         const chunkSize = 3300;
         const totalChunks = Math.ceil(serialized.length / chunkSize);
         const groupId = msgObj.syncId;
@@ -2164,16 +2201,13 @@ window.EPStore = {
             data: part,
             ts: msgObj.ts
           });
-          await fetch(`https://ntfy.sh/${this.CLOUD_TOPIC}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
-            body: chunkEnvelope,
-            cache: 'no-store'
-          });
+          await this._postToCloud(chunkEnvelope);
           if (totalChunks > 1 && i < totalChunks - 1) {
-            await new Promise(r => setTimeout(r, 90));
+            await new Promise(r => setTimeout(r, 120));
           }
         }
+      } else {
+        console.warn('Sincronização: pacote grande demais para a nuvem (' + serialized.length + ' bytes). Reduza o tamanho da imagem.');
       }
     } catch (err) {
       console.warn('Aviso de sincronização em nuvem:', err);
@@ -2336,6 +2370,15 @@ window.EPStore = {
       changed = true;
     } else if (action === 'UPDATE_SETTINGS' && payload) {
       const current = this.getSalonSettings();
+      if (payload.settingsUpdatedAt && current.settingsUpdatedAt && payload.settingsUpdatedAt < current.settingsUpdatedAt) {
+        // Evento antigo: ignora campos que já foram alterados depois, mas aceita a foto se ainda for a padrão
+        const isDefaultAvatar = !current.avatarImage || current.avatarImage.indexOf('assets/images/') === 0;
+        if (!(isDefaultAvatar && payload.avatarImage)) return false;
+        const merged = { ...current, avatarImage: payload.avatarImage };
+        localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(merged));
+        if (!deferRender) this.emitStoreUpdate({ action, payload, fromRemote: true });
+        return true;
+      }
       const updated = { ...current, ...payload };
       localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(updated));
       if (payload.themeColors) {
