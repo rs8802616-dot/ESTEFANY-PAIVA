@@ -1,4 +1,4 @@
-const CACHE_NAME = 'estefany-nails-v28-fix-profile-photo-sync';
+const CACHE_NAME = 'estefany-nails-v29-no-test-image-flash';
 const STATIC_ASSETS = [
   './',
   './index.html',

@@ -94,7 +94,7 @@
         <!-- Linha de Saudação à Cliente (Toque no Perfil para abrir os Stories 24h estilo Instagram) -->
         <div class="wine-greeting-row">
           <div class="greeting-avatar-ring has-active-story" id="clientProfileAvatarRing" onclick="openProfileStoryViewer()" title="Toque para ver os Stories do Dia (24h)">
-            <img src="assets/images/trabalho-amendoada-ouro.png" id="clientHeaderAvatarImg" alt="Estefany Paiva">
+            <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" id="clientHeaderAvatarImg" alt="Estefany Paiva">
             <span class="avatar-story-badge" id="clientProfileStoryBadge">Stories</span>
           </div>
           <div class="greeting-text-area">
@@ -104,6 +104,24 @@
         </div>
       </div>
     </header>
+    <script>
+      (function() {
+        try {
+          var raw = localStorage.getItem('epn_salon_settings');
+          var s = raw ? JSON.parse(raw) : null;
+          var av = document.getElementById('clientHeaderAvatarImg');
+          if (av) av.src = (s && s.avatarImage) ? s.avatarImage : 'assets/images/trabalho-amendoada-ouro.png';
+          if (s && s.salonName) {
+            var t = document.getElementById('clientHeaderSalonTitle');
+            if (t) t.innerText = s.salonName.replace(/NAILS/i, '').trim() || s.salonName;
+          }
+          if (s && (s.welcomeText || s.slogan)) {
+            var w = document.getElementById('clientHeaderWelcomeSub');
+            if (w) w.innerText = s.welcomeText || s.slogan;
+          }
+        } catch (e) {}
+      })();
+    </script>
 
     <!-- ========================================================
          CONTEÚDO PRINCIPAL (EXPANSIVO E RESPONSIVO)
@@ -160,8 +178,18 @@
                 </button>
               </div>
               <div class="promo-photo-side">
-                <img src="assets/images/trabalho-tons-terrosos.png" id="clientPromoBannerImg" alt="Unhas com acabamento impecável">
+                <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" id="clientPromoBannerImg" alt="Unhas com acabamento impecável">
               </div>
+              <script>
+                (function() {
+                  try {
+                    var raw = localStorage.getItem('epn_salon_settings');
+                    var s = raw ? JSON.parse(raw) : null;
+                    var pImg = document.getElementById('clientPromoBannerImg');
+                    if (pImg) pImg.src = (s && s.promoBannerImage) ? s.promoBannerImage : 'assets/images/trabalho-tons-terrosos.png';
+                  } catch (e) {}
+                })();
+              </script>
             </div>
           </section>
 
@@ -214,88 +242,8 @@
               <button class="category-tab-pill" onclick="filterServicesByCategory('cat_spa', this)">Spa das Mãos</button>
             </div>
 
-            <!-- Carrossel de Serviços -->
-            <div class="services-carousel-track" id="clientServicesCarousel">
-              <!-- Card 1: Alongamento em Gel -->
-              <div class="service-card-lux" data-category="cat_alongamento" data-service-id="srv_alongamento">
-                <div class="service-photo-cover" onclick="openStoryViewer('srv_alongamento')">
-                  <img src="assets/images/trabalho-alongamento-chocolate.png" alt="Alongamento em Gel">
-                  <div class="story-preview-indicator">
-                    <i class="fa-solid fa-play"></i> Ver Stories
-                  </div>
-                </div>
-                <div class="service-details-box">
-                  <h4>Alongamento em Gel</h4>
-                  <p class="service-desc-snippet">Unhas longas, naturais e ultra resistentes com acabamento profissional.</p>
-                  <div class="service-price-row">
-                    <span class="service-price-val">R$ 180,00</span>
-                    <button class="btn-select-service-pill" onclick="selectServiceForBooking('srv_alongamento', 'Alongamento em Gel', 180, 'assets/images/trabalho-alongamento-chocolate.png')">
-                      Agendar
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Card 2: Manicure Clássica -->
-              <div class="service-card-lux" data-category="cat_manicure" data-service-id="srv_manicure">
-                <div class="service-photo-cover" onclick="openStoryViewer('srv_manicure')">
-                  <img src="assets/images/trabalho-tons-terrosos.png" alt="Manicure Clássica">
-                  <div class="story-preview-indicator">
-                    <i class="fa-solid fa-play"></i> Ver Stories
-                  </div>
-                </div>
-                <div class="service-details-box">
-                  <h4>Manicure Clássica</h4>
-                  <p class="service-desc-snippet">Cutilagem impecável e esmaltação perfeita com produtos de alta linha.</p>
-                  <div class="service-price-row">
-                    <span class="service-price-val">R$ 70,00</span>
-                    <button class="btn-select-service-pill" onclick="selectServiceForBooking('srv_manicure', 'Manicure Clássica', 70, 'assets/images/trabalho-tons-terrosos.png')">
-                      Agendar
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Card 3: Spa das Mãos -->
-              <div class="service-card-lux" data-category="cat_spa" data-service-id="srv_spa">
-                <div class="service-photo-cover" onclick="openStoryViewer('srv_spa')">
-                  <img src="assets/images/trabalho-perolada-glaze.png" alt="Spa das Mãos">
-                  <div class="story-preview-indicator">
-                    <i class="fa-solid fa-play"></i> Ver Stories
-                  </div>
-                </div>
-                <div class="service-details-box">
-                  <h4>Spa das Mãos</h4>
-                  <p class="service-desc-snippet">Esfoliação, hidratação profunda e massagem relaxante para mãos renovadas.</p>
-                  <div class="service-price-row">
-                    <span class="service-price-val">R$ 90,00</span>
-                    <button class="btn-select-service-pill" onclick="selectServiceForBooking('srv_spa', 'Spa das Mãos', 90, 'assets/images/trabalho-perolada-glaze.png')">
-                      Agendar
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Card 4: Nail Art & Ouro -->
-              <div class="service-card-lux" data-category="cat_nailart" data-service-id="srv_nailart">
-                <div class="service-photo-cover" onclick="openStoryViewer('srv_nailart')">
-                  <img src="assets/images/trabalho-amendoada-ouro.png" alt="Nail Art & Ouro">
-                  <div class="story-preview-indicator">
-                    <i class="fa-solid fa-play"></i> Ver Stories
-                  </div>
-                </div>
-                <div class="service-details-box">
-                  <h4>Nail Art & Ouro</h4>
-                  <p class="service-desc-snippet">Design exclusivo com folha de ouro encapsulada e acabamento de luxo.</p>
-                  <div class="service-price-row">
-                    <span class="service-price-val">R$ 150,00</span>
-                    <button class="btn-select-service-pill" onclick="selectServiceForBooking('srv_nailart', 'Nail Art & Ouro', 150, 'assets/images/trabalho-amendoada-ouro.png')">
-                      Agendar
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <!-- Carrossel de Serviços (Populado imediatamente com os serviços reais salvos) -->
+            <div class="services-carousel-track" id="clientServicesCarousel"></div>
           </section>
 
         </div>
@@ -310,7 +258,7 @@
 
             <!-- Serviço Selecionado -->
             <div class="service-selected-banner" id="selectedServicePreview">
-              <img src="assets/images/trabalho-alongamento-chocolate.png" id="selectedServiceImg" alt="Alongamento">
+              <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" id="selectedServiceImg" alt="Alongamento">
               <div>
                 <h5 id="selectedServiceTitle">Alongamento em Gel</h5>
                 <p id="selectedServiceMeta">R$ 180,00 &bull; 90 minutos</p>
@@ -501,7 +449,7 @@
 
       <div style="text-align:center; margin-bottom:16px;">
         <div class="greeting-avatar-ring" style="width:72px; height:72px; margin:0 auto 10px;">
-          <img src="assets/images/trabalho-amendoada-ouro.png" id="profileModalAvatarImg" alt="Perfil">
+          <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" id="profileModalAvatarImg" alt="Perfil">
         </div>
         <h4 style="font-family:var(--font-serif); font-size:1.2rem; color:#350B19;" id="profileModalClientName">Cliente VIP</h4>
         <p style="font-size:0.8rem; color:#8A2D4E;" id="profileModalClientPhone">Cliente VIP Estefany Paiva Nails</p>
@@ -599,7 +547,7 @@
       <div class="instagram-story-header">
         <div class="instagram-story-user">
           <div class="instagram-story-avatar-wrap">
-            <img src="assets/images/trabalho-amendoada-ouro.png" id="storyUserAvatarImg" class="instagram-story-avatar" alt="Estefany">
+            <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" id="storyUserAvatarImg" class="instagram-story-avatar" alt="Estefany">
           </div>
           <div class="instagram-story-user-meta">
             <h4>
@@ -621,7 +569,7 @@
       <div class="instagram-story-media-stage" id="instagramStoryMediaStage"
            onmousedown="pauseStory()" onmouseup="resumeStory()"
            ontouchstart="pauseStory()" ontouchend="resumeStory()">
-        <img id="storyMediaImg" src="assets/images/trabalho-alongamento-chocolate.png" alt="Story" style="display: block;">
+        <img id="storyMediaImg" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Story" style="display: block;">
         <video id="storyMediaVideo" autoplay playsinline webkit-playsinline style="display: none;"></video>
         <div id="storyMediaCaptionOverlay" class="instagram-story-caption-box" style="display: none;"></div>
 
@@ -744,6 +692,14 @@
       return `${y}-${m}-${day}`;
     }
 
+    // Hidratação síncrona imediata antes do primeiro frame para nunca piscar imagens de teste
+    try {
+      applyDynamicThemeColorsToClient();
+      applyDynamicSalonSettingsToClient();
+      renderDynamicCategoryPills();
+      renderDynamicClientServices();
+    } catch (e) {}
+
     document.addEventListener('DOMContentLoaded', async () => {
       // Garante que nenhum modal sobreponha a tela indevidamente
       try {
@@ -753,9 +709,6 @@
           }
         });
       } catch (e) {}
-      if (window.EPStore) {
-        await window.EPStore.init();
-      }
       applyDynamicThemeColorsToClient();
       applyDynamicSalonSettingsToClient();
       renderDynamicCategoryPills();
@@ -765,6 +718,9 @@
       renderDynamicSlots();
       updateNextBookingBanner();
       updateClientNotificationsBadge();
+      if (window.EPStore) {
+        await window.EPStore.init();
+      }
 
       // Atualiza automaticamente quando houver qualquer mudança no Admin ou em outro aparelho
       window.addEventListener('epstore:updated', () => {
@@ -796,17 +752,18 @@
         welcomeEl.innerText = s.welcomeText || s.slogan;
       }
 
+      const finalAvatar = s.avatarImage || 'assets/images/trabalho-amendoada-ouro.png';
       const avatarEl = document.getElementById('clientHeaderAvatarImg');
-      if (avatarEl && s.avatarImage) {
-        avatarEl.src = s.avatarImage;
+      if (avatarEl && avatarEl.src !== finalAvatar) {
+        avatarEl.src = finalAvatar;
       }
       const profAv = document.getElementById('profileModalAvatarImg');
-      if (profAv && s.avatarImage) {
-        profAv.src = s.avatarImage;
+      if (profAv && profAv.src !== finalAvatar) {
+        profAv.src = finalAvatar;
       }
       const storyAv = document.getElementById('storyUserAvatarImg');
-      if (storyAv && s.avatarImage) {
-        storyAv.src = s.avatarImage;
+      if (storyAv && storyAv.src !== finalAvatar) {
+        storyAv.src = finalAvatar;
       }
 
       const promoTitle = document.getElementById('clientPromoBannerTitle');
@@ -815,8 +772,9 @@
       const promoBtn = document.getElementById('clientPromoBannerBtnText');
       if (promoBtn && s.promoBannerBtnText) promoBtn.innerText = s.promoBannerBtnText;
 
+      const finalPromo = s.promoBannerImage || 'assets/images/trabalho-tons-terrosos.png';
       const promoImg = document.getElementById('clientPromoBannerImg');
-      if (promoImg && s.promoBannerImage) promoImg.src = s.promoBannerImage;
+      if (promoImg && promoImg.src !== finalPromo) promoImg.src = finalPromo;
 
       updateProfileStoryRingClient();
     }
@@ -863,6 +821,21 @@
 
       const services = window.EPStore.getServices(true);
       if (!services || services.length === 0) return;
+      if (!window._userExplicitlyPickedService && services[0]) {
+        const firstSrv = services[0];
+        selectedService = {
+          id: firstSrv.id,
+          name: firstSrv.name,
+          price: parseFloat(firstSrv.price || 150),
+          image: firstSrv.image || 'assets/images/trabalho-alongamento-chocolate.png'
+        };
+        const selImg = document.getElementById('selectedServiceImg');
+        const selTitle = document.getElementById('selectedServiceTitle');
+        const selMeta = document.getElementById('selectedServiceMeta');
+        if (selImg) selImg.src = selectedService.image;
+        if (selTitle) selTitle.innerText = selectedService.name;
+        if (selMeta) selMeta.innerText = `R$ ${selectedService.price.toFixed(2).replace('.', ',')} • ${firstSrv.duration || 90} minutos`;
+      }
 
       const filtered = activeClientCategory === 'all'
         ? services
@@ -1001,6 +974,7 @@
     }
 
     function selectServiceForBooking(id, name, price, img) {
+      window._userExplicitlyPickedService = true;
       selectedService = { id, name, price, image: img };
       const titleEl = document.getElementById("selectedServiceTitle");
       const metaEl = document.getElementById("selectedServiceMeta");

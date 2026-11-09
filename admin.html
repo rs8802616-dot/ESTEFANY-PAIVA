@@ -119,13 +119,27 @@
         <div class="admin-greeting-row">
           <div class="admin-greeting-left">
             <div class="admin-avatar-ring">
-              <img src="assets/images/trabalho-amendoada-ouro.png" id="adminHeaderAvatarImg" alt="Estefany Paiva" onclick="triggerDirectAvatarUpload()" style="cursor:pointer;" title="Toque para trocar a foto de perfil"><input type="file" id="directAvatarFileInput" accept="image/*" style="display:none;" onchange="handleDirectAvatarUpload(this)">
+              <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" id="adminHeaderAvatarImg" alt="Estefany Paiva" onclick="triggerDirectAvatarUpload()" style="cursor:pointer;" title="Toque para trocar a foto de perfil"><input type="file" id="directAvatarFileInput" accept="image/*" style="display:none;" onchange="handleDirectAvatarUpload(this)">
             </div>
             <div class="admin-greeting-text">
               <h2 id="adminHeaderOwnerGreet">Olá, Estefany! 👋</h2>
               <p>Aqui está o resumo completo do seu negócio hoje.</p>
             </div>
           </div>
+          <script>
+            (function() {
+              try {
+                var raw = localStorage.getItem('epn_salon_settings');
+                var s = raw ? JSON.parse(raw) : null;
+                var av = document.getElementById('adminHeaderAvatarImg');
+                if (av) av.src = (s && s.avatarImage) ? s.avatarImage : 'assets/images/trabalho-amendoada-ouro.png';
+                if (s && s.ownerName) {
+                  var g = document.getElementById('adminHeaderOwnerGreet');
+                  if (g) g.innerText = 'Olá, ' + s.ownerName.split(' ')[0] + '! 👋';
+                }
+              } catch (e) {}
+            })();
+          </script>
 
           <div class="admin-greeting-right-controls">
             <button type="button" onclick="openModalStoriesPerfilAdmin()" class="btn-open-client-pill" style="border:1px solid rgba(255,255,255,0.28); background:linear-gradient(90deg, #DD2A7B 0%, #F58529 100%); color:#FFF; cursor:pointer;">
@@ -1069,7 +1083,7 @@
         <!-- Upload de Foto do Celular / Galeria com Preview -->
         <div style="background:#FBECEF; border:1.5px dashed #8A2D4E; border-radius:16px; padding:14px; text-align:center; margin-bottom:14px;">
           <div style="width:92px; height:92px; border-radius:16px; overflow:hidden; margin:0 auto 10px; border:2px solid #FFFFFF; box-shadow:0 4px 12px rgba(77,19,40,0.15); background:#FFF;">
-            <img id="previewServicoFotoImg" src="assets/images/trabalho-alongamento-chocolate.png" style="width:100%; height:100%; object-fit:cover;" alt="Prévia da Foto">
+            <img id="previewServicoFotoImg" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" style="width:100%; height:100%; object-fit:cover;" alt="Prévia da Foto">
           </div>
           <label for="inputServicoFotoFile" style="display:inline-flex; align-items:center; gap:6px; background:#4D1328; color:#FFFFFF; padding:8px 16px; border-radius:30px; font-size:0.8rem; font-weight:700; cursor:pointer;">
             <i class="fa-solid fa-camera"></i> Escolher Foto do Celular / Galeria
@@ -1154,7 +1168,7 @@
                 <div style="width:18px; height:18px; border-radius:50%; background:#D83F79; border:1px solid #FFF;"></div>
                 <span style="color:#FFF; font-size:0.6rem; font-weight:700;">Estefany Paiva</span>
               </div>
-              <img id="serviceStoryPreviewImg" src="assets/images/trabalho-alongamento-chocolate.png" style="width:100%; height:100%; object-fit:cover; border-radius:14px; display:block;" alt="Prévia">
+              <img id="serviceStoryPreviewImg" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" style="width:100%; height:100%; object-fit:cover; border-radius:14px; display:block;" alt="Prévia">
               <video id="serviceStoryPreviewVideo" autoplay muted loop playsinline style="width:100%; height:100%; object-fit:cover; border-radius:14px; display:none;"></video>
             </div>
           </div>
@@ -1203,7 +1217,7 @@
       <form id="formConfigSalao" onsubmit="saveConfigSalao(event)">
         <!-- Upload da Foto de Perfil da Profissional -->
         <div style="background:#FBECEF; border-radius:16px; padding:12px; text-align:center; margin-bottom:14px;">
-          <img id="previewConfigAvatarImg" src="assets/images/trabalho-amendoada-ouro.png" style="width:74px; height:74px; border-radius:50%; object-fit:cover; border:2px solid #4D1328; display:block; margin:0 auto 8px;" alt="Foto de Perfil">
+          <img id="previewConfigAvatarImg" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" style="width:74px; height:74px; border-radius:50%; object-fit:cover; border:2px solid #4D1328; display:block; margin:0 auto 8px;" alt="Foto de Perfil">
           <label for="inputConfigAvatarFile" style="display:inline-flex; align-items:center; gap:6px; background:#4D1328; color:#FFF; padding:6px 14px; border-radius:20px; font-size:0.76rem; font-weight:700; cursor:pointer;">
             <i class="fa-solid fa-camera"></i> Trocar Foto de Perfil (Celular)
           </label>
@@ -1264,7 +1278,7 @@
 
       <form onsubmit="saveConfigBanner(event)">
         <div style="background:#FBECEF; border-radius:16px; padding:12px; text-align:center; margin-bottom:14px;">
-          <img id="previewConfigBannerImg" src="assets/images/trabalho-tons-terrosos.png" style="width:100%; max-width:220px; height:110px; border-radius:14px; object-fit:cover; display:block; margin:0 auto 8px; border:2px solid #FFF;" alt="Banner">
+          <img id="previewConfigBannerImg" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" style="width:100%; max-width:220px; height:110px; border-radius:14px; object-fit:cover; display:block; margin:0 auto 8px; border:2px solid #FFF;" alt="Banner">
           <label for="inputConfigBannerFile" style="display:inline-flex; align-items:center; gap:6px; background:#4D1328; color:#FFF; padding:6px 14px; border-radius:20px; font-size:0.76rem; font-weight:700; cursor:pointer;">
             <i class="fa-solid fa-camera"></i> Escolher Foto do Banner (Celular)
           </label>
@@ -1891,15 +1905,12 @@
     let uploadedBannerPhotoDataUrl = null;
     let editableCustomSlots = ['09:00', '10:30', '13:00', '14:00', '15:30', '17:00', '18:30', '19:30'];
 
-    document.addEventListener('DOMContentLoaded', async () => {
-      try {
-        if (window.EPStore) {
-          await window.EPStore.init();
-        }
-      } catch (err) {
-        console.warn('EPStore.init caught:', err);
-      }
+    // Hidratação síncrona imediata antes do primeiro frame
+    try {
+      applySalonSettingsToAdminHeader();
+    } catch (e) {}
 
+    document.addEventListener('DOMContentLoaded', async () => {
       // Garante que nenhum modal sobreponha a tela no celular
       try {
         document.querySelectorAll('.admin-modal-overlay').forEach(m => {
@@ -1913,6 +1924,14 @@
         refreshAllAdminViews();
       } catch (err) {
         console.error('refreshAllAdminViews caught:', err);
+      }
+
+      try {
+        if (window.EPStore) {
+          await window.EPStore.init();
+        }
+      } catch (err) {
+        console.warn('EPStore.init caught:', err);
       }
 
       // Reenvia a foto/perfil atual para a nuvem (garante que celulares que abrirem depois recebam a foto)
@@ -1947,8 +1966,16 @@
       const s = window.EPStore.getSalonSettings();
       if (!s) return;
 
+      const finalAvatar = s.avatarImage || 'assets/images/trabalho-amendoada-ouro.png';
       const av = document.getElementById('adminHeaderAvatarImg');
-      if (av && s.avatarImage) av.src = s.avatarImage;
+      if (av && av.src !== finalAvatar) av.src = finalAvatar;
+
+      const cfgAv = document.getElementById('previewConfigAvatarImg');
+      if (cfgAv && cfgAv.src !== finalAvatar) cfgAv.src = finalAvatar;
+
+      const finalBanner = s.promoBannerImage || 'assets/images/trabalho-tons-terrosos.png';
+      const cfgBan = document.getElementById('previewConfigBannerImg');
+      if (cfgBan && cfgBan.src !== finalBanner) cfgBan.src = finalBanner;
 
       const greet = document.getElementById('adminHeaderOwnerGreet');
       if (greet && s.ownerName) {

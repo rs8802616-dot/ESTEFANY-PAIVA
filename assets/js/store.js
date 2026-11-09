@@ -616,9 +616,9 @@ window.EPStore = {
       localStorage.setItem(STORAGE_KEYS.THEME_CONFIG, JSON.stringify(SEED_DATA.theme));
     }
 
-    // 5. Portfólio Vivo (Carrossel Topo)
+    // 5. Portfólio Vivo (Carrossel Topo) - NUNCA sobrescreve se já existir no localStorage
     const existingCarousel = localStorage.getItem(STORAGE_KEYS.CAROUSEL_ITEMS);
-    if (!existingCarousel || !existingCarousel.includes('trabalho-alongamento-chocolate.png')) {
+    if (!existingCarousel) {
       localStorage.setItem(STORAGE_KEYS.CAROUSEL_ITEMS, JSON.stringify(SEED_DATA.carouselItems));
     }
 
@@ -627,9 +627,9 @@ window.EPStore = {
       localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(SEED_DATA.categories));
     }
 
-    // 7. Serviços com Stories
+    // 7. Serviços com Stories - NUNCA sobrescreve serviços reais já salvos pela usuária
     const existingServices = localStorage.getItem(STORAGE_KEYS.SERVICES);
-    if (!existingServices || !existingServices.includes('trabalho-alongamento-chocolate.png')) {
+    if (!existingServices) {
       localStorage.setItem(STORAGE_KEYS.SERVICES, JSON.stringify(SEED_DATA.services));
     }
 
@@ -643,25 +643,9 @@ window.EPStore = {
       localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(SEED_DATA.salonSettings));
     }
 
-    // 10. Stories de 24h do Perfil (Estilo Instagram)
+    // 10. Stories de 24h do Perfil (Estilo Instagram) - Inicia vazio para não exibir fotos de teste
     if (!localStorage.getItem(STORAGE_KEYS.PROFILE_STORIES)) {
-      const now = Date.now();
-      localStorage.setItem(STORAGE_KEYS.PROFILE_STORIES, JSON.stringify([
-        {
-          id: 'pstory_seed_1',
-          type: 'image',
-          url: 'assets/images/trabalho-amendoada-ouro.png',
-          caption: 'Bom dia, maravilhosas! Agenda aberta com muito carinho ✨💅',
-          createdAt: now - (2 * 3600 * 1000)
-        },
-        {
-          id: 'pstory_seed_2',
-          type: 'image',
-          url: 'assets/images/trabalho-alongamento-chocolate.png',
-          caption: 'Resultado impecável de hoje no estúdio ♡',
-          createdAt: now - (1 * 3600 * 1000)
-        }
-      ]));
+      localStorage.setItem(STORAGE_KEYS.PROFILE_STORIES, JSON.stringify([]));
     }
 
     // 11. Compromissos Pessoais / Google Agenda da Administradora
@@ -669,10 +653,14 @@ window.EPStore = {
       localStorage.setItem(STORAGE_KEYS.PERSONAL_BUSY_BLOCKS, JSON.stringify([]));
     }
 
-    // Aplica o tema visual no documento em tempo real
+    // Aplica o tema visual no documento imediatamente (sem esperar rede)
     this.applyThemeToDocument();
     this.startRealtimeSync();
-    await this.pullCloudEvents(false);
+    // Busca eventos da nuvem em segundo plano sem travar a renderização das imagens reais locais!
+    if (!this._initialCloudPullTriggered) {
+      this._initialCloudPullTriggered = true;
+      this.pullCloudEvents(false);
+    }
   },
 
   // ----------------------------------------------------
@@ -1618,6 +1606,7 @@ window.EPStore = {
   saveService(serviceData) {
     const list = this.getServices(false);
     if (!serviceData.id) serviceData.id = 'srv_' + Date.now();
+    serviceData.updatedAt = Date.now();
     const idx = list.findIndex(s => s.id === serviceData.id);
     let savedItem = serviceData;
     if (idx >= 0) {
@@ -2304,10 +2293,18 @@ window.EPStore = {
         changed = true;
       }
     } else if (action === 'UPSERT_SERVICE' && payload && payload.id) {
+      const isTestAsset = (u) => typeof u === 'string' && u.indexOf('assets/images/') === 0;
       const list = this.getServices(false);
       const idx = list.findIndex(s => s.id === payload.id);
       if (idx >= 0) {
-        list[idx] = { ...list[idx], ...payload };
+        if (list[idx].updatedAt && payload.updatedAt && payload.updatedAt < list[idx].updatedAt) {
+          return false;
+        }
+        const safePayload = { ...payload };
+        if (list[idx].image && !isTestAsset(list[idx].image) && isTestAsset(safePayload.image)) {
+          delete safePayload.image;
+        }
+        list[idx] = { ...list[idx], ...safePayload };
       } else {
         list.push(payload);
       }
@@ -2369,21 +2366,30 @@ window.EPStore = {
       themeOrSettingsChanged = true;
       changed = true;
     } else if (action === 'UPDATE_SETTINGS' && payload) {
+      const isTestAsset = (u) => typeof u === 'string' && u.indexOf('assets/images/') === 0;
       const current = this.getSalonSettings();
-      if (payload.settingsUpdatedAt && current.settingsUpdatedAt && payload.settingsUpdatedAt < current.settingsUpdatedAt) {
-        // Evento antigo: ignora campos que já foram alterados depois, mas aceita a foto se ainda for a padrão
-        const isDefaultAvatar = !current.avatarImage || current.avatarImage.indexOf('assets/images/') === 0;
-        if (!(isDefaultAvatar && payload.avatarImage)) return false;
-        const merged = { ...current, avatarImage: payload.avatarImage };
+      const safePayload = { ...payload };
+      // Nunca permite que uma imagem de teste de um evento antigo sobrescreva uma foto real já salva
+      if (current.avatarImage && !isTestAsset(current.avatarImage) && isTestAsset(safePayload.avatarImage)) {
+        delete safePayload.avatarImage;
+      }
+      if (current.promoBannerImage && !isTestAsset(current.promoBannerImage) && isTestAsset(safePayload.promoBannerImage)) {
+        delete safePayload.promoBannerImage;
+      }
+      if (current.settingsUpdatedAt && (!safePayload.settingsUpdatedAt || safePayload.settingsUpdatedAt < current.settingsUpdatedAt)) {
+        // Evento antigo: ignora campos que já foram alterados depois, mas aceita a foto se a atual ainda for de teste e a recebida for real
+        const isDefaultAvatar = !current.avatarImage || isTestAsset(current.avatarImage);
+        if (!(isDefaultAvatar && safePayload.avatarImage && !isTestAsset(safePayload.avatarImage))) return false;
+        const merged = { ...current, avatarImage: safePayload.avatarImage };
         localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(merged));
-        if (!deferRender) this.emitStoreUpdate({ action, payload, fromRemote: true });
+        if (!deferRender) this.emitStoreUpdate({ action, payload: safePayload, fromRemote: true });
         return true;
       }
-      const updated = { ...current, ...payload };
+      const updated = { ...current, ...safePayload };
       localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(updated));
-      if (payload.themeColors) {
+      if (safePayload.themeColors) {
         const curTheme = this.getTheme();
-        localStorage.setItem(STORAGE_KEYS.THEME_CONFIG, JSON.stringify({ ...curTheme, ...payload.themeColors }));
+        localStorage.setItem(STORAGE_KEYS.THEME_CONFIG, JSON.stringify({ ...curTheme, ...safePayload.themeColors }));
       }
       themeOrSettingsChanged = true;
       changed = true;
