@@ -142,9 +142,7 @@
           </script>
 
           <div class="admin-greeting-right-controls">
-            <button type="button" onclick="openModalStoriesPerfilAdmin()" class="btn-open-client-pill" style="border:1px solid rgba(255,255,255,0.28); background:linear-gradient(90deg, #DD2A7B 0%, #F58529 100%); color:#FFF; cursor:pointer;">
-              <i class="fa-brands fa-instagram"></i> + Stories 24h
-            </button>
+
             <button type="button" onclick="openModalGoogleAgendaAdmin()" class="btn-open-client-pill" style="border:1px solid rgba(255,255,255,0.28); background:#1A73E8; color:#FFF; cursor:pointer;">
               <i class="fa-brands fa-google"></i> Google Agenda
             </button>
@@ -654,17 +652,7 @@
         </div>
 
         <div class="admin-items-responsive-grid">
-          <!-- 00A. Stories do Perfil 24h (Estilo Instagram) -->
-          <div class="card-list-item" onclick="openModalStoriesPerfilAdmin()">
-            <div style="display:flex; align-items:center; gap:12px;">
-              <div class="client-avatar-badge" style="background:linear-gradient(135deg, #DD2A7B 0%, #F58529 100%); color:#FFF;"><i class="fa-brands fa-instagram"></i></div>
-              <div>
-                <h5 style="font-size:0.92rem; font-weight:700; color:#350B19;">Stories do Perfil (24 Horas)</h5>
-                <p style="font-size:0.76rem; color:#6A1D39;">Postar fotos e vídeos nos stories da sua foto de perfil (expiram em 24h)</p>
-              </div>
-            </div>
-            <span class="filter-pill" style="padding:4px 10px; font-size:0.72rem; background:#FDF2F8; color:#DB2777; border-color:#FBCFE8;">Postar Story</span>
-          </div>
+
 
           <!-- 00B. Integração Google Agenda & Bloqueio de Compromissos Pessoais -->
           <div class="card-list-item" onclick="openModalGoogleAgendaAdmin()">
@@ -1127,51 +1115,6 @@
         <div class="form-input-box" style="margin-bottom:14px;">
           <label style="display:block; font-size:0.8rem; font-weight:600; color:#4D1328; margin-bottom:4px;">Descrição Curta</label>
           <input type="text" id="inputServicoDesc" placeholder="Ex: Fortalecimento com camada de gel brilhante..." style="width:100%; padding:10px 14px; border-radius:12px; border:1px solid rgba(77,19,40,0.18);">
-        </div>
-
-        <!-- Mídias do Procedimento: Fotos e Vídeos ilimitados (Padrão Celular Instagram) -->
-        <div style="background:#FFF9FA; border:1px solid rgba(216,63,121,0.25); border-radius:16px; padding:14px; margin-bottom:16px;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-            <strong style="font-size:0.82rem; color:#350B19;">
-              <i class="fa-brands fa-instagram" style="color:#D83F79;"></i> Status / Stories do Serviço
-            </strong>
-            <span style="font-size:0.7rem; color:#8A2D4E;">Quantas fotos ou vídeos quiser</span>
-          </div>
-
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
-            <label style="display:flex; align-items:center; justify-content:center; gap:6px; padding:9px 10px; background:#FBECEF; border:1px solid rgba(77,19,40,0.15); border-radius:10px; font-size:0.74rem; font-weight:700; color:#4D1328; cursor:pointer;">
-              <i class="fa-solid fa-images"></i> + Fotos (Quantas quiser)
-              <input type="file" multiple accept="image/*" style="display:none;" onchange="handleAddServiceMultiplePhotos(this)">
-            </label>
-            <label style="display:flex; align-items:center; justify-content:center; gap:6px; padding:9px 10px; background:#FBECEF; border:1px solid rgba(77,19,40,0.15); border-radius:10px; font-size:0.74rem; font-weight:700; color:#4D1328; cursor:pointer;">
-              <i class="fa-solid fa-film"></i> + Vídeo do Celular
-              <input type="file" multiple accept="video/*" style="display:none;" onchange="handleAddServiceVideoFile(this)">
-            </label>
-          </div>
-          <div style="margin-bottom:10px;">
-            <button type="button" onclick="handleAddServiceVideoPrompt()" style="width:100%; padding:7px 10px; background:#FFF; border:1px dashed rgba(77,19,40,0.22); border-radius:10px; font-size:0.72rem; font-weight:600; color:#6A1D39; cursor:pointer;">
-              <i class="fa-solid fa-link"></i> Ou colar link de vídeo externo (MP4 / Instagram)
-            </button>
-          </div>
-
-          <div id="serviceMediaThumbnailsList" style="display:flex; gap:8px; overflow-x:auto; padding-bottom:6px; margin-bottom:12px;"></div>
-
-          <div style="text-align:center;">
-            <span style="font-size:0.7rem; font-weight:700; color:#8A2D4E; margin-bottom:6px; display:block;">
-              📱 Pré-visualização no Padrão Celular (Instagram Stories):
-            </span>
-            <div style="border-radius:20px; background:#000; padding:8px; width:100%; max-width:200px; margin:0 auto; aspect-ratio:9/16; position:relative; overflow:hidden; box-shadow:0 8px 24px rgba(0,0,0,0.35);">
-              <div style="position:absolute; top:8px; left:8px; right:8px; height:2px; background:rgba(255,255,255,0.4); border-radius:2px; z-index:10;">
-                <div style="width:50%; height:100%; background:#FFF;"></div>
-              </div>
-              <div style="position:absolute; top:14px; left:8px; display:flex; align-items:center; gap:4px; z-index:10;">
-                <div style="width:18px; height:18px; border-radius:50%; background:#D83F79; border:1px solid #FFF;"></div>
-                <span style="color:#FFF; font-size:0.6rem; font-weight:700;">Estefany Paiva</span>
-              </div>
-              <img id="serviceStoryPreviewImg" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" style="width:100%; height:100%; object-fit:cover; border-radius:14px; display:block;" alt="Prévia">
-              <video id="serviceStoryPreviewVideo" autoplay muted loop playsinline style="width:100%; height:100%; object-fit:cover; border-radius:14px; display:none;"></video>
-            </div>
-          </div>
         </div>
 
         <div style="display:flex; gap:10px;">
@@ -1725,59 +1668,6 @@
     </div>
   </div>
 
-  <!-- MODAL: STORIES DE 24 HORAS DO PERFIL (ESTILO INSTAGRAM) -->
-  <div class="admin-modal-overlay" id="modalStoriesPerfilAdmin">
-    <div class="admin-modal-card" style="max-height:92vh; overflow-y:auto;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-        <h3 style="font-family:var(--font-serif); font-size:1.3rem; color:#350B19;">
-          <i class="fa-brands fa-instagram" style="color:#DD2A7B;"></i> Stories do Perfil (24 Horas)
-        </h3>
-        <button onclick="closeModal('modalStoriesPerfilAdmin')" style="background:none; border:none; font-size:1.2rem; color:#6A1D39; cursor:pointer;">✕</button>
-      </div>
-
-      <p style="font-size:0.76rem; color:#6A1D39; margin-bottom:12px;">
-        Poste fotos ou vídeos nos seus Stories do Perfil! Quando a cliente tocar na sua foto de perfil lá no aplicativo, vai abrir igual ao Instagram. Cada story some sozinho após 24 horas.
-      </p>
-
-      <!-- Botões para adicionar Foto ou Vídeo nos Stories do Perfil -->
-      <div style="background:#FFF9FA; border:1px solid rgba(216,63,121,0.25); border-radius:16px; padding:14px; margin-bottom:14px;">
-        <div style="margin-bottom:10px;">
-          <label style="display:block; font-size:0.78rem; font-weight:700; color:#4D1328; margin-bottom:4px;">Legenda do Story (Opcional)</label>
-          <input type="text" id="inputProfileStoryCaption" placeholder="Ex: Unhas do dia maravilhosas ✨ Horários abertos!" style="width:100%; padding:9px 12px; border-radius:10px; border:1px solid rgba(77,19,40,0.18); background:#FFF;">
-        </div>
-
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
-          <label style="display:flex; align-items:center; justify-content:center; gap:6px; padding:10px; background:#FBECEF; border:1px solid rgba(77,19,40,0.15); border-radius:12px; font-size:0.76rem; font-weight:700; color:#4D1328; cursor:pointer;">
-            <i class="fa-solid fa-camera"></i> + Postar Foto (24h)
-            <input type="file" multiple accept="image/*" style="display:none;" onchange="handleUploadProfileStoryPhoto(this)">
-          </label>
-          <label style="display:flex; align-items:center; justify-content:center; gap:6px; padding:10px; background:#FBECEF; border:1px solid rgba(77,19,40,0.15); border-radius:12px; font-size:0.76rem; font-weight:700; color:#4D1328; cursor:pointer;">
-            <i class="fa-solid fa-video"></i> + Postar Vídeo (24h)
-            <input type="file" multiple accept="video/*" style="display:none;" onchange="handleUploadProfileStoryVideo(this)">
-          </label>
-        </div>
-
-        <button type="button" onclick="handleAddProfileStoryVideoUrlPrompt()" style="width:100%; padding:8px 10px; background:#FFF; border:1px dashed rgba(77,19,40,0.22); border-radius:10px; font-size:0.74rem; font-weight:600; color:#6A1D39; cursor:pointer;">
-          <i class="fa-solid fa-link"></i> Ou colar link de vídeo externo (MP4 / Reels)
-        </button>
-      </div>
-
-      <!-- Lista de Stories Ativos nas últimas 24h -->
-      <div style="margin-bottom:14px;">
-        <strong style="display:block; font-size:0.82rem; color:#350B19; margin-bottom:8px;">
-          <i class="fa-regular fa-clock"></i> Stories Ativos Agora (Expiram em 24h):
-        </strong>
-        <div id="adminProfileStoriesListContainer" style="display:flex; flex-direction:column; gap:8px; max-height:240px; overflow-y:auto;">
-          <!-- Populado via JS -->
-        </div>
-      </div>
-
-      <button type="button" onclick="closeModal('modalStoriesPerfilAdmin')" style="width:100%; padding:12px; border-radius:var(--radius-pill); background:#4D1328; color:#FFF; font-weight:700; border:none; cursor:pointer;">
-        Concluir
-      </button>
-    </div>
-  </div>
-
   <!-- MODAL: INTEGRAÇÃO GOOGLE AGENDA & BLOQUEIO DE COMPROMISSOS PESSOAIS -->
   <div class="admin-modal-overlay" id="modalGoogleAgendaAdmin">
     <div class="admin-modal-card" style="max-height:92vh; overflow-y:auto;">
@@ -2310,15 +2200,7 @@
         uploadedServicePhotoDataUrl = await window.EPStore.compressImageFile(file, 650, 0.78);
         const preview = document.getElementById('previewServicoFotoImg');
         if (preview) preview.src = uploadedServicePhotoDataUrl;
-        const storyImg = document.getElementById('serviceStoryPreviewImg');
-        if (storyImg) { storyImg.style.display = 'block'; storyImg.src = uploadedServicePhotoDataUrl; }
-        if (currentServiceMediaList.length === 0) {
-          currentServiceMediaList.push({ type: 'image', url: uploadedServicePhotoDataUrl });
-        } else {
-          currentServiceMediaList[0] = { type: 'image', url: uploadedServicePhotoDataUrl };
-        }
-        renderServiceMediaThumbnails();
-        showToast('Foto em alta qualidade carregada com pré-visualização no padrão celular!');
+        showToast('Foto do serviço carregada com sucesso!');
       } catch (e) {
         showToast('Erro ao carregar a imagem.');
       }
@@ -2326,13 +2208,11 @@
 
     function openModalNovoServico() {
       uploadedServicePhotoDataUrl = null;
-      currentServiceMediaList = [];
       document.getElementById('formNovoServico').reset();
       document.getElementById('inputServicoIdEdit').value = '';
       document.getElementById('modalServicoHeading').innerHTML = '<i class="fa-regular fa-gem" style="color:#8A2D4E;"></i> Cadastrar Novo Serviço';
       document.getElementById('previewServicoFotoImg').src = 'assets/images/trabalho-alongamento-chocolate.png';
       populateCategoriesSelectAdmin();
-      renderServiceMediaThumbnails();
       openModal('modalNovoServico');
     }
 
@@ -2340,7 +2220,6 @@
       const s = window.EPStore ? window.EPStore.getServiceById(serviceId) : null;
       if (!s) return;
       uploadedServicePhotoDataUrl = s.image || 'assets/images/trabalho-alongamento-chocolate.png';
-      currentServiceMediaList = Array.isArray(s.mediaList) ? [...s.mediaList] : (Array.isArray(s.storiesVideos) ? s.storiesVideos.map(v => ({ type: 'image', url: v.mediaUrl || s.image })) : [{ type: 'image', url: uploadedServicePhotoDataUrl }]);
       document.getElementById('inputServicoIdEdit').value = s.id;
       document.getElementById('inputServicoNome').value = s.name || '';
       document.getElementById('inputServicoPreco').value = s.price || 150;
@@ -2349,7 +2228,6 @@
       document.getElementById('inputServicoDesc').value = s.description || '';
       document.getElementById('modalServicoHeading').innerHTML = '<i class="fa-regular fa-gem" style="color:#8A2D4E;"></i> Editar Serviço';
       document.getElementById('previewServicoFotoImg').src = uploadedServicePhotoDataUrl;
-      renderServiceMediaThumbnails();
       openModal('modalNovoServico');
     }
 
@@ -2371,8 +2249,7 @@
           categoryId: categoria,
           description: desc || 'Procedimento realizado com produtos de alta linha.',
           active: true,
-          image: finalImg,
-          mediaList: currentServiceMediaList && currentServiceMediaList.length > 0 ? currentServiceMediaList : [{ type: 'image', url: finalImg }]
+          image: finalImg
         };
         if (editId) payload.id = editId;
         window.EPStore.saveService(payload);
@@ -3093,10 +2970,6 @@
     }
   
     // ========================================================
-    // GERENCIAMENTO DE MÚLTIPLAS FOTOS E VÍDEOS POR SERVIÇO
-    // ========================================================
-    let currentServiceMediaList = [];
-
     function populateCategoriesSelectAdmin(selectedId = '') {
       const select = document.getElementById('selectServicoCategoria');
       if (!select || !window.EPStore) return;
@@ -3106,138 +2979,10 @@
       `).join('');
     }
 
-    async function handleAddServiceMultiplePhotos(input) {
-      if (!input.files || input.files.length === 0) return;
-      for (let i = 0; i < input.files.length; i++) {
-        const dataUrl = await window.EPStore.compressImageFile(input.files[i], 650, 0.78);
-        currentServiceMediaList.push({ type: 'image', url: dataUrl });
-      }
-      renderServiceMediaThumbnails();
-      showToast(`${input.files.length} foto(s) em alta qualidade adicionada(s) aos stories!`);
-    }
+    function renderServiceMediaThumbnails() {}
+    function removeServiceMediaItem() {}
+    function previewThisMediaInMockup() {}
 
-    function handleAddServiceVideoFile(input) {
-      if (!input.files || input.files.length === 0) return;
-      const files = Array.from(input.files);
-      input.value = '';
-
-      (async () => {
-        for (const file of files) {
-          if (file.size > 80 * 1024 * 1024) {
-            showToast('Vídeo muito grande! Escolha um vídeo de até 80MB.');
-            continue;
-          }
-
-          showToast('Adicionando vídeo ao catálogo do serviço...');
-          const meta = await window.EPStore.extractVideoMetaAndThumbnail(file);
-          const stored = await window.EPStore.storeMediaBlob(file);
-          const localUrl = (stored && stored.id) ? stored.id : (stored && stored.objectUrl ? stored.objectUrl : '');
-
-          const mediaItem = {
-            type: 'video',
-            url: localUrl,
-            thumbnail: meta.thumbnail,
-            duration: meta.duration || 60
-          };
-
-          if (!uploadedServicePhotoDataUrl && meta.thumbnail) {
-            uploadedServicePhotoDataUrl = meta.thumbnail;
-            const pImg = document.getElementById('serviceStoryPreviewImg');
-            if (pImg) pImg.src = uploadedServicePhotoDataUrl;
-          }
-
-          currentServiceMediaList.push(mediaItem);
-          renderServiceMediaThumbnails();
-          showToast('Vídeo do celular adicionado aos stories do serviço com sucesso!');
-
-          window.EPStore.uploadVideoToCloud(file).then(cloudUrl => {
-            if (cloudUrl) {
-              mediaItem.cloudUrl = cloudUrl;
-              console.log('Vídeo do serviço enviado para a nuvem:', cloudUrl);
-            }
-          }).catch(err => {
-            console.warn('Erro ao sincronizar vídeo do serviço:', err);
-          });
-        }
-      })();
-    }
-
-    function handleAddServiceVideoPrompt() {
-      const url = prompt('Cole o link do vídeo (MP4 ou URL de vídeo curto):', 'https://');
-      if (url && url.trim() && url !== 'https://') {
-        currentServiceMediaList.push({ type: 'video', url: url.trim(), duration: 60 });
-        renderServiceMediaThumbnails();
-        showToast('Vídeo adicionado aos stories!');
-      }
-    }
-
-    function removeServiceMediaItem(idx) {
-      currentServiceMediaList.splice(idx, 1);
-      renderServiceMediaThumbnails();
-    }
-
-    function renderServiceMediaThumbnails() {
-      const container = document.getElementById('serviceMediaThumbnailsList');
-      if (!container) return;
-
-      if (currentServiceMediaList.length === 0) {
-        container.innerHTML = '<span style="font-size:0.75rem; color:#8A2D4E; padding:6px;">Nenhuma mídia extra adicionada.</span>';
-        const pImg = document.getElementById('serviceStoryPreviewImg');
-        const pVid = document.getElementById('serviceStoryPreviewVideo');
-        if (pImg) { pImg.style.display = 'block'; pImg.src = uploadedServicePhotoDataUrl || 'assets/images/trabalho-alongamento-chocolate.png'; }
-        if (pVid) { pVid.style.display = 'none'; }
-        return;
-      }
-
-      container.innerHTML = currentServiceMediaList.map((m, idx) => {
-        const displayUrl = (window.EPStore && window.EPStore.resolveMediaUrlSync)
-          ? window.EPStore.resolveMediaUrlSync(m.url, m.cloudUrl || m.thumbnail)
-          : (m.cloudUrl || m.url);
-
-        return `
-          <div style="position:relative; width:56px; height:56px; border-radius:10px; overflow:hidden; flex-shrink:0; border:1.5px solid #D83F79; background:#18181B; cursor:pointer;" onclick="previewThisMediaInMockup(${idx})">
-            ${m.type === 'video'
-              ? `<video src="${displayUrl}" muted playsinline style="width:100%; height:100%; object-fit:cover;"></video><span style="position:absolute; bottom:2px; left:2px; background:rgba(0,0,0,0.75); color:#FFF; font-size:0.55rem; padding:1px 4px; border-radius:4px;">▶ Vídeo</span>`
-              : `<img src="${displayUrl}" style="width:100%; height:100%; object-fit:cover;">`
-            }
-            <button type="button" onclick="event.stopPropagation(); removeServiceMediaItem(${idx})" style="position:absolute; top:2px; right:2px; background:rgba(216,63,121,0.95); color:#FFF; border:none; width:16px; height:16px; border-radius:50%; font-size:0.6rem; cursor:pointer; display:flex; align-items:center; justify-content:center;">✕</button>
-          </div>
-        `;
-      }).join('');
-
-      previewThisMediaInMockup(currentServiceMediaList.length - 1);
-    }
-
-    function previewThisMediaInMockup(idx) {
-      const item = currentServiceMediaList[idx];
-      if (!item) return;
-      const pImg = document.getElementById('serviceStoryPreviewImg');
-      const pVid = document.getElementById('serviceStoryPreviewVideo');
-      const displayUrl = (window.EPStore && window.EPStore.resolveMediaUrlSync)
-        ? window.EPStore.resolveMediaUrlSync(item.url, item.cloudUrl || item.thumbnail)
-        : (item.cloudUrl || item.url);
-
-      if (item.type === 'video') {
-        if (pImg) pImg.style.display = 'none';
-        if (pVid) {
-          pVid.style.display = 'block';
-          pVid.src = displayUrl;
-          pVid.muted = true;
-          pVid.play().catch(() => {});
-        }
-      } else {
-        if (pVid) {
-          pVid.pause();
-          pVid.style.display = 'none';
-        }
-        if (pImg) {
-          pImg.style.display = 'block';
-          pImg.src = displayUrl;
-        }
-      }
-    }
-
-    // ========================================================
     // FICHA DETALHADA DA CLIENTE & WHATSAPP
     // ========================================================
     let currentModalClientPhone = '';
@@ -3615,144 +3360,14 @@
     }
 
     // ========================================================
-    // STORIES DE 24H DO PERFIL (ADMINISTRADORA)
-    // ========================================================
-    function openModalStoriesPerfilAdmin() {
-      renderAdminProfileStoriesList();
-      openModal('modalStoriesPerfilAdmin');
-    }
+    // Stories removidos a pedido da usuária
+    function openModalStoriesPerfilAdmin() {}
+    function renderAdminProfileStoriesList() {}
+    function handleUploadProfileStoryPhoto() {}
+    function handleUploadProfileStoryVideo() {}
+    function handleAddProfileStoryVideoUrlPrompt() {}
+    function excluirProfileStoryAdmin() {}
 
-        function renderAdminProfileStoriesList() {
-      const container = document.getElementById('adminProfileStoriesListContainer');
-      if (!container || !window.EPStore) return;
-      const stories = window.EPStore.getProfileStories ? window.EPStore.getProfileStories() : [];
-
-      if (stories.length === 0) {
-        container.innerHTML = '<p style="font-size:0.78rem; color:#8A2D4E; padding:8px;">Nenhum story ativo nas últimas 24h. Poste uma foto ou vídeo acima!</p>';
-        return;
-      }
-
-      container.innerHTML = stories.map(st => {
-        const elapsed = window.EPStore.formatStoryElapsed ? window.EPStore.formatStoryElapsed(st.createdAt) : 'Ativo';
-        const displayUrl = (window.EPStore.resolveMediaUrlSync)
-          ? window.EPStore.resolveMediaUrlSync(st.url, st.cloudUrl || st.thumbnail)
-          : (st.cloudUrl || st.url);
-
-        return `
-          <div style="display:flex; justify-content:space-between; align-items:center; background:#FFF; border:1px solid rgba(77,19,40,0.12); border-radius:12px; padding:8px 12px; gap:10px;">
-            <div style="display:flex; align-items:center; gap:10px;">
-              ${st.type === 'video'
-                ? `<div style="position:relative; width:44px; height:44px; border-radius:10px; overflow:hidden; background:#000; flex-shrink:0;">
-                     <video src="${displayUrl}" muted playsinline loop autoplay style="width:100%; height:100%; object-fit:cover;"></video>
-                     <span style="position:absolute; bottom:1px; left:2px; font-size:0.55rem; color:#FFF; background:rgba(0,0,0,0.7); padding:1px 3px; border-radius:3px;">▶ ${st.duration ? st.duration + 's' : 'Vídeo'}</span>
-                   </div>`
-                : `<img src="${displayUrl}" style="width:44px; height:44px; border-radius:10px; object-fit:cover;" alt="Story">`
-              }
-              <div>
-                <strong style="font-size:0.82rem; color:#350B19; display:block;">${st.caption || (st.type === 'video' ? 'Vídeo nos Stories' : 'Foto nos Stories')}</strong>
-                <span style="font-size:0.7rem; color:#6A1D39;">Publicado ${elapsed} &bull; Expira em 24h ${st.duration > 60 ? `&bull; Dividido em partes` : ''}</span>
-              </div>
-            </div>
-            <div style="display:flex; align-items:center; gap:6px;">
-              <a href="index.html" target="_blank" style="text-decoration:none; padding:6px 10px; border-radius:8px; border:1px solid rgba(216,63,121,0.25); background:#FFF0F3; color:#D83F79; font-size:0.72rem; font-weight:600; display:flex; align-items:center; gap:4px;">
-                <i class="fa-solid fa-play"></i> Ver
-              </a>
-              <button type="button" onclick="excluirProfileStoryAdmin('${st.id}')" style="padding:6px 10px; border-radius:8px; border:none; background:#FFF0F3; color:#D83F79; font-size:0.75rem; cursor:pointer;" title="Excluir Story">
-                <i class="fa-solid fa-trash"></i>
-              </button>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    async function handleUploadProfileStoryPhoto(input) {
-      if (!input.files || input.files.length === 0) return;
-      const caption = (document.getElementById('inputProfileStoryCaption')?.value || '').trim();
-      const files = Array.from(input.files);
-      input.value = '';
-      for (let i = 0; i < files.length; i++) {
-        const dataUrl = await window.EPStore.compressImageFile(files[i], 720, 0.80);
-        window.EPStore.addProfileStory({ type: 'image', url: dataUrl, caption });
-      }
-      if (document.getElementById('inputProfileStoryCaption')) document.getElementById('inputProfileStoryCaption').value = '';
-      renderAdminProfileStoriesList();
-      showToast('Foto publicada nos seus Stories de 24h do Perfil!');
-    }
-
-    async function handleUploadProfileStoryVideo(input) {
-      if (!input.files || input.files.length === 0) return;
-      const caption = (document.getElementById('inputProfileStoryCaption')?.value || '').trim();
-      const files = Array.from(input.files);
-      input.value = '';
-
-      for (const file of files) {
-        if (file.size > 100 * 1024 * 1024) {
-          showToast('Vídeo muito grande! Escolha um vídeo de até 100MB.');
-          continue;
-        }
-
-        showToast('Processando e otimizando vídeo do celular...');
-
-        // 1. Extrai metadados e frame de thumbnail rapidamente
-        const meta = await window.EPStore.extractVideoMetaAndThumbnail(file);
-        const durationSecs = meta.duration || 60;
-
-        // 2. Salva o binário completo no IndexedDB local para reprodução imediata sem estourar o localStorage
-        const stored = await window.EPStore.storeMediaBlob(file);
-        const localUrl = (stored && stored.id) ? stored.id : (stored && stored.objectUrl ? stored.objectUrl : '');
-
-        // 3. Adiciona aos Stories locais
-        const newStoryId = 'pstory_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
-        window.EPStore.addProfileStory({
-          id: newStoryId,
-          type: 'video',
-          url: localUrl,
-          thumbnail: meta.thumbnail,
-          caption: caption,
-          duration: durationSecs
-        });
-
-        if (document.getElementById('inputProfileStoryCaption')) {
-          document.getElementById('inputProfileStoryCaption').value = '';
-        }
-        renderAdminProfileStoriesList();
-
-        if (durationSecs > 60) {
-          showToast(`Vídeo de ${durationSecs}s publicado! Será dividido automaticamente em partes de até 1 min (Instagram).`);
-        } else {
-          showToast(`Vídeo de ${durationSecs}s publicado com sucesso nos Stories 24h!`);
-        }
-
-        // 4. Em segundo plano: envia para streaming na nuvem para sincronizar com todos os celulares e clientes
-        window.EPStore.uploadVideoToCloud(file).then(cloudUrl => {
-          if (cloudUrl) {
-            window.EPStore.updateProfileStoryCloudUrl(newStoryId, cloudUrl);
-            console.log('Vídeo sincronizado na nuvem com sucesso:', cloudUrl);
-          }
-        }).catch(err => {
-          console.warn('Erro silencioso no upload para nuvem do vídeo:', err);
-        });
-      }
-    }
-
-    function handleAddProfileStoryVideoUrlPrompt() {
-      const url = prompt('Cole o link do vídeo (MP4) para seus Stories 24h:', 'https://');
-      if (url && url.trim() && url !== 'https://') {
-        const caption = (document.getElementById('inputProfileStoryCaption')?.value || '').trim();
-        window.EPStore.addProfileStory({ type: 'video', url: url.trim(), caption });
-        renderAdminProfileStoriesList();
-        showToast('Vídeo adicionado aos Stories de 24h do Perfil!');
-      }
-    }
-
-    function excluirProfileStoryAdmin(id) {
-      window.EPStore.deleteProfileStory(id);
-      renderAdminProfileStoriesList();
-      showToast('Story removido do perfil.');
-    }
-
-    // ========================================================
     // INTEGRAÇÃO GOOGLE AGENDA & BLOQUEIO DE COMPROMISSOS PESSOAIS
     // ========================================================
     function openModalGoogleAgendaAdmin() {

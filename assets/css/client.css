@@ -232,45 +232,25 @@ html, body {
   width: 68px;
   height: 68px;
   border-radius: 50%;
-  padding: 3.5px;
-  background: linear-gradient(45deg, #FEDA77 0%, #F58529 25%, #DD2A7B 55%, #8134AF 80%, #515BD4 100%);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+  padding: 3px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.45) 0%, rgba(216, 63, 121, 0.6) 100%);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
   flex-shrink: 0;
   position: relative;
-  cursor: pointer;
+  cursor: default;
   transition: transform 0.2s ease;
 }
 
 .greeting-avatar-ring:hover {
-  transform: scale(1.05);
+  transform: scale(1.02);
 }
 
 .greeting-avatar-ring.has-active-story {
-  animation: instaStoryPulse 2.4s infinite ease-in-out;
-}
-
-@keyframes instaStoryPulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(221, 42, 123, 0.55), 0 4px 16px rgba(0,0,0,0.35); }
-  50% { box-shadow: 0 0 0 6px rgba(221, 42, 123, 0), 0 6px 20px rgba(0,0,0,0.45); }
+  animation: none !important;
 }
 
 .avatar-story-badge {
-  position: absolute;
-  bottom: -4px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: linear-gradient(90deg, #DD2A7B 0%, #F58529 100%);
-  color: #FFFFFF !important;
-  font-size: 0.54rem;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  padding: 2px 7px;
-  border-radius: 10px;
-  border: 1.5px solid #350B19;
-  white-space: nowrap;
-  text-transform: uppercase;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
-  pointer-events: none;
+  display: none !important;
 }
 
 .greeting-avatar-ring img {
@@ -2063,4 +2043,15 @@ html, body {
   .booking-fullscreen-topbar {
     border-radius: 24px 24px 0 0 !important;
   }
+}
+
+
+/* Desativação total da interface de Stories */
+.story-preview-indicator,
+.story-viewer-fullscreen-overlay,
+#modalStoryViewer,
+.avatar-story-badge {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
 }

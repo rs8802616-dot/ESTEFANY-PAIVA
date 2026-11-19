@@ -2013,14 +2013,8 @@ window.EPStore = {
   // STORIES DE 24H DO PERFIL (ESTILO INSTAGRAM)
   // ----------------------------------------------------
   getProfileStories() {
-    const raw = JSON.parse(localStorage.getItem(STORAGE_KEYS.PROFILE_STORIES) || '[]');
-    const now = Date.now();
-    // Mantém apenas os stories publicados nas últimas 24 horas (86.400.000 ms)
-    const active = raw.filter(item => item && item.url && (!item.createdAt || (now - item.createdAt) < 86400000));
-    if (active.length !== raw.length) {
-      localStorage.setItem(STORAGE_KEYS.PROFILE_STORIES, JSON.stringify(active));
-    }
-    return active;
+    // Stories desativados a pedido da usuária
+    return [];
   },
 
   addProfileStory(storyData) {

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'estefany-nails-v30-fix-videos-playback-and-upload';
+const CACHE_NAME = 'estefany-nails-v31-remove-stories-feature';
 const STATIC_ASSETS = [
   './',
   './index.html',
