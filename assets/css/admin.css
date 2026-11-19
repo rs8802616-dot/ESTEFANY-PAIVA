@@ -928,14 +928,7 @@ input:checked + .switch-slider:before {
   pointer-events: auto !important;
 }
 
-#modalPortalClienteInApp:not(.active) {
-  display: none !important;
-  visibility: hidden !important;
-}
-#modalPortalClienteInApp.active {
-  display: flex !important;
-  visibility: visible !important;
-}
+
 
 .admin-modal-card {
   background: #FFFFFF;

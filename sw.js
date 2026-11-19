@@ -1,4 +1,4 @@
-const CACHE_NAME = 'estefany-nails-v31-remove-stories-feature';
+const CACHE_NAME = 'estefany-nails-v32-clean-code-and-performance';
 const STATIC_ASSETS = [
   './',
   './index.html',
