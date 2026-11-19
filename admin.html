@@ -996,6 +996,19 @@
           <i class="fa-brands fa-whatsapp" style="font-size:1.2rem;"></i> Conversar no WhatsApp
         </button>
 
+        <!-- Mensagens Prontas de 1 Clique -->
+        <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px;">
+          <button type="button" onclick="enviarMensagemProntaAgendamento('lembrete')" style="padding:8px 6px; border-radius:14px; border:1px solid rgba(37,211,102,0.35); background:#ECFDF5; color:#15803D; font-size:0.72rem; font-weight:700; cursor:pointer;">
+            🔔 Lembrete
+          </button>
+          <button type="button" onclick="enviarMensagemProntaAgendamento('pix')" style="padding:8px 6px; border-radius:14px; border:1px solid rgba(22,163,74,0.35); background:#F0FDF4; color:#166534; font-size:0.72rem; font-weight:700; cursor:pointer;">
+            💸 Enviar Pix
+          </button>
+          <button type="button" onclick="enviarMensagemProntaAgendamento('avaliacao')" style="padding:8px 6px; border-radius:14px; border:1px solid rgba(216,63,121,0.3); background:#FFF0F3; color:#9D174D; font-size:0.72rem; font-weight:700; cursor:pointer;">
+            ⭐ Pós-Atend.
+          </button>
+        </div>
+
         <button onclick="salvarAgendamentoNoGoogleAgendaAdmin()" style="width:100%; padding:11px; border-radius:30px; border:none; background:#1A73E8; color:#FFF; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;">
           <i class="fa-brands fa-google"></i> Enviar para Meu Google Agenda
         </button>
@@ -1333,6 +1346,11 @@
           </div>
         </div>
 
+        <div class="form-input-box" style="margin-bottom:12px;">
+          <label style="display:block; font-size:0.78rem; font-weight:600; color:#4D1328; margin-bottom:4px;">Antecedência Mínima p/ Cliente Remarcar Online (horas)</label>
+          <input type="number" id="inputRescheduleMinHours" value="12" min="1" max="72" style="width:100%; padding:10px 12px; border-radius:12px; border:1px solid rgba(77,19,40,0.18);">
+        </div>
+
         <div class="form-input-box" style="margin-bottom:16px;">
           <label style="display:block; font-size:0.78rem; font-weight:600; color:#4D1328; margin-bottom:4px;">Política de Cancelamento / Tolerância</label>
           <input type="text" id="inputCancelPolicy" value="Avisar com pelo menos 24h de antecedência." style="width:100%; padding:10px 12px; border-radius:12px; border:1px solid rgba(77,19,40,0.18);">
@@ -1395,6 +1413,34 @@
           <span style="font-size:0.72rem; color:#6A1D39; font-weight:700; text-transform:uppercase;">Total Investido</span>
           <h4 style="font-size:1.3rem; font-weight:800; color:#059669;" id="cliDetTotalSpent">R$ 0,00</h4>
         </div>
+      </div>
+
+      <!-- Ficha Técnica da Cliente (Preferências de Unhas, Gel e Alergias) -->
+      <div style="background:#FFF9FA; border:1px solid rgba(216,63,121,0.22); border-radius:14px; padding:12px; margin-bottom:14px;">
+        <h5 style="font-size:0.84rem; font-weight:700; color:#4D1328; margin-bottom:8px;">
+          <i class="fa-solid fa-clipboard-list" style="color:#D83F79;"></i> Ficha Técnica de Unhas
+        </h5>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
+          <div>
+            <label style="display:block; font-size:0.7rem; font-weight:600; color:#6A1D39; margin-bottom:2px;">Formato Preferido</label>
+            <input type="text" id="cliTechShape" placeholder="Ex: Amendoada" style="width:100%; padding:7px 10px; border-radius:10px; border:1px solid rgba(77,19,40,0.18); font-size:0.78rem;">
+          </div>
+          <div>
+            <label style="display:block; font-size:0.7rem; font-weight:600; color:#6A1D39; margin-bottom:2px;">Cor / Gel Favorito</label>
+            <input type="text" id="cliTechColor" placeholder="Ex: Milky White" style="width:100%; padding:7px 10px; border-radius:10px; border:1px solid rgba(77,19,40,0.18); font-size:0.78rem;">
+          </div>
+        </div>
+        <div style="margin-bottom:8px;">
+          <label style="display:block; font-size:0.7rem; font-weight:600; color:#6A1D39; margin-bottom:2px;">Alergias / Sensibilidades</label>
+          <input type="text" id="cliTechAllergies" placeholder="Ex: Nenhuma ou sensível a gel X" style="width:100%; padding:7px 10px; border-radius:10px; border:1px solid rgba(77,19,40,0.18); font-size:0.78rem;">
+        </div>
+        <div style="margin-bottom:8px;">
+          <label style="display:block; font-size:0.7rem; font-weight:600; color:#6A1D39; margin-bottom:2px;">Observações da Profissional</label>
+          <textarea id="cliTechNotes" rows="2" placeholder="Anotações da última manutenção..." style="width:100%; padding:7px 10px; border-radius:10px; border:1px solid rgba(77,19,40,0.18); font-size:0.78rem; resize:vertical;"></textarea>
+        </div>
+        <button type="button" onclick="saveClientTechNotesAdmin()" style="width:100%; padding:8px; border-radius:20px; border:none; background:#4D1328; color:#FFF; font-size:0.76rem; font-weight:700; cursor:pointer;">
+          <i class="fa-solid fa-floppy-disk"></i> Salvar Ficha Técnica
+        </button>
       </div>
 
       <!-- Histórico de Procedimentos -->
@@ -2091,18 +2137,37 @@
         return;
       }
 
+      const todayMs = Date.now();
       container.innerHTML = Array.from(clientMap.values()).map(cli => {
         const initials = (cli.name || 'CL').split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
+        let daysSince = 0;
+        if (cli.lastDate && cli.lastDate.includes('-')) {
+          const p = cli.lastDate.split('-');
+          const lastDt = new Date(parseInt(p[0], 10), parseInt(p[1], 10) - 1, parseInt(p[2], 10));
+          daysSince = Math.floor((todayMs - lastDt.getTime()) / (1000 * 60 * 60 * 24));
+        }
+        const needsReturn = daysSince >= 21;
+        const safeName = (cli.name || 'Cliente').replace(/'/g, "\'");
+        const safePhone = (cli.phone || '').replace(/'/g, "\'");
+        const lastBr = (cli.lastDate && cli.lastDate.includes('-')) ? cli.lastDate.split('-').reverse().join('/') : cli.lastDate;
         return `
-          <div class="card-list-item" onclick="openModalDetalhesCliente('${cli.phone}')">
-            <div style="display:flex; align-items:center; gap:10px;">
+          <div class="card-list-item" onclick="openModalDetalhesCliente('${safePhone}')" style="gap:10px;">
+            <div style="display:flex; align-items:center; gap:10px; min-width:0; flex:1;">
               <div class="client-avatar-badge">${initials}</div>
-              <div>
-                <h5 style="font-size:0.92rem; font-weight:700; color:#350B19;">${cli.name}</h5>
-                <p style="font-size:0.76rem; color:#6A1D39;">${cli.phone} &bull; Último: ${cli.lastDate} (${cli.service})</p>
+              <div style="min-width:0;">
+                <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                  <h5 style="font-size:0.92rem; font-weight:700; color:#350B19;">${cli.name}</h5>
+                  ${needsReturn ? `<span style="background:#FEF3C7; color:#B45309; border:1px solid #F59E0B; font-size:0.65rem; font-weight:800; padding:2px 7px; border-radius:12px;">⏰ Retorno (${daysSince}d)</span>` : ''}
+                </div>
+                <p style="font-size:0.76rem; color:#6A1D39;">${cli.phone} &bull; Último: ${lastBr} (${cli.service})</p>
               </div>
             </div>
-            <i class="fa-brands fa-whatsapp" style="color:#25D366; font-size:1.2rem;"></i>
+            ${needsReturn
+              ? `<button type="button" onclick="event.stopPropagation(); chamarClienteRetornoWhatsApp('${safePhone}', '${safeName}', ${daysSince})" style="padding:6px 10px; border-radius:16px; border:none; background:#25D366; color:#FFF; font-size:0.7rem; font-weight:700; cursor:pointer; flex-shrink:0;" title="Enviar mensagem convidando para manutenção">
+                   <i class="fa-brands fa-whatsapp"></i> Retorno
+                 </button>`
+              : `<i class="fa-brands fa-whatsapp" style="color:#25D366; font-size:1.2rem; flex-shrink:0;"></i>`
+            }
           </div>
         `;
       }).join('');
@@ -2395,6 +2460,8 @@
       document.getElementById('chkPayCash').checked = s.payCash !== false;
       document.getElementById('inputPixKey').value = s.pixKey || '(61) 98554-3452';
       document.getElementById('inputDepositPct').value = s.depositPercent || 0;
+      const reschInp = document.getElementById('inputRescheduleMinHours');
+      if (reschInp) reschInp.value = s.rescheduleMinHours || 12;
       document.getElementById('inputCancelPolicy').value = s.cancellationPolicy || 'Avisar com pelo menos 24h de antecedência.';
       openModal('modalConfigPagamento');
     }
@@ -2409,6 +2476,7 @@
           payCash: document.getElementById('chkPayCash').checked,
           pixKey: document.getElementById('inputPixKey').value.trim(),
           depositPercent: parseInt(document.getElementById('inputDepositPct').value, 10) || 0,
+          rescheduleMinHours: parseInt(document.getElementById('inputRescheduleMinHours')?.value, 10) || 12,
           cancellationPolicy: document.getElementById('inputCancelPolicy').value.trim()
         });
       }
@@ -2494,6 +2562,44 @@
     function abrirWhatsAppDetalhe() {
       if (!activeAppointmentTarget) return;
       callClientWhatsApp(activeAppointmentTarget.phone, activeAppointmentTarget.name);
+    }
+
+    function enviarMensagemProntaAgendamento(tipo) {
+      if (!activeAppointmentTarget) return;
+      const app = (window.EPStore ? window.EPStore.getAppointments() : []).find(a => a.id === activeAppointmentTarget.id) || activeAppointmentTarget;
+      const cleanPhone = String(app.clientPhone || app.phone || '').replace(/\D/g, '');
+      if (!cleanPhone) {
+        showToast('Telefone da cliente não encontrado.');
+        return;
+      }
+      const nome = app.clientName || app.name || 'Linda';
+      const srv = app.serviceName || 'seu procedimento';
+      const dateBr = (app.date && app.date.includes('-')) ? app.date.split('-').reverse().join('/') : (app.date || '');
+      const hora = app.time || '';
+      const price = parseFloat(app.servicePrice || app.price || 0);
+      const settings = (window.EPStore && window.EPStore.getSalonSettings) ? window.EPStore.getSalonSettings() : {};
+      const pixKey = settings.pixKey || '';
+      const depPct = parseInt(settings.depositPercent || 0, 10);
+
+      let texto = '';
+      if (tipo === 'lembrete') {
+        texto = `Olá, ${nome}! ✨ Passando para confirmar seu horário de *${srv}* no dia *${dateBr}* às *${hora}* no Studio Estefany Paiva Nails. Te espero! 💖`;
+      } else if (tipo === 'pix') {
+        const valorPix = depPct > 0 ? (price * depPct / 100) : price;
+        const labelVal = depPct > 0 ? `sinal de reserva (${depPct}% - R$ ${valorPix.toFixed(2).replace('.', ',')})` : `valor de R$ ${valorPix.toFixed(2).replace('.', ',')}`;
+        texto = `Olá, ${nome}! 💖 Segue nossa chave Pix para o ${labelVal} referente ao seu horário de *${srv}* (${dateBr} às ${hora}):\n\n🔑 *Chave Pix:* ${pixKey || '(consulte no atendimento)'}\n\nAssim que fizer, pode me enviar o comprovante por aqui! ✨`;
+      } else if (tipo === 'avaliacao') {
+        texto = `Olá, ${nome}! 💅 Foi um prazer enorme te atender! Como ficaram suas unhas de *${srv}*? Se puder me contar o que achou ou postar uma fotinho marcando o studio, vou amar! 💖✨`;
+      }
+
+      window.open(`https://wa.me/55${cleanPhone}?text=${encodeURIComponent(texto)}`, '_blank');
+    }
+
+    function chamarClienteRetornoWhatsApp(phone, name, daysSince) {
+      const cleanPhone = String(phone || '').replace(/\D/g, '');
+      if (!cleanPhone) return;
+      const texto = `Olá, ${name}! 💖 Tudo bem? Vi aqui que já faz ${daysSince} dias desde o seu último atendimento conosco ✨ Que tal já garantirmos o horário da sua manutenção para manter suas unhas impecáveis?`;
+      window.open(`https://wa.me/55${cleanPhone}?text=${encodeURIComponent(texto)}`, '_blank');
     }
 
     function marcarComoConfirmado() {
@@ -2990,7 +3096,27 @@
         `).join('');
       }
 
+      // Carrega Ficha Técnica salva da cliente
+      const tech = (window.EPStore && window.EPStore.getClientTechnicalNotes)
+        ? window.EPStore.getClientTechnicalNotes(client.clientPhone)
+        : { nailShape: '', favoriteColor: '', allergies: '', notes: '' };
+      if (document.getElementById('cliTechShape')) document.getElementById('cliTechShape').value = tech.nailShape || '';
+      if (document.getElementById('cliTechColor')) document.getElementById('cliTechColor').value = tech.favoriteColor || '';
+      if (document.getElementById('cliTechAllergies')) document.getElementById('cliTechAllergies').value = tech.allergies || '';
+      if (document.getElementById('cliTechNotes')) document.getElementById('cliTechNotes').value = tech.notes || '';
+
       openModal('modalDetalhesCliente');
+    }
+
+    function saveClientTechNotesAdmin() {
+      if (!currentModalClientPhone || !window.EPStore || !window.EPStore.saveClientTechnicalNotes) return;
+      window.EPStore.saveClientTechnicalNotes(currentModalClientPhone, {
+        nailShape: document.getElementById('cliTechShape')?.value || '',
+        favoriteColor: document.getElementById('cliTechColor')?.value || '',
+        allergies: document.getElementById('cliTechAllergies')?.value || '',
+        notes: document.getElementById('cliTechNotes')?.value || ''
+      });
+      showToast('Ficha técnica da cliente salva com sucesso!');
     }
 
     function openClientChatFromModal() {

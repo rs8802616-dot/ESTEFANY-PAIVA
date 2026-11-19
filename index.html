@@ -255,12 +255,34 @@
               <p>Selecione a data, horário e preencha apenas seu Nome e WhatsApp.</p>
             </div>
 
+            <!-- Aviso de Remarcação (aparece apenas quando a cliente está remarcando) -->
+            <div id="bookingRescheduleBanner" style="display:none; background:#FEF3C7; border:1px solid #F59E0B; border-radius:14px; padding:10px 14px; margin-bottom:12px; color:#92400E; font-size:0.8rem;">
+              <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+                <div>
+                  <strong><i class="fa-solid fa-rotate"></i> Remarcando seu horário</strong>
+                  <div id="bookingRescheduleBannerText" style="font-size:0.75rem; margin-top:2px;">Escolha a nova data e horário abaixo.</div>
+                </div>
+                <button type="button" onclick="cancelRescheduleMode()" style="background:#FFF; border:1px solid #F59E0B; color:#92400E; border-radius:16px; padding:4px 10px; font-size:0.72rem; font-weight:700; cursor:pointer;">Cancelar</button>
+              </div>
+            </div>
+
             <!-- Serviço Selecionado -->
             <div class="service-selected-banner" id="selectedServicePreview">
               <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" id="selectedServiceImg" alt="Alongamento">
-              <div>
+              <div style="flex:1; min-width:0;">
                 <h5 id="selectedServiceTitle">Alongamento em Gel</h5>
                 <p id="selectedServiceMeta">R$ 180,00 &bull; 90 minutos</p>
+              </div>
+            </div>
+
+            <!-- Combo: Adicionar Outros Procedimentos no Mesmo Horário -->
+            <div id="extraServicesWrapper" style="margin-bottom:14px;">
+              <button type="button" onclick="toggleExtraServicesPicker()" style="width:100%; padding:9px 14px; border-radius:14px; border:1px dashed rgba(216,63,121,0.45); background:#FFF9FA; color:#6A1D39; font-size:0.8rem; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:space-between;">
+                <span><i class="fa-solid fa-plus-circle" style="color:#D83F79;"></i> Adicionar outro procedimento (Combo)</span>
+                <span id="extraServicesCountBadge" style="font-size:0.72rem; color:#D83F79;">Opcional</span>
+              </button>
+              <div id="extraServicesPickerBox" style="display:none; margin-top:8px; background:#FFFFFF; border:1px solid rgba(77,19,40,0.12); border-radius:14px; padding:10px; max-height:190px; overflow-y:auto;">
+                <!-- Populado via JS -->
               </div>
             </div>
 
@@ -570,10 +592,28 @@
         Seu horário foi reservado com sucesso no Studio Estefany Paiva Nails.
       </p>
 
-      <div style="background:#FBECEF; border-radius:14px; padding:14px; margin-bottom:16px; text-align:left; font-size:0.85rem; color:#4D1328; line-height:1.6;">
+      <div style="background:#FBECEF; border-radius:14px; padding:14px; margin-bottom:12px; text-align:left; font-size:0.85rem; color:#4D1328; line-height:1.6;">
         <p><strong>Serviço:</strong> <span id="successSrvName">Alongamento em Gel</span></p>
         <p><strong>Data & Horário:</strong> <span id="successDateTime">08/11/2026 às 14:00</span></p>
         <p><strong>Cliente:</strong> <span id="successClientName">Mariana Silva</span></p>
+        <p><strong>Valor & Duração:</strong> <span id="successPriceDur">R$ 180,00 • 90 min</span></p>
+      </div>
+
+      <!-- Sinal / Pagamento via Pix (Copia e Cola) -->
+      <div id="bookingSuccessPixBox" style="display:none; background:#ECFDF5; border:1px solid rgba(22,163,74,0.28); border-radius:14px; padding:12px 14px; margin-bottom:14px; text-align:left;">
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:6px;">
+          <strong style="font-size:0.82rem; color:#166534;"><i class="fa-brands fa-pix"></i> <span id="successPixTitle">Chave Pix do Studio</span></strong>
+          <span id="successPixAmountBadge" style="background:#16A34A; color:#FFF; font-size:0.72rem; font-weight:700; padding:2px 9px; border-radius:12px;">R$ 0,00</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:6px; background:#FFF; border:1px solid rgba(22,163,74,0.22); border-radius:10px; padding:7px 10px; margin-bottom:8px;">
+          <code id="successPixKeyValue" style="flex:1; font-size:0.8rem; color:#14532D; word-break:break-all; font-weight:700;"></code>
+          <button type="button" onclick="copyBookingPixKey()" style="background:#16A34A; color:#FFF; border:none; border-radius:8px; padding:6px 10px; font-size:0.74rem; font-weight:700; cursor:pointer; flex-shrink:0;">
+            <i class="fa-regular fa-copy"></i> Copiar
+          </button>
+        </div>
+        <button type="button" onclick="sendBookingReceiptWhatsapp()" style="width:100%; padding:9px 12px; border-radius:20px; border:none; background:#25D366; color:#FFF; font-size:0.78rem; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;">
+          <i class="fa-brands fa-whatsapp"></i> Enviar Comprovante / Confirmar no WhatsApp
+        </button>
       </div>
 
       <div style="display:flex; flex-direction:column; gap:8px;">
@@ -601,22 +641,14 @@
   <!-- Scripts -->
   <script src="assets/js/store.js"></script>
   <script>
-    let selectedService = { id: 'srv_alongamento', name: 'Alongamento em Gel', price: 180, image: 'assets/images/trabalho-alongamento-chocolate.png' };
+    let selectedService = { id: 'srv_alongamento', name: 'Alongamento em Gel', price: 180, duration: 90, image: 'assets/images/trabalho-alongamento-chocolate.png' };
+    let selectedExtraServiceIds = [];
+    let reschedulingAppointmentId = null;
     let selectedSlotTime = '14:00';
     let selectedDate = new Date();
     let currentCalMonth = new Date().getMonth();
     let currentCalYear = new Date().getFullYear();
     let activeClientCategory = 'all';
-
-    // Stories state
-    let storyActiveService = null;
-    let storyIndex = 0;
-    let storyTimer = null;
-    const storyImages = [
-      'assets/images/trabalho-alongamento-chocolate.png',
-      'assets/images/trabalho-amendoada-ouro.png',
-      'assets/images/trabalho-tons-terrosos.png'
-    ];
 
     function formatLocalYYYYMMDD(d) {
       const y = d.getFullYear();
@@ -903,15 +935,122 @@
       renderDynamicSlots();
     }
 
-    function selectServiceForBooking(id, name, price, img) {
-      window._userExplicitlyPickedService = true;
-      selectedService = { id, name, price, image: img };
+    function getBookingTotals() {
+      const allServices = (window.EPStore && window.EPStore.getServices) ? window.EPStore.getServices(true) : [];
+      const baseSrv = allServices.find(s => s.id === selectedService.id);
+      const baseDur = parseInt(selectedService.duration || (baseSrv && baseSrv.duration) || 90, 10);
+      const basePrice = parseFloat(selectedService.price || (baseSrv && baseSrv.price) || 150);
+      const names = [selectedService.name || (baseSrv && baseSrv.name) || 'Serviço'];
+      let totalPrice = basePrice;
+      let totalDuration = baseDur;
+
+      selectedExtraServiceIds.forEach(extraId => {
+        if (extraId === selectedService.id) return;
+        const extra = allServices.find(s => s.id === extraId);
+        if (extra) {
+          names.push(extra.name);
+          totalPrice += parseFloat(extra.price || 0);
+          totalDuration += parseInt(extra.duration || 60, 10);
+        }
+      });
+
+      return {
+        names,
+        combinedName: names.join(' + '),
+        totalPrice,
+        totalDuration
+      };
+    }
+
+    function updateSelectedServiceSummaryUI() {
+      const totals = getBookingTotals();
       const titleEl = document.getElementById("selectedServiceTitle");
       const metaEl = document.getElementById("selectedServiceMeta");
       const imgEl = document.getElementById("selectedServiceImg");
-      if (titleEl) titleEl.innerText = name;
-      if (metaEl) metaEl.innerText = "R$ " + parseFloat(price).toFixed(2).replace(".", ",") + " • 90 minutos";
-      if (imgEl) imgEl.src = img;
+      const badgeEl = document.getElementById("extraServicesCountBadge");
+
+      if (titleEl) titleEl.innerText = totals.combinedName;
+      if (metaEl) metaEl.innerText = "R$ " + totals.totalPrice.toFixed(2).replace(".", ",") + " • " + totals.totalDuration + " minutos";
+      if (imgEl && selectedService.image) imgEl.src = selectedService.image;
+      if (badgeEl) {
+        badgeEl.innerText = selectedExtraServiceIds.length > 0
+          ? ("+" + selectedExtraServiceIds.length + " extra(s)")
+          : "Opcional";
+      }
+    }
+
+    function renderExtraServicesPicker() {
+      const box = document.getElementById('extraServicesPickerBox');
+      if (!box || !window.EPStore) return;
+      const services = window.EPStore.getServices(true).filter(s => s.id !== selectedService.id);
+      if (services.length === 0) {
+        box.innerHTML = '<p style="font-size:0.76rem; color:#8A2D4E; text-align:center; padding:6px;">Nenhum outro procedimento disponível.</p>';
+        return;
+      }
+      box.innerHTML = services.map(s => {
+        const checked = selectedExtraServiceIds.includes(s.id);
+        const priceFmt = parseFloat(s.price || 0).toFixed(2).replace('.', ',');
+        const dur = parseInt(s.duration || 60, 10);
+        return `
+          <label style="display:flex; align-items:center; justify-content:space-between; gap:8px; padding:8px 10px; border-radius:10px; margin-bottom:4px; cursor:pointer; background:${checked ? '#FBECEF' : '#FAFAFA'}; border:1px solid ${checked ? '#D83F79' : 'rgba(77,19,40,0.08)'};">
+            <div style="display:flex; align-items:center; gap:8px; min-width:0;">
+              <input type="checkbox" ${checked ? 'checked' : ''} onchange="toggleExtraServiceItem('${s.id}')" style="accent-color:#D83F79; width:16px; height:16px;">
+              <div style="min-width:0;">
+                <strong style="font-size:0.8rem; color:#350B19; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${s.name}</strong>
+                <span style="font-size:0.7rem; color:#6A1D39;">+${dur} min</span>
+              </div>
+            </div>
+            <span style="font-size:0.78rem; font-weight:700; color:#4D1328; flex-shrink:0;">+ R$ ${priceFmt}</span>
+          </label>
+        `;
+      }).join('');
+    }
+
+    function toggleExtraServicesPicker() {
+      const box = document.getElementById('extraServicesPickerBox');
+      if (!box) return;
+      const isHidden = (box.style.display === 'none' || !box.style.display);
+      if (isHidden) {
+        renderExtraServicesPicker();
+        box.style.display = 'block';
+      } else {
+        box.style.display = 'none';
+      }
+    }
+
+    function toggleExtraServiceItem(srvId) {
+      if (selectedExtraServiceIds.includes(srvId)) {
+        selectedExtraServiceIds = selectedExtraServiceIds.filter(id => id !== srvId);
+      } else {
+        selectedExtraServiceIds.push(srvId);
+      }
+      updateSelectedServiceSummaryUI();
+      renderExtraServicesPicker();
+      renderDynamicSlots();
+    }
+
+    function cancelRescheduleMode() {
+      reschedulingAppointmentId = null;
+      const banner = document.getElementById('bookingRescheduleBanner');
+      if (banner) banner.style.display = 'none';
+      renderDynamicSlots();
+    }
+
+    function selectServiceForBooking(id, name, price, img) {
+      window._userExplicitlyPickedService = true;
+      cancelRescheduleMode();
+      selectedExtraServiceIds = [];
+      const srvObj = (window.EPStore && window.EPStore.getServiceById) ? window.EPStore.getServiceById(id) : null;
+      selectedService = {
+        id,
+        name,
+        price: parseFloat(price || (srvObj && srvObj.price) || 150),
+        duration: parseInt((srvObj && srvObj.duration) || 90, 10),
+        image: img
+      };
+      const extraBox = document.getElementById('extraServicesPickerBox');
+      if (extraBox) extraBox.style.display = 'none';
+      updateSelectedServiceSummaryUI();
       openBookingModalDirect();
       showToast("Serviço selecionado: " + name);
     }
@@ -944,8 +1083,9 @@
         : ['09:00', '10:30', '13:00', '14:00', '15:30', '17:00', '18:30', '19:30'];
 
       // Usa getAvailableSlots que já filtra tanto os agendamentos de clientes quanto os Compromissos Pessoais do Google Agenda da Administradora!
+      const bookingTotals = getBookingTotals();
       const freeSlots = (window.EPStore && window.EPStore.getAvailableSlots)
-        ? window.EPStore.getAvailableSlots(dateStr)
+        ? window.EPStore.getAvailableSlots(dateStr, bookingTotals.totalDuration, reschedulingAppointmentId || '')
         : allSlots;
 
       if (freeSlots.length === 0) {
@@ -1093,13 +1233,20 @@
 
       const dateStr = formatLocalYYYYMMDD(selectedDate);
       const bookedTime = selectedSlotTime;
+      if (!bookedTime) {
+        showToast('Selecione um horário disponível antes de confirmar!');
+        return;
+      }
+
+      const totals = getBookingTotals();
+      const wasReschedule = !!reschedulingAppointmentId;
       const newBooking = {
         clientName: name,
         clientPhone: phone,
         serviceId: selectedService.id,
-        serviceName: selectedService.name,
-        servicePrice: selectedService.price,
-        duration: 90,
+        serviceName: totals.combinedName,
+        servicePrice: totals.totalPrice,
+        duration: totals.totalDuration,
         date: dateStr,
         time: bookedTime,
         status: 'Confirmado'
@@ -1108,7 +1255,18 @@
       let savedApp = null;
       try {
         if (window.EPStore) {
-          savedApp = await window.EPStore.createAppointment(newBooking);
+          if (wasReschedule && window.EPStore.rescheduleAppointment) {
+            savedApp = window.EPStore.rescheduleAppointment(reschedulingAppointmentId, dateStr, bookedTime, {
+              clientName: name,
+              clientPhone: phone,
+              serviceId: selectedService.id,
+              serviceName: totals.combinedName,
+              servicePrice: totals.totalPrice,
+              duration: totals.totalDuration
+            });
+          } else {
+            savedApp = await window.EPStore.createAppointment(newBooking);
+          }
         }
       } catch (err) {
         console.warn('Fallback save triggered:', err);
@@ -1124,6 +1282,9 @@
           window.EPStore.publishCloudSync('UPSERT_APPOINTMENT', savedApp);
         }
       }
+
+      cancelRescheduleMode();
+      selectedExtraServiceIds = [];
 
       // Garante persistência permanente dos dados da cliente
       localStorage.setItem('epn_last_client_phone', phone);
@@ -1143,24 +1304,44 @@
         window.AudioAlertEngine.playNotificationChime();
       }
 
-      document.getElementById('successSrvName').innerText = selectedService.name;
+      document.getElementById('successSrvName').innerText = totals.combinedName;
       document.getElementById('successDateTime').innerText = `${selectedDate.toLocaleDateString('pt-BR')} às ${bookedTime}`;
       document.getElementById('successClientName').innerText = name;
+      const priceDurEl = document.getElementById('successPriceDur');
+      if (priceDurEl) {
+        priceDurEl.innerText = `R$ ${totals.totalPrice.toFixed(2).replace('.', ',')} • ${totals.totalDuration} min`;
+      }
+
+      // Exibe Chave Pix / Sinal se configurada pela administradora
+      const salonSettings = (window.EPStore && window.EPStore.getSalonSettings) ? window.EPStore.getSalonSettings() : {};
+      const pixBox = document.getElementById('bookingSuccessPixBox');
+      if (pixBox && salonSettings.payPix !== false && salonSettings.pixKey) {
+        const depPct = parseInt(salonSettings.depositPercent || 0, 10);
+        const pixAmount = depPct > 0 ? (totals.totalPrice * depPct / 100) : totals.totalPrice;
+        document.getElementById('successPixTitle').innerText = depPct > 0
+          ? `Sinal de Reserva (${depPct}%) via Pix`
+          : 'Chave Pix do Studio (Pagamento)';
+        document.getElementById('successPixAmountBadge').innerText = `R$ ${pixAmount.toFixed(2).replace('.', ',')}`;
+        document.getElementById('successPixKeyValue').innerText = salonSettings.pixKey;
+        pixBox.style.display = 'block';
+      } else if (pixBox) {
+        pixBox.style.display = 'none';
+      }
 
       lastConfirmedClientBooking = savedApp || {
         id: 'EP-' + Date.now(),
         clientName: name,
         clientPhone: phone,
-        serviceName: selectedService.name,
-        servicePrice: selectedService.price,
-        duration: 90,
+        serviceName: totals.combinedName,
+        servicePrice: totals.totalPrice,
+        duration: totals.totalDuration,
         date: dateStr,
         time: bookedTime
       };
 
       closeClientModal('modalAgendamentoPopup');
       openClientModal('modalBookingSuccess');
-      showToast('Agendamento confirmado! Toque em Salvar no Google Agenda para registrar no seu celular.');
+      showToast(wasReschedule ? 'Horário remarcado com sucesso!' : 'Agendamento confirmado com sucesso!');
     }
 
     function updateNextBookingBanner() {
@@ -1301,18 +1482,28 @@
         return;
       }
 
-      container.innerHTML = filtered.map(item => `
-        <div style="background:#FBECEF; border-radius:14px; padding:12px 14px; display:flex; justify-content:space-between; align-items:center;">
-          <div>
+      container.innerHTML = filtered.map(item => {
+        const isActive = item.status !== 'Cancelado' && item.status !== 'cancelado' && item.status !== 'Concluído';
+        return `
+        <div style="background:#FBECEF; border-radius:14px; padding:12px 14px; display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
+          <div style="flex:1; min-width:160px;">
             <h5 style="color:#350B19; font-weight:700; font-size:0.9rem;">${item.serviceName}</h5>
             <p style="font-size:0.76rem; color:#4D1328; font-weight:600;">Cliente: ${item.clientName}</p>
             <p style="font-size:0.75rem; color:#6A1D39;">${item.date.split('-').reverse().join('/')} às ${item.time} &bull; <strong>${item.status}</strong></p>
           </div>
-          <button onclick="openWhatsAppChatDirect()" style="padding:6px 12px; border-radius:20px; border:none; background:#25D366; color:#FFF; font-size:0.75rem; font-weight:700; cursor:pointer;">
-            <i class="fa-brands fa-whatsapp"></i> Falar
-          </button>
+          <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
+            ${isActive ? `
+              <button type="button" onclick="startClientReschedule('${item.id}')" style="padding:6px 11px; border-radius:20px; border:1px solid rgba(77,19,40,0.22); background:#FFF; color:#4D1328; font-size:0.74rem; font-weight:700; cursor:pointer;">
+                <i class="fa-solid fa-rotate"></i> Remarcar
+              </button>
+            ` : ''}
+            <button type="button" onclick="openWhatsAppChatDirect()" style="padding:6px 11px; border-radius:20px; border:none; background:#25D366; color:#FFF; font-size:0.74rem; font-weight:700; cursor:pointer;">
+              <i class="fa-brands fa-whatsapp"></i> Falar
+            </button>
+          </div>
         </div>
-      `).join('');
+      `;
+      }).join('');
     }
 
     function openDetalhesModal() {
@@ -1342,6 +1533,71 @@
       const cleanPhone = ((s && s.phone) ? s.phone : '61985543452').replace(/\D/g, '');
       const msg = encodeURIComponent("Olá, Estefany! Gostaria de falar sobre o meu agendamento de unhas ✨");
       window.open(`https://wa.me/55${cleanPhone}?text=${msg}`, '_blank');
+    }
+
+    function copyBookingPixKey() {
+      const keyEl = document.getElementById('successPixKeyValue');
+      const key = keyEl ? keyEl.innerText.trim() : '';
+      if (!key) return;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(key).then(() => {
+          showToast('Chave Pix copiada! Cole no app do seu banco.');
+        }).catch(() => {
+          prompt('Copie a Chave Pix abaixo:', key);
+        });
+      } else {
+        prompt('Copie a Chave Pix abaixo:', key);
+      }
+    }
+
+    function sendBookingReceiptWhatsapp() {
+      const s = window.EPStore ? window.EPStore.getSalonSettings() : {};
+      const cleanPhone = ((s && s.phone) ? s.phone : '61985543452').replace(/\D/g, '');
+      const app = lastConfirmedClientBooking || {};
+      const dateBr = app.date ? app.date.split('-').reverse().join('/') : '';
+      const msg = encodeURIComponent(
+        `Olá, Estefany! 💖 Acabei de agendar *${app.serviceName || 'meu atendimento'}* para o dia *${dateBr}* às *${app.time || ''}* (Nome: ${app.clientName || ''}). Segue a confirmação/comprovante!`
+      );
+      window.open(`https://wa.me/55${cleanPhone}?text=${msg}`, '_blank');
+    }
+
+    function startClientReschedule(appId) {
+      if (!window.EPStore) return;
+      const app = (window.EPStore.getAppointments() || []).find(a => a.id === appId);
+      if (!app) return;
+
+      const check = window.EPStore.canClientReschedule ? window.EPStore.canClientReschedule(app) : { allowed: true, minHours: 12 };
+      if (!check.allowed) {
+        showToast(`Remarcação online permitida com no mínimo ${check.minHours || 12}h de antecedência. Fale pelo WhatsApp!`);
+        return;
+      }
+
+      reschedulingAppointmentId = app.id;
+      selectedExtraServiceIds = [];
+      const srvObj = window.EPStore.getServiceById ? window.EPStore.getServiceById(app.serviceId) : null;
+      selectedService = {
+        id: app.serviceId || 'srv_custom',
+        name: app.serviceName || (srvObj && srvObj.name) || 'Serviço',
+        price: parseFloat(app.servicePrice || (srvObj && srvObj.price) || 150),
+        duration: parseInt(app.duration || (srvObj && srvObj.duration) || 90, 10),
+        image: (srvObj && srvObj.image) ? srvObj.image : 'assets/images/trabalho-alongamento-chocolate.png'
+      };
+
+      const nameInp = document.getElementById('clientNameInput');
+      const phoneInp = document.getElementById('clientPhoneInput');
+      if (nameInp && app.clientName) nameInp.value = app.clientName;
+      if (phoneInp && app.clientPhone) phoneInp.value = app.clientPhone;
+
+      const banner = document.getElementById('bookingRescheduleBanner');
+      const bannerTxt = document.getElementById('bookingRescheduleBannerText');
+      if (banner) banner.style.display = 'block';
+      if (bannerTxt) {
+        bannerTxt.innerText = `Horário atual: ${app.date.split('-').reverse().join('/')} às ${app.time}. Escolha o novo dia e horário abaixo.`;
+      }
+
+      updateSelectedServiceSummaryUI();
+      closeClientModal('modalMeusAgendamentos');
+      openBookingModalDirect();
     }
 
     function downloadCalendarIcs() {

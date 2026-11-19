@@ -16,7 +16,8 @@ const STORAGE_KEYS = {
   APPOINTMENTS: 'epn_appointments_lgpd',
   SETTINGS: 'epn_salon_settings',
   PROFILE_STORIES: 'epn_profile_stories_24h',
-  PERSONAL_BUSY_BLOCKS: 'epn_personal_busy_blocks'
+  PERSONAL_BUSY_BLOCKS: 'epn_personal_busy_blocks',
+  CLIENT_TECH_NOTES: 'epn_client_tech_notes'
 };
 
 // ==========================================
@@ -1844,14 +1845,135 @@ window.EPStore = {
     });
   },
 
-  getAvailableSlots(dateStr, durationMinutes = 60) {
+  _timeToMinutes(hhmm) {
+    if (!hhmm || typeof hhmm !== 'string') return 0;
+    const parts = hhmm.split(':');
+    const h = parseInt(parts[0], 10) || 0;
+    const m = parseInt(parts[1], 10) || 0;
+    return h * 60 + m;
+  },
+
+  getAvailableSlots(dateStr, durationMinutes = 90, ignoreAppointmentId = '') {
     const appointments = this.getAppointments();
-    const dayAppointments = appointments.filter(a => a.date === dateStr && a.status !== 'Cancelado');
+    const dayAppointments = appointments.filter(a =>
+      a.date === dateStr &&
+      a.status !== 'Cancelado' &&
+      a.status !== 'cancelado' &&
+      (!ignoreAppointmentId || a.id !== ignoreAppointmentId)
+    );
 
     const defaultSlots = this.getConfiguredSlots();
-    const takenTimes = new Set(dayAppointments.map(a => a.time));
+    const reqDuration = Math.max(30, parseInt(durationMinutes, 10) || 90);
 
-    return defaultSlots.filter(slot => !takenTimes.has(slot) && !this.isSlotBlockedByPersonalEvent(dateStr, slot));
+    return defaultSlots.filter(slot => {
+      if (this.isSlotBlockedByPersonalEvent(dateStr, slot)) return false;
+
+      const sStart = this._timeToMinutes(slot);
+      const sEnd = sStart + reqDuration;
+
+      for (const app of dayAppointments) {
+        if (app.time === slot) return false;
+        const aStart = this._timeToMinutes(app.time);
+        const aDur = Math.max(30, parseInt(app.duration, 10) || 90);
+        const aEnd = aStart + aDur;
+        // Bloqueio inteligente por sobreposição de tempo
+        if (sStart < aEnd && sEnd > aStart) {
+          return false;
+        }
+      }
+      return true;
+    });
+  },
+
+  // Verifica se a cliente ainda está dentro do prazo mínimo para remarcar sozinha
+  canClientReschedule(appointment, minHoursOverride) {
+    if (!appointment || !appointment.date || !appointment.time) return { allowed: false, hoursLeft: 0 };
+    if (appointment.status === 'Cancelado' || appointment.status === 'cancelado' || appointment.status === 'Concluído') {
+      return { allowed: false, hoursLeft: 0 };
+    }
+    const settings = this.getSalonSettings ? this.getSalonSettings() : {};
+    const minHours = typeof minHoursOverride === 'number'
+      ? minHoursOverride
+      : (parseInt(settings.rescheduleMinHours, 10) || 12);
+
+    const parts = appointment.date.split('-');
+    const tParts = appointment.time.split(':');
+    if (parts.length !== 3 || tParts.length < 2) return { allowed: true, hoursLeft: 99 };
+
+    const appDate = new Date(
+      parseInt(parts[0], 10),
+      parseInt(parts[1], 10) - 1,
+      parseInt(parts[2], 10),
+      parseInt(tParts[0], 10),
+      parseInt(tParts[1], 10)
+    );
+    const diffHours = (appDate.getTime() - Date.now()) / (1000 * 60 * 60);
+    return {
+      allowed: diffHours >= minHours,
+      hoursLeft: Math.max(0, Math.round(diffHours)),
+      minHours
+    };
+  },
+
+  // Remarcação de agendamento (libera o horário antigo e reserva o novo)
+  rescheduleAppointment(appointmentId, newDate, newTime, extraUpdates = {}) {
+    const list = this.getAppointments();
+    const idx = list.findIndex(a => a.id === appointmentId);
+    if (idx === -1) return null;
+
+    const updated = {
+      ...list[idx],
+      ...extraUpdates,
+      date: newDate,
+      time: newTime,
+      status: 'Confirmado',
+      rescheduledAt: new Date().toISOString()
+    };
+    list[idx] = updated;
+    localStorage.setItem(STORAGE_KEYS.APPOINTMENTS, JSON.stringify(list));
+    this.publishCloudSync('UPSERT_APPOINTMENT', updated);
+    this.emitStoreUpdate({ action: 'UPSERT_APPOINTMENT', payload: updated, fromRemote: false });
+    return updated;
+  },
+
+  // ====================================================
+  // FICHA TÉCNICA DA CLIENTE (FORMATO, GEL, ALERGIAS, OBS)
+  // ====================================================
+  _normalizeClientKey(phone) {
+    return String(phone || '').replace(/\D/g, '');
+  },
+
+  getAllClientTechnicalNotes() {
+    try {
+      return JSON.parse(localStorage.getItem(STORAGE_KEYS.CLIENT_TECH_NOTES) || '{}');
+    } catch (e) {
+      return {};
+    }
+  },
+
+  getClientTechnicalNotes(phone) {
+    const key = this._normalizeClientKey(phone);
+    if (!key) return { nailShape: '', favoriteColor: '', allergies: '', notes: '' };
+    const map = this.getAllClientTechnicalNotes();
+    return map[key] || { nailShape: '', favoriteColor: '', allergies: '', notes: '' };
+  },
+
+  saveClientTechnicalNotes(phone, data) {
+    const key = this._normalizeClientKey(phone);
+    if (!key) return null;
+    const map = this.getAllClientTechnicalNotes();
+    const record = {
+      phoneKey: key,
+      nailShape: (data.nailShape || '').trim(),
+      favoriteColor: (data.favoriteColor || '').trim(),
+      allergies: (data.allergies || '').trim(),
+      notes: (data.notes || '').trim(),
+      updatedAt: new Date().toISOString()
+    };
+    map[key] = record;
+    localStorage.setItem(STORAGE_KEYS.CLIENT_TECH_NOTES, JSON.stringify(map));
+    this.publishCloudSync('UPSERT_CLIENT_TECH_NOTES', record);
+    return record;
   },
 
   // Criação de Agendamento Enxuto (Apenas Nome + Celular) - Persistência Garantida
@@ -2337,6 +2459,11 @@ window.EPStore = {
     } else if (action === 'DELETE_PERSONAL_BLOCK' && payload && payload.id) {
       const list = this.getPersonalBusyBlocks().filter(b => b.id !== payload.id);
       localStorage.setItem(STORAGE_KEYS.PERSONAL_BUSY_BLOCKS, JSON.stringify(list));
+      changed = true;
+    } else if (action === 'UPSERT_CLIENT_TECH_NOTES' && payload && payload.phoneKey) {
+      const map = this.getAllClientTechnicalNotes();
+      map[payload.phoneKey] = payload;
+      localStorage.setItem(STORAGE_KEYS.CLIENT_TECH_NOTES, JSON.stringify(map));
       changed = true;
     } else if (action === 'UPDATE_THEME' && payload) {
       const current = this.getTheme();

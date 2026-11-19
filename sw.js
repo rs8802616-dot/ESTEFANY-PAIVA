@@ -1,4 +1,4 @@
-const CACHE_NAME = 'estefany-nails-v32-clean-code-and-performance';
+const CACHE_NAME = 'estefany-nails-v33-combos-pix-tech-notes-reschedule';
 const STATIC_ASSETS = [
   './',
   './index.html',
