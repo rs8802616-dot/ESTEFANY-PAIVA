@@ -908,6 +908,15 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     </div>
                   </div>
 
+                  {/* Calendário em tela cheia estilo Google Calendário */}
+                  <AdminGoogleCalendar
+                    appointments={appointments}
+                    blocks={blocks}
+                    settings={settings}
+                    onSelectAppointment={handleOpenAppointmentDetail}
+                    onNewAppointmentForDate={() => handleOpenNewWalkIn()}
+                  />
+
                   {/* Barra de Meta Mensal */}
                   <section className="bg-white rounded-2xl border border-[#E8D6CB] p-5 space-y-3.5">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
