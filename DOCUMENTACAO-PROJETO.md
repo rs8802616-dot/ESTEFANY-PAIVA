@@ -228,3 +228,12 @@ O projeto foi migrado para a arquitetura completa em **React 19 + TypeScript + V
 - **Destaque do botão de Combo (`BookingSheet.tsx`)**:
   - Substituído o texto apagado `+ + Combo (adicionar outro serviço)` por um botão destacado em `#F2EAE4` com borda dourada `#C4A477`, ícone em bloco escuro `#594943` e selo `+ Combo`.
   - Cache do Workbox PWA elevado para `estefany-nails-v54-booking-modal-lock-and-combo-highlight`.
+
+
+### v55 — Correção Crítica: Proteção Contra Reversão de Fotos e Textos Salvos (`db.ts`, `localClientStore.ts` e `utils.ts`)
+- **Por que as fotos voltavam para as fotos de teste ao salvar:**
+  - `subscribeSalonSettings` e `subscribePublicServices` aplicavam `...(snap.data())` e `saveLocalServices(cloudList)` **por cima** dos dados recém-salvos localmente quando o Firestore estava em modo cofre local (sem token Firebase Auth) ou antes da confirmação na nuvem, sobrescrevendo imediatamente a foto escolhida pela administradora.
+- **Solução Definitiva:**
+  - Adicionado controle de alterações locais pendentes (`isSettingsDirtyLocal`, `getDirtyServiceIds`, `getDeletedServiceIds`) em `src/lib/localClientStore.ts` e `src/lib/db.ts`: snapshots antigos do Firestore **nunca** sobrescrevem fotos, textos ou serviços editados localmente até que a gravação na nuvem seja confirmada com sucesso.
+  - Reforçada a compressão em `compressImageToDataUrl` (`src/lib/utils.ts`) com redução progressiva de escala e qualidade para garantir imagens sempre `<= 220.000` bytes (dentro do limite de `250.000` bytes do Firestore).
+  - Cache do Workbox PWA elevado para `estefany-nails-v55-fix-photo-revert-dirty-guard`.

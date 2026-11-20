@@ -488,13 +488,27 @@ export async function compressImageToDataUrl(
           reject(new Error('Canvas indisponível.'));
           return;
         }
-        ctx.drawImage(img, 0, 0, w, h);
-        const dataUrl = canvas.toDataURL('image/jpeg', quality);
-        if (dataUrl.length > 240_000) {
-          resolve(canvas.toDataURL('image/jpeg', 0.55));
-        } else {
-          resolve(dataUrl);
+        const tryEncode = (scaleFactor: number, q: number): string => {
+          const w = Math.max(1, Math.round(img.width * scale * scaleFactor));
+          const h = Math.max(1, Math.round(img.height * scale * scaleFactor));
+          canvas.width = w;
+          canvas.height = h;
+          ctx.drawImage(img, 0, 0, w, h);
+          return canvas.toDataURL('image/jpeg', q);
+        };
+
+        let dataUrl = tryEncode(1, quality);
+        const attempts: Array<[number, number]> = [
+          [1, 0.62],
+          [0.8, 0.55],
+          [0.65, 0.5],
+          [0.5, 0.45],
+        ];
+        for (const [sf, q] of attempts) {
+          if (dataUrl.length <= 220_000) break;
+          dataUrl = tryEncode(sf, q);
         }
+        resolve(dataUrl);
       };
       img.src = String(reader.result);
     };

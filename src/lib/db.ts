@@ -21,13 +21,19 @@ import {
 import { isAdminGateUnlocked } from './adminRoute';
 import { DEFAULT_CATEGORIES, DEFAULT_SERVICES, DEFAULT_SETTINGS } from './defaults';
 import {
+  clearServiceDirty,
   computeLocalAvailabilitySlots,
+  getDeletedServiceIds,
+  getDirtyServiceIds,
+  isSettingsDirtyLocal,
   loadCachedSettingsSync,
   loadLocalBlocks,
   loadLocalBookings,
   loadLocalCategories,
   loadLocalServices,
   loadLocalTechNotes,
+  markServiceDeleted,
+  markServiceDirty,
   removeLocalBooking,
   saveAllLocalBookings,
   saveCachedSettingsSync,
@@ -35,6 +41,7 @@ import {
   saveLocalCategories,
   saveLocalServices,
   saveLocalTechNotes,
+  setSettingsDirtyLocal,
   subscribeLocalStoreChanges,
   upsertLocalBooking,
 } from './localClientStore';
@@ -181,11 +188,19 @@ export function subscribeSalonSettings(onData: (settings: SalonSettings) => void
     ref,
     (snap) => {
       if (snap.exists()) {
-        const merged: SalonSettings = {
-          ...DEFAULT_SETTINGS,
-          ...loadCachedSettingsSync(),
-          ...(snap.data() as Partial<SalonSettings>),
-        };
+        const localSettings = loadCachedSettingsSync();
+        const cloudSettings = snap.data() as Partial<SalonSettings>;
+        const merged: SalonSettings = isSettingsDirtyLocal()
+          ? {
+              ...DEFAULT_SETTINGS,
+              ...cloudSettings,
+              ...localSettings,
+            }
+          : {
+              ...DEFAULT_SETTINGS,
+              ...localSettings,
+              ...cloudSettings,
+            };
         saveCachedSettingsSync(merged, false);
         onData(merged);
       } else {
@@ -235,6 +250,23 @@ export function subscribePublicCategories(onData: (categories: Category[]) => vo
   };
 }
 
+function mergeCloudAndLocalServices(cloudList: Service[]): Service[] {
+  const localSvcs = loadLocalServices();
+  const dirtyIds = getDirtyServiceIds();
+  const deletedIds = getDeletedServiceIds();
+  const map = new Map<string, Service>();
+
+  cloudList.forEach((s) => {
+    if (!deletedIds.has(s.id)) map.set(s.id, s);
+  });
+  localSvcs.forEach((s) => {
+    if (!deletedIds.has(s.id) && (dirtyIds.has(s.id) || !map.has(s.id))) {
+      map.set(s.id, s);
+    }
+  });
+  return Array.from(map.values()).sort((a, b) => a.order - b.order);
+}
+
 export function subscribePublicServices(onData: (services: Service[]) => void): Unsubscribe {
   const emitLocal = () => {
     onData(loadLocalServices().filter((s) => s.active));
@@ -253,8 +285,9 @@ export function subscribePublicServices(onData: (services: Service[]) => void): 
       const cloudList = snap.docs
         .map((d) => ({ id: d.id, ...(d.data() as Omit<Service, 'id'>) }))
         .sort((a, b) => a.order - b.order);
-      saveLocalServices(cloudList, false);
-      onData(cloudList.filter((s) => s.active));
+      const merged = mergeCloudAndLocalServices(cloudList);
+      saveLocalServices(merged, false);
+      onData(merged.filter((s) => s.active));
     },
     () => {
       emitLocal();
@@ -615,11 +648,7 @@ export function subscribeAllServicesAdmin(onData: (svcs: Service[]) => void): Un
         id: d.id,
         ...(d.data() as Omit<Service, 'id'>),
       }));
-      const localSvcs = loadLocalServices();
-      const map = new Map<string, Service>();
-      cloudSvcs.forEach((s) => map.set(s.id, s));
-      localSvcs.forEach((s) => map.set(s.id, s));
-      const merged = Array.from(map.values()).sort((a, b) => a.order - b.order);
+      const merged = mergeCloudAndLocalServices(cloudSvcs);
       saveLocalServices(merged, false);
       onData(merged);
     },
@@ -1089,6 +1118,7 @@ export async function adminSaveService(input: {
   const next = existsInLocal
     ? current.map((s) => (s.id === svcId ? cleanSvc : s))
     : [...current, cleanSvc];
+  markServiceDirty(svcId);
   saveLocalServices(next, true);
 
   const ref = doc(db, 'services', svcId);
@@ -1116,12 +1146,14 @@ export async function adminSaveService(input: {
         createdAt: serverTimestamp(),
       }, { merge: true });
     }
+    clearServiceDirty(svcId);
   } catch {
-    // Saved in local reactive store
+    // Saved in local reactive store (dirty flag keeps local override safe)
   }
 }
 
 export async function adminDeleteService(serviceId: string): Promise<void> {
+  markServiceDeleted(serviceId);
   const next = loadLocalServices().filter((s) => s.id !== serviceId);
   saveLocalServices(next, true);
 
@@ -1233,7 +1265,8 @@ export async function adminSaveSettings(settings: SalonSettings): Promise<void> 
     returnAlertDays: Math.max(1, Math.min(180, Number(settings.returnAlertDays) || 21)),
   };
 
-  // Notify all subscribers immediately in 0ms
+  // Mark dirty before writing so stale Firestore snapshots never overwrite local edits
+  setSettingsDirtyLocal(true);
   saveCachedSettingsSync(cleanSettings, true);
 
   const { closedMonths: _omitClosedMonths, ...firestoreSafeSettings } = cleanSettings;
@@ -1243,6 +1276,7 @@ export async function adminSaveSettings(settings: SalonSettings): Promise<void> 
       ...firestoreSafeSettings,
       updatedAt: serverTimestamp(),
     });
+    setSettingsDirtyLocal(false);
   } catch {
     // Already saved and broadcast in local reactive store
   }

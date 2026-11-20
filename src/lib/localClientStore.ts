@@ -16,6 +16,9 @@ const CATEGORIES_CACHE_KEY = 'ep_nails_categories_cache_v44';
 const SERVICES_CACHE_KEY = 'ep_nails_services_cache_v44';
 const BLOCKS_CACHE_KEY = 'ep_nails_personal_blocks_v44';
 const TECH_NOTES_CACHE_KEY = 'ep_nails_tech_notes_v44';
+const SETTINGS_DIRTY_KEY = 'ep_nails_settings_dirty_v55';
+const SERVICES_DIRTY_IDS_KEY = 'ep_nails_services_dirty_v55';
+const SERVICES_DELETED_IDS_KEY = 'ep_nails_services_deleted_v55';
 
 export interface SavedClientIdentity {
   name: string;
@@ -77,6 +80,28 @@ export function saveCachedSettingsSync(settings: SalonSettings, notify = true): 
     if (notify) notifyLocalStoreChanges();
   } catch {
     // Ignore storage quota errors
+  }
+}
+
+export function isSettingsDirtyLocal(): boolean {
+  if (typeof window === 'undefined') return false;
+  try {
+    return window.localStorage.getItem(SETTINGS_DIRTY_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
+export function setSettingsDirtyLocal(dirty: boolean): void {
+  if (typeof window === 'undefined') return;
+  try {
+    if (dirty) {
+      window.localStorage.setItem(SETTINGS_DIRTY_KEY, '1');
+    } else {
+      window.localStorage.removeItem(SETTINGS_DIRTY_KEY);
+    }
+  } catch {
+    // ignore
   }
 }
 
@@ -209,6 +234,59 @@ export function saveLocalServices(services: Service[], notify = true): void {
   } catch {
     // Ignore storage quota errors
   }
+}
+
+function readIdSet(key: string): Set<string> {
+  if (typeof window === 'undefined') return new Set();
+  try {
+    const raw = window.localStorage.getItem(key);
+    if (!raw) return new Set();
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? new Set(parsed.map(String)) : new Set();
+  } catch {
+    return new Set();
+  }
+}
+
+function writeIdSet(key: string, set: Set<string>): void {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.setItem(key, JSON.stringify(Array.from(set)));
+  } catch {
+    // ignore
+  }
+}
+
+export function getDirtyServiceIds(): Set<string> {
+  return readIdSet(SERVICES_DIRTY_IDS_KEY);
+}
+
+export function markServiceDirty(serviceId: string): void {
+  const dirty = readIdSet(SERVICES_DIRTY_IDS_KEY);
+  dirty.add(serviceId);
+  writeIdSet(SERVICES_DIRTY_IDS_KEY, dirty);
+  const deleted = readIdSet(SERVICES_DELETED_IDS_KEY);
+  if (deleted.delete(serviceId)) {
+    writeIdSet(SERVICES_DELETED_IDS_KEY, deleted);
+  }
+}
+
+export function clearServiceDirty(serviceId: string): void {
+  const dirty = readIdSet(SERVICES_DIRTY_IDS_KEY);
+  if (dirty.delete(serviceId)) {
+    writeIdSet(SERVICES_DIRTY_IDS_KEY, dirty);
+  }
+}
+
+export function getDeletedServiceIds(): Set<string> {
+  return readIdSet(SERVICES_DELETED_IDS_KEY);
+}
+
+export function markServiceDeleted(serviceId: string): void {
+  const deleted = readIdSet(SERVICES_DELETED_IDS_KEY);
+  deleted.add(serviceId);
+  writeIdSet(SERVICES_DELETED_IDS_KEY, deleted);
+  clearServiceDirty(serviceId);
 }
 
 // ------------------------------------------------------------------
