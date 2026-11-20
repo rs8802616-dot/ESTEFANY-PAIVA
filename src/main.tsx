@@ -12,7 +12,7 @@ if ('serviceWorker' in navigator) {
   });
 
   // Limpa qualquer Service Worker antigo (v38/v39/v40) que ainda estivesse preso no cache do navegador
-  const SW_MIGRATION_KEY = 'epn_sw_v58_clean_no_google_prompt';
+  const SW_MIGRATION_KEY = 'epn_sw_v59_studio_de_beleza_firebase';
   if (!localStorage.getItem(SW_MIGRATION_KEY)) {
     localStorage.setItem(SW_MIGRATION_KEY, '1');
     void navigator.serviceWorker.getRegistrations().then((regs) => {

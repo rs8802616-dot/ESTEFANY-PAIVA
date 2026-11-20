@@ -1,12 +1,10 @@
 {
-  "projectId": "adega-delivery-pdv",
-  "appId": "1:120526498592:web:eb77b2bf1f77d734e08545",
-  "apiKey": "AIzaSyCHr0xEmgY8qQG41xyYU7T4AK8Y3ALvDnY",
-  "authDomain": "adega-delivery-pdv.firebaseapp.com",
-  "firestoreDatabaseId": "ai-studio-2b450244-1a2e-44b5-b80e-5608c17cd674",
-  "storageBucket": "adega-delivery-pdv.firebasestorage.app",
-  "messagingSenderId": "120526498592",
-  "measurementId": "",
-  "oAuthClientId": "120526498592-hfb4er8j0a2b7udie046enoe0iamjijo.apps.googleusercontent.com",
-  "recaptchaSiteKey": ""
+  "projectId": "studio-de-beleza-8045a",
+  "appId": "1:152184282359:web:ddf731f01d5e784714c7f2",
+  "apiKey": "AIzaSyD67kLzURLYIbDozET0SqaWFE3X4fCsf1k",
+  "authDomain": "studio-de-beleza-8045a.firebaseapp.com",
+  "firestoreDatabaseId": "(default)",
+  "storageBucket": "studio-de-beleza-8045a.firebasestorage.app",
+  "messagingSenderId": "152184282359",
+  "measurementId": "G-XJLHGC08WP"
 }

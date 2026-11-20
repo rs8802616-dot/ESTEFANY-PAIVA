@@ -47,7 +47,7 @@ export default defineConfig(() => {
           ],
         },
         workbox: {
-          cacheId: 'estefany-nails-v58-clean-no-google-prompt',
+          cacheId: 'estefany-nails-v59-studio-de-beleza-firebase',
           skipWaiting: true,
           clientsClaim: true,
           cleanupOutdatedCaches: true,

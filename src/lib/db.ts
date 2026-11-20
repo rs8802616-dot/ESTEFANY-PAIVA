@@ -1291,7 +1291,6 @@ export async function adminSaveSettings(settings: SalonSettings): Promise<boolea
  * com o Cloud Firestore assim que a administradora estiver autenticada no Firebase.
  */
 export async function syncPendingLocalChangesToCloud(): Promise<boolean> {
-  if (!auth.currentUser) return false;
   let allSynced = true;
 
   if (isSettingsDirtyLocal()) {

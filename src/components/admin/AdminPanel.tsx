@@ -34,8 +34,10 @@ import {
   subscribeAllServicesAdmin,
   subscribeClientTechNotesAdmin,
   subscribePersonalBlocksAdmin,
+  syncPendingLocalChangesToCloud,
 } from '../../lib/db';
 import {
+  ensureEmailUserSignedIn,
   resendVerificationEmail,
   resetAdminPassword,
   signInWithEmail,
@@ -136,6 +138,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     if (!authReady || !effectiveAdmin) return;
 
     void seedInitialStudioDataIfEmpty();
+    void syncPendingLocalChangesToCloud();
 
     const unsubs = [
       subscribeAllAppointmentsAdmin(setAppointments),
@@ -415,8 +418,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       if (vaultOk) {
         setVaultEmail(getVaultAdminEmail());
         setLoginPassword('');
-        // Tenta autenticar no Firebase Auth em background caso o provedor esteja ativo
-        void signInWithEmail(loginEmail, loginPassword).catch(() => {});
+        // Autentica no Firebase Auth em background (ou cria o usuário no novo projeto) e sincroniza as fotos pendentes
+        void ensureEmailUserSignedIn(loginEmail, loginPassword).then((u) => {
+          if (u) void syncPendingLocalChangesToCloud();
+        });
         showToast('Acesso ao painel liberado!', 'success');
         return;
       }

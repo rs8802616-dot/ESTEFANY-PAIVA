@@ -1,5 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import {
+  createUserWithEmailAndPassword,
   getAuth,
   GoogleAuthProvider,
   sendEmailVerification,
@@ -80,6 +81,23 @@ export function handleFirestoreError(
 export async function signInWithEmail(email: string, password: string): Promise<User> {
   const result = await signInWithEmailAndPassword(auth, email.trim(), password);
   return result.user;
+}
+
+export async function ensureEmailUserSignedIn(email: string, password: string): Promise<User | null> {
+  try {
+    return await signInWithEmail(email, password);
+  } catch (err: unknown) {
+    const code = (err as { code?: string })?.code || '';
+    if (code === 'auth/user-not-found' || code === 'auth/invalid-credential') {
+      try {
+        const created = await createUserWithEmailAndPassword(auth, email.trim(), password);
+        return created.user;
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  }
 }
 
 export async function resetAdminPassword(email: string): Promise<void> {
