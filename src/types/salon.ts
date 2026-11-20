@@ -25,6 +25,7 @@ export interface SalonSettings {
   configuredSlots: string[];
   workDays: number[];
   blockedDates: string[];
+  closedMonths?: string[];
   returnAlertDays: number;
   updatedAt?: unknown;
 }
@@ -49,6 +50,7 @@ export interface Service {
   featured: boolean;
   active: boolean;
   order: number;
+  maintenanceDays?: number;
   createdAt?: unknown;
   updatedAt?: unknown;
 }
@@ -123,6 +125,9 @@ export interface ClientProfileSummary {
   lastVisitDate: string | null;
   daysSinceLastVisit: number | null;
   needsReturnAlert: boolean;
+  daysUntilMaintenance?: number | null;
+  needsUpcomingMaintenance?: boolean;
+  maintenanceCycleDays?: number;
   lastServices: string[];
   techNote?: ClientTechNote;
 }

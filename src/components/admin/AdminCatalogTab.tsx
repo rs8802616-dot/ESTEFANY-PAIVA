@@ -59,6 +59,7 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
       featured: false,
       active: true,
       order: services.length + 1,
+      maintenanceDays: 21,
     });
   };
 
@@ -98,6 +99,8 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
         featured: Boolean(editingSvc.featured),
         active: editingSvc.active !== false,
         order: Number(editingSvc.order) || 1,
+        maintenanceDays:
+          editingSvc.maintenanceDays !== undefined ? Number(editingSvc.maintenanceDays) : 21,
       });
       showToast(editingSvc.id ? 'Procedimento atualizado.' : 'Procedimento criado.');
       setEditingSvc(null);
@@ -301,6 +304,23 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
                   className="w-full min-h-[44px] rounded-xl border border-[#E8D6CB] bg-white px-3.5 text-sm tabular-nums"
                 />
               </div>
+            </div>
+
+            <div>
+              <label htmlFor="svc-maint" className="block text-xs font-medium text-[#95847C] mb-1">
+                Prazo de Manutenção / Retorno (dias — ex: 21 p/ Unha em Gel, 0 se não tiver)
+              </label>
+              <input
+                id="svc-maint"
+                type="number"
+                min={0}
+                max={180}
+                value={editingSvc.maintenanceDays ?? 21}
+                onChange={(e) =>
+                  setEditingSvc({ ...editingSvc, maintenanceDays: Number(e.target.value) })
+                }
+                className="w-full min-h-[44px] rounded-xl border border-[#E8D6CB] bg-white px-3.5 text-sm tabular-nums"
+              />
             </div>
 
             <div>

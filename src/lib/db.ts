@@ -1063,6 +1063,7 @@ export async function adminSaveService(input: {
   featured: boolean;
   active: boolean;
   order: number;
+  maintenanceDays?: number;
 }): Promise<void> {
   const isNew = !input.id;
   const svcId = input.id || makeSafeDocId('svc');
@@ -1077,6 +1078,10 @@ export async function adminSaveService(input: {
     featured: Boolean(input.featured),
     active: Boolean(input.active),
     order: Math.max(0, Math.min(1000, Number(input.order) || 0)),
+    maintenanceDays:
+      input.maintenanceDays !== undefined
+        ? Math.max(0, Math.min(180, Number(input.maintenanceDays) || 0))
+        : 21,
   };
 
   const current = loadLocalServices();
@@ -1191,6 +1196,14 @@ export async function adminSaveSettings(settings: SalonSettings): Promise<void> 
     .sort()
     .slice(0, 120);
 
+  const cleanClosedMonths = Array.from(
+    new Set(
+      (settings.closedMonths || [])
+        .map((m) => m.trim())
+        .filter((m) => /^\d{4}-\d{2}$/.test(m)),
+    ),
+  ).sort();
+
   const cleanSettings: SalonSettings = {
     ...settings,
     studioName: clampStr(settings.studioName, 80),
@@ -1216,15 +1229,18 @@ export async function adminSaveSettings(settings: SalonSettings): Promise<void> 
     configuredSlots: cleanSlots,
     workDays: settings.workDays.length > 0 ? settings.workDays.slice(0, 7) : [1, 2, 3, 4, 5, 6],
     blockedDates: cleanBlocked,
+    closedMonths: cleanClosedMonths,
     returnAlertDays: Math.max(1, Math.min(180, Number(settings.returnAlertDays) || 21)),
   };
 
   // Notify all subscribers immediately in 0ms
   saveCachedSettingsSync(cleanSettings, true);
 
+  const { closedMonths: _omitClosedMonths, ...firestoreSafeSettings } = cleanSettings;
+
   try {
     await setDoc(ref, {
-      ...cleanSettings,
+      ...firestoreSafeSettings,
       updatedAt: serverTimestamp(),
     });
   } catch {

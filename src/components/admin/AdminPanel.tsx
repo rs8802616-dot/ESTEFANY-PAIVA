@@ -48,6 +48,7 @@ import {
 } from '../../lib/adminRoute';
 import {
   buildReturnAlertWhatsAppUrl,
+  buildUpcomingMaintenanceWhatsAppUrl,
   daysBetween,
   formatBRL,
   formatDateBR,
@@ -172,15 +173,25 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       }
     });
 
+    const getCycleDaysForApt = (apt: Appointment) => {
+      const matched = services.find((s) => apt.serviceIds.includes(s.id));
+      if (matched?.maintenanceDays !== undefined && matched.maintenanceDays > 0) {
+        return matched.maintenanceDays;
+      }
+      return settings.returnAlertDays || 21;
+    };
+
     appointments.forEach((apt) => {
       if (apt.status === 'cancelled') return;
       const phoneDigits = sanitizePhone(apt.clientPhone);
       const key = phoneDigits || apt.clientEmail || apt.clientName.toLowerCase();
       const existing = map.get(key);
       const hasUpcoming = hasFutureAppointmentKeys.has(key);
+      const cycleDays = getCycleDaysForApt(apt);
 
       if (!existing) {
         const diff = apt.date <= today ? daysBetween(apt.date, today) : null;
+        const until = diff !== null ? cycleDays - diff : null;
         map.set(key, {
           key,
           clientName: apt.clientName,
@@ -190,7 +201,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           totalSpent: apt.totalPrice,
           lastVisitDate: apt.date <= today ? apt.date : null,
           daysSinceLastVisit: diff,
-          needsReturnAlert: !hasUpcoming && diff !== null && diff >= settings.returnAlertDays,
+          needsReturnAlert: !hasUpcoming && diff !== null && diff >= cycleDays,
+          daysUntilMaintenance: until,
+          needsUpcomingMaintenance: !hasUpcoming && until !== null && until >= 0 && until <= 5,
+          maintenanceCycleDays: cycleDays,
           lastServices: apt.serviceNames,
           techNote: noteByPhone.get(phoneDigits),
         });
@@ -198,10 +212,14 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
         existing.totalVisits += 1;
         existing.totalSpent += apt.totalPrice;
         if (apt.date <= today && (!existing.lastVisitDate || apt.date > existing.lastVisitDate)) {
+          const diff = daysBetween(apt.date, today);
+          const until = cycleDays - diff;
           existing.lastVisitDate = apt.date;
-          existing.daysSinceLastVisit = daysBetween(apt.date, today);
-          existing.needsReturnAlert =
-            !hasUpcoming && existing.daysSinceLastVisit >= settings.returnAlertDays;
+          existing.daysSinceLastVisit = diff;
+          existing.needsReturnAlert = !hasUpcoming && diff >= cycleDays;
+          existing.daysUntilMaintenance = until;
+          existing.needsUpcomingMaintenance = !hasUpcoming && until >= 0 && until <= 5;
+          existing.maintenanceCycleDays = cycleDays;
           existing.lastServices = apt.serviceNames;
         }
       }
@@ -279,7 +297,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   );
 
   const returnAlerts = useMemo(
-    () => clientProfiles.filter((c) => c.needsReturnAlert),
+    () => clientProfiles.filter((c) => c.needsReturnAlert || c.needsUpcomingMaintenance),
     [clientProfiles],
   );
 
@@ -1098,7 +1116,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     <section className="bg-white rounded-2xl border border-[#E8D6CB] p-5 space-y-4">
                       <div className="flex items-center justify-between">
                         <h2 className="font-editorial text-2xl font-semibold text-[#594943]">
-                          Alertas de Retorno ({settings.returnAlertDays}+ dias)
+                          Lembretes de Manutenção (5 dias antes & Retornos)
                         </h2>
                         <button
                           type="button"
@@ -1114,39 +1132,69 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
                       {returnAlerts.length === 0 ? (
                         <p className="text-sm text-[#95847C] py-6 text-center">
-                          Nenhuma cliente passou de {settings.returnAlertDays} dias sem manutenção.
+                          Nenhuma cliente próxima da manutenção (5 dias antes) ou em atraso.
                         </p>
                       ) : (
                         <div className="divide-y divide-[#E8D6CB]">
-                          {returnAlerts.slice(0, 5).map((client) => (
-                            <div
-                              key={client.key}
-                              className="py-3 flex items-center justify-between gap-3"
-                            >
-                              <div className="min-w-0">
-                                <div className="text-sm font-semibold text-[#594943] truncate">
-                                  {client.clientName}
-                                </div>
-                                <div className="text-xs text-[#BE9293] tabular-nums">
-                                  {client.daysSinceLastVisit} dias desde o último atendimento
-                                </div>
-                              </div>
-                              <a
-                                href={buildReturnAlertWhatsAppUrl(
+                          {returnAlerts.slice(0, 6).map((client) => {
+                            const isUpcoming = Boolean(client.needsUpcomingMaintenance);
+                            const daysLeft = client.daysUntilMaintenance ?? 0;
+                            const waHref = isUpcoming
+                              ? buildUpcomingMaintenanceWhatsAppUrl(
+                                  client.clientName,
+                                  client.clientPhone,
+                                  daysLeft,
+                                  client.lastServices.join(' + ') || 'manutenção',
+                                  settings,
+                                )
+                              : buildReturnAlertWhatsAppUrl(
                                   client.clientName,
                                   client.clientPhone,
                                   client.daysSinceLastVisit ?? settings.returnAlertDays,
                                   settings,
-                                )}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="min-h-[40px] inline-flex items-center gap-1.5 rounded-xl bg-[#F2EAE4] px-3 py-1.5 text-xs font-semibold text-[#594943] hover:bg-[#C4A477] hover:text-white transition-colors shrink-0"
+                                );
+
+                            return (
+                              <div
+                                key={client.key}
+                                className="py-3 flex items-center justify-between gap-3"
                               >
-                                <MessageCircle className="w-3.5 h-3.5" />
-                                <span>Chamar</span>
-                              </a>
-                            </div>
-                          ))}
+                                <div className="min-w-0">
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-sm font-semibold text-[#594943] truncate">
+                                      {client.clientName}
+                                    </span>
+                                    <span
+                                      className={`px-2 py-0.5 rounded-full text-[10px] font-bold shrink-0 ${
+                                        isUpcoming
+                                          ? 'bg-[#C4A477]/20 text-[#594943]'
+                                          : 'bg-[#BE9293]/20 text-[#594943]'
+                                      }`}
+                                    >
+                                      {isUpcoming
+                                        ? daysLeft === 0
+                                          ? 'Vence hoje'
+                                          : `Faltam ${daysLeft}d`
+                                        : 'Vencido'}
+                                    </span>
+                                  </div>
+                                  <div className="text-xs text-[#95847C] tabular-nums">
+                                    {client.lastServices.join(' + ') || 'Procedimento'} ·{' '}
+                                    {client.daysSinceLastVisit} dias desde a última visita
+                                  </div>
+                                </div>
+                                <a
+                                  href={waHref}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="min-h-[40px] inline-flex items-center gap-1.5 rounded-xl bg-[#F2EAE4] px-3 py-1.5 text-xs font-semibold text-[#594943] hover:bg-[#C4A477] hover:text-white transition-colors shrink-0"
+                                >
+                                  <MessageCircle className="w-3.5 h-3.5" />
+                                  <span>Mandar Mensagem</span>
+                                </a>
+                              </div>
+                            );
+                          })}
                         </div>
                       )}
                     </section>

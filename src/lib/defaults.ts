@@ -61,6 +61,7 @@ export const DEFAULT_SETTINGS: SalonSettings = {
   configuredSlots: DEFAULT_CONFIGURED_SLOTS,
   workDays: [1, 2, 3, 4, 5, 6],
   blockedDates: [],
+  closedMonths: [],
   returnAlertDays: 21,
 };
 

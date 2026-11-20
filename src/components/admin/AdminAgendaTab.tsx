@@ -7,11 +7,14 @@ import {
   CheckCircle2,
   ChevronRight,
   Clock,
+  Lock,
   MessageCircle,
   Phone,
   Plus,
   QrCode,
+  Sparkles,
   Trash2,
+  Unlock,
   XCircle,
 } from 'lucide-react';
 import { BottomSheet } from '../BottomSheet';
@@ -21,11 +24,13 @@ import {
   adminDeleteAppointment,
   adminDeletePersonalBlock,
   adminRescheduleAppointment,
+  adminSaveSettings,
   adminUpdateAppointmentStatus,
   createAppointmentAtomic,
 } from '../../lib/db';
 import { auth } from '../../lib/firebase';
 import {
+  addDaysISO,
   buildGoogleCalendarUrl,
   buildWhatsAppUrl,
   calculatePixChargeAmount,
@@ -70,7 +75,39 @@ export const AdminAgendaTab: React.FC<AdminAgendaTabProps> = ({
   const [detailAppointmentId, setDetailAppointmentId] = useState<string | null>(null);
   const [blockSheetOpen, setBlockSheetOpen] = useState(false);
   const [walkInOpen, setWalkInOpen] = useState(false);
+  const [monthsPanelOpen, setMonthsPanelOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  const upcomingMonths = useMemo(() => {
+    const MONTHS_PT = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+    const now = new Date();
+    const list: { ym: string; label: string }[] = [];
+    for (let i = 0; i < 8; i++) {
+      const dt = new Date(now.getFullYear(), now.getMonth() + i, 1);
+      const ym = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}`;
+      list.push({ ym, label: `${MONTHS_PT[dt.getMonth()]}/${String(dt.getFullYear()).slice(-2)}` });
+    }
+    return list;
+  }, []);
+
+  const toggleMonthOpen = async (ym: string) => {
+    const currentClosed = settings.closedMonths || [];
+    const isClosed = currentClosed.includes(ym);
+    const nextClosed = isClosed
+      ? currentClosed.filter((m) => m !== ym)
+      : [...currentClosed, ym].sort();
+    try {
+      await adminSaveSettings({ ...settings, closedMonths: nextClosed });
+      showToast(
+        isClosed
+          ? `Agenda de ${ym} aberta para clientes!`
+          : `Agenda de ${ym} fechada para clientes.`,
+        isClosed ? 'success' : 'info',
+      );
+    } catch {
+      showToast('Erro ao atualizar mês da agenda.', 'error');
+    }
+  };
 
   // Personal block form state
   const [blkTitle, setBlkTitle] = useState('Horário de Almoço');
@@ -219,6 +256,19 @@ export const AdminAgendaTab: React.FC<AdminAgendaTabProps> = ({
         <div className="flex flex-wrap items-center gap-2.5">
           <button
             type="button"
+            onClick={() => setMonthsPanelOpen((v) => !v)}
+            className={`min-h-[44px] inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-xs sm:text-sm font-medium transition-colors whitespace-nowrap cursor-pointer ${
+              monthsPanelOpen
+                ? 'bg-[#F2EAE4] border-[#C4A477] text-[#594943]'
+                : 'border-[#E8D6CB] bg-white text-[#594943] hover:border-[#C4A477]'
+            }`}
+          >
+            <Calendar className="w-4 h-4 text-[#C4A477]" />
+            <span>Abrir / Fechar Meses</span>
+          </button>
+
+          <button
+            type="button"
             onClick={() => setBlockSheetOpen(true)}
             className="min-h-[44px] inline-flex items-center gap-2 rounded-xl border border-[#E8D6CB] bg-white px-4 py-2 text-xs sm:text-sm font-medium text-[#594943] hover:border-[#C4A477] transition-colors whitespace-nowrap"
           >
@@ -236,6 +286,46 @@ export const AdminAgendaTab: React.FC<AdminAgendaTabProps> = ({
           </button>
         </div>
       </div>
+
+      {/* Painel Rápido: Abrir ou Fechar Meses para Agendamento das Clientes */}
+      {monthsPanelOpen && (
+        <div className="bg-white rounded-2xl border border-[#C4A477] p-4 sm:p-5 space-y-3 shadow-2xs">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h3 className="font-editorial text-lg font-semibold text-[#594943]">
+                Meses Abertos / Fechados no Calendário da Cliente
+              </h3>
+              <p className="text-xs text-[#95847C]">
+                Toque em qualquer mês para abrir ou fechar os agendamentos online para as clientes.
+              </p>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2">
+            {upcomingMonths.map((m) => {
+              const isClosed = (settings.closedMonths || []).includes(m.ym);
+              return (
+                <button
+                  key={m.ym}
+                  type="button"
+                  onClick={() => void toggleMonthOpen(m.ym)}
+                  className={`flex items-center justify-between gap-1.5 px-3 py-2.5 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${
+                    isClosed
+                      ? 'bg-[#FAF6F1] border-[#E8D6CB] text-[#95847C]'
+                      : 'bg-[#594943] border-[#594943] text-[#FAF6F1] shadow-2xs'
+                  }`}
+                >
+                  <span>{m.label}</span>
+                  {isClosed ? (
+                    <Lock className="w-3.5 h-3.5 text-[#BE9293] shrink-0" />
+                  ) : (
+                    <Unlock className="w-3.5 h-3.5 text-[#C4A477] shrink-0" />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Filters */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white rounded-2xl border border-[#E8D6CB] p-3.5">
@@ -716,6 +806,64 @@ export const AdminAgendaTab: React.FC<AdminAgendaTabProps> = ({
                     </div>
                   </div>
                 )}
+
+              {/* Ciclo de Manutenção: Agendar Retorno ou Perguntar à Cliente */}
+              {(selectedAppointment.status === 'confirmed' ||
+                selectedAppointment.status === 'completed') &&
+                (() => {
+                  const matchedSvc = services.find((s) =>
+                    selectedAppointment.serviceIds.includes(s.id),
+                  );
+                  const cycleDays =
+                    matchedSvc?.maintenanceDays !== undefined
+                      ? matchedSvc.maintenanceDays
+                      : settings.returnAlertDays || 21;
+                  if (cycleDays <= 0) return null;
+                  const nextDate = addDaysISO(selectedAppointment.date, cycleDays);
+                  const askMsg = `Olá, ${selectedAppointment.clientName}! ✨ Como o prazo ideal de manutenção para ${selectedAppointment.serviceNames.join(' + ')} é de ${cycleDays} dias (por volta de ${formatDateBR(nextDate)}), posso já deixar seu horário de retorno reservado?`;
+
+                  return (
+                    <div className="mt-4 pt-4 border-t border-[#E8D6CB] space-y-2.5 bg-[#FAF6F1] p-3.5 rounded-2xl border">
+                      <div className="flex items-center gap-2">
+                        <Sparkles className="w-4 h-4 text-[#C4A477]" />
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-[#594943]">
+                          Manutenção Recomendada ({cycleDays} dias · {formatDateBR(nextDate)})
+                        </h4>
+                      </div>
+                      <p className="text-xs text-[#95847C]">
+                        Já pergunte à cliente na mesa se ela deseja deixar a próxima manutenção marcada:
+                      </p>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setWiName(selectedAppointment.clientName);
+                            setWiPhone(selectedAppointment.clientPhone);
+                            setWiDate(nextDate);
+                            setWiStart(selectedAppointment.startTime);
+                            setWiServiceIds(selectedAppointment.serviceIds);
+                            setWiNotes(`Manutenção (${cycleDays} dias)`);
+                            setDetailAppointmentId(null);
+                            setWalkInOpen(true);
+                          }}
+                          className="min-h-[42px] inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#594943] text-white text-xs font-semibold hover:bg-[#433631] cursor-pointer"
+                        >
+                          <CalendarPlus className="w-3.5 h-3.5 text-[#C4A477]" />
+                          <span>Marcar Manutenção (+{cycleDays}d)</span>
+                        </button>
+                        <a
+                          href={buildWhatsAppUrl(selectedAppointment.clientPhone, askMsg)}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="min-h-[42px] inline-flex items-center justify-center gap-1.5 rounded-xl bg-white border border-[#E8D6CB] text-[#594943] text-xs font-semibold hover:border-[#C4A477]"
+                        >
+                          <MessageCircle className="w-3.5 h-3.5 text-[#C4A477]" />
+                          <span>Perguntar no WhatsApp</span>
+                        </a>
+                      </div>
+                    </div>
+                  );
+                })()}
             </div>
           </div>
         )}

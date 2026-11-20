@@ -119,6 +119,17 @@ export interface TimeSlotOption {
  * Checks blockedDates (folgas), workingDays, configuredSlots (or open/close interval),
  * current time buffer (if today), and every busy slot (active appointments + personal blocks).
  */
+export function addDaysISO(isoDate: string, days: number): string {
+  const [y, m, d] = isoDate.split('-').map(Number);
+  if (!y || !m || !d) return todayISO();
+  const dt = new Date(y, m - 1, d);
+  dt.setDate(dt.getDate() + days);
+  const yy = dt.getFullYear();
+  const mm = String(dt.getMonth() + 1).padStart(2, '0');
+  const dd = String(dt.getDate()).padStart(2, '0');
+  return `${yy}-${mm}-${dd}`;
+}
+
 export function generateTimeSlotsForDate(
   dateISO: string,
   durationMinutes: number,
@@ -126,6 +137,9 @@ export function generateTimeSlotsForDate(
   busySlots: AvailabilitySlot[],
   ignoreSlotId?: string,
 ): TimeSlotOption[] {
+  if (settings.closedMonths?.includes(dateISO.slice(0, 7))) {
+    return [];
+  }
   if (settings.blockedDates?.includes(dateISO)) {
     return [];
   }
@@ -336,6 +350,23 @@ export function buildReturnAlertWhatsAppUrl(
   settings: SalonSettings,
 ): string {
   const msg = `Oi, ${clientName}! Tudo bem? Notei aqui que já fazem ${daysSince} dias desde o seu último atendimento no ${settings.studioName}. Vamos agendar sua manutenção para manter suas unhas sempre impecáveis?`;
+  return buildWhatsAppUrl(clientPhone, msg);
+}
+
+export function buildUpcomingMaintenanceWhatsAppUrl(
+  clientName: string,
+  clientPhone: string,
+  daysRemaining: number,
+  serviceName: string,
+  settings: SalonSettings,
+): string {
+  const whenText =
+    daysRemaining <= 0
+      ? 'chegou o dia ideal'
+      : daysRemaining === 1
+        ? 'falta apenas 1 dia'
+        : `faltam apenas ${daysRemaining} dias`;
+  const msg = `Oi, ${clientName}! Tudo bem? Passando para lembrar com carinho que ${whenText} para a sua manutenção de ${serviceName} no ${settings.studioName}. Quer que eu já reserve o melhor horário para você antes que a agenda feche?`;
   return buildWhatsAppUrl(clientPhone, msg);
 }
 

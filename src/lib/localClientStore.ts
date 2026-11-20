@@ -62,6 +62,7 @@ export function loadCachedSettingsSync(): SalonSettings {
         ? parsed.configuredSlots
         : DEFAULT_SETTINGS.configuredSlots,
       blockedDates: Array.isArray(parsed.blockedDates) ? parsed.blockedDates : [],
+      closedMonths: Array.isArray(parsed.closedMonths) ? parsed.closedMonths : [],
     };
   } catch {
     return DEFAULT_SETTINGS;

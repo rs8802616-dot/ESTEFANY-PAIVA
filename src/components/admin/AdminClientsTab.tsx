@@ -11,6 +11,7 @@ import { useToast } from '../Toast';
 import { adminSaveClientTechNote } from '../../lib/db';
 import {
   buildReturnAlertWhatsAppUrl,
+  buildUpcomingMaintenanceWhatsAppUrl,
   formatBRL,
   formatDateBR,
   makeClientNoteId,
@@ -46,14 +47,14 @@ export const AdminClientsTab: React.FC<AdminClientsTabProps> = ({
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     return clients.filter((c) => {
-      if (onlyReturnAlert && !c.needsReturnAlert) return false;
+      if (onlyReturnAlert && !c.needsReturnAlert && !c.needsUpcomingMaintenance) return false;
       if (q && !`${c.clientName} ${c.clientPhone}`.toLowerCase().includes(q)) return false;
       return true;
     });
   }, [clients, search, onlyReturnAlert]);
 
   const alertCount = useMemo(
-    () => clients.filter((c) => c.needsReturnAlert).length,
+    () => clients.filter((c) => c.needsReturnAlert || c.needsUpcomingMaintenance).length,
     [clients],
   );
 
@@ -256,12 +257,22 @@ export const AdminClientsTab: React.FC<AdminClientsTabProps> = ({
 
                 {client.clientPhone && (
                   <a
-                    href={buildReturnAlertWhatsAppUrl(
-                      client.clientName,
-                      client.clientPhone,
-                      client.daysSinceLastVisit ?? settings.returnAlertDays,
-                      settings,
-                    )}
+                    href={
+                      client.needsUpcomingMaintenance
+                        ? buildUpcomingMaintenanceWhatsAppUrl(
+                            client.clientName,
+                            client.clientPhone,
+                            client.daysUntilMaintenance ?? 5,
+                            client.lastServices.join(' + ') || 'manutenção',
+                            settings,
+                          )
+                        : buildReturnAlertWhatsAppUrl(
+                            client.clientName,
+                            client.clientPhone,
+                            client.daysSinceLastVisit ?? settings.returnAlertDays,
+                            settings,
+                          )
+                    }
                     target="_blank"
                     rel="noreferrer"
                     className="min-h-[40px] inline-flex items-center justify-center gap-1.5 rounded-xl border border-[#E8D6CB] bg-white px-3.5 py-2 text-xs font-medium text-[#594943] hover:border-[#C4A477] transition-colors"

@@ -172,3 +172,15 @@ O projeto foi migrado para a arquitetura completa em **React 19 + TypeScript + V
   - **Horários de Pico do Studio (`BarChart` 08h–18h)** com cores dinâmicas por volume de atendimentos e badge indicando o horário de pico.
   - **Receitas por Forma de Pagamento** com barras de progresso, ícones (`Pix`, `Cartão`, `Presencial/Dinheiro`), percentuais e valores exatos.
   - **Tabela Analítica de Performance de Serviços com Busca Instantânea**: medalhas de Rank (`1º`, `2º`, `3º`), Preço Médio, Qtd Vendida, Faturamento Total e `% do Total` com mini-barra de progresso.
+
+
+### v49 — Controle de Meses Abertos/Fechados + Ciclo de Manutenção por Serviço + Lembretes 5 Dias Antes
+- **Abrir / Fechar Meses da Agenda (`closedMonths` em `SalonSettings`, `AdminAgendaTab.tsx`, `CalendarPicker.tsx` e `utils.ts`)**:
+  - Adicionado botão **"Abrir / Fechar Meses"** no topo da Agenda com os próximos 8 meses: a profissional escolhe com 1 clique quais meses ficam **Abertos** (cadeado aberto) ou **Fechados** (cadeado fechado) no calendário das clientes.
+  - Quando um mês está fechado, o `CalendarPicker` bloqueia todos os dias desse mês para as clientes e exibe um aviso elegante informando que a agenda daquele mês ainda não foi aberta.
+- **Ciclo de Manutenção por Procedimento (`maintenanceDays` em `Service` & `AdminCatalogTab.tsx`)**:
+  - Cada procedimento agora possui o campo **"Prazo de Manutenção / Retorno (dias)"** (ex.: `21` dias para Unha em Gel / Fibra de Vidro).
+- **Perguntar / Pré-Agendar Manutenção na Hora (`AdminAgendaTab.tsx`)**:
+  - Nos detalhes de um atendimento confirmado ou concluído, aparece o painel **"Manutenção Recomendada (+21 dias)"** com 2 botões: **"Marcar Manutenção (+Xd)"** (abre o Novo Horário já preenchido com cliente, serviço e data futura) e **"Perguntar no WhatsApp"**.
+- **Alerta Automático "5 Dias Antes" (`AdminPanel.tsx`, `AdminClientsTab.tsx` e `utils.ts`)**:
+  - Quando faltam **5 dias ou menos** para vencer o ciclo de manutenção da cliente (e ela ainda não tem novo horário marcado), aparece automaticamente no Dashboard e na lista de Clientes com o selo **`Faltam Xd`** e botão **"Mandar Mensagem"** no WhatsApp com texto personalizado (`buildUpcomingMaintenanceWhatsAppUrl`).

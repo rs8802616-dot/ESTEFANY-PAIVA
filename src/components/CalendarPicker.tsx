@@ -59,6 +59,14 @@ export const CalendarPicker: React.FC<CalendarPickerProps> = ({
     [settings.blockedDates],
   );
 
+  const closedMonthSet = useMemo(
+    () => new Set(settings.closedMonths || []),
+    [settings.closedMonths],
+  );
+
+  const viewMonthISO = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}`;
+  const isViewMonthClosed = closedMonthSet.has(viewMonthISO);
+
   const calendarCells = useMemo(() => {
     const firstDay = new Date(viewYear, viewMonth, 1).getDay();
     const totalDays = new Date(viewYear, viewMonth + 1, 0).getDate();
@@ -73,15 +81,16 @@ export const CalendarPicker: React.FC<CalendarPickerProps> = ({
       const isPast = iso < today;
       const isClosedDay = !settings.workDays.includes(weekday);
       const isBlocked = blockedDateSet.has(iso);
+      const isClosedMonth = closedMonthSet.has(iso.slice(0, 7));
       cells.push({
         iso,
         day,
-        disabled: isPast || isClosedDay || isBlocked,
-        isBlocked,
+        disabled: isPast || isClosedDay || isBlocked || isClosedMonth,
+        isBlocked: isBlocked || isClosedMonth,
       });
     }
     return cells;
-  }, [viewYear, viewMonth, today, settings.workDays, blockedDateSet]);
+  }, [viewYear, viewMonth, today, settings.workDays, blockedDateSet, closedMonthSet]);
 
   const timeSlots = useMemo(() => {
     if (!selectedDate) return [];
@@ -152,6 +161,12 @@ export const CalendarPicker: React.FC<CalendarPickerProps> = ({
             <ChevronRight className="w-5 h-5" />
           </button>
         </div>
+
+        {isViewMonthClosed && (
+          <div className="mb-3 rounded-xl bg-[#F2EAE4] border border-[#C4A477]/50 px-3 py-2 text-xs font-medium text-[#594943] text-center">
+            A agenda de <strong>{MONTH_NAMES[viewMonth]} de {viewYear}</strong> ainda não foi aberta pela profissional.
+          </div>
+        )}
 
         <div className="grid grid-cols-7 gap-1 text-center mb-1.5">
           {WEEKDAYS.map((wd) => (
