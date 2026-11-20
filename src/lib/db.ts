@@ -19,6 +19,7 @@ import {
   db,
 } from './firebase';
 import { isAdminGateUnlocked } from './adminRoute';
+import { syncAppointmentToGoogleCalendar } from './googleCalendarSync';
 import { DEFAULT_CATEGORIES, DEFAULT_SERVICES, DEFAULT_SETTINGS } from './defaults';
 import {
   clearServiceDirty,
@@ -508,6 +509,7 @@ export async function createAppointmentAtomic(
     // Kept in local reactive store if offline or Firestore rule restricts write
   }
 
+  void syncAppointmentToGoogleCalendar(baseApt, loadCachedSettingsSync());
   return baseApt;
 }
 
@@ -563,6 +565,7 @@ export async function rescheduleAppointmentAtomic(
     // Local reactive store already updated
   }
 
+  void syncAppointmentToGoogleCalendar(updatedApt, loadCachedSettingsSync());
   return updatedApt;
 }
 
@@ -605,6 +608,7 @@ export async function cancelAppointmentAtomic(appointment: Appointment): Promise
     // Local reactive store already updated
   }
 
+  void syncAppointmentToGoogleCalendar(cancelledApt, loadCachedSettingsSync());
   return cancelledApt;
 }
 

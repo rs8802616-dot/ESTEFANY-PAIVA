@@ -50,6 +50,12 @@ import {
   verifyAdminVaultCredentials,
 } from '../../lib/adminRoute';
 import {
+  disconnectGoogleCalendar,
+  fetchGoogleCalendarStatus,
+  syncAppointmentToGoogleCalendar,
+  type GoogleCalendarStatus,
+} from '../../lib/googleCalendarSync';
+import {
   buildReturnAlertWhatsAppUrl,
   buildUpcomingMaintenanceWhatsAppUrl,
   daysBetween,
@@ -126,6 +132,11 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   const [loginPassword, setLoginPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [vaultEmail, setVaultEmail] = useState<string | null>(() => getVaultAdminEmail());
+  const [gcalStatus, setGcalStatus] = useState<GoogleCalendarStatus>({
+    configured: false,
+    connected: false,
+    email: null,
+  });
   const [walkInSignal, setWalkInSignal] = useState(0);
   const [newClientSignal, setNewClientSignal] = useState(0);
   const [firstProfileSignal, setFirstProfileSignal] = useState(0);
@@ -153,6 +164,25 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       unsubs.forEach((fn) => fn());
     };
   }, [authReady, effectiveAdmin]);
+
+  useEffect(() => {
+    if (!effectiveAdmin) return;
+    void fetchGoogleCalendarStatus().then(setGcalStatus);
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const gcalParam = params.get('gcal');
+      if (gcalParam === 'connected') {
+        showToast('Google Agenda conectada! Novos agendamentos irão automaticamente.', 'success');
+        window.history.replaceState({}, '', window.location.pathname);
+      } else if (gcalParam === 'missing_env') {
+        showToast('Configure GOOGLE_CLIENT_ID e GOOGLE_CLIENT_SECRET na Vercel.', 'error');
+        window.history.replaceState({}, '', window.location.pathname);
+      } else if (gcalParam === 'error') {
+        showToast('Não foi possível conectar o Google Agenda.', 'error');
+        window.history.replaceState({}, '', window.location.pathname);
+      }
+    }
+  }, [effectiveAdmin, showToast]);
 
   const today = todayISO();
   const currentMonth = today.slice(0, 7);
@@ -755,6 +785,52 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
+            {gcalStatus.connected ? (
+              <button
+                type="button"
+                onClick={() => {
+                  const confirmDisconnect = window.confirm(
+                    `Google Agenda conectada (${gcalStatus.email || 'conta Google'}).\n\nClique OK para sincronizar os horários futuros agora, ou Cancelar para desconectar.`,
+                  );
+                  if (confirmDisconnect) {
+                    const futureApts = appointments.filter(
+                      (a) => a.status !== 'cancelled' && a.date >= today,
+                    );
+                    void Promise.all(
+                      futureApts.map((a) => syncAppointmentToGoogleCalendar(a, settings)),
+                    ).then(() =>
+                      showToast(`${futureApts.length} agendamentos sincronizados no Google Agenda.`, 'success'),
+                    );
+                  } else {
+                    void disconnectGoogleCalendar().then(() => {
+                      setGcalStatus((prev) => ({ ...prev, connected: false, email: null }));
+                      showToast('Google Agenda desconectada.', 'info');
+                    });
+                  }
+                }}
+                title={`Google Agenda: ${gcalStatus.email || 'Conectada'}`}
+                className="min-h-[40px] inline-flex items-center gap-1.5 rounded-xl bg-emerald-50 border border-emerald-200 px-3 py-1.5 text-xs font-semibold text-emerald-800 hover:bg-emerald-100 transition-colors cursor-pointer"
+              >
+                <span className="w-2 h-2 rounded-full bg-emerald-600 shrink-0" />
+                <span className="hidden md:inline truncate max-w-[160px]">
+                  {gcalStatus.email || 'Google Agenda'}
+                </span>
+                <span className="md:hidden">Agenda</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => {
+                  window.location.href = '/api/google-calendar?action=auth-url';
+                }}
+                className="min-h-[40px] inline-flex items-center gap-1.5 rounded-xl bg-white border border-[#E8D6CB] hover:border-[#C4A477] px-3 py-1.5 text-xs font-semibold text-[#594943] transition-colors cursor-pointer"
+              >
+                <CalendarDays className="w-3.5 h-3.5 text-[#C4A477]" />
+                <span className="hidden sm:inline">Conectar Google Agenda</span>
+                <span className="sm:hidden">Google Agenda</span>
+              </button>
+            )}
+
             <button
               type="button"
               onClick={onExitAdmin}

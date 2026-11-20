@@ -47,7 +47,7 @@ export default defineConfig(() => {
           ],
         },
         workbox: {
-          cacheId: 'estefany-nails-v75-ep-app-icons',
+          cacheId: 'estefany-nails-v76-google-calendar-api-sync',
           skipWaiting: true,
           clientsClaim: true,
           cleanupOutdatedCaches: true,
