@@ -47,7 +47,7 @@ export default defineConfig(() => {
           ],
         },
         workbox: {
-          cacheId: 'estefany-nails-v74-restore-hero-cover',
+          cacheId: 'estefany-nails-v75-ep-app-icons',
           skipWaiting: true,
           clientsClaim: true,
           cleanupOutdatedCaches: true,
