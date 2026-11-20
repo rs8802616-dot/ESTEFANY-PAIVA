@@ -22,6 +22,7 @@ import {
   X,
 } from 'lucide-react';
 import { AdminAgendaTab } from './AdminAgendaTab';
+import { AdminGoogleCalendar } from './AdminGoogleCalendar';
 import { AdminClientsTab } from './AdminClientsTab';
 import { AdminCatalogTab } from './AdminCatalogTab';
 import { AdminFinanceSuite, type FinanceSubScreen } from './AdminFinanceSuite';

@@ -47,7 +47,7 @@ export default defineConfig(() => {
           ],
         },
         workbox: {
-          cacheId: 'estefany-nails-v68-clear-stale-local-bookings',
+          cacheId: 'estefany-nails-v69-google-calendar-inicio',
           skipWaiting: true,
           clientsClaim: true,
           cleanupOutdatedCaches: true,

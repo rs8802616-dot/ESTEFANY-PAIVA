@@ -12,7 +12,7 @@ if ('serviceWorker' in navigator) {
   });
 
   // Limpa qualquer Service Worker antigo (v38/v39/v40) que ainda estivesse preso no cache do navegador
-  const SW_MIGRATION_KEY = 'epn_sw_v68_clear_stale_local_bookings';
+  const SW_MIGRATION_KEY = 'epn_sw_v69_google_calendar_inicio';
   if (!localStorage.getItem(SW_MIGRATION_KEY)) {
     localStorage.setItem(SW_MIGRATION_KEY, '1');
     localStorage.removeItem('ep_nails_guest_bookings_v36');
