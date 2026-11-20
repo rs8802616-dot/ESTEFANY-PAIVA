@@ -50,3 +50,10 @@ O projeto foi reconstruído do zero com arquitetura modular limpa em **ES Module
   2. Coleções estruturadas no Firestore: `salon_settings/main`, `categories`, `services`, `appointments`, `personal_blocks` e `client_tech_notes`.
   3. Autenticação do painel administrativo integrada ao `signInWithEmailAndPassword` do Firebase Auth (com fallback local seguro enquanto `FIREBASE_CONFIG` não estiver preenchido).
   4. Cache do Service Worker atualizado para `estefany-nails-v35-firebase-ready`.
+- **v36**: **Redesign Completo para Visual de Aplicativo Nativo (Celular & Tablet / iPadOS)**:
+  1. **Barra Inferior Flutuante Glassmórfica (Mobile)**: Substituída a barra chapada por uma tab bar flutuante translúcida (`backdrop-filter: blur(18px)`) com cantos arredondados, destaque ativo rosé e suporte completo a `safe-area-inset-bottom`.
+  2. **Modais Estilo Native Bottom Sheet (Celular)**: No celular, todos os modais agora sobem suavemente de baixo para cima com alça superior (*drag handle*), cantos superiores arredondados (`28px`) e scroll táctil nativo.
+  3. **Cards Horizontais Compactos no Celular & Grid 2–3 Colunas no Tablet/Desktop**: No smartphone, os procedimentos aparecem em cards horizontais ágeis (foto à esquerda + duração + preço + botão Agendar), eliminando rolagens gigantescas; em tablets (`>= 640px`), expandem automaticamente para grade de luxo.
+  4. **Hero Banner Full-Bleed**: Banner promocional redesenhado com imagem em tela cheia + gradiente vinho elegante, sem textos espremidos em telas de 360px.
+  5. **Sidebar Fixa Estilo iPadOS no Painel Admin (Tablet `>= 768px`)**: Em tablets e PCs, o painel administrativo agora possui barra lateral fixa elegante com ícones + KPIs com ícones destacados.
+  6. **Manifesto PWA Ajustado**: `theme_color` alinhado ao vinho oficial `#350B19` e `orientation: "any"` para uso fluido em celular e tablet. Cache atualizado para `estefany-nails-v36-native-mobile-tablet-app`.

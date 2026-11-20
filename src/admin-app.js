@@ -61,6 +61,8 @@ async function reloadAllData() {
 function renderHeader() {
   const s = state.settings;
   document.getElementById('adminSalonName').textContent = s.salonName || 'Estefany Paiva';
+  const sideName = document.getElementById('sidebarSalonName');
+  if (sideName) sideName.textContent = s.salonName || 'Estefany Paiva';
   document.getElementById('adminGreeting').textContent = `Olá, ${(s.ownerName || 'Estefany').split(' ')[0]}!`;
   document.getElementById('adminAvatarImg').src = s.avatarImage || 'assets/images/trabalho-amendoada-ouro.png';
   document.getElementById('adminModeBadge').textContent =
@@ -519,10 +521,13 @@ function bindEvents() {
     btn.addEventListener('click', () => closeModal(btn.dataset.close));
   });
 
-  document.getElementById('btnAdminLogout').addEventListener('click', async () => {
+  const handleLogout = async () => {
     await db.logoutAdmin();
     location.reload();
-  });
+  };
+  document.getElementById('btnAdminLogout').addEventListener('click', handleLogout);
+  const sideOut = document.getElementById('btnSidebarLogout');
+  if (sideOut) sideOut.addEventListener('click', handleLogout);
 
   // Novo agendamento manual
   const openNewApp = () => {

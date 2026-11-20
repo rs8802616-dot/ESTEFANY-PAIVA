@@ -2,9 +2,12 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Painel Administrativo — Estefany Paiva Nails</title>
   <meta name="theme-color" content="#350B19">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="manifest" href="manifest.json">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -39,74 +42,98 @@
     </div>
   </div>
 
-  <!-- APLICAÇÃO ADMINISTRATIVA -->
-  <div class="app-shell" id="adminAppShell" hidden>
-    <header class="hero-header">
-      <div class="container">
-        <div class="topbar">
-          <div class="brand">
-            <span class="brand-monogram">Ep</span>
-            <div class="brand-titles">
-              <span class="brand-name" id="adminSalonName">Estefany Paiva</span>
-              <span class="brand-sub">PAINEL ADMINISTRATIVO</span>
-            </div>
-          </div>
-
-          <div class="topbar-actions">
-            <a href="index.html" target="_blank" rel="noopener noreferrer" class="btn btn-ghost">
-              <i class="fa-solid fa-arrow-up-right-from-square"></i> Site da Cliente
-            </a>
-            <button type="button" class="icon-btn" id="btnAdminLogout" title="Sair">
-              <i class="fa-solid fa-right-from-bracket"></i>
-            </button>
-          </div>
+  <!-- APLICAÇÃO ADMINISTRATIVA (MOBILE + TABLET IPADOS) -->
+  <div class="admin-layout" id="adminAppShell" hidden>
+    <!-- Barra Lateral Fixa (Tablet >= 768px & Desktop) -->
+    <aside class="admin-sidebar">
+      <div class="brand">
+        <span class="brand-monogram">Ep</span>
+        <div class="brand-titles">
+          <span class="brand-name" id="sidebarSalonName">Estefany Paiva</span>
+          <span class="brand-sub">PAINEL ADMIN</span>
         </div>
-
-        <div class="profile-row">
-          <div class="profile-left">
-            <div class="avatar-frame">
-              <img id="adminAvatarImg" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Perfil">
-            </div>
-            <div class="profile-greeting">
-              <h1 id="adminGreeting">Olá, Estefany!</h1>
-              <p id="adminModeBadge">Gestão completa da agenda, clientes e faturamento.</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Navegação Desktop -->
-        <nav class="desktop-nav" id="desktopNav">
-          <button type="button" class="desktop-nav-btn is-active" data-tab="dashboard">Início</button>
-          <button type="button" class="desktop-nav-btn" data-tab="agenda">Agenda</button>
-          <button type="button" class="desktop-nav-btn" data-tab="clientes">Clientes</button>
-          <button type="button" class="desktop-nav-btn" data-tab="servicos">Serviços</button>
-          <button type="button" class="desktop-nav-btn" data-tab="relatorios">Relatórios</button>
-          <button type="button" class="desktop-nav-btn" data-tab="ajustes">Ajustes</button>
-        </nav>
       </div>
-    </header>
 
-    <main class="main-content">
-      <!-- ABA 1: INÍCIO -->
-      <section class="tab-screen is-active" id="tab_dashboard">
-        <div class="kpis-grid">
-          <div class="kpi-card">
-            <div class="kpi-label">Agendamentos Ativos</div>
-            <div class="kpi-value" id="kpiActiveCount">0</div>
+      <nav class="sidebar-nav">
+        <button type="button" class="sidebar-btn is-active" data-tab="dashboard"><i class="fa-solid fa-house"></i> Início</button>
+        <button type="button" class="sidebar-btn" data-tab="agenda"><i class="fa-regular fa-calendar"></i> Agenda</button>
+        <button type="button" class="sidebar-btn" data-tab="clientes"><i class="fa-solid fa-users"></i> Clientes</button>
+        <button type="button" class="sidebar-btn" data-tab="servicos"><i class="fa-regular fa-gem"></i> Serviços</button>
+        <button type="button" class="sidebar-btn" data-tab="relatorios"><i class="fa-solid fa-chart-simple"></i> Relatórios</button>
+        <button type="button" class="sidebar-btn" data-tab="ajustes"><i class="fa-solid fa-gear"></i> Ajustes</button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <a href="index.html" target="_blank" rel="noopener noreferrer" class="btn btn-ghost btn-block">
+          <i class="fa-solid fa-arrow-up-right-from-square"></i> Site da Cliente
+        </a>
+        <button type="button" class="btn btn-ghost btn-block" id="btnSidebarLogout">
+          <i class="fa-solid fa-right-from-bracket"></i> Sair
+        </button>
+      </div>
+    </aside>
+
+    <div class="admin-workspace">
+      <header class="hero-header">
+        <div class="container">
+          <div class="topbar">
+            <div class="brand">
+              <span class="brand-monogram">Ep</span>
+              <div class="brand-titles">
+                <span class="brand-name" id="adminSalonName">Estefany Paiva</span>
+                <span class="brand-sub">PAINEL ADMINISTRATIVO</span>
+              </div>
+            </div>
+
+            <div class="topbar-actions">
+              <a href="index.html" target="_blank" rel="noopener noreferrer" class="btn btn-ghost">
+                <i class="fa-solid fa-arrow-up-right-from-square"></i> Site
+              </a>
+              <button type="button" class="icon-btn" id="btnAdminLogout" title="Sair">
+                <i class="fa-solid fa-right-from-bracket"></i>
+              </button>
+            </div>
           </div>
-          <div class="kpi-card">
-            <div class="kpi-label">Clientes Cadastradas</div>
-            <div class="kpi-value" id="kpiClientsCount">0</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">Faturamento (Mês)</div>
-            <div class="kpi-value" id="kpiMonthRevenue">R$ 0,00</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">Ticket Médio</div>
-            <div class="kpi-value" id="kpiAvgTicket">R$ 0,00</div>
+
+          <div class="profile-row">
+            <div class="profile-left">
+              <div class="avatar-frame">
+                <img id="adminAvatarImg" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Perfil">
+              </div>
+              <div class="profile-greeting">
+                <h1 id="adminGreeting">Olá, Estefany!</h1>
+                <p id="adminModeBadge">Gestão completa da agenda, clientes e faturamento.</p>
+              </div>
+            </div>
           </div>
         </div>
+      </header>
+
+      <main class="main-content">
+        <!-- ABA 1: INÍCIO -->
+        <section class="tab-screen is-active" id="tab_dashboard">
+          <div class="kpis-grid">
+            <div class="kpi-card">
+              <div class="kpi-icon"><i class="fa-regular fa-calendar-check"></i></div>
+              <div class="kpi-label">Agendamentos</div>
+              <div class="kpi-value" id="kpiActiveCount">0</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-icon"><i class="fa-solid fa-users"></i></div>
+              <div class="kpi-label">Clientes</div>
+              <div class="kpi-value" id="kpiClientsCount">0</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-icon"><i class="fa-solid fa-wallet"></i></div>
+              <div class="kpi-label">Faturamento (Mês)</div>
+              <div class="kpi-value" id="kpiMonthRevenue">R$ 0,00</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-icon"><i class="fa-solid fa-sparkles"></i></div>
+              <div class="kpi-label">Ticket Médio</div>
+              <div class="kpi-value" id="kpiAvgTicket">R$ 0,00</div>
+            </div>
+          </div>
 
         <div class="card">
           <div class="section-header">
@@ -297,7 +324,8 @@
           </button>
         </form>
       </section>
-    </main>
+      </main>
+    </div>
 
     <!-- Navegação Inferior Mobile -->
     <nav class="bottom-nav" id="mobileNav">

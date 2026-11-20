@@ -4,9 +4,9 @@
   "description": "Aplicativo de agendamento e portfólio de nail design de luxo - Estefany Paiva Nails",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#F8F2ED",
-  "theme_color": "#F8F2ED",
-  "orientation": "portrait-primary",
+  "background_color": "#F7F1F3",
+  "theme_color": "#350B19",
+  "orientation": "any",
   "icons": [
     {
       "src": "assets/images/capa-estefany-paiva.jpg",

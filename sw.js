@@ -1,4 +1,4 @@
-const CACHE_NAME = 'estefany-nails-v35-firebase-ready';
+const CACHE_NAME = 'estefany-nails-v36-native-mobile-tablet-app';
 const STATIC_ASSETS = [
   './',
   './index.html',
