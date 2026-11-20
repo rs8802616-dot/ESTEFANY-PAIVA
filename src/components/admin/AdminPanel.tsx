@@ -676,7 +676,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             <button
               type="button"
               onClick={() => {
-                setProfileScreen(31);
+                setProfileSubScreen(31);
                 setActiveTab('perfil');
                 setSidebarOpen(false);
               }}
@@ -965,7 +965,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       <button
                         type="button"
                         onClick={() => {
-                          setProfileScreen(31);
+                          setProfileSubScreen(31);
                           setActiveTab('perfil');
                         }}
                         className="min-h-[44px] inline-flex items-center justify-center gap-2 rounded-xl bg-white border border-[#E8D6CB] px-4 py-2 text-xs sm:text-sm font-semibold text-[#594943] hover:border-[#C4A477] transition-colors cursor-pointer"
