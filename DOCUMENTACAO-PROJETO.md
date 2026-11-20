@@ -305,3 +305,8 @@ O projeto foi migrado para a arquitetura completa em **React 19 + TypeScript + V
 - **Portal da Cliente (`ClientPortal.tsx`)**:
   - Botão de combo alterado para **`+ Combo`** / **`No Combo`** com texto claro; rótulos de categoria com contraste alto; rodapé completo com links de **WhatsApp**, **Instagram** e **Endereço**; barra fixa inferior no celular mostrando o total e botão **`Continuar →`** quando há serviços selecionados.
   - Cache do Workbox PWA elevado para `estefany-nails-v62-full-audit-cleanup`.
+
+
+### v63 — Correção do Título Espremido no Tablet/Celular (`AdminPanel.tsx`)
+- Alterado o cabeçalho do **Início** para `flex-col xl:flex-row` (sem `shrink-0` no grupo de 3 botões), impedindo que os botões espremam `"Visão Geral do Estúdio"` em uma coluna estreita no celular e tablet.
+- Cache do Workbox PWA elevado para `estefany-nails-v63-fix-heading-squeeze`.

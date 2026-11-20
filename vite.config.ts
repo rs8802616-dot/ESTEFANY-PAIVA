@@ -47,7 +47,7 @@ export default defineConfig(() => {
           ],
         },
         workbox: {
-          cacheId: 'estefany-nails-v62-full-audit-cleanup',
+          cacheId: 'estefany-nails-v63-fix-heading-squeeze',
           skipWaiting: true,
           clientsClaim: true,
           cleanupOutdatedCaches: true,

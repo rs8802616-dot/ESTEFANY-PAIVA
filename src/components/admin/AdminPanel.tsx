@@ -807,8 +807,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           {/* TAB 1: INÍCIO */}
           {activeTab === 'inicio' && (
             <div className="space-y-6 sm:space-y-8">
-              <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-                <div>
+              <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-4">
+                <div className="min-w-0">
                   <h1 className="font-editorial text-2xl sm:text-3xl font-semibold text-[#594943]">
                     Visão Geral do Estúdio
                   </h1>
@@ -817,7 +817,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   </p>
                 </div>
 
-                    <div className="flex flex-wrap items-center gap-2 shrink-0">
+                    <div className="flex flex-wrap items-center gap-2">
                       <button
                         type="button"
                         onClick={() => {
