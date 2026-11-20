@@ -293,7 +293,7 @@ export const AdminGoogleCalendar: React.FC<AdminGoogleCalendarProps> = ({
           </div>
 
           {/* Full-Screen Hourly Timeline (08:00 - 20:00) with Pastel Cards */}
-          <div className="relative overflow-y-auto max-h-[62vh] sm:max-h-[68vh] px-2 sm:px-5 py-3">
+          <div className="relative overflow-y-auto min-h-[62dvh] max-h-[76dvh] px-2 sm:px-5 py-3">
             <div
               className="relative"
               style={{ height: `${timelineHours.length * ROW_HEIGHT}px` }}

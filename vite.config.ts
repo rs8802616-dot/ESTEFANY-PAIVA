@@ -47,7 +47,7 @@ export default defineConfig(() => {
           ],
         },
         workbox: {
-          cacheId: 'estefany-nails-v70-timeline-calendar-pastel',
+          cacheId: 'estefany-nails-v71-inicio-only-calendar',
           skipWaiting: true,
           clientsClaim: true,
           cleanupOutdatedCaches: true,
