@@ -1236,7 +1236,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
         aria-label="Menu inferior principal"
         className="xl:hidden fixed bottom-3 left-3 right-3 z-40 mb-safe no-print"
       >
-        <div className="glass-nav rounded-2xl border border-white/15 shadow-xl px-1.5 py-1.5 grid grid-cols-5 items-center">
+        <div className="glass-nav max-w-xl mx-auto rounded-2xl border border-white/15 shadow-xl px-1.5 py-1.5 grid grid-cols-5 items-center">
           {NAV_ITEMS.map((item) => {
             const Icon = item.icon;
             const active = activeTab === item.id;

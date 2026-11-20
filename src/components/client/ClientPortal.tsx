@@ -307,7 +307,7 @@ export const ClientPortal: React.FC<ClientPortalProps> = ({
               <div
                 role="tablist"
                 aria-label="Filtrar por categoria"
-                className="flex items-center gap-2 overflow-x-auto pb-1 -mx-1 px-1"
+                className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 -mx-1 px-1"
               >
                 <button
                   type="button"
@@ -393,7 +393,7 @@ export const ClientPortal: React.FC<ClientPortalProps> = ({
                     return (
                       <article
                         key={svc.id}
-                        className={`bg-white rounded-2xl border transition-all overflow-hidden flex flex-row sm:flex-col ${
+                        className={`bg-white rounded-2xl border transition-all overflow-hidden flex flex-col ${
                           inCombo
                             ? 'border-[#C4A477] ring-1 ring-[#C4A477]/25'
                             : 'border-[#E8D6CB] hover:border-[#594943]/25'
@@ -401,7 +401,7 @@ export const ClientPortal: React.FC<ClientPortalProps> = ({
                       >
                         <div
                           onClick={() => quickBookService(svc)}
-                          className="w-28 h-28 sm:w-full sm:h-auto sm:aspect-[4/3] shrink-0 overflow-hidden bg-[#FAF6F1] cursor-pointer"
+                          className="w-full aspect-[4/3] shrink-0 overflow-hidden bg-[#FAF6F1] cursor-pointer"
                         >
                           <SafeImage
                             src={svc.imageUrl}

@@ -68,6 +68,15 @@
   padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
 }
 
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 .mb-safe {
   margin-bottom: max(0.75rem, env(safe-area-inset-bottom));
 }

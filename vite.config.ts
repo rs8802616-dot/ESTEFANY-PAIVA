@@ -47,7 +47,7 @@ export default defineConfig(() => {
           ],
         },
         workbox: {
-          cacheId: 'estefany-nails-v64-card-image-aspect',
+          cacheId: 'estefany-nails-v65-mobile-cards-and-clean-filters',
           skipWaiting: true,
           clientsClaim: true,
           cleanupOutdatedCaches: true,

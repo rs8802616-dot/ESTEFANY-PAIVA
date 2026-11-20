@@ -269,7 +269,7 @@ export const AdminAgendaTab: React.FC<AdminAgendaTabProps> = ({
   return (
     <div className="space-y-6">
       {/* Header Actions */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
         <div>
           <h1 className="font-editorial text-3xl font-semibold text-[#594943]">Agenda</h1>
           <p className="text-sm text-[#95847C]">
@@ -352,8 +352,8 @@ export const AdminAgendaTab: React.FC<AdminAgendaTabProps> = ({
       )}
 
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white rounded-2xl border border-[#E8D6CB] p-3.5">
-        <div className="flex items-center gap-1.5 overflow-x-auto">
+      <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 bg-white rounded-2xl border border-[#E8D6CB] p-3.5">
+        <div className="flex flex-wrap items-center gap-1.5">
           {(['all', 'pending', 'confirmed', 'completed', 'cancelled'] as const).map((st) => (
             <button
               key={st}
