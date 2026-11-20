@@ -2,1659 +2,267 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Estefany Paiva Nails - Agendamento Online</title>
-
-  <!-- PWA Metadata & Favicon -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Estefany Paiva Nails — Agendamento Online</title>
   <meta name="theme-color" content="#350B19">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="manifest" href="manifest.json">
-  <link rel="icon" type="image/jpeg" href="assets/images/capa-estefany-paiva.jpg">
-
-  <!-- Google Fonts: Editorial Serif + Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-  <!-- Font Awesome -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
-  <!-- Estilos do Portal do Cliente -->
-  <link rel="stylesheet" href="assets/css/client.css">
-  <style>
-    .toast-notification {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      background: #350B19;
-      color: #FFFFFF;
-      padding: 14px 22px;
-      border-radius: 30px;
-      font-size: 0.88rem;
-      font-weight: 600;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.35);
-      border: 1px solid rgba(251, 236, 239, 0.2);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      z-index: 9999;
-      transform: translateY(100px);
-      opacity: 0;
-      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-    .toast-notification.active {
-      transform: translateY(0);
-      opacity: 1;
-    }
-  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="assets/css/design-system.css">
 </head>
 <body>
-
-  <!-- CONTAINER PRINCIPAL DO CLIENTE (100% RESPONSIVO - MOBILE & DESKTOP) -->
-  <div class="site-wrapper-expansive">
-
-    <!-- ========================================================
-         1. CABEÇALHO VINHO DE LUXO COM ONDAS ORGÂNICAS
-         ======================================================== -->
-    <header class="client-header-wine">
-      <div class="wine-header-inner-expansive">
-        <!-- Linha Superior: Menu 3 Traços (Idêntico ao Admin), Assinatura Ep, Nav Desktop e Sino de Notificação (Idêntico ao Admin) -->
-        <div class="wine-top-row">
-          <div style="display:flex; align-items:center; gap:14px;">
-            <button class="btn-header-icon" aria-label="Menu" onclick="openMenuDrawer()">
-              <i class="fa-solid fa-bars"></i>
-            </button>
-
-            <!-- Logo Assinatura Oficial Ep ESTEFANY PAIVA NAIL DESIGNER -->
-            <div class="signature-logo-wrap" onclick="window.scrollTo({top:0, behavior:'smooth'})" style="cursor:pointer;">
-              <span class="sig-script-ep">Ep</span>
-              <div class="sig-script-text">
-                <span class="sig-script-title" id="clientHeaderSalonTitle">ESTEFANY PAIVA</span>
-                <span class="sig-script-sub" id="clientHeaderSalonSub">NAIL DESIGNER</span>
-              </div>
+  <div class="app-shell">
+    <!-- Cabeçalho do Estúdio -->
+    <header class="hero-header">
+      <div class="container">
+        <div class="topbar">
+          <a href="index.html" class="brand">
+            <span class="brand-monogram">Ep</span>
+            <div class="brand-titles">
+              <span class="brand-name" id="headerSalonName">Estefany Paiva</span>
+              <span class="brand-sub" id="headerSalonSub">NAIL DESIGNER</span>
             </div>
-          </div>
+          </a>
 
-          <!-- Menu de Navegação no Desktop do Cliente -->
-          <nav class="client-desktop-nav">
-            <a href="#secNossosServicos"><i class="fa-solid fa-gem"></i> Serviços</a>
-            <a href="#secMeusAgendamentos" onclick="openAppointmentsFullModal(); return false;"><i class="fa-regular fa-calendar-check"></i> Meus Agendamentos</a>
-            <a href="#bookingSection" class="active"><i class="fa-solid fa-calendar-plus"></i> Agendar Horário</a>
-          </nav>
-
-          <div style="display:flex; align-items:center; gap:10px;">
-            <button class="btn-header-icon" aria-label="Notificações" onclick="openModalNotificacoesCliente()">
-              <i class="fa-regular fa-bell"></i>
-              <span class="badge-bell-count" id="clientBellBadge">2</span>
+          <div class="topbar-actions">
+            <button type="button" class="btn btn-ghost" id="btnOpenMyBookings">
+              <i class="fa-regular fa-calendar-check"></i> Meus Horários
+            </button>
+            <button type="button" class="icon-btn" id="btnQuickWhatsapp" aria-label="Falar no WhatsApp">
+              <i class="fa-brands fa-whatsapp"></i>
             </button>
           </div>
         </div>
 
-        <!-- Linha de Saudação à Cliente -->
-        <div class="wine-greeting-row">
-          <div class="greeting-avatar-ring" id="clientProfileAvatarRing">
-            <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" id="clientHeaderAvatarImg" alt="Estefany Paiva">
-          </div>
-          <div class="greeting-text-area">
-            <h2 id="clientGreetingHeading">Olá, <span id="clientGreetingName">Bem-vinda</span>! <i class="fa-regular fa-heart"></i></h2>
-            <p id="clientHeaderWelcomeSub">Bem-vinda ao seu momento de beleza e autocuidado.</p>
+        <div class="profile-row">
+          <div class="profile-left">
+            <div class="avatar-frame">
+              <img id="salonAvatarImg" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Estefany Paiva">
+            </div>
+            <div class="profile-greeting">
+              <h1 id="clientGreeting">Olá, bem-vinda!</h1>
+              <p id="salonBioText">Especialista em alongamento em gel, banho de gel e nail art.</p>
+            </div>
           </div>
         </div>
       </div>
     </header>
+
+    <!-- Hidratação síncrona da foto de perfil salva (evita piscar imagem antiga) -->
     <script>
-      (function() {
+      (function () {
         try {
-          var raw = localStorage.getItem('epn_salon_settings');
-          var s = raw ? JSON.parse(raw) : null;
-          var av = document.getElementById('clientHeaderAvatarImg');
-          if (av) av.src = (s && s.avatarImage) ? s.avatarImage : 'assets/images/trabalho-amendoada-ouro.png';
-          if (s && s.salonName) {
-            var t = document.getElementById('clientHeaderSalonTitle');
-            if (t) t.innerText = s.salonName.replace(/NAILS/i, '').trim() || s.salonName;
-          }
-          if (s && (s.welcomeText || s.slogan)) {
-            var w = document.getElementById('clientHeaderWelcomeSub');
-            if (w) w.innerText = s.welcomeText || s.slogan;
-          }
+          var s = JSON.parse(localStorage.getItem('epn_salon_settings') || '{}');
+          var av = document.getElementById('salonAvatarImg');
+          if (av) av.src = s.avatarImage || 'assets/images/trabalho-amendoada-ouro.png';
+          if (s.salonName) document.getElementById('headerSalonName').textContent = s.salonName;
+          if (s.bio) document.getElementById('salonBioText').textContent = s.bio;
         } catch (e) {}
       })();
     </script>
 
-    <!-- ========================================================
-         CONTEÚDO PRINCIPAL (EXPANSIVO E RESPONSIVO)
-         ======================================================== -->
-    <main class="client-main-content-expansive">
+    <!-- Conteúdo Principal -->
+    <main class="main-content">
+      <!-- Próximo Agendamento da Cliente (só aparece quando existir) -->
+      <section class="next-booking-strip" id="nextBookingStrip" hidden>
+        <div class="list-item-main">
+          <div class="list-item-title" id="nextBookingTitle">Seu próximo horário</div>
+          <div class="list-item-sub" id="nextBookingMeta"></div>
+        </div>
+        <button type="button" class="btn btn-outline btn-sm" id="btnManageNextBooking">
+          Ver / Remarcar
+        </button>
+      </section>
 
-      <!-- GRID DESKTOP (2 COLUNAS NO PC / 1 NO MOBILE) -->
-      <div class="client-desktop-grid">
+      <!-- Banner Destaque -->
+      <section class="promo-card">
+        <div>
+          <h2 id="promoTitle">Realce a beleza das suas mãos</h2>
+          <p id="promoSubtitle">Horários exclusivos com atendimento personalizado.</p>
+          <button type="button" class="btn btn-primary" id="btnHeroBookNow">
+            <i class="fa-regular fa-calendar-plus"></i> Agendar Agora
+          </button>
+        </div>
+        <div class="promo-img-wrap">
+          <img id="promoBannerImg" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Studio Estefany Paiva">
+        </div>
+      </section>
 
-        <!-- COLUNA ESQUERDA: Ações, Promoção, Meus Agendamentos e Catálogo -->
-        <div class="client-col-left">
-
-          <!-- 2. GRADE DE 4 AÇÕES RÁPIDAS -->
-          <section class="quick-actions-bar">
-            <div class="quick-actions-grid">
-              <button class="card-action-squircle" onclick="scrollToBooking()">
-                <div class="action-icon-wrap">
-                  <i class="fa-regular fa-calendar-plus"></i>
-                </div>
-                <span>Agendar Horário</span>
-              </button>
-
-              <button class="card-action-squircle" onclick="openAppointmentsFullModal()">
-                <div class="action-icon-wrap">
-                  <i class="fa-solid fa-clock-rotate-left"></i>
-                </div>
-                <span>Meus Agendamentos</span>
-              </button>
-
-              <button class="card-action-squircle" onclick="document.getElementById('secNossosServicos').scrollIntoView({behavior:'smooth'})">
-                <div class="action-icon-wrap">
-                  <i class="fa-solid fa-gem"></i>
-                </div>
-                <span>Serviços</span>
-              </button>
-
-              <button class="card-action-squircle" onclick="openProfileContactModal()">
-                <div class="action-icon-wrap">
-                  <i class="fa-solid fa-user"></i>
-                </div>
-                <span>Meu Perfil</span>
-              </button>
-            </div>
-          </section>
-
-          <!-- 3. BANNER PROMOCIONAL DESTAQUE COM ONDAS -->
-          <section class="promo-card-wrapper">
-            <div class="promo-highlight-card">
-              <div class="promo-text-side">
-                <h3 id="clientPromoBannerTitle">Cuidado, beleza e autoestima em cada detalhe ♡</h3>
-                <button class="btn-promo-wine-pill" onclick="scrollToBooking()">
-                  <span id="clientPromoBannerBtnText">Agendar agora</span>
-                  <i class="fa-solid fa-arrow-right"></i>
-                </button>
-              </div>
-              <div class="promo-photo-side">
-                <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" id="clientPromoBannerImg" alt="Unhas com acabamento impecável">
-              </div>
-              <script>
-                (function() {
-                  try {
-                    var raw = localStorage.getItem('epn_salon_settings');
-                    var s = raw ? JSON.parse(raw) : null;
-                    var pImg = document.getElementById('clientPromoBannerImg');
-                    if (pImg) pImg.src = (s && s.promoBannerImage) ? s.promoBannerImage : 'assets/images/trabalho-tons-terrosos.png';
-                  } catch (e) {}
-                })();
-              </script>
-            </div>
-          </section>
-
-          <!-- 4. SEÇÃO "✦ MEUS AGENDAMENTOS" -->
-          <section class="section-client-block" id="secMeusAgendamentos">
-            <div class="section-head-title-row">
-              <h3>✦ Meus Agendamentos</h3>
-              <a href="#" onclick="openAppointmentsFullModal(); return false;">Ver todos &gt;</a>
-            </div>
-
-            <div class="next-booking-banner" id="nextAppointmentCardPreview" onclick="openDetalhesModal()">
-              <div class="booking-date-block">
-                <span class="date-day-week" id="appPreviewWeekDay">Sáb</span>
-                <span class="date-day-number" id="appPreviewDayNum">08</span>
-                <span class="date-month-name" id="appPreviewMonth">Nov</span>
-              </div>
-
-              <div class="booking-info-mid">
-                <h4 id="appPreviewServiceName">Alongamento em Gel</h4>
-                <div class="booking-time-meta">
-                  <i class="fa-regular fa-clock"></i>
-                  <span id="appPreviewTime">14:00</span>
-                </div>
-                <div class="booking-prof-meta">
-                  <i class="fa-regular fa-user"></i>
-                  <span>com Estefany Paiva</span>
-                </div>
-              </div>
-
-              <button class="btn-details-soft-pill" onclick="event.stopPropagation(); openDetalhesModal();">
-                <span>Ver detalhes</span>
-                <i class="fa-solid fa-chevron-right"></i>
-              </button>
-            </div>
-          </section>
-
-          <!-- 5. SEÇÃO "♡ NOSSOS SERVIÇOS" -->
-          <section class="section-client-block" id="secNossosServicos">
-            <div class="section-head-title-row">
-              <h3>♡ Nossos Serviços</h3>
-            </div>
-
-            <!-- Abas de Categoria -->
-            <div class="category-tabs-track" id="clientCategoryTabs">
-              <button class="category-tab-pill active" onclick="filterServicesByCategory('all', this)">Todos</button>
-              <button class="category-tab-pill" onclick="filterServicesByCategory('cat_alongamento', this)">Alongamento em Gel</button>
-              <button class="category-tab-pill" onclick="filterServicesByCategory('cat_manicure', this)">Manicure Clássica</button>
-              <button class="category-tab-pill" onclick="filterServicesByCategory('cat_esmalte', this)">Esmaltação em Gel</button>
-              <button class="category-tab-pill" onclick="filterServicesByCategory('cat_nailart', this)">Nail Art</button>
-              <button class="category-tab-pill" onclick="filterServicesByCategory('cat_spa', this)">Spa das Mãos</button>
-            </div>
-
-            <!-- Carrossel de Serviços (Populado imediatamente com os serviços reais salvos) -->
-            <div class="services-carousel-track" id="clientServicesCarousel"></div>
-          </section>
-
+      <!-- Catálogo de Procedimentos -->
+      <section>
+        <div class="section-header">
+          <h2>Procedimentos</h2>
         </div>
 
-        <!-- COLUNA DIREITA: Agende seu Horário (Sticky no PC) -->
-        <div class="client-col-right" id="bookingSection">
-          <section class="booking-section-wrapper">
-            <div class="booking-header-title">
-              <h3>Agende seu Horário</h3>
-              <p>Selecione a data, horário e preencha apenas seu Nome e WhatsApp.</p>
-            </div>
-
-            <!-- Aviso de Remarcação (aparece apenas quando a cliente está remarcando) -->
-            <div id="bookingRescheduleBanner" style="display:none; background:#FEF3C7; border:1px solid #F59E0B; border-radius:14px; padding:10px 14px; margin-bottom:12px; color:#92400E; font-size:0.8rem;">
-              <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
-                <div>
-                  <strong><i class="fa-solid fa-rotate"></i> Remarcando seu horário</strong>
-                  <div id="bookingRescheduleBannerText" style="font-size:0.75rem; margin-top:2px;">Escolha a nova data e horário abaixo.</div>
-                </div>
-                <button type="button" onclick="cancelRescheduleMode()" style="background:#FFF; border:1px solid #F59E0B; color:#92400E; border-radius:16px; padding:4px 10px; font-size:0.72rem; font-weight:700; cursor:pointer;">Cancelar</button>
-              </div>
-            </div>
-
-            <!-- Serviço Selecionado -->
-            <div class="service-selected-banner" id="selectedServicePreview">
-              <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" id="selectedServiceImg" alt="Alongamento">
-              <div style="flex:1; min-width:0;">
-                <h5 id="selectedServiceTitle">Alongamento em Gel</h5>
-                <p id="selectedServiceMeta">R$ 180,00 &bull; 90 minutos</p>
-              </div>
-            </div>
-
-            <!-- Combo: Adicionar Outros Procedimentos no Mesmo Horário -->
-            <div id="extraServicesWrapper" style="margin-bottom:14px;">
-              <button type="button" onclick="toggleExtraServicesPicker()" style="width:100%; padding:9px 14px; border-radius:14px; border:1px dashed rgba(216,63,121,0.45); background:#FFF9FA; color:#6A1D39; font-size:0.8rem; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:space-between;">
-                <span><i class="fa-solid fa-plus-circle" style="color:#D83F79;"></i> Adicionar outro procedimento (Combo)</span>
-                <span id="extraServicesCountBadge" style="font-size:0.72rem; color:#D83F79;">Opcional</span>
-              </button>
-              <div id="extraServicesPickerBox" style="display:none; margin-top:8px; background:#FFFFFF; border:1px solid rgba(77,19,40,0.12); border-radius:14px; padding:10px; max-height:190px; overflow-y:auto;">
-                <!-- Populado via JS -->
-              </div>
-            </div>
-
-            <!-- Calendário Inline -->
-            <div class="calendar-card-inline">
-              <div class="calendar-month-header">
-                <button type="button" class="btn-cal-nav" onclick="changeCalendarMonth(-1)">
-                  <i class="fa-solid fa-chevron-left"></i>
-                </button>
-                <h4 id="calendarMonthTitle">Novembro 2026</h4>
-                <button type="button" class="btn-cal-nav" onclick="changeCalendarMonth(1)">
-                  <i class="fa-solid fa-chevron-right"></i>
-                </button>
-              </div>
-
-              <div class="calendar-weekdays-row">
-                <span>Dom</span><span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sáb</span>
-              </div>
-
-              <div class="calendar-days-grid" id="calendarDaysGrid">
-                <!-- Populado via JS -->
-              </div>
-
-              <!-- Resumo de Horários Agendados no Dia Selecionado do Calendário -->
-              <div id="calendarSelectedDayBookingsBox" style="margin-top:12px; padding-top:10px; border-top:1px solid rgba(77,19,40,0.08); font-size:0.78rem; color:#4D1328;">
-                <!-- Populado dinamicamente via JS -->
-              </div>
-            </div>
-
-            <!-- Horários Livres -->
-            <div class="slots-section-block">
-              <span class="slots-section-label"><i class="fa-regular fa-clock"></i> Horários disponíveis:</span>
-              <div class="slots-grid-chips" id="timeSlotsGrid">
-                <button type="button" class="slot-chip-btn active" onclick="selectSlot(this, '09:00')">09:00</button>
-                <button type="button" class="slot-chip-btn" onclick="selectSlot(this, '10:30')">10:30</button>
-                <button type="button" class="slot-chip-btn" onclick="selectSlot(this, '14:00')">14:00</button>
-                <button type="button" class="slot-chip-btn" onclick="selectSlot(this, '15:30')">15:30</button>
-                <button type="button" class="slot-chip-btn" onclick="selectSlot(this, '17:00')">17:00</button>
-                <button type="button" class="slot-chip-btn" onclick="selectSlot(this, '18:30')">18:30</button>
-              </div>
-            </div>
-
-            <!-- Formulário LGPD (Apenas 2 campos) -->
-            <form id="clientBookingForm" onsubmit="handleConfirmBooking(event)">
-              <div class="form-input-box" style="margin-bottom:12px;">
-                <label style="display:block; font-size:0.8rem; font-weight:600; color:#4D1328; margin-bottom:4px;">Seu Nome Completo *</label>
-                <input type="text" id="clientNameInput" required placeholder="Ex: Mariana Silva" oninput="persistClientDraft()">
-              </div>
-
-              <div class="form-input-box" style="margin-bottom:14px;">
-                <label style="display:block; font-size:0.8rem; font-weight:600; color:#4D1328; margin-bottom:4px;">Celular / WhatsApp (com DDD) *</label>
-                <input type="tel" id="clientPhoneInput" required placeholder="(61) 98554-3452" maxlength="15" oninput="applyPhoneMask(this)">
-              </div>
-
-              <button type="submit" class="btn-confirm-booking-wine" id="btnSubmitBooking">
-                <i class="fa-solid fa-lock" style="font-size:0.85rem;"></i>
-                <span>Confirmar Agendamento</span>
-              </button>
-
-              <p style="text-align:center; font-size:0.75rem; color:#8A2D4E; margin-top:10px;">
-                <i class="fa-solid fa-shield-check"></i> Conformidade LGPD &bull; Zero dados sensíveis solicitados
-              </p>
-            </form>
-          </section>
-        </div>
-
-      </div>
-
+        <div class="pills-row" id="categoryPills"></div>
+        <div class="services-grid" id="servicesGrid"></div>
+      </section>
     </main>
 
-    <!-- ========================================================
-         BARRA DE NAVEGAÇÃO INFERIOR VINHO PROFUNDO (MOBILE ONLY)
-         ======================================================== -->
-    <nav class="bottom-nav-wine-fixed">
-      <button class="nav-item-wine active" onclick="window.scrollTo({top:0, behavior:'smooth'})">
+    <!-- Navegação Inferior Mobile -->
+    <nav class="bottom-nav">
+      <button type="button" class="bottom-nav-btn is-active" id="navHome">
         <i class="fa-solid fa-house"></i>
         <span>Início</span>
       </button>
-
-      <button class="nav-item-wine" onclick="openAppointmentsFullModal()">
-        <i class="fa-regular fa-calendar-check"></i>
-        <span>Agendamentos</span>
+      <button type="button" class="bottom-nav-btn" id="navBook">
+        <i class="fa-regular fa-calendar-plus"></i>
+        <span>Agendar</span>
       </button>
-
-      <button class="nav-item-wine" onclick="document.getElementById('secNossosServicos').scrollIntoView({behavior:'smooth'})">
-        <i class="fa-solid fa-gem"></i>
-        <span>Serviços</span>
+      <button type="button" class="bottom-nav-btn" id="navMyBookings">
+        <i class="fa-regular fa-clock"></i>
+        <span>Meus Horários</span>
       </button>
-
-      <button class="nav-item-wine" onclick="openWhatsAppChatDirect()">
-        <i class="fa-regular fa-comments"></i>
-        <span>Contato</span>
-      </button>
-
-      <button class="nav-item-wine" onclick="openProfileContactModal()">
-        <i class="fa-regular fa-user"></i>
-        <span>Perfil</span>
+      <button type="button" class="bottom-nav-btn" id="navWhatsapp">
+        <i class="fa-brands fa-whatsapp"></i>
+        <span>WhatsApp</span>
       </button>
     </nav>
-
   </div>
 
-  <!-- ========================================================
-       MODAIS INTERATIVOS DO CLIENTE
-       ======================================================== -->
-
-  <!-- 1. Modal: Meus Agendamentos (Ver todos) -->
-  <div class="client-modal-overlay" id="modalMeusAgendamentos">
-    <div class="client-modal-card">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-        <h3 style="font-family:var(--font-serif); font-size:1.3rem; color:#350B19;">
-          <i class="fa-solid fa-clock-rotate-left" style="color:#8A2D4E;"></i> Meus Agendamentos
-        </h3>
-        <button onclick="closeClientModal('modalMeusAgendamentos')" style="background:none; border:none; font-size:1.2rem; color:#6A1D39; cursor:pointer;">✕</button>
-      </div>
-
-      <div style="margin-bottom:14px;">
-        <div style="display:flex; gap:8px;">
-          <input type="tel" id="inputBuscaMeusAgendamentos" placeholder="Digite seu WhatsApp..." style="flex:1; padding:10px 14px; border-radius:12px; border:1px solid rgba(77,19,40,0.18);">
-          <button onclick="filtrarMeusAgendamentos()" style="padding:10px 16px; border-radius:12px; border:none; background:#4D1328; color:#FFF; font-weight:600; cursor:pointer;">
-            Buscar
-          </button>
-        </div>
-      </div>
-
-      <div id="listaMeusAgendamentosConteudo" style="display:flex; flex-direction:column; gap:10px; max-height:50vh; overflow-y:auto;">
-        <!-- Populado dinamicamente via JS -->
-      </div>
-
-      <div style="margin-top:16px;">
-        <button onclick="scrollToBooking(); closeClientModal('modalMeusAgendamentos');" style="width:100%; padding:12px; border-radius:30px; border:none; background:#4D1328; color:#FFF; font-weight:700; cursor:pointer;">
-          + Fazer Novo Agendamento
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 2. Modal: Detalhes do Horário Atual -->
-  <div class="client-modal-overlay" id="modalDetalhesAgendamento">
-    <div class="client-modal-card">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-        <h3 style="font-family:var(--font-serif); font-size:1.3rem; color:#350B19;">Detalhes do Horário</h3>
-        <button onclick="closeClientModal('modalDetalhesAgendamento')" style="background:none; border:none; font-size:1.2rem; color:#6A1D39; cursor:pointer;">✕</button>
-      </div>
-
-      <div style="background:#FBECEF; border-radius:16px; padding:16px; margin-bottom:16px;">
-        <h4 id="detalheModalSrv" style="font-size:1.15rem; color:#350B19; font-weight:700; margin-bottom:6px;">Alongamento em Gel</h4>
-        <p style="font-size:0.85rem; color:#6A1D39; margin-bottom:4px;">
-          <i class="fa-regular fa-calendar-check" style="color:#8A2D4E; width:18px;"></i> <span id="detalheModalData">Sábado, 08 de Novembro</span>
-        </p>
-        <p style="font-size:0.85rem; color:#6A1D39; margin-bottom:4px;">
-          <i class="fa-regular fa-clock" style="color:#8A2D4E; width:18px;"></i> <span id="detalheModalHora">14:00 (Duração: 90 min)</span>
-        </p>
-        <p style="font-size:0.85rem; color:#6A1D39; margin-bottom:4px;">
-          <i class="fa-regular fa-user" style="color:#8A2D4E; width:18px;"></i> Profissional: <strong>Estefany Paiva</strong>
-        </p>
-        <p style="font-size:0.85rem; color:#6A1D39;">
-          <i class="fa-solid fa-location-dot" style="color:#8A2D4E; width:18px;"></i> Studio Estefany Paiva Nails &bull; Brasília - DF
-        </p>
-      </div>
-
-      <div style="display:flex; flex-direction:column; gap:8px;">
-        <button onclick="openClientGoogleCalendarDirect()" style="width:100%; padding:13px; border-radius:30px; border:none; background:#1A73E8; color:#FFF; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; box-shadow:0 4px 12px rgba(26,115,232,0.3);">
-          <i class="fa-brands fa-google"></i> Salvar no Meu Google Agenda (Automático)
-        </button>
-
-        <button onclick="downloadCalendarIcs()" style="width:100%; padding:12px; border-radius:30px; border:none; background:#4D1328; color:#FFF; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;">
-          <i class="fa-regular fa-calendar-arrow-down"></i> Baixar p/ Calendário do Celular (.ics)
-        </button>
-
-        <button onclick="openWhatsAppChatDirect()" style="width:100%; padding:12px; border-radius:30px; border:none; background:#25D366; color:#FFF; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;">
-          <i class="fa-brands fa-whatsapp"></i> Falar com a Estefany no WhatsApp
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 3. Modal: Meu Perfil -->
-  <div class="client-modal-overlay" id="modalMeuPerfil">
-    <div class="client-modal-card">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-        <h3 style="font-family:var(--font-serif); font-size:1.3rem; color:#350B19;">Meu Perfil</h3>
-        <button onclick="closeClientModal('modalMeuPerfil')" style="background:none; border:none; font-size:1.2rem; color:#6A1D39; cursor:pointer;">✕</button>
-      </div>
-
-      <div style="text-align:center; margin-bottom:16px;">
-        <div class="greeting-avatar-ring" style="width:72px; height:72px; margin:0 auto 10px;">
-          <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" id="profileModalAvatarImg" alt="Perfil">
-        </div>
-        <h4 style="font-family:var(--font-serif); font-size:1.2rem; color:#350B19;" id="profileModalClientName">Cliente VIP</h4>
-        <p style="font-size:0.8rem; color:#8A2D4E;" id="profileModalClientPhone">Cliente VIP Estefany Paiva Nails</p>
-      </div>
-
-      <div style="background:#FBECEF; border-radius:16px; padding:14px; margin-bottom:16px; font-size:0.85rem; color:#6A1D39; line-height:1.6;">
-        <p><strong>Studio:</strong> ESTEFANY PAIVA NAILS</p>
-        <p><strong>WhatsApp:</strong> (61) 98554-3452</p>
-        <p><strong>Instagram:</strong> @estefanypaiva_nails</p>
-        <p><strong>Localização:</strong> Brasília - DF</p>
-      </div>
-
-      <button onclick="closeClientModal('modalMeuPerfil'); openAppointmentsFullModal();" style="width:100%; padding:12px; border-radius:30px; border:none; background:#4D1328; color:#FFF; font-weight:700; cursor:pointer;">
-        Ver Meus Agendamentos
-      </button>
-    </div>
-  </div>
-
-  <!-- 4. Modal: Central de Notificações da Cliente (Idêntica à Área Administrativa) -->
-  <div class="client-modal-overlay" id="modalNotificacoesCliente">
-    <div class="client-modal-card">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-        <h3 style="font-family:var(--font-serif); font-size:1.3rem; color:#350B19;">
-          <i class="fa-regular fa-bell" style="color:#8A2D4E;"></i> Central de Notificações
-        </h3>
-        <button onclick="closeClientModal('modalNotificacoesCliente')" style="background:none; border:none; font-size:1.2rem; color:#6A1D39; cursor:pointer;">✕</button>
-      </div>
-
-      <div id="clientNotificationsDynamicList" style="display:flex; flex-direction:column; gap:10px; margin-bottom:16px; max-height:48vh; overflow-y:auto;">
-        <!-- Populado dinamicamente via JS com os agendamentos reais -->
-      </div>
-
-      <button onclick="testClientAudioAlert()" style="width:100%; padding:13px; border-radius:30px; border:none; background:#4D1328; color:#FFF; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;">
-        <i class="fa-solid fa-volume-high"></i> Testar Alerta Sonoro (Apito no Celular)
-      </button>
-    </div>
-  </div>
-
-  <!-- 4B. Modal: Menu Principal 3 Traços (Idêntico ao Padrão Administrativo) -->
-  <div class="client-modal-overlay" id="modalMenuClienteDrawer">
-    <div class="client-modal-card">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-        <div style="display:flex; align-items:center; gap:10px;">
-          <div style="width:40px; height:40px; border-radius:50%; background:#350B19; color:#FFF; display:flex; align-items:center; justify-content:center; font-family:var(--font-serif); font-style:italic; font-size:1.25rem;">Ep</div>
-          <div>
-            <h3 style="font-family:var(--font-serif); font-size:1.15rem; color:#350B19; margin:0;" id="drawerSalonTitle">Estefany Paiva Nails</h3>
-            <span style="font-size:0.75rem; color:#8A2D4E;">Menu de Acesso Rápido</span>
-          </div>
-        </div>
-        <button onclick="closeClientModal('modalMenuClienteDrawer')" style="background:none; border:none; font-size:1.2rem; color:#6A1D39; cursor:pointer;">✕</button>
-      </div>
-
-      <div style="display:flex; flex-direction:column; gap:8px;">
-        <button onclick="closeClientModal('modalMenuClienteDrawer'); scrollToBooking();" style="width:100%; padding:13px 16px; border-radius:16px; border:1px solid rgba(77,19,40,0.08); background:#FBECEF; color:#350B19; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:space-between;">
-          <span><i class="fa-regular fa-calendar-plus" style="color:#4D1328; width:24px;"></i> Agendar Novo Horário</span>
-          <i class="fa-solid fa-chevron-right" style="font-size:0.75rem; color:#8A2D4E;"></i>
-        </button>
-
-        <button onclick="closeClientModal('modalMenuClienteDrawer'); openAppointmentsFullModal();" style="width:100%; padding:13px 16px; border-radius:16px; border:1px solid rgba(77,19,40,0.08); background:#FBECEF; color:#350B19; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:space-between;">
-          <span><i class="fa-regular fa-calendar-check" style="color:#4D1328; width:24px;"></i> Meus Agendamentos</span>
-          <i class="fa-solid fa-chevron-right" style="font-size:0.75rem; color:#8A2D4E;"></i>
-        </button>
-
-        <button onclick="closeClientModal('modalMenuClienteDrawer'); document.getElementById('secNossosServicos').scrollIntoView({behavior:'smooth'});" style="width:100%; padding:13px 16px; border-radius:16px; border:1px solid rgba(77,19,40,0.08); background:#FBECEF; color:#350B19; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:space-between;">
-          <span><i class="fa-solid fa-gem" style="color:#4D1328; width:24px;"></i> Catálogo de Serviços</span>
-          <i class="fa-solid fa-chevron-right" style="font-size:0.75rem; color:#8A2D4E;"></i>
-        </button>
-
-        <button onclick="closeClientModal('modalMenuClienteDrawer'); openModalNotificacoesCliente();" style="width:100%; padding:13px 16px; border-radius:16px; border:1px solid rgba(77,19,40,0.08); background:#FBECEF; color:#350B19; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:space-between;">
-          <span><i class="fa-regular fa-bell" style="color:#4D1328; width:24px;"></i> Minhas Notificações</span>
-          <i class="fa-solid fa-chevron-right" style="font-size:0.75rem; color:#8A2D4E;"></i>
-        </button>
-
-        <button onclick="closeClientModal('modalMenuClienteDrawer'); openProfileContactModal();" style="width:100%; padding:13px 16px; border-radius:16px; border:1px solid rgba(77,19,40,0.08); background:#FBECEF; color:#350B19; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:space-between;">
-          <span><i class="fa-regular fa-user" style="color:#4D1328; width:24px;"></i> Meu Perfil & Contato</span>
-          <i class="fa-solid fa-chevron-right" style="font-size:0.75rem; color:#8A2D4E;"></i>
-        </button>
-
-        <button onclick="closeClientModal('modalMenuClienteDrawer'); openWhatsAppChatDirect();" style="width:100%; padding:13px 16px; border-radius:16px; border:none; background:#25D366; color:#FFFFFF; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; margin-top:4px;">
-          <i class="fa-brands fa-whatsapp" style="font-size:1.1rem;"></i> Falar com a Estefany no WhatsApp
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal Tela Toda de Agendamento Direto (Abre a tela inteira sem cortar o calendário) -->
-  <div class="client-modal-overlay booking-fullscreen-modal" id="modalAgendamentoPopup" style="z-index: 9200;">
-    <div class="booking-fullscreen-card">
-      <!-- Barra superior estilo app nativo -->
-      <div class="booking-fullscreen-topbar">
-        <button type="button" onclick="closeClientModal('modalAgendamentoPopup')" class="btn-fullscreen-back">
+  <!-- MODAL: AGENDAMENTO EM TELA CHEIA -->
+  <div class="modal-backdrop modal-fullscreen" id="modalBooking">
+    <div class="modal-card">
+      <div class="modal-topbar">
+        <button type="button" class="btn btn-ghost btn-sm" id="btnCloseBookingTop">
           <i class="fa-solid fa-arrow-left"></i> Voltar
         </button>
-        <div class="booking-fullscreen-title-box">
-          <h4 class="booking-fullscreen-title">
-            <i class="fa-solid fa-calendar-plus" style="color:#E9A3B5; margin-right:6px;"></i> Agendar Horário
-          </h4>
-        </div>
-        <button type="button" onclick="closeClientModal('modalAgendamentoPopup')" class="btn-fullscreen-close" aria-label="Fechar">
+        <strong id="bookingModalTitle">Agendar Horário</strong>
+        <button type="button" class="icon-btn" id="btnCloseBookingX" aria-label="Fechar">
           <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
 
-      <!-- Container onde o formulário e calendário completo de agendamento é carregado -->
-      <div class="booking-fullscreen-body" id="modalBookingSectionHost">
-        <!-- O conteúdo de agendamento fica aqui -->
+      <div class="modal-body">
+        <!-- Aviso de Remarcação -->
+        <div class="card" id="rescheduleNotice" hidden>
+          <div class="list-item-main">
+            <div class="list-item-title"><i class="fa-solid fa-rotate"></i> Remarcando horário</div>
+            <div class="list-item-sub" id="rescheduleNoticeText"></div>
+          </div>
+          <button type="button" class="btn btn-outline btn-sm" id="btnCancelReschedule">Cancelar remarcação</button>
+        </div>
+
+        <!-- Resumo do Serviço Selecionado -->
+        <div class="list-item" id="selectedServiceSummary">
+          <div class="list-item-main">
+            <div class="list-item-title" id="summaryServiceName">Procedimento</div>
+            <div class="list-item-sub" id="summaryServiceMeta">R$ 0,00 • 90 min</div>
+          </div>
+          <button type="button" class="btn btn-outline btn-sm" id="btnToggleCombo">
+            <i class="fa-solid fa-plus"></i> Combo
+          </button>
+        </div>
+
+        <!-- Seletor de Procedimentos Extras (Combo) -->
+        <div class="card" id="comboPickerBox" hidden>
+          <div class="list-item-sub">Selecione procedimentos extras para o mesmo horário:</div>
+          <div class="card-stack" id="comboList"></div>
+        </div>
+
+        <!-- Calendário 7 Colunas -->
+        <div class="calendar-box">
+          <div class="calendar-nav">
+            <button type="button" class="icon-btn icon-btn-dark" id="btnCalPrev" aria-label="Mês anterior">
+              <i class="fa-solid fa-chevron-left"></i>
+            </button>
+            <h4 id="calMonthLabel">Novembro 2026</h4>
+            <button type="button" class="icon-btn icon-btn-dark" id="btnCalNext" aria-label="Próximo mês">
+              <i class="fa-solid fa-chevron-right"></i>
+            </button>
+          </div>
+          <div class="calendar-weekdays">
+            <span>Dom</span><span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sáb</span>
+          </div>
+          <div class="calendar-days" id="calDaysGrid"></div>
+        </div>
+
+        <!-- Horários Disponíveis -->
+        <div class="field">
+          <label>Horários disponíveis em <span id="selectedDateLabel"></span></label>
+          <div class="slots-grid" id="slotsGrid"></div>
+        </div>
+
+        <!-- Dados da Cliente -->
+        <form id="bookingForm">
+          <div class="field">
+            <label for="inputClientName">Seu Nome Completo *</label>
+            <input type="text" id="inputClientName" required placeholder="Ex: Mariana Silva">
+          </div>
+          <div class="field">
+            <label for="inputClientPhone">Seu WhatsApp com DDD *</label>
+            <input type="tel" id="inputClientPhone" required placeholder="(61) 99999-9999">
+          </div>
+          <button type="submit" class="btn btn-primary btn-block" id="btnSubmitBooking">
+            <i class="fa-solid fa-check"></i> Confirmar Agendamento
+          </button>
+        </form>
       </div>
     </div>
   </div>
 
-  <!-- 6. Modal: Confirmação de Sucesso -->
-  <div class="client-modal-overlay" id="modalBookingSuccess">
-    <div class="client-modal-card" style="text-align:center;">
-      <div style="width:68px; height:68px; border-radius:50%; background:#ECFDF5; color:#16A34A; font-size:2rem; display:flex; align-items:center; justify-content:center; margin:0 auto 14px;">
-        <i class="fa-solid fa-check"></i>
-      </div>
-      <h3 style="font-family:var(--font-serif); font-size:1.4rem; color:#350B19; margin-bottom:6px;">Agendamento Confirmado!</h3>
-      <p style="font-size:0.85rem; color:#6A1D39; margin-bottom:16px;">
-        Seu horário foi reservado com sucesso no Studio Estefany Paiva Nails.
-      </p>
-
-      <div style="background:#FBECEF; border-radius:14px; padding:14px; margin-bottom:12px; text-align:left; font-size:0.85rem; color:#4D1328; line-height:1.6;">
-        <p><strong>Serviço:</strong> <span id="successSrvName">Alongamento em Gel</span></p>
-        <p><strong>Data & Horário:</strong> <span id="successDateTime">08/11/2026 às 14:00</span></p>
-        <p><strong>Cliente:</strong> <span id="successClientName">Mariana Silva</span></p>
-        <p><strong>Valor & Duração:</strong> <span id="successPriceDur">R$ 180,00 • 90 min</span></p>
+  <!-- MODAL: CONFIRMAÇÃO + PIX COPIA E COLA -->
+  <div class="modal-backdrop" id="modalSuccess">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Agendamento Confirmado!</h3>
+        <button type="button" class="icon-btn icon-btn-dark" id="btnCloseSuccess" aria-label="Fechar">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
       </div>
 
-      <!-- Sinal / Pagamento via Pix (Copia e Cola) -->
-      <div id="bookingSuccessPixBox" style="display:none; background:#ECFDF5; border:1px solid rgba(22,163,74,0.28); border-radius:14px; padding:12px 14px; margin-bottom:14px; text-align:left;">
-        <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:6px;">
-          <strong style="font-size:0.82rem; color:#166534;"><i class="fa-brands fa-pix"></i> <span id="successPixTitle">Chave Pix do Studio</span></strong>
-          <span id="successPixAmountBadge" style="background:#16A34A; color:#FFF; font-size:0.72rem; font-weight:700; padding:2px 9px; border-radius:12px;">R$ 0,00</span>
-        </div>
-        <div style="display:flex; align-items:center; gap:6px; background:#FFF; border:1px solid rgba(22,163,74,0.22); border-radius:10px; padding:7px 10px; margin-bottom:8px;">
-          <code id="successPixKeyValue" style="flex:1; font-size:0.8rem; color:#14532D; word-break:break-all; font-weight:700;"></code>
-          <button type="button" onclick="copyBookingPixKey()" style="background:#16A34A; color:#FFF; border:none; border-radius:8px; padding:6px 10px; font-size:0.74rem; font-weight:700; cursor:pointer; flex-shrink:0;">
+      <div class="card card-stack" id="successDetailsBox"></div>
+
+      <div class="card card-stack" id="successPixBox" hidden>
+        <div class="list-item-title" id="successPixTitle">Chave Pix</div>
+        <div class="list-item-sub">Valor: <strong id="successPixValue"></strong></div>
+        <div class="list-item">
+          <code id="successPixKey"></code>
+          <button type="button" class="btn btn-dark btn-sm" id="btnCopyPix">
             <i class="fa-regular fa-copy"></i> Copiar
           </button>
         </div>
-        <button type="button" onclick="sendBookingReceiptWhatsapp()" style="width:100%; padding:9px 12px; border-radius:20px; border:none; background:#25D366; color:#FFF; font-size:0.78rem; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;">
-          <i class="fa-brands fa-whatsapp"></i> Enviar Comprovante / Confirmar no WhatsApp
-        </button>
       </div>
 
-      <div style="display:flex; flex-direction:column; gap:8px;">
-        <button onclick="openClientGoogleCalendarDirect()" style="width:100%; padding:13px; border-radius:30px; border:none; background:#1A73E8; color:#FFF; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; box-shadow:0 4px 14px rgba(26,115,232,0.35);">
-          <i class="fa-brands fa-google"></i> Abrir & Salvar no Meu Google Agenda
+      <div class="card-stack">
+        <button type="button" class="btn btn-whatsapp btn-block" id="btnSuccessWhatsapp">
+          <i class="fa-brands fa-whatsapp"></i> Confirmar / Enviar Comprovante no WhatsApp
         </button>
-
-        <button onclick="downloadCalendarIcs()" style="width:100%; padding:11px; border-radius:30px; border:none; background:#4D1328; color:#FFF; font-weight:700; cursor:pointer;">
-          <i class="fa-regular fa-calendar-arrow-down"></i> Baixar p/ Calendário do Celular (.ics)
+        <button type="button" class="btn btn-google btn-block" id="btnSuccessGcal">
+          <i class="fa-brands fa-google"></i> Salvar no Google Agenda
         </button>
-
-        <button onclick="closeClientModal('modalBookingSuccess')" style="width:100%; padding:10px; border-radius:30px; border:1px solid rgba(77,19,40,0.2); background:transparent; color:#6A1D39; font-weight:600; cursor:pointer;">
-          Fechar
+        <button type="button" class="btn btn-outline btn-block" id="btnSuccessIcs">
+          <i class="fa-regular fa-calendar"></i> Baixar p/ Calendário do Celular (.ics)
         </button>
       </div>
     </div>
   </div>
 
-  <!-- Toast Notification Feedback -->
-  <div class="toast-notification" id="toastClientNotification">
-    <i class="fa-solid fa-circle-check" style="color:#25D366;"></i>
-    <span id="toastClientText">Horário reservado com sucesso!</span>
+  <!-- MODAL: MEUS AGENDAMENTOS & REMARCAÇÃO -->
+  <div class="modal-backdrop" id="modalMyBookings">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Meus Agendamentos</h3>
+        <button type="button" class="icon-btn icon-btn-dark" id="btnCloseMyBookings" aria-label="Fechar">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="field">
+        <label for="inputSearchMyPhone">Buscar pelo seu WhatsApp</label>
+        <input type="tel" id="inputSearchMyPhone" placeholder="Digite seu número com DDD...">
+      </div>
+
+      <div class="card-stack" id="myBookingsList"></div>
+    </div>
   </div>
 
-  <!-- Scripts -->
-  <script src="assets/js/store.js"></script>
+  <script type="module" src="src/client-app.js"></script>
   <script>
-    let selectedService = { id: 'srv_alongamento', name: 'Alongamento em Gel', price: 180, duration: 90, image: 'assets/images/trabalho-alongamento-chocolate.png' };
-    let selectedExtraServiceIds = [];
-    let reschedulingAppointmentId = null;
-    let selectedSlotTime = '14:00';
-    let selectedDate = new Date();
-    let currentCalMonth = new Date().getMonth();
-    let currentCalYear = new Date().getFullYear();
-    let activeClientCategory = 'all';
-
-    function formatLocalYYYYMMDD(d) {
-      const y = d.getFullYear();
-      const m = String(d.getMonth() + 1).padStart(2, '0');
-      const day = String(d.getDate()).padStart(2, '0');
-      return `${y}-${m}-${day}`;
-    }
-
-    // Hidratação síncrona imediata antes do primeiro frame para nunca piscar imagens de teste
-    try {
-      applyDynamicThemeColorsToClient();
-      applyDynamicSalonSettingsToClient();
-      renderDynamicCategoryPills();
-      renderDynamicClientServices();
-    } catch (e) {}
-
-    document.addEventListener('DOMContentLoaded', async () => {
-      // Garante que nenhum modal sobreponha a tela indevidamente
-      try {
-        document.querySelectorAll('.client-modal-overlay').forEach(m => {
-          if (!m.classList.contains('active')) {
-            m.style.display = 'none';
-          }
-        });
-      } catch (e) {}
-      applyDynamicThemeColorsToClient();
-      applyDynamicSalonSettingsToClient();
-      renderDynamicCategoryPills();
-      renderDynamicClientServices();
-      restoreClientSavedData();
-      renderCalendar();
-      renderDynamicSlots();
-      updateNextBookingBanner();
-      updateClientNotificationsBadge();
-      if (window.EPStore) {
-        await window.EPStore.init();
-      }
-
-      // Atualiza automaticamente quando houver qualquer mudança no Admin ou em outro aparelho
-      window.addEventListener('epstore:updated', () => {
-        applyDynamicThemeColorsToClient();
-        applyDynamicSalonSettingsToClient();
-        renderDynamicCategoryPills();
-        renderDynamicClientServices();
-        renderCalendar();
-        renderDynamicSlots();
-        updateNextBookingBanner();
-        updateClientNotificationsBadge();
-      });
-    });
-
-    function applyDynamicSalonSettingsToClient() {
-      if (!window.EPStore) return;
-      const s = window.EPStore.getSalonSettings();
-      if (!s) return;
-
-      const titleEl = document.getElementById('clientHeaderSalonTitle');
-      if (titleEl && s.salonName) {
-        titleEl.innerText = s.salonName.replace(/NAILS/i, '').trim() || s.salonName;
-      }
-      const drawerTitle = document.getElementById('drawerSalonTitle');
-      if (drawerTitle && s.salonName) drawerTitle.innerText = s.salonName;
-
-      const welcomeEl = document.getElementById('clientHeaderWelcomeSub');
-      if (welcomeEl && (s.welcomeText || s.slogan)) {
-        welcomeEl.innerText = s.welcomeText || s.slogan;
-      }
-
-      const finalAvatar = s.avatarImage || 'assets/images/trabalho-amendoada-ouro.png';
-      const avatarEl = document.getElementById('clientHeaderAvatarImg');
-      if (avatarEl && avatarEl.src !== finalAvatar) {
-        avatarEl.src = finalAvatar;
-      }
-      const profAv = document.getElementById('profileModalAvatarImg');
-      if (profAv && profAv.src !== finalAvatar) {
-        profAv.src = finalAvatar;
-      }
-      const storyAv = document.getElementById('storyUserAvatarImg');
-      if (storyAv && storyAv.src !== finalAvatar) {
-        storyAv.src = finalAvatar;
-      }
-
-      const promoTitle = document.getElementById('clientPromoBannerTitle');
-      if (promoTitle && s.promoBannerTitle) promoTitle.innerText = s.promoBannerTitle;
-
-      const promoBtn = document.getElementById('clientPromoBannerBtnText');
-      if (promoBtn && s.promoBannerBtnText) promoBtn.innerText = s.promoBannerBtnText;
-
-      const finalPromo = s.promoBannerImage || 'assets/images/trabalho-tons-terrosos.png';
-      const promoImg = document.getElementById('clientPromoBannerImg');
-      if (promoImg && promoImg.src !== finalPromo) promoImg.src = finalPromo;
-
-      updateProfileStoryRingClient();
-    }
-
-    function updateProfileStoryRingClient() {
-      if (!window.EPStore || !window.EPStore.getProfileStories) return;
-      const stories = window.EPStore.getProfileStories();
-      const ring = document.getElementById('clientProfileAvatarRing');
-      const badge = document.getElementById('clientProfileStoryBadge');
-      if (ring) {
-        ring.classList.toggle('has-active-story', stories.length > 0);
-      }
-      if (badge) {
-        badge.style.display = stories.length > 0 ? 'inline-block' : 'none';
-        badge.innerText = stories.length > 1 ? `Stories (${stories.length})` : 'Stories';
-      }
-    }
-
-    // Renderiza todos os serviços cadastrados no EPStore (incluindo novos serviços com foto do celular!)
-    
-    // Renderiza dinamicamente as pílulas de categorias cadastradas pela administradora
-    function renderDynamicCategoryPills() {
-      const container = document.getElementById('clientCategoryTabs');
-      if (!container || !window.EPStore) return;
-      const cats = window.EPStore.getCategories();
-      
-      let html = `<button class="category-tab-pill ${activeClientCategory === 'all' ? 'active' : ''}" onclick="filterServicesByCategory('all', this)">Todos</button>`;
-      cats.forEach(c => {
-        const isActive = (activeClientCategory === c.id);
-        html += `<button class="category-tab-pill ${isActive ? 'active' : ''}" onclick="filterServicesByCategory('${c.id}', this)">${c.name}</button>`;
-      });
-      container.innerHTML = html;
-    }
-
-    function applyDynamicThemeColorsToClient() {
-      if (window.EPStore && window.EPStore.applyThemeToDocument) {
-        window.EPStore.applyThemeToDocument();
-      }
-    }
-
-    function renderDynamicClientServices() {
-      const container = document.getElementById('clientServicesCarousel');
-      if (!container || !window.EPStore) return;
-
-      const services = window.EPStore.getServices(true);
-      if (!services || services.length === 0) return;
-      if (!window._userExplicitlyPickedService && services[0]) {
-        const firstSrv = services[0];
-        selectedService = {
-          id: firstSrv.id,
-          name: firstSrv.name,
-          price: parseFloat(firstSrv.price || 150),
-          image: firstSrv.image || 'assets/images/trabalho-alongamento-chocolate.png'
-        };
-        const selImg = document.getElementById('selectedServiceImg');
-        const selTitle = document.getElementById('selectedServiceTitle');
-        const selMeta = document.getElementById('selectedServiceMeta');
-        if (selImg) selImg.src = selectedService.image;
-        if (selTitle) selTitle.innerText = selectedService.name;
-        if (selMeta) selMeta.innerText = `R$ ${selectedService.price.toFixed(2).replace('.', ',')} • ${firstSrv.duration || 90} minutos`;
-      }
-
-      const filtered = activeClientCategory === 'all'
-        ? services
-        : services.filter(s => {
-            const cat = (s.categoryId || '').toLowerCase();
-            if (activeClientCategory === 'cat_manicure') return cat.includes('classica') || cat.includes('manicure');
-            if (activeClientCategory === 'cat_spa') return cat.includes('blindagem') || cat.includes('spa');
-            return cat === activeClientCategory;
-          });
-
-      container.innerHTML = filtered.map(s => {
-        const imgUrl = s.image || 'assets/images/trabalho-alongamento-chocolate.png';
-        const priceFormatted = parseFloat(s.price || 150).toFixed(2).replace('.', ',');
-        const safeName = (s.name || 'Serviço').replace(/'/g, "\'");
-        const safeImg = imgUrl.replace(/'/g, "\'");
-        return `
-          <div class="service-card-lux" data-category="${s.categoryId || 'cat_alongamento'}" data-service-id="${s.id}">
-            <div class="service-photo-cover" onclick="selectServiceForBooking('${s.id}', '${safeName}', ${parseFloat(s.price || 150)}, '${safeImg}')" style="cursor:pointer;" title="Clique para agendar este procedimento">
-              <img src="${imgUrl}" alt="${s.name}">
-            </div>
-            <div class="service-details-box">
-              <h4>${s.name}</h4>
-              <p class="service-desc-snippet">${s.description || 'Acabamento impecável com produtos de alta linha.'}</p>
-              <div class="service-price-row">
-                <span class="service-price-val">R$ ${priceFormatted}</span>
-                <button class="btn-select-service-pill" onclick="selectServiceForBooking('${s.id}', '${safeName}', ${parseFloat(s.price || 150)}, '${safeImg}')">
-                  Agendar
-                </button>
-              </div>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    // Retorna APENAS os agendamentos pertencentes à cliente deste aparelho (Privacidade LGPD)
-    function getCurrentClientOwnAppointments() {
-      if (!window.EPStore) return [];
-      const allApps = window.EPStore.getAppointments().filter(a => a.status !== 'Cancelado' && a.status !== 'cancelado');
-      const lastId = localStorage.getItem('epn_last_appointment_id') || '';
-      const savedPhone = (localStorage.getItem('epn_last_client_phone') || '').replace(/\D/g, '');
-      const savedName = (localStorage.getItem('epn_last_client_name') || '').trim().toLowerCase();
-
-      if (!lastId && savedPhone.length < 8 && savedName.length < 3) {
-        return [];
-      }
-
-      return allApps.filter(a => {
-        if (lastId && a.id === lastId) return true;
-        const aPhone = (a.clientPhone || '').replace(/\D/g, '');
-        if (savedPhone.length >= 8 && aPhone && (aPhone.includes(savedPhone) || savedPhone.includes(aPhone))) return true;
-        const aName = (a.clientName || '').trim().toLowerCase();
-        if (savedName.length >= 3 && aName === savedName) return true;
-        return false;
-      });
-    }
-
-    // Restaura Nome, WhatsApp e Agendamento da cliente mesmo após F5 / atualizar a página
-    function restoreClientSavedData() {
-      let savedName = localStorage.getItem('epn_last_client_name') || '';
-      let savedPhone = localStorage.getItem('epn_last_client_phone') || '';
-      const lastId = localStorage.getItem('epn_last_appointment_id') || '';
-
-      // Se tinha apenas o ID salvo, recupera o nome e telefone do próprio agendamento
-      if ((!savedName || !savedPhone) && lastId && window.EPStore) {
-        const found = window.EPStore.getAppointments().find(a => a.id === lastId);
-        if (found) {
-          savedName = savedName || found.clientName || '';
-          savedPhone = savedPhone || found.clientPhone || '';
-        }
-      }
-
-      const nameInput = document.getElementById('clientNameInput');
-      const phoneInput = document.getElementById('clientPhoneInput');
-
-      if (nameInput && savedName) nameInput.value = savedName;
-      if (phoneInput && savedPhone) phoneInput.value = savedPhone;
-
-      updateClientHeaderAndProfile(savedName, savedPhone);
-    }
-
-    function persistClientDraft() {
-      const nameInput = document.getElementById('clientNameInput');
-      const phoneInput = document.getElementById('clientPhoneInput');
-      const nameVal = nameInput ? nameInput.value.trim() : '';
-      const phoneVal = phoneInput ? phoneInput.value.trim() : '';
-
-      localStorage.setItem('epn_last_client_name', nameVal);
-      localStorage.setItem('epn_last_client_phone', phoneVal);
-
-      updateClientHeaderAndProfile(nameVal, phoneVal);
-      updateNextBookingBanner();
-      updateClientNotificationsBadge();
-    }
-
-    function updateClientHeaderAndProfile(name, phone) {
-      const cleanName = (name || '').trim();
-      const firstName = cleanName ? cleanName.split(' ')[0] : '';
-      const greetEl = document.getElementById('clientGreetingName');
-      if (greetEl) {
-        greetEl.innerText = firstName || 'Bem-vinda';
-      }
-
-      const profNameEl = document.getElementById('profileModalClientName');
-      const profPhoneEl = document.getElementById('profileModalClientPhone');
-      if (profNameEl) profNameEl.innerText = cleanName || 'Cliente VIP';
-      if (profPhoneEl) profPhoneEl.innerText = phone ? `WhatsApp: ${phone}` : 'Preencha seu nome e WhatsApp ao agendar';
-    }
-
-    function showToast(msg) {
-      const toast = document.getElementById('toastClientNotification');
-      const text = document.getElementById('toastClientText');
-      if (toast && text) {
-        text.innerText = msg;
-        toast.classList.add('active');
-        setTimeout(() => toast.classList.remove('active'), 3200);
-      }
-    }
-
-    function scrollToBooking() {
-      openBookingModalDirect();
-    }
-
-    function openBookingModalDirect() {
-      const wrapper = document.querySelector(".booking-section-wrapper");
-      const host = document.getElementById("modalBookingSectionHost");
-      if (wrapper && host && !host.contains(wrapper)) {
-        host.appendChild(wrapper);
-      }
-      openClientModal("modalAgendamentoPopup");
-      renderCalendar();
-      renderDynamicSlots();
-    }
-
-    function getBookingTotals() {
-      const allServices = (window.EPStore && window.EPStore.getServices) ? window.EPStore.getServices(true) : [];
-      const baseSrv = allServices.find(s => s.id === selectedService.id);
-      const baseDur = parseInt(selectedService.duration || (baseSrv && baseSrv.duration) || 90, 10);
-      const basePrice = parseFloat(selectedService.price || (baseSrv && baseSrv.price) || 150);
-      const names = [selectedService.name || (baseSrv && baseSrv.name) || 'Serviço'];
-      let totalPrice = basePrice;
-      let totalDuration = baseDur;
-
-      selectedExtraServiceIds.forEach(extraId => {
-        if (extraId === selectedService.id) return;
-        const extra = allServices.find(s => s.id === extraId);
-        if (extra) {
-          names.push(extra.name);
-          totalPrice += parseFloat(extra.price || 0);
-          totalDuration += parseInt(extra.duration || 60, 10);
-        }
-      });
-
-      return {
-        names,
-        combinedName: names.join(' + '),
-        totalPrice,
-        totalDuration
-      };
-    }
-
-    function updateSelectedServiceSummaryUI() {
-      const totals = getBookingTotals();
-      const titleEl = document.getElementById("selectedServiceTitle");
-      const metaEl = document.getElementById("selectedServiceMeta");
-      const imgEl = document.getElementById("selectedServiceImg");
-      const badgeEl = document.getElementById("extraServicesCountBadge");
-
-      if (titleEl) titleEl.innerText = totals.combinedName;
-      if (metaEl) metaEl.innerText = "R$ " + totals.totalPrice.toFixed(2).replace(".", ",") + " • " + totals.totalDuration + " minutos";
-      if (imgEl && selectedService.image) imgEl.src = selectedService.image;
-      if (badgeEl) {
-        badgeEl.innerText = selectedExtraServiceIds.length > 0
-          ? ("+" + selectedExtraServiceIds.length + " extra(s)")
-          : "Opcional";
-      }
-    }
-
-    function renderExtraServicesPicker() {
-      const box = document.getElementById('extraServicesPickerBox');
-      if (!box || !window.EPStore) return;
-      const services = window.EPStore.getServices(true).filter(s => s.id !== selectedService.id);
-      if (services.length === 0) {
-        box.innerHTML = '<p style="font-size:0.76rem; color:#8A2D4E; text-align:center; padding:6px;">Nenhum outro procedimento disponível.</p>';
-        return;
-      }
-      box.innerHTML = services.map(s => {
-        const checked = selectedExtraServiceIds.includes(s.id);
-        const priceFmt = parseFloat(s.price || 0).toFixed(2).replace('.', ',');
-        const dur = parseInt(s.duration || 60, 10);
-        return `
-          <label style="display:flex; align-items:center; justify-content:space-between; gap:8px; padding:8px 10px; border-radius:10px; margin-bottom:4px; cursor:pointer; background:${checked ? '#FBECEF' : '#FAFAFA'}; border:1px solid ${checked ? '#D83F79' : 'rgba(77,19,40,0.08)'};">
-            <div style="display:flex; align-items:center; gap:8px; min-width:0;">
-              <input type="checkbox" ${checked ? 'checked' : ''} onchange="toggleExtraServiceItem('${s.id}')" style="accent-color:#D83F79; width:16px; height:16px;">
-              <div style="min-width:0;">
-                <strong style="font-size:0.8rem; color:#350B19; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${s.name}</strong>
-                <span style="font-size:0.7rem; color:#6A1D39;">+${dur} min</span>
-              </div>
-            </div>
-            <span style="font-size:0.78rem; font-weight:700; color:#4D1328; flex-shrink:0;">+ R$ ${priceFmt}</span>
-          </label>
-        `;
-      }).join('');
-    }
-
-    function toggleExtraServicesPicker() {
-      const box = document.getElementById('extraServicesPickerBox');
-      if (!box) return;
-      const isHidden = (box.style.display === 'none' || !box.style.display);
-      if (isHidden) {
-        renderExtraServicesPicker();
-        box.style.display = 'block';
-      } else {
-        box.style.display = 'none';
-      }
-    }
-
-    function toggleExtraServiceItem(srvId) {
-      if (selectedExtraServiceIds.includes(srvId)) {
-        selectedExtraServiceIds = selectedExtraServiceIds.filter(id => id !== srvId);
-      } else {
-        selectedExtraServiceIds.push(srvId);
-      }
-      updateSelectedServiceSummaryUI();
-      renderExtraServicesPicker();
-      renderDynamicSlots();
-    }
-
-    function cancelRescheduleMode() {
-      reschedulingAppointmentId = null;
-      const banner = document.getElementById('bookingRescheduleBanner');
-      if (banner) banner.style.display = 'none';
-      renderDynamicSlots();
-    }
-
-    function selectServiceForBooking(id, name, price, img) {
-      window._userExplicitlyPickedService = true;
-      cancelRescheduleMode();
-      selectedExtraServiceIds = [];
-      const srvObj = (window.EPStore && window.EPStore.getServiceById) ? window.EPStore.getServiceById(id) : null;
-      selectedService = {
-        id,
-        name,
-        price: parseFloat(price || (srvObj && srvObj.price) || 150),
-        duration: parseInt((srvObj && srvObj.duration) || 90, 10),
-        image: img
-      };
-      const extraBox = document.getElementById('extraServicesPickerBox');
-      if (extraBox) extraBox.style.display = 'none';
-      updateSelectedServiceSummaryUI();
-      openBookingModalDirect();
-      showToast("Serviço selecionado: " + name);
-    }
-
-    function renderDynamicSlots() {
-      const grid = document.getElementById('timeSlotsGrid');
-      if (!grid) return;
-
-      const dateStr = formatLocalYYYYMMDD(selectedDate);
-      
-      // Verifica se o dia está disponível pela janela de abertura e folgas da administradora
-      const isDayOpen = window.EPStore && window.EPStore.isDateAvailableForBooking
-        ? window.EPStore.isDateAvailableForBooking(dateStr)
-        : true;
-
-      if (!isDayOpen) {
-        grid.innerHTML = `
-          <div style="grid-column: 1 / -1; padding: 18px 16px; text-align: center; background: #FBECEF; border: 1px dashed rgba(77, 19, 40, 0.25); border-radius: 18px; color: #4D1328;">
-            <i class="fa-regular fa-calendar-xmark" style="font-size: 1.4rem; color: #8A2D4E; margin-bottom: 6px; display: block;"></i>
-            <strong>Agenda Fechada para este Período</strong>
-            <p style="font-size: 0.78rem; color: #6A1D39; margin-top: 4px;">A profissional não está atendendo nesta data ou a abertura desta semana/mês ainda não foi liberada.</p>
-          </div>
-        `;
-        selectedSlotTime = '';
-        return;
-      }
-
-      const allSlots = window.EPStore && window.EPStore.getConfiguredSlots
-        ? window.EPStore.getConfiguredSlots()
-        : ['09:00', '10:30', '13:00', '14:00', '15:30', '17:00', '18:30', '19:30'];
-
-      // Usa getAvailableSlots que já filtra tanto os agendamentos de clientes quanto os Compromissos Pessoais do Google Agenda da Administradora!
-      const bookingTotals = getBookingTotals();
-      const freeSlots = (window.EPStore && window.EPStore.getAvailableSlots)
-        ? window.EPStore.getAvailableSlots(dateStr, bookingTotals.totalDuration, reschedulingAppointmentId || '')
-        : allSlots;
-
-      if (freeSlots.length === 0) {
-        grid.innerHTML = `
-          <div style="grid-column: 1 / -1; padding: 16px; text-align: center; background: #FFF0F3; border: 1px solid rgba(216, 63, 121, 0.2); border-radius: 18px; color: #6A1D39;">
-            <i class="fa-solid fa-hourglass-end" style="color: #D83F79; font-size: 1.2rem; margin-bottom: 4px; display: block;"></i>
-            <strong>Todos os horários deste dia já foram preenchidos!</strong>
-            <p style="font-size: 0.78rem; color: #8A2D4E; margin-top: 2px;">Escolha outro dia disponível no calendário acima.</p>
-          </div>
-        `;
-        selectedSlotTime = '';
-        return;
-      }
-
-      if (!freeSlots.includes(selectedSlotTime)) {
-        selectedSlotTime = freeSlots[0];
-      }
-
-      grid.innerHTML = freeSlots.map(slot => {
-        const isActive = (slot === selectedSlotTime);
-        return `<button type="button" class="slot-chip-btn ${isActive ? 'active' : ''}" onclick="selectSlot(this, '${slot}')">${slot}</button>`;
-      }).join('');
-    }
-
-    function selectSlot(btn, time) {
-      document.querySelectorAll('.slot-chip-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      selectedSlotTime = time;
-    }
-
-    function renderCalendar() {
-      const monthNames = [
-        'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-        'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
-      ];
-      const lbl = document.getElementById('calendarMonthTitle');
-      if (lbl) lbl.innerText = `${monthNames[currentCalMonth]} ${currentCalYear}`;
-
-      const daysGrid = document.getElementById('calendarDaysGrid');
-      if (!daysGrid) return;
-      daysGrid.innerHTML = '';
-
-      const firstDayIndex = new Date(currentCalYear, currentCalMonth, 1).getDay();
-      const lastDayDate = new Date(currentCalYear, currentCalMonth + 1, 0).getDate();
-
-      for (let i = 0; i < firstDayIndex; i++) {
-        daysGrid.innerHTML += '<div class="cal-day-empty"></div>';
-      }
-
-      const appointments = window.EPStore ? window.EPStore.getAppointments() : [];
-      const bookedDatesSet = new Set(
-        appointments.filter(a => a.status !== 'Cancelado' && a.status !== 'cancelado').map(a => a.date)
-      );
-
-      const selectedDay = (selectedDate.getMonth() === currentCalMonth && selectedDate.getFullYear() === currentCalYear)
-        ? selectedDate.getDate()
-        : null;
-
-      for (let day = 1; day <= lastDayDate; day++) {
-        const dateStr = `${currentCalYear}-${String(currentCalMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-        const hasBooking = bookedDatesSet.has(dateStr);
-        const isSelected = (day === selectedDay);
-        
-        const isDateOpen = window.EPStore && window.EPStore.isDateAvailableForBooking
-          ? window.EPStore.isDateAvailableForBooking(dateStr)
-          : true;
-
-        if (!isDateOpen) {
-          daysGrid.innerHTML += `
-            <button type="button" class="cal-day-btn day-closed-blocked" onclick="showToast('Data indisponível: agenda fechada para este período ou folga da profissional!')" title="Agenda fechada para esta data">
-              ${day}
-            </button>
-          `;
-        } else {
-          daysGrid.innerHTML += `
-            <button type="button" class="cal-day-btn ${isSelected ? 'selected' : ''} ${hasBooking ? 'has-booking' : ''}" onclick="pickDay(${day})">
-              ${day}
-              ${hasBooking ? '<span class="cal-day-dot"></span>' : ''}
-            </button>
-          `;
-        }
-      }
-
-      renderSelectedDayBookingsBox();
-    }
-
-    function renderSelectedDayBookingsBox() {
-      const box = document.getElementById('calendarSelectedDayBookingsBox');
-      if (!box || !window.EPStore) return;
-      const dateStr = formatLocalYYYYMMDD(selectedDate);
-      const dayApps = (window.EPStore.getAppointments() || []).filter(
-        a => a.date === dateStr && a.status !== 'Cancelado' && a.status !== 'cancelado'
-      );
-      const personalBlocks = window.EPStore.getPersonalBusyBlocks
-        ? window.EPStore.getPersonalBusyBlocks().filter(b => b.date === dateStr)
-        : [];
-
-      if (dayApps.length === 0 && personalBlocks.length === 0) {
-        box.innerHTML = `<span style="color:#6A1D39;"><i class="fa-regular fa-calendar-check"></i> Dia <strong>${dateStr.split('-').reverse().join('/')}</strong> com horários livres para agendamento.</span>`;
-      } else {
-        const appPills = dayApps.map(a => `<span style="display:inline-block; background:#FBECEF; border:1px solid rgba(77,19,40,0.15); padding:2px 8px; border-radius:10px; font-weight:700; margin:2px;">${a.time} (Reservado)</span>`);
-        const blockPills = personalBlocks.map(b => `<span style="display:inline-block; background:#FBECEF; border:1px solid rgba(77,19,40,0.15); padding:2px 8px; border-radius:10px; font-weight:700; margin:2px;">${b.allDay ? 'Dia Todo' : (b.startTime + ' às ' + b.endTime)} (Indisponível)</span>`);
-        const allPills = [...appPills, ...blockPills].join(' ');
-        box.innerHTML = `<div style="margin-bottom:4px; font-weight:700; color:#350B19;"><i class="fa-solid fa-clock" style="color:#D83F79;"></i> Horários já preenchidos ou fechados em ${dateStr.split('-').reverse().join('/')}:</div><div>${allPills}</div>`;
-      }
-    }
-
-    function changeCalendarMonth(delta) {
-      currentCalMonth += delta;
-      if (currentCalMonth < 0) { currentCalMonth = 11; currentCalYear--; }
-      if (currentCalMonth > 11) { currentCalMonth = 0; currentCalYear++; }
-      renderCalendar();
-    }
-
-    function pickDay(day) {
-      selectedDate = new Date(currentCalYear, currentCalMonth, day);
-      renderCalendar();
-      renderDynamicSlots();
-    }
-
-    function applyPhoneMask(input) {
-      let v = input.value.replace(/\D/g, '');
-      if (v.length > 11) v = v.slice(0, 11);
-      if (v.length > 6) {
-        input.value = `(${v.slice(0,2)}) ${v.slice(2,7)}-${v.slice(7)}`;
-      } else if (v.length > 2) {
-        input.value = `(${v.slice(0,2)}) ${v.slice(2)}`;
-      } else {
-        input.value = v;
-      }
-      persistClientDraft();
-    }
-
-    async function handleConfirmBooking(e) {
-      e.preventDefault();
-      const name = document.getElementById('clientNameInput').value.trim();
-      const phone = document.getElementById('clientPhoneInput').value.trim();
-      const cleanDigits = phone.replace(/\D/g, '');
-
-      if (!name || cleanDigits.length < 10) {
-        showToast('Informe seu Nome e WhatsApp com DDD!');
-        document.getElementById('clientPhoneInput').focus();
-        return;
-      }
-
-      const dateStr = formatLocalYYYYMMDD(selectedDate);
-      const bookedTime = selectedSlotTime;
-      if (!bookedTime) {
-        showToast('Selecione um horário disponível antes de confirmar!');
-        return;
-      }
-
-      const totals = getBookingTotals();
-      const wasReschedule = !!reschedulingAppointmentId;
-      const newBooking = {
-        clientName: name,
-        clientPhone: phone,
-        serviceId: selectedService.id,
-        serviceName: totals.combinedName,
-        servicePrice: totals.totalPrice,
-        duration: totals.totalDuration,
-        date: dateStr,
-        time: bookedTime,
-        status: 'Confirmado'
-      };
-
-      let savedApp = null;
-      try {
-        if (window.EPStore) {
-          if (wasReschedule && window.EPStore.rescheduleAppointment) {
-            savedApp = window.EPStore.rescheduleAppointment(reschedulingAppointmentId, dateStr, bookedTime, {
-              clientName: name,
-              clientPhone: phone,
-              serviceId: selectedService.id,
-              serviceName: totals.combinedName,
-              servicePrice: totals.totalPrice,
-              duration: totals.totalDuration
-            });
-          } else {
-            savedApp = await window.EPStore.createAppointment(newBooking);
-          }
-        }
-      } catch (err) {
-        console.warn('Fallback save triggered:', err);
-        const list = JSON.parse(localStorage.getItem('epn_appointments_lgpd') || '[]');
-        savedApp = {
-          id: 'EP-' + Math.floor(1000 + Math.random() * 9000),
-          ...newBooking,
-          createdAt: new Date().toISOString()
-        };
-        list.unshift(savedApp);
-        localStorage.setItem('epn_appointments_lgpd', JSON.stringify(list));
-        if (window.EPStore && window.EPStore.publishCloudSync) {
-          window.EPStore.publishCloudSync('UPSERT_APPOINTMENT', savedApp);
-        }
-      }
-
-      cancelRescheduleMode();
-      selectedExtraServiceIds = [];
-
-      // Garante persistência permanente dos dados da cliente
-      localStorage.setItem('epn_last_client_phone', phone);
-      localStorage.setItem('epn_last_client_name', name);
-      if (savedApp && savedApp.id) {
-        localStorage.setItem('epn_last_appointment_id', savedApp.id);
-      }
-
-      // Sobe imediatamente para o calendário, para Meus Agendamentos e para o Sino de Notificações
-      updateClientHeaderAndProfile(name, phone);
-      renderCalendar();
-      renderDynamicSlots();
-      updateNextBookingBanner();
-      updateClientNotificationsBadge();
-
-      if (window.AudioAlertEngine) {
-        window.AudioAlertEngine.playNotificationChime();
-      }
-
-      document.getElementById('successSrvName').innerText = totals.combinedName;
-      document.getElementById('successDateTime').innerText = `${selectedDate.toLocaleDateString('pt-BR')} às ${bookedTime}`;
-      document.getElementById('successClientName').innerText = name;
-      const priceDurEl = document.getElementById('successPriceDur');
-      if (priceDurEl) {
-        priceDurEl.innerText = `R$ ${totals.totalPrice.toFixed(2).replace('.', ',')} • ${totals.totalDuration} min`;
-      }
-
-      // Exibe Chave Pix / Sinal se configurada pela administradora
-      const salonSettings = (window.EPStore && window.EPStore.getSalonSettings) ? window.EPStore.getSalonSettings() : {};
-      const pixBox = document.getElementById('bookingSuccessPixBox');
-      if (pixBox && salonSettings.payPix !== false && salonSettings.pixKey) {
-        const depPct = parseInt(salonSettings.depositPercent || 0, 10);
-        const pixAmount = depPct > 0 ? (totals.totalPrice * depPct / 100) : totals.totalPrice;
-        document.getElementById('successPixTitle').innerText = depPct > 0
-          ? `Sinal de Reserva (${depPct}%) via Pix`
-          : 'Chave Pix do Studio (Pagamento)';
-        document.getElementById('successPixAmountBadge').innerText = `R$ ${pixAmount.toFixed(2).replace('.', ',')}`;
-        document.getElementById('successPixKeyValue').innerText = salonSettings.pixKey;
-        pixBox.style.display = 'block';
-      } else if (pixBox) {
-        pixBox.style.display = 'none';
-      }
-
-      lastConfirmedClientBooking = savedApp || {
-        id: 'EP-' + Date.now(),
-        clientName: name,
-        clientPhone: phone,
-        serviceName: totals.combinedName,
-        servicePrice: totals.totalPrice,
-        duration: totals.totalDuration,
-        date: dateStr,
-        time: bookedTime
-      };
-
-      closeClientModal('modalAgendamentoPopup');
-      openClientModal('modalBookingSuccess');
-      showToast(wasReschedule ? 'Horário remarcado com sucesso!' : 'Agendamento confirmado com sucesso!');
-    }
-
-    function updateNextBookingBanner() {
-      if (!window.EPStore) return;
-      const ownApps = getCurrentClientOwnAppointments();
-      const secMeus = document.getElementById('secMeusAgendamentos');
-
-      if (ownApps.length === 0) {
-        const srvEl = document.getElementById('appPreviewServiceName');
-        const timeEl = document.getElementById('appPreviewTime');
-        if (srvEl) srvEl.innerText = 'Nenhum horário agendado ainda';
-        if (timeEl) timeEl.innerText = 'Toque abaixo para escolher seu horário';
-        return;
-      }
-
-      const next = ownApps[0];
-
-      const srvEl = document.getElementById('appPreviewServiceName');
-      const timeEl = document.getElementById('appPreviewTime');
-      const dayEl = document.getElementById('appPreviewDayNum');
-      const monthEl = document.getElementById('appPreviewMonth');
-      const weekEl = document.getElementById('appPreviewWeekDay');
-
-      if (srvEl) srvEl.innerText = next.serviceName;
-      if (timeEl) timeEl.innerText = next.time;
-
-      if (next.date) {
-        const parts = next.date.split('-');
-        if (parts.length === 3) {
-          const dt = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
-          const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
-          const days = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-          if (dayEl) dayEl.innerText = parts[2];
-          if (monthEl) monthEl.innerText = months[dt.getMonth()] || 'Nov';
-          if (weekEl) weekEl.innerText = days[dt.getDay()] || 'Sáb';
-
-          const detSrv = document.getElementById('detalheModalSrv');
-          const detData = document.getElementById('detalheModalData');
-          const detHora = document.getElementById('detalheModalHora');
-          if (detSrv) detSrv.innerText = next.serviceName;
-          if (detData) detData.innerText = `${days[dt.getDay()]}, ${parts[2]} de ${months[dt.getMonth()]} de ${parts[0]}`;
-          if (detHora) detHora.innerText = `${next.time} • Cliente: ${next.clientName}`;
-        }
-      }
-    }
-
-    function updateClientNotificationsBadge() {
-      if (!window.EPStore) return;
-      const ownApps = getCurrentClientOwnAppointments();
-      const badge = document.getElementById('clientBellBadge');
-      if (badge) {
-        badge.innerText = ownApps.length;
-        badge.style.display = ownApps.length > 0 ? 'flex' : 'none';
-      }
-    }
-
-    function renderClientNotificationsModal() {
-      const listEl = document.getElementById('clientNotificationsDynamicList');
-      if (!listEl || !window.EPStore) return;
-
-      const ownApps = getCurrentClientOwnAppointments();
-      if (ownApps.length === 0) {
-        listEl.innerHTML = `
-          <div style="text-align:center; padding:18px 12px; background:#FBECEF; border-radius:16px;">
-            <i class="fa-regular fa-bell" style="font-size:1.5rem; color:#8A2D4E; margin-bottom:6px; display:block;"></i>
-            <strong style="color:#350B19; font-size:0.88rem;">Você ainda não tem notificações</strong>
-            <p style="font-size:0.78rem; color:#6A1D39; margin-top:4px;">Assim que você confirmar um agendamento, seus avisos e lembretes aparecerão exclusivamente aqui.</p>
-          </div>
-        `;
-        return;
-      }
-
-      listEl.innerHTML = ownApps.map(a => `
-        <div style="background:#FBECEF; border:1px solid rgba(77,19,40,0.08); border-radius:16px; padding:12px 14px; display:flex; justify-content:space-between; align-items:center; gap:10px;">
-          <div>
-            <strong style="color:#350B19; font-size:0.88rem; display:block;">Seu Horário está ${a.status} ✨</strong>
-            <p style="font-size:0.78rem; color:#6A1D39; margin-top:2px;">
-              <strong>${a.clientName}:</strong> ${a.serviceName} agendado para <strong>${a.date.split('-').reverse().join('/')} às ${a.time}</strong>.
-            </p>
-          </div>
-          <span style="background:#DDF2E1; color:#226E3A; font-size:0.7rem; font-weight:700; padding:4px 10px; border-radius:20px; flex-shrink:0;">
-            ${a.status}
-          </span>
-        </div>
-      `).join('');
-    }
-
-    function filterServicesByCategory(catId, btn) {
-      activeClientCategory = catId;
-      document.querySelectorAll('.category-tab-pill').forEach(b => b.classList.remove('active'));
-      if (btn) btn.classList.add('active');
-      renderDynamicClientServices();
-    }
-
-    function openClientModal(id) {
-      const el = document.getElementById(id);
-      if (el) {
-        el.style.display = 'flex';
-        el.classList.add('active');
-        document.body.style.overflow = 'hidden';
-      }
-    }
-
-    function closeClientModal(id) {
-      const el = document.getElementById(id);
-      if (el) {
-        el.classList.remove('active');
-        el.style.display = 'none';
-        document.body.style.overflow = '';
-      }
-    }
-
-    function openAppointmentsFullModal() {
-      const input = document.getElementById('inputBuscaMeusAgendamentos');
-      const savedPhone = localStorage.getItem('epn_last_client_phone') || '';
-      if (input && savedPhone && !input.value) {
-        input.value = savedPhone;
-      }
-      filtrarMeusAgendamentos();
-      openClientModal('modalMeusAgendamentos');
-    }
-
-    function filtrarMeusAgendamentos() {
-      const container = document.getElementById('listaMeusAgendamentosConteudo');
-      const input = document.getElementById('inputBuscaMeusAgendamentos');
-      const term = (input ? input.value : '').replace(/\D/g, '');
-
-      const allApps = window.EPStore ? window.EPStore.getAppointments() : [];
-      let filtered = [];
-      if (term.length >= 4) {
-        filtered = allApps.filter(a => (a.clientPhone || '').replace(/\D/g, '').includes(term));
-      } else {
-        filtered = getCurrentClientOwnAppointments();
-      }
-
-      if (filtered.length === 0) {
-        container.innerHTML = '<p style="font-size:0.85rem; color:#8A2D4E; padding:14px; text-align:center;">Digite seu WhatsApp acima ou faça seu primeiro agendamento para consultar seus horários.</p>';
-        return;
-      }
-
-      container.innerHTML = filtered.map(item => {
-        const isActive = item.status !== 'Cancelado' && item.status !== 'cancelado' && item.status !== 'Concluído';
-        return `
-        <div style="background:#FBECEF; border-radius:14px; padding:12px 14px; display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
-          <div style="flex:1; min-width:160px;">
-            <h5 style="color:#350B19; font-weight:700; font-size:0.9rem;">${item.serviceName}</h5>
-            <p style="font-size:0.76rem; color:#4D1328; font-weight:600;">Cliente: ${item.clientName}</p>
-            <p style="font-size:0.75rem; color:#6A1D39;">${item.date.split('-').reverse().join('/')} às ${item.time} &bull; <strong>${item.status}</strong></p>
-          </div>
-          <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
-            ${isActive ? `
-              <button type="button" onclick="startClientReschedule('${item.id}')" style="padding:6px 11px; border-radius:20px; border:1px solid rgba(77,19,40,0.22); background:#FFF; color:#4D1328; font-size:0.74rem; font-weight:700; cursor:pointer;">
-                <i class="fa-solid fa-rotate"></i> Remarcar
-              </button>
-            ` : ''}
-            <button type="button" onclick="openWhatsAppChatDirect()" style="padding:6px 11px; border-radius:20px; border:none; background:#25D366; color:#FFF; font-size:0.74rem; font-weight:700; cursor:pointer;">
-              <i class="fa-brands fa-whatsapp"></i> Falar
-            </button>
-          </div>
-        </div>
-      `;
-      }).join('');
-    }
-
-    function openDetalhesModal() {
-      updateNextBookingBanner();
-      openClientModal('modalDetalhesAgendamento');
-    }
-
-    function openProfileContactModal() {
-      restoreClientSavedData();
-      openClientModal('modalMeuPerfil');
-    }
-
-    function openModalNotificacoesCliente() {
-      renderClientNotificationsModal();
-      openClientModal('modalNotificacoesCliente');
-    }
-
-    function testClientAudioAlert() {
-      if (window.AudioAlertEngine) {
-        window.AudioAlertEngine.playNotificationChime();
-        showToast('Alerta sonoro executado!');
-      }
-    }
-
-    function openWhatsAppChatDirect() {
-      const s = window.EPStore ? window.EPStore.getSalonSettings() : {};
-      const cleanPhone = ((s && s.phone) ? s.phone : '61985543452').replace(/\D/g, '');
-      const msg = encodeURIComponent("Olá, Estefany! Gostaria de falar sobre o meu agendamento de unhas ✨");
-      window.open(`https://wa.me/55${cleanPhone}?text=${msg}`, '_blank');
-    }
-
-    function copyBookingPixKey() {
-      const keyEl = document.getElementById('successPixKeyValue');
-      const key = keyEl ? keyEl.innerText.trim() : '';
-      if (!key) return;
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(key).then(() => {
-          showToast('Chave Pix copiada! Cole no app do seu banco.');
-        }).catch(() => {
-          prompt('Copie a Chave Pix abaixo:', key);
-        });
-      } else {
-        prompt('Copie a Chave Pix abaixo:', key);
-      }
-    }
-
-    function sendBookingReceiptWhatsapp() {
-      const s = window.EPStore ? window.EPStore.getSalonSettings() : {};
-      const cleanPhone = ((s && s.phone) ? s.phone : '61985543452').replace(/\D/g, '');
-      const app = lastConfirmedClientBooking || {};
-      const dateBr = app.date ? app.date.split('-').reverse().join('/') : '';
-      const msg = encodeURIComponent(
-        `Olá, Estefany! 💖 Acabei de agendar *${app.serviceName || 'meu atendimento'}* para o dia *${dateBr}* às *${app.time || ''}* (Nome: ${app.clientName || ''}). Segue a confirmação/comprovante!`
-      );
-      window.open(`https://wa.me/55${cleanPhone}?text=${msg}`, '_blank');
-    }
-
-    function startClientReschedule(appId) {
-      if (!window.EPStore) return;
-      const app = (window.EPStore.getAppointments() || []).find(a => a.id === appId);
-      if (!app) return;
-
-      const check = window.EPStore.canClientReschedule ? window.EPStore.canClientReschedule(app) : { allowed: true, minHours: 12 };
-      if (!check.allowed) {
-        showToast(`Remarcação online permitida com no mínimo ${check.minHours || 12}h de antecedência. Fale pelo WhatsApp!`);
-        return;
-      }
-
-      reschedulingAppointmentId = app.id;
-      selectedExtraServiceIds = [];
-      const srvObj = window.EPStore.getServiceById ? window.EPStore.getServiceById(app.serviceId) : null;
-      selectedService = {
-        id: app.serviceId || 'srv_custom',
-        name: app.serviceName || (srvObj && srvObj.name) || 'Serviço',
-        price: parseFloat(app.servicePrice || (srvObj && srvObj.price) || 150),
-        duration: parseInt(app.duration || (srvObj && srvObj.duration) || 90, 10),
-        image: (srvObj && srvObj.image) ? srvObj.image : 'assets/images/trabalho-alongamento-chocolate.png'
-      };
-
-      const nameInp = document.getElementById('clientNameInput');
-      const phoneInp = document.getElementById('clientPhoneInput');
-      if (nameInp && app.clientName) nameInp.value = app.clientName;
-      if (phoneInp && app.clientPhone) phoneInp.value = app.clientPhone;
-
-      const banner = document.getElementById('bookingRescheduleBanner');
-      const bannerTxt = document.getElementById('bookingRescheduleBannerText');
-      if (banner) banner.style.display = 'block';
-      if (bannerTxt) {
-        bannerTxt.innerText = `Horário atual: ${app.date.split('-').reverse().join('/')} às ${app.time}. Escolha o novo dia e horário abaixo.`;
-      }
-
-      updateSelectedServiceSummaryUI();
-      closeClientModal('modalMeusAgendamentos');
-      openBookingModalDirect();
-    }
-
-    function downloadCalendarIcs() {
-      const ownApps = getCurrentClientOwnAppointments();
-      const targetApp = lastConfirmedClientBooking || ownApps[0] || {
-        id: 'EP-' + Date.now(),
-        clientName: document.getElementById('clientNameInput')?.value || 'Cliente VIP',
-        serviceName: selectedService.name,
-        servicePrice: selectedService.price || 150,
-        duration: 90,
-        date: formatLocalYYYYMMDD(selectedDate),
-        time: selectedSlotTime || '14:00'
-      };
-      if (window.EPStore && window.EPStore.downloadIcsFile) {
-        window.EPStore.downloadIcsFile(targetApp);
-        showToast('Arquivo de calendário (.ics) baixado!');
-        return;
-      }
-    }
-
-    let lastConfirmedClientBooking = null;
-
-    function openClientGoogleCalendarDirect() {
-      const ownApps = getCurrentClientOwnAppointments();
-      const targetApp = lastConfirmedClientBooking || ownApps[0] || {
-        id: 'EP-' + Date.now(),
-        clientName: document.getElementById('clientNameInput')?.value || 'Cliente VIP',
-        serviceName: selectedService.name,
-        servicePrice: parseFloat(selectedService.price || 150),
-        duration: 90,
-        date: formatLocalYYYYMMDD(selectedDate),
-        time: selectedSlotTime || '14:00'
-      };
-      if (window.EPStore && window.EPStore.getGoogleCalendarUrl) {
-        const gcalUrl = window.EPStore.getGoogleCalendarUrl(targetApp);
-        window.open(gcalUrl, '_blank');
-        showToast('Abrindo seu Google Agenda para salvar o horário!');
-      }
-    }
-
-    // Stories removidos a pedido da usuária (agendamento e catálogo direto)
-    function openProfileStoryViewer() {}
-    function openStoryViewer(serviceId) {
-      if (serviceId && window.EPStore) {
-        const s = window.EPStore.getServiceById(serviceId);
-        if (s) {
-          selectServiceForBooking(s.id, s.name, s.price, s.image);
-          return;
-        }
-      }
-      openBookingModalDirect();
-    }
-    function closeStoryViewer() {}
-    function updateProfileStoryRingClient() {}
-
-    function openMenuDrawer() {
-      openClientModal('modalMenuClienteDrawer');
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
     }
   </script>
 </body>

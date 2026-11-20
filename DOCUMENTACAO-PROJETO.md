@@ -1,103 +1,47 @@
 # DOCUMENTAÇÃO OFICIAL DO PROJETO: ESTEFANY PAIVA NAILS
-**Data da Última Atualização:** 08/11/2026  
-**Status do Projeto:** Ativo / Produção (Vercel & PWA)  
+**Data da Última Atualização:** 19/11/2026  
+**Versão Atual:** **v34 (Reconstrução Arquitetural Profissional)**  
 **Repositório:** `https://github.com/rs8802616-dot/ESTEFANY-PAIVA.git`  
 **Branch:** `main`
 
 ---
 
-## 1. Visão Geral da Arquitetura
-O sistema é uma aplicação web progressiva (PWA) de luxo para salão de estética de unhas e nail designer, dividida em 3 portais independentes com isolamento criptográfico por tokens:
-1. **Portal da Cliente (`index.html`)**: Catálogo de serviços com Stories padrão Instagram, banners expansivos em alta definição, agendamento interativo em modal popup sem rolagem de tela indesejada, notificações e sincronização em tempo real.
-2. **Painel da Administradora (`admin.html`)**: Gestão de agenda, calendário interativo, controle de clientes, edição livre de categorias e serviços, precificação, métricas financeiras, acompanhamento de metas com indicadores visuais reais, integração com Google Agenda e visualizador seguro do Portal da Cliente embarcado sem deslogar da conta admin.
-3. **Área do Dono / Master (`master.html`)**: Rotação criptográfica de chaves/tokens SHA-256, logs de segurança, estatísticas de acessos e monitoramento geral do estúdio.
+## 1. Nova Arquitetura Modular (v34)
+O projeto foi reconstruído do zero com arquitetura modular limpa em **ES Modules nativos** (sem frameworks pesados, deploy imediato na Vercel), eliminando os 579 `!important`, os 777 estilos inline, as senhas em texto puro, o canal público `ntfy.sh` e os dados fictícios chumbados no HTML.
+
+### Estrutura de Arquivos
+- **`index.html`** (269 linhas, 0 `style=""` inline): Portal da Cliente semântico e instantâneo.
+- **`admin.html`** (437 linhas, 0 `style=""` inline): Painel Administrativo limpo com Login Gate seguro.
+- **`assets/css/design-system.css`**: Design System único (Vinho/Marsala `#350B19`, Rosé `#D83F79`, Cream `#FAF4F5`), mobile-first e **zero `!important`**.
+- **`src/config.js`**: Configurações padrão do estúdio e credenciais opcionais do **Supabase** (`SUPABASE_URL` e `SUPABASE_ANON_KEY`).
+- **`src/utils.js`**: Utilitários puros (formatação BRL, datas, máscaras, escape XSS, compressão de imagem, SHA-256, WhatsApp, Google Agenda, `.ics` e Toast).
+- **`src/db.js`**: Camada de Dados Unificada com adaptador duplo:
+  - **Modo Nuvem (Supabase)**: Ativado automaticamente ao preencher `src/config.js`, utilizando PostgreSQL real, Row Level Security (RLS) e Supabase Auth.
+  - **Modo Local Seguro**: Funciona imediatamente sem backend externo, sem vazar dados em canais públicos e com criação de senha privada (hash SHA-256) no primeiro acesso do Admin.
+- **`src/client-app.js`**: Controlador do Portal da Cliente (catálogo, filtros, Combo de serviços, calendário 7 colunas, bloqueio inteligente por duração, Pix Copia e Cola e remarcação online).
+- **`src/admin-app.js`**: Controlador do Painel Administrativo (100% dados reais, Dashboard, Agenda com mensagens prontas de 1 clique, Clientes com alerta de retorno 21+ dias e Ficha Técnica, Serviços/Categorias, Relatórios com CSV/PDF e Ajustes).
+- **`supabase-schema.sql`**: Script SQL pronto para criar todas as tabelas, índices únicos de horário e políticas RLS no Supabase.
+- **`sw.js`**: Service Worker atualizado (`estefany-nails-v34-professional-rebuild`).
 
 ---
 
-## 2. Tecnologias e Camadas
-- **Frontend Core**: HTML5 Semântico, CSS3 Moderno (Variáveis CSS, CSS Grid, Flexbox, Animações Suaves), JavaScript ES6+ Nativo sem dependência de frameworks pesados (desempenho instantâneo no celular).
-- **Gerenciador de Estado Global (`assets/js/store.js`)**: `window.EPStore` encapsula armazenamento local (`localStorage`), sincronização entre abas (`BroadcastChannel` e eventos de `storage`), persistência na nuvem via SSE/ntfy e motor gráfico de alto contraste para temas claros e escuros.
-- **Service Worker (`sw.js`)**: Cache inteligente offline-first, atualização rápida com versionamento de cache para evitar que celulares fiquem com versões antigas presas na memória.
+## 2. Como Ativar o Banco de Dados Real na Nuvem (Supabase — Gratuito)
+1. Crie uma conta gratuita em `https://supabase.com` e crie um novo projeto.
+2. No menu **SQL Editor**, cole e execute o conteúdo de `supabase-schema.sql`.
+3. Em **Authentication → Users**, crie seu usuário administrador (e-mail e senha).
+4. Em **Settings → API**, copie a **Project URL** e a **anon public key** e cole em `src/config.js`.
+5. Faça push para a branch `main` — o site passa a operar 100% em PostgreSQL real na nuvem.
 
 ---
 
-## 3. Principais Funcionalidades e Regras de Negócio
-
-### 3.1 Agendamentos & Modal Popup Direto
-- Ao clicar em **"Agendar"** dentro dos Stories de um serviço ou na lista do catálogo, a aplicação abre **diretamente a área de agendamento em um modal popup** (`#modalAgendamentoPopup`), eliminando a rolagem brusca até o rodapé da página.
-- Horários agendados por qualquer cliente são imediatamente travados e saem da grade de opções dos demais usuários em tempo real.
-- Suporte para exportação direta para **Google Agenda** e download de arquivo `.ics` para adicionar ao calendário nativo do celular (iOS / Android).
-
-### 3.2 Painel Administrativo & Dashboard
-- **Layout Responsivo**: Fluido em smartphones e adaptado em grid de 2 a 4 colunas em tablets e PCs.
-- **Eliminação de Loops de Renderização**: Observer de mutação estático para garantir estabilidade visual, impedindo piscamento de telas e sobreposição de abas.
-- **Visualizador Embutido**: Permite que a administradora visualize o aplicativo exatamente como a cliente vê através de um modal com iframe isolado (`#modalPortalClienteInApp`), mantendo o token de administração intacto.
-
-### 3.3 Temas e Motor Gráfico
-- Paleta configurável pela administradora (Vinho/Marsala oficial `#350B19`, Dourado Rosé `#D83F79` e superfícies adaptativas).
-- O motor gráfico ajusta o contraste de textos, títulos, valores e botões tanto para fundos claros quanto para fundos escuros/pretos, evitando textos ilegíveis.
-
----
-
-## 4. Histórico Recente de Alterações
-- **v21**: Sincronização em tempo real de fotos e dados entre aparelhos via SSE e chunks criptografados.
-- **v22**: Abertura direta do agendamento em modal popup ao clicar em agendar nos Stories ou Catálogo.
-- **v23**: Correção de piscamento no Painel Administrativo, estabilização dos recálculos do motor gráfico de cores e criação desta documentação mestra para guiar todas as próximas intervenções.
-- **v24**: Correção crítica de renderização da página da administradora (admin.html), blindagem do ciclo de inicialização DOMContentLoaded com tratamento de exceções resiliente e correção da navegação offline no Service Worker para nunca redirecionar o admin para a home do cliente.
-- **v25**: Eliminação definitiva dos blocos brancos e cortes visuais na tela do celular:
-  1. **Remoção de Camadas Fantasmas no Android/Chrome**: Modais administrativos (.admin-modal-overlay) e do cliente (.client-modal-overlay) agora utilizam 'display: none !important' e 'visibility: hidden !important' quando inativos, impedindo que o motor gráfico do navegador (Blink/GPU) desenhe superfícies brancas ou sobreponha iframes (#modalPortalClienteInApp) sobre as telas do app.
-  2. **Renderização Sob Demanda e Isolada por Aba**: A função switchAdminTab() agora dispara a renderização segura da aba ativa (dashboard, agenda, clientes, serviços, relatórios), com scroll top instantâneo.
-  3. **Tolerância a Falhas**: Todas as funções dentro de refreshAllAdminViews() foram isoladas em blocos try/catch independentes.
-  4. **Estados Vazios Elegantes**: Fallbacks visuais adicionados para clientes e serviços quando a base de dados estiver vazia.
-  5. **Purga Automática de Cache**: Versão do Service Worker elevada para 'estefany-nails-v25-fix-mobile-modal-overlay-cutoffs' para atualização imediata no celular do usuário.
-- **v26**: Abertura do Agendamento em Tela Toda e Correção da Grade do Calendário no Celular:
-  1. **Agendamento em Tela Toda (Full Screen)**: O modal de agendamento (#modalAgendamentoPopup) agora abre ocupando 100% da tela do celular (tela cheia), com barra superior elegante estilo app nativo (botão "Voltar", título com ícone e botão de fechar), proporcionando uma experiência de uso fluida sem sensação de caixa flutuante apertada.
-  2. **Correção Definitiva do Calendário (Zero Vazamento)**: Ajustada a grade do calendário (.calendar-days-grid e .calendar-weekdays-row) com colunas fluidas repeat(7, minmax(0, 1fr)), eliminando a quebra e corte da coluna de sábado (Sáb) nas laterais dos celulares.
-  3. **Trava de Rolagem de Fundo**: Ao abrir o agendamento em tela cheia, o scroll do corpo da página é bloqueado (overflow: hidden) e restaurado ao fechar.
-  4. **Atualização do Cache PWA**: Versão do Service Worker elevada para 'estefany-nails-v26-fullscreen-booking-calendar-fix'.
-- **v27**: Visualizador de Stories em Tela Toda (Padrão Oficial Instagram) e Fatiamento de Vídeos em 60s:
-  1. **Visualizador de Stories Edge-to-Edge (100% da Tela)**: O modal de Stories (#modalStoryViewer) agora ocupa 100% da tela do celular sem bordas pretas externas, com imagens e vídeos em 'object-fit: cover', barras de progresso finas no topo e cabeçalho nativo com avatar, nome da profissional, selo verificado e tempo decorrido.
-  2. **Rodapé Oficial Estilo Instagram**: Adicionada pílula de interação "Enviar mensagem / Agendar...", botão de curtir com coração flutuante animado e botão de WhatsApp direto para conversão.
-  3. **Segurar para Pausar (Press & Hold)**: Ao pressionar e segurar na tela, o story pausa a reprodução do vídeo e do timer, ocultando os controles suavemente; ao soltar, a reprodução é retomada automaticamente.
-  4. **Fatiamento Automático de Vídeos em Partes de até 1 Minuto (60s)**: Seguindo a regra do Instagram, vídeos com duração superior a 60 segundos são automaticamente fatiados em segmentos sucessivos de no máximo 60 segundos (Parte 1/2, Parte 2/2, etc.), cada um com sua barrinha independente no topo.
-  5. **Purga Automática de Cache**: Versão do Service Worker elevada para 'estefany-nails-v27-instagram-stories-fullscreen-60s-split'.
-- **v28**: Correção da foto de perfil que não atualizava nos outros aparelhos:
-  1. **Causa**: `saveSalonSettings()` enviava para a nuvem (ntfy) o objeto de configurações INTEIRO, incluindo banners e imagens em Base64. O pacote ficava enorme (acima do limite de 180KB, sendo descartado sem aviso) ou gerava dezenas de partes, batendo no limite de requisições (erro 429). Resultado: a foto nova nunca chegava no celular da cliente, que continuava mostrando a imagem padrão.
-  2. **Envio só do que mudou (delta)**: agora apenas os campos alterados são publicados, com um carimbo `settingsUpdatedAt`; a foto de perfil (pequena) chega em poucos pacotes.
-  3. **Reenvio com nova tentativa**: `_postToCloud()` tenta de novo automaticamente em caso de erro 429/rede (até 4 tentativas).
-  4. **Retrato do perfil (snapshot)**: ao abrir o painel admin, `publishProfileSnapshot()` reenvia foto + dados principais (no máximo a cada 4h), porque o histórico da nuvem expira em ~12h e aparelhos que abrem depois não recebiam nada.
-  5. **Proteção contra eventos antigos**: um evento de configuração mais antigo não sobrescreve uma alteração mais nova.
-  6. **Limitação conhecida**: sem banco de dados próprio, a sincronização depende do canal ntfy (histórico de ~12h). Para garantia total e permanente, o ideal é um backend (ex: Firebase/Supabase).
-  7. Cache do Service Worker: `estefany-nails-v28-fix-profile-photo-sync`.
-- **v29**: Eliminação definitiva do piscamento de imagens de teste (antigas) ao atualizar a página (`F5` / refresh):
-  1. **Remoção de `src="assets/images/..."` fixos no HTML**: Em `index.html` e `admin.html`, as tags `<img>` da foto de perfil (`#clientHeaderAvatarImg`, `#adminHeaderAvatarImg`, `#profileModalAvatarImg`, `#storyUserAvatarImg`, `#previewConfigAvatarImg`), do banner promocional (`#clientPromoBannerImg`, `#previewConfigBannerImg`) e das prévias de serviços deixaram de trazer caminhos de imagens de teste chumbados no HTML (que o navegador desenhava antes do JavaScript rodar) e passaram a usar um pixel transparente 1x1 hidratado sincronicamente com a imagem real salva no `localStorage`.
-  2. **Remoção dos 4 Cards de Serviços de Teste Estáticos no HTML**: O container `#clientServicesCarousel` em `index.html` não traz mais os 4 cards estáticos de teste chumbados no HTML, sendo populado diretamente pelo `renderDynamicClientServices()` antes do primeiro frame.
-  3. **Hidratação Síncrona Imediata (Sem Bloqueio de Rede no `init()`)**: Em `assets/js/store.js`, `EPStore.init()` não trava mais esperando `await this.pullCloudEvents(false)` (requisição de rede ao `ntfy.sh`) antes de liberar a renderização local, e tanto `index.html` quanto `admin.html` injetam as fotos reais do `localStorage` sincronicamente logo após o `<header>` e antes do primeiro paint.
-  4. **Fim da Sobrescrita Indevida de Serviços e Fotos Reais**: Removida a verificação `!existingServices.includes('trabalho-alongamento-chocolate.png')` em `EPStore.init()` (que resetava os serviços locais para os dados de teste caso a usuária trocasse todas as fotos) e adicionada trava em `applyIncomingSyncEvent()` impedindo que eventos antigos com caminho `assets/images/...` sobrescrevam fotos reais (`data:image/...`) já salvas.
-  5. **Purga Automática de Cache PWA**: Versão do Service Worker elevada para `estefany-nails-v29-no-test-image-flash`.
-- **v30**: Correção Definitiva de Reprodução e Upload de Vídeos nos Stories (Perfil e Catálogo):
-  1. **Eliminação do Erro de Cota do localStorage (QuotaExceededError - 5MB)**: Arquivos de vídeo do celular (normalmente entre 4MB e 80MB) agora são salvos como blobs binários diretamente no **IndexedDB** (`epn_media_vault_db`), gerando referências locais `idb://vid_...` com ObjectURLs instantâneos em memória. O `localStorage` agora guarda apenas registros leves com thumbnails compactos, nunca mais quebrando com tela branca ou travamento ao salvar serviços ou stories.
-  2. **Streaming em Nuvem e Sincronização Multidispositivos**: Vídeos publicados no painel administrativo são enviados em segundo plano via binário para o endpoint de mídia (`https://ntfy.sh/ep_nails_media_files_2026_paiva?filename=story.mp4`), obtendo URLs de streaming diretas (`https://ntfy.sh/file/...mp4`) que funcionam com carregamento rápido e sem sobrecarregar o canal de sincronização SSE (que rejeita pacotes > 400KB).
-  3. **Correção de Políticas de Autoplay Mobile (iOS / Android)**: No visualizador de Stories do cliente (`index.html`), o `<video id="storyMediaVideo">` tenta a reprodução com áudio e, caso as políticas de segurança do navegador móvel bloqueiem (NotAllowedError), ativa automaticamente o fallback silencioso (`vid.muted = true`) sem travar o slide, acompanhado de um botão de som no topo (`🔊 / 🔇`) para a cliente desmutar com 1 toque.
-  4. **Diferenciação de Toque Rápido vs Segurar na Tela (Hold Timer)**: Substituído o evento imediato `ontouchstart="pauseStory()"` por um timer de toque sustentado (180ms), garantindo que toques rápidos para avançar ou retroceder os stories nunca pausem o vídeo ou congelem o contador.
-  5. **Fim de Timers Duplicados e Transição de 60s Suave**: Corrigida a chamada concorrente em `showStorySlide()` que disparava múltiplos `setInterval` em `startStoryPlaybackProgress()`, e ajustada a detecção de término (`vidEl.ended || vidEl.currentTime >= endTime - 0.12`) para avançar perfeitamente entre as partes fatiadas (Parte 1/2, Parte 2/2) de vídeos longos.
-  6. **Purga Automática de Cache PWA**: Versão do Service Worker elevada para `estefany-nails-v30-fix-videos-playback-and-upload`.
-- **v31**: Remoção Completa da Funcionalidade de Stories (Simplificação e Foco 100% no Catálogo e Agendamento Direto):
-  1. **Remoção dos Stories do Perfil**: Removidos o anel de Stories do Instagram (`.greeting-avatar-ring.has-active-story`), a badge de "STORIES" e o clique no avatar que abria o visualizador. A foto de perfil agora possui uma moldura rosé dourada limpa e elegante, sem elementos de Stories.
-  2. **Catálogo com Agendamento Imediato**: No Portal da Cliente (`index.html`), ao tocar na foto de qualquer serviço ou no botão "Agendar", o modal de agendamento em tela cheia (`#modalAgendamentoPopup`) é aberto instantaneamente para a cliente escolher a data e horário, sem passar por Stories.
-  3. **Remoção do Visualizador de Stories**: Excluído o modal `#modalStoryViewer` do DOM e todo o código de reprodução/segmentação de mídia, deixando a página mais leve, rápida e sem complexidades de vídeo.
-  4. **Limpeza do Painel Administrativo (`admin.html`)**: Removido o botão "+ Stories 24h" do cabeçalho do admin, o card de Stories das configurações e o bloco complexo de múltiplos vídeos/mockup do Instagram dentro do cadastro de serviços. O cadastro de serviços agora foca no que importa: Nome, Preço, Duração, Categoria, Descrição e Foto de Capa do Procedimento com pré-visualização instantânea.
-  5. **Purga Automática de Cache PWA**: Versão do Service Worker elevada para `estefany-nails-v31-remove-stories-feature`.
-- **v32**: Refatoração Completa, Limpeza de Código Morto e Padronização Profissional:
-  1. **Remoção de iFrame Embutido no Painel Admin (`modalPortalClienteInApp`)**: O botão "Portal da Cliente" agora abre diretamente o site da cliente em uma nova aba limpa (`window.open('index.html', '_blank')`), eliminando qualquer risco de sobreposição de telas brancas, bloqueios de GPU e vazamento de memória causados por iframes aninhados em celulares Android.
-  2. **Limpeza Profunda do `store.js` e Otimização de Performance**: Eliminadas centenas de linhas de código morto remanescente (cofre IndexedDB de streaming de vídeo, funções de upload multipart e handlers pesados de mídia). O núcleo do estado global agora é 100% enxuto, com tempo de carregamento instantâneo no celular.
-  3. **Limpeza de CSS Morto (`client.css` e `admin.css`)**: Removidas centenas de linhas de regras de estilos desnecessárias dos Stories e do iframe modal, reduzindo o peso do CSS e acelerando a renderização do primeiro frame (FCP / LCP).
-  4. **Padronização do Fluxo de Agendamento**: Ao tocar em qualquer procedimento do catálogo ou no botão de agendar, a cliente tem acesso direto e sem atritos ao calendário de 7 colunas e seleção de horários disponíveis, com confirmação direta pelo WhatsApp.
-  5. **Purga Automática de Cache PWA**: Versão do Service Worker elevada para `estefany-nails-v32-clean-code-and-performance`.
-- **v33**: Pacote de Funcionalidades Profissionais (Combo de Serviços, Bloqueio por Duração, Pix Copia e Cola, Mensagens Prontas, Ficha Técnica, Retorno 21+ dias e Remarcação Online):
-  1. **Combo / Múltiplos Serviços + Bloqueio Inteligente por Duração (`index.html` e `store.js`)**: A cliente agora pode adicionar procedimentos extras no mesmo agendamento ("+ Adicionar outro procedimento"). O sistema soma automaticamente o valor total e a duração total em minutos, e `EPStore.getAvailableSlots()` verifica sobreposição real de horários (`[início, fim)`) para evitar colisões na agenda.
-  2. **Sinal / Pagamento via Pix (Copia e Cola) na Confirmação (`index.html`)**: Ao confirmar o agendamento, o modal de sucesso exibe automaticamente a chave Pix configurada pela administradora, calcula o valor do sinal (`depositPercent`) ou valor integral, oferece botão de 1 clique **"Copiar Chave Pix"** e botão para enviar o comprovante direto no WhatsApp.
-  3. **Remarcação Online pela Própria Cliente (`index.html` e `store.js`)**: Em "Meus Agendamentos", horários futuros ativos exibem o botão **"Remarcar"**, respeitando a antecedência mínima configurável pela administradora (`rescheduleMinHours`, padrão 12h). Ao confirmar o novo horário, o antigo é liberado automaticamente.
-  4. **Mensagens Prontas de 1 Clique na Agenda (`admin.html`)**: Nos detalhes de qualquer agendamento, foram adicionados 3 botões rápidos de WhatsApp com textos personalizados: **🔔 Lembrete**, **💸 Enviar Pix** e **⭐ Pós-Atendimento**.
-  5. **Ficha Técnica da Cliente + Alerta de Retorno (`admin.html` e `store.js`)**: Na Ficha da Cliente (`#modalDetalhesCliente`), a profissional pode salvar **Formato Preferido**, **Cor/Gel Favorito**, **Alergias** e **Observações Técnicas** (sincronizados na nuvem via `UPSERT_CLIENT_TECH_NOTES`). Na lista de clientes, quem fez o último procedimento há **21 dias ou mais** ganha a etiqueta **`⏰ Retorno (Xd)`** com botão de 1 clique para chamar no WhatsApp convidando para manutenção.
-  6. **Purga Automática de Cache PWA**: Versão do Service Worker elevada para `estefany-nails-v33-combos-pix-tech-notes-reschedule`.
+## 3. Histórico de Versões Recentes
+- **v31**: Remoção completa da funcionalidade de Stories.
+- **v32**: Remoção do iframe embutido no admin e limpeza inicial de código morto.
+- **v33**: Combo de serviços, bloqueio por duração, Pix Copia e Cola, remarcação online, mensagens prontas de 1 clique, Ficha Técnica e alerta de retorno (21+ dias).
+- **v34**: **Reconstrução Arquitetural Profissional do Zero**:
+  1. Redução de `index.html` de 1.661 para 269 linhas (0 inline styles) e `admin.html` de 3.583 para 437 linhas (0 inline styles).
+  2. Novo `assets/css/design-system.css` com **zero `!important`** (eliminando os 579 `!important` antigos).
+  3. Remoção definitiva de senhas em texto puro e do canal público `ntfy.sh` que expunha dados das clientes.
+  4. Criação da camada de dados `src/db.js` pronta para **Supabase (PostgreSQL + Auth + RLS)** via `supabase-schema.sql`, com fallback local seguro.
+  5. Eliminação total de números e avaliações falsas no painel administrativo (100% métricas reais).
+  6. Cache do Service Worker atualizado para `estefany-nails-v34-professional-rebuild`.
