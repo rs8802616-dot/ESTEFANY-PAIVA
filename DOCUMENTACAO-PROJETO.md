@@ -184,3 +184,13 @@ O projeto foi migrado para a arquitetura completa em **React 19 + TypeScript + V
   - Nos detalhes de um atendimento confirmado ou concluído, aparece o painel **"Manutenção Recomendada (+21 dias)"** com 2 botões: **"Marcar Manutenção (+Xd)"** (abre o Novo Horário já preenchido com cliente, serviço e data futura) e **"Perguntar no WhatsApp"**.
 - **Alerta Automático "5 Dias Antes" (`AdminPanel.tsx`, `AdminClientsTab.tsx` e `utils.ts`)**:
   - Quando faltam **5 dias ou menos** para vencer o ciclo de manutenção da cliente (e ela ainda não tem novo horário marcado), aparece automaticamente no Dashboard e na lista de Clientes com o selo **`Faltam Xd`** e botão **"Mandar Mensagem"** no WhatsApp com texto personalizado (`buildUpcomingMaintenanceWhatsAppUrl`).
+
+
+### v50 — Skill `humanizar-textos-ia` + Humanização Completa dos Textos do Aplicativo e WhatsApp
+- **Pesquisa & Criação da Skill `humanizar-textos-ia` (`.agents/skills/humanizar-textos-ia/SKILL.md` e `~/.gemini/config/skills/humanizar-textos-ia/SKILL.md`)**:
+  - Mapeados os principais sinais de detecção de conteúdo gerado por IA documentados na Wikipédia (*Detecção de conteúdo gerado por inteligência artificial*) e na linguística computacional: **baixa perplexidade**, **baixo burstiness** (monotonia de ritmo), **repetição de n-grams / conectivos formais**, **neutralidade e polidez artificial (RLHF)** e **adjetivação vaga**.
+- **Humanização dos Textos do App e Mensagens**:
+  - `src/lib/defaults.ts`: Reescritos `tagline`, `bio`, `heroTitle`, `heroSubtitle` e todas as descrições dos 6 procedimentos padrão para linguagem natural, direta e acolhedora de estúdio real (sem clichês corporativos como *"assinatura editorial"*, *"com foco em"* ou *"impecável"*).
+  - `src/lib/utils.ts` e `src/components/admin/AdminProfileSuite.tsx`: Reescritos os modelos de mensagens de WhatsApp (Lembrete, Pix, Pós-Atendimento, Retorno e Manutenção 5 dias antes) para soarem como conversa natural de WhatsApp da Estefany com suas clientes.
+  - `src/components/admin/AdminPanel.tsx`, `AdminAgendaTab.tsx`, `AdminCatalogTab.tsx`, `AdminFinanceSuite.tsx`: Removidos jargões técnicos e bordões artificiais de interface, mantendo os textos curtos e naturais.
+  - Cache do Workbox PWA elevado para `estefany-nails-v50-humanized-copy`.

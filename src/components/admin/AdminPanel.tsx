@@ -417,7 +417,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
         setLoginPassword('');
         // Tenta autenticar no Firebase Auth em background caso o provedor esteja ativo
         void signInWithEmail(loginEmail, loginPassword).catch(() => {});
-        showToast('Acesso administrativo Luxury Nude liberado!', 'success');
+        showToast('Acesso ao painel liberado!', 'success');
         return;
       }
 
@@ -465,7 +465,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   if (!authReady) {
     return (
       <div className="min-h-screen bg-[#FAF6F1] flex items-center justify-center p-6">
-        <div className="text-sm text-[#95847C]">Verificando credenciais Luxury Nude...</div>
+        <div className="text-sm text-[#95847C]">Conferindo seu acesso...</div>
       </div>
     );
   }
@@ -490,7 +490,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 ? !user.emailVerified
                   ? `Sua conta (${user.email}) ainda precisa confirmar o e-mail para liberar acesso.`
                   : `A conta ${user.email} não possui permissão de administradora.`
-                : 'Acesso criptografado com e-mail e senha • Identidade Luxury Nude.'}
+                : 'Entre com seu e-mail e senha para abrir a agenda do estúdio.'}
             </p>
           </div>
 

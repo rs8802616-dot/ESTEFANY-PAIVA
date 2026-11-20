@@ -120,7 +120,7 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
             Serviços & Categorias
           </h1>
           <p className="text-sm text-[#95847C]">
-            Atualize valores, durações e fotos exibidas em tempo real no Portal da Cliente.
+            Mude preços, tempos e fotos — tudo atualiza na hora no site da cliente.
           </p>
         </div>
         <button

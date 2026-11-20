@@ -188,7 +188,7 @@ export const AdminProfileSuite: React.FC<Props> = ({
     saveGallery([item, ...gallery]);
     setNewPhotoTitle('');
     setNewPhotoUrl('');
-    showToast('Fotografia publicada na Galeria Luxury Nude!', 'success');
+    showToast('Foto publicada na galeria!', 'success');
     setScreen(25);
   };
 
@@ -212,7 +212,7 @@ export const AdminProfileSuite: React.FC<Props> = ({
       setForm(updatedForm);
       setSlotsText(finalSlots.join(', '));
       await adminSaveSettings(updatedForm);
-      showToast('Configurações Luxury Nude salvas com sucesso!', 'success');
+      showToast('Configurações salvas!', 'success');
     } catch {
       showToast('Não foi possível salvar as configurações.', 'error');
     } finally {
@@ -532,19 +532,19 @@ export const AdminProfileSuite: React.FC<Props> = ({
               {[
                 {
                   title: 'Confirmação de Agendamento',
-                  text: `Olá, ${selectedClientName}! ✨ Seu horário no ${settings.studioName} está reservado com carinho. Qualquer dúvida estou à disposição!`,
+                  text: `Oi, ${selectedClientName}! Seu horário aqui no ${settings.studioName} já está garantido. Se precisar de algo, é só me chamar.`,
                 },
                 {
                   title: 'Lembrete 24h Antes',
-                  text: `Oi, ${selectedClientName}! Passando para lembrar do nosso encontro amanhã no ${settings.studioName} 💅 Confirma sua presença?`,
+                  text: `Oi, ${selectedClientName}! Tudo certo pro nosso horário amanhã no ${settings.studioName}? Me confirma por aqui, por favor.`,
                 },
                 {
                   title: 'Ciclo de Manutenção (21 dias)',
-                  text: `Olá, ${selectedClientName}! Já completaram 21 dias do seu procedimento. Vamos agendar sua manutenção para manter suas unhas impecáveis? ✨`,
+                  text: `Oi, ${selectedClientName}! Já deu 21 dias do seu atendimento. Quer deixar sua manutenção marcada pra não ficar sem horário?`,
                 },
                 {
                   title: 'Pós-Atendimento & Feedback',
-                  text: `Oi, ${selectedClientName}! Foi um prazer cuidar das suas unhas hoje no ${settings.studioName}. O que achou do resultado? 💖`,
+                  text: `Oi, ${selectedClientName}! Obrigada por vir hoje no ${settings.studioName}. Gostou do resultado? Depois me conta!`,
                 },
               ].map((tpl, idx) => (
                 <button

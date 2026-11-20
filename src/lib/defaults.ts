@@ -38,13 +38,13 @@ export const DEFAULT_CONFIGURED_SLOTS: string[] = [
 
 export const DEFAULT_SETTINGS: SalonSettings = {
   studioName: 'Estefany Paiva Nails',
-  tagline: 'Atelier de Alta Nail Designer & Cuidado Natural',
+  tagline: 'Nail Designer • Fibra de Vidro e Cuidado Natural',
   ownerName: 'Estefany Paiva',
-  bio: 'Especialista em fibra de vidro, banho de gel e acabamento ultrafino com foco em saúde da lâmina natural.',
+  bio: 'Trabalho com fibra de vidro, banho de gel e acabamento fininho, sem agredir a sua unha natural.',
   avatarImage: STUDIO_IMAGES.ownerPortrait,
-  heroTitle: 'Unhas esculpidas com precisão, leveza e assinatura editorial.',
+  heroTitle: 'Unhas bem feitas, leves e do jeito que você gosta.',
   heroSubtitle:
-    'Monte seu combo, escolha seu horário livre em tempo real e finalize com Pix Copia e Cola sem precisar esperar no WhatsApp.',
+    'Escolha os serviços, veja os horários livres na hora e pague no Pix. Simples, sem esperar resposta no WhatsApp.',
   heroImageUrl: STUDIO_IMAGES.hero,
   whatsapp: '5561985543452',
   instagram: '@estefanypaivanails',
@@ -78,7 +78,7 @@ export const DEFAULT_SERVICES: Service[] = [
     name: 'Alongamento em Fibra de Vidro',
     categoryId: 'cat_alongamentos',
     description:
-      'Estrutura ultrafina e resistente com curvatura natural, acabamento em gel leitoso ou baby boomer e cutilagem combinada.',
+      'Alongamento fininho e resistente com curvatura natural. Você escolhe entre gel leitoso ou baby boomer, já com cutilagem.',
     price: 195,
     durationMinutes: 150,
     imageUrl: STUDIO_IMAGES.alongamento,
@@ -91,7 +91,7 @@ export const DEFAULT_SERVICES: Service[] = [
     name: 'Manutenção de Alongamento',
     categoryId: 'cat_alongamentos',
     description:
-      'Reposição estrutural completa indicada entre 18 e 25 dias, realinhamento de ponta, nivelamento e brilho selado.',
+      'Manutenção completa indicada entre 18 e 25 dias. A gente acerta o crescimento, alinha a ponta e renova o brilho.',
     price: 135,
     durationMinutes: 120,
     imageUrl: STUDIO_IMAGES.alongamento,
@@ -104,7 +104,7 @@ export const DEFAULT_SERVICES: Service[] = [
     name: 'Banho de Gel & Blindagem',
     categoryId: 'cat_blindagem',
     description:
-      'Revestimento protetor sobre o comprimento natural para fortalecer lâminas finas e garantir semanas de brilho impecável.',
+      'Camada protetora por cima da sua própria unha pra dar mais força, evitar quebras e manter o esmalte intacto por semanas.',
     price: 115,
     durationMinutes: 90,
     imageUrl: STUDIO_IMAGES.banho,
@@ -114,10 +114,10 @@ export const DEFAULT_SERVICES: Service[] = [
   },
   {
     id: 'svc_esmaltacao_gel',
-    name: 'Esmaltação em Gel Premium',
+    name: 'Esmaltação em Gel',
     categoryId: 'cat_esmaltacao',
     description:
-      'Cutilagem cuidadosa com preparação russa leve e esmaltação em gel de alta pigmentação com secagem instantânea.',
+      'Cutilagem caprichada com acabamento limpo e esmaltação em gel que já sai seca na hora e dura bem mais.',
     price: 85,
     durationMinutes: 60,
     imageUrl: STUDIO_IMAGES.esmaltacao,
@@ -130,7 +130,7 @@ export const DEFAULT_SERVICES: Service[] = [
     name: 'Spa dos Pés & Pedicure em Gel',
     categoryId: 'cat_spa',
     description:
-      'Esfoliação botânica, hidratação profunda com óleos essenciais, cutilagem completa e esmaltação duradoura.',
+      'Esfoliação, hidratação caprichada nos pés, cutilagem completa e esmaltação em gel pra durar bastante.',
     price: 110,
     durationMinutes: 90,
     imageUrl: STUDIO_IMAGES.spa,
@@ -140,10 +140,10 @@ export const DEFAULT_SERVICES: Service[] = [
   },
   {
     id: 'svc_remocao_segura',
-    name: 'Remoção Técnica + Nutrição',
+    name: 'Remoção Segura + Nutrição',
     categoryId: 'cat_blindagem',
     description:
-      'Retirada segura de alongamento sem agressão à lâmina natural, polimento suave e base fortalecedora vitamínica.',
+      'Retirada do alongamento com cuidado pra não machucar a unha natural, seguida de polimento leve e base fortalecedora.',
     price: 65,
     durationMinutes: 60,
     imageUrl: STUDIO_IMAGES.banho,

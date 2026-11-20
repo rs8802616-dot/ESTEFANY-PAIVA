@@ -1128,7 +1128,7 @@ export const AdminFinanceSuite: React.FC<{
             </span>
           </div>
           <p className="text-xs text-[#95847C]">
-            Conciliação direta dos pagamentos registrados no app e lançamentos do caixa.
+            Resumo do que entrou pelos agendamentos e lançamentos manuais do caixa.
           </p>
           <div className="space-y-4 pt-1">
             {paymentMethodsBreakdown.map((item) => {

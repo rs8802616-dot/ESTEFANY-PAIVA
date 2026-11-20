@@ -47,7 +47,7 @@ export default defineConfig(() => {
           ],
         },
         workbox: {
-          cacheId: 'estefany-nails-v49-months-and-maintenance-5d',
+          cacheId: 'estefany-nails-v50-humanized-copy',
           skipWaiting: true,
           clientsClaim: true,
           cleanupOutdatedCaches: true,

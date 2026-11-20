@@ -326,19 +326,19 @@ export function getAdminWhatsAppTemplates(appointment: Appointment, settings: Sa
       id: 'reminder',
       label: 'Lembrete',
       description: 'Confirma data, hora e procedimento',
-      text: `Olá, ${appointment.clientName}! Passando para lembrar do seu atendimento no ${settings.studioName} em ${dateLabel} às ${appointment.startTime} (${servicesLabel}). Endereço: ${settings.address}. Te espero com carinho!`,
+      text: `Oi, ${appointment.clientName}! Passando só pra confirmar seu horário aqui no ${settings.studioName} no dia ${dateLabel}, às ${appointment.startTime} (${servicesLabel}). Endereço: ${settings.address}. Te espero!`,
     },
     {
       id: 'pix',
       label: 'Enviar Pix',
       description: 'Envia chave Pix e valor do sinal/serviço',
-      text: `Olá, ${appointment.clientName}! Para confirmar sua reserva de ${dateLabel} às ${appointment.startTime}, segue nossa chave Pix (${settings.pixKey}) no valor de ${formatBRL(chargeAmount)}. Assim que concluir, pode me enviar o comprovante por aqui.`,
+      text: `Oi, ${appointment.clientName}! Pra confirmar seu horário de ${dateLabel} às ${appointment.startTime}, segue a chave Pix (${settings.pixKey}) no valor de ${formatBRL(chargeAmount)}. Assim que fizer, me manda o comprovante por aqui.`,
     },
     {
       id: 'thanks',
       label: 'Pós-Atendimento',
       description: 'Agradece a visita e pede feedback',
-      text: `Oi, ${appointment.clientName}! Muito obrigada pela visita ao ${settings.studioName}. Como você está amando suas unhas? Seu feedback é super especial para mim! Lembre-se de agendar sua manutenção em cerca de ${settings.returnAlertDays} dias.`,
+      text: `Oi, ${appointment.clientName}! Obrigada por vir hoje no ${settings.studioName}. Gostou do resultado? Depois me conta! E lembra de marcar sua manutenção em uns ${settings.returnAlertDays} dias.`,
     },
   ];
 }
@@ -349,7 +349,7 @@ export function buildReturnAlertWhatsAppUrl(
   daysSince: number,
   settings: SalonSettings,
 ): string {
-  const msg = `Oi, ${clientName}! Tudo bem? Notei aqui que já fazem ${daysSince} dias desde o seu último atendimento no ${settings.studioName}. Vamos agendar sua manutenção para manter suas unhas sempre impecáveis?`;
+  const msg = `Oi, ${clientName}! Tudo bem? Vi aqui que já faz ${daysSince} dias desde a sua última vez no ${settings.studioName}. Vamos marcar sua manutenção pra deixar as unhas em dia?`;
   return buildWhatsAppUrl(clientPhone, msg);
 }
 
@@ -362,11 +362,11 @@ export function buildUpcomingMaintenanceWhatsAppUrl(
 ): string {
   const whenText =
     daysRemaining <= 0
-      ? 'chegou o dia ideal'
+      ? 'já tá na hora'
       : daysRemaining === 1
-        ? 'falta apenas 1 dia'
-        : `faltam apenas ${daysRemaining} dias`;
-  const msg = `Oi, ${clientName}! Tudo bem? Passando para lembrar com carinho que ${whenText} para a sua manutenção de ${serviceName} no ${settings.studioName}. Quer que eu já reserve o melhor horário para você antes que a agenda feche?`;
+        ? 'falta 1 dia'
+        : `faltam ${daysRemaining} dias`;
+  const msg = `Oi, ${clientName}! Tudo bem? Só passando pra avisar que ${whenText} pra sua manutenção de ${serviceName} aqui no ${settings.studioName}. Quer que eu já deixe um horário separado pra você?`;
   return buildWhatsAppUrl(clientPhone, msg);
 }
 

@@ -497,7 +497,7 @@ export const AdminAgendaTab: React.FC<AdminAgendaTabProps> = ({
               Bloqueios Pessoais da Agenda
             </h2>
             <p className="text-xs text-[#95847C]">
-              Almoços, cursos ou compromissos que bloqueiam horários específicos em tempo real.
+              Almoços, cursos ou compromissos para fechar um horário na hora.
             </p>
           </div>
           <button
