@@ -117,7 +117,7 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="font-editorial text-3xl font-semibold text-[#594943]">
-            Serviços & Categorias
+            Serviços e Categorias
           </h1>
           <p className="text-sm text-[#95847C]">
             Mude preços, tempos e fotos — tudo atualiza na hora no site da cliente.
@@ -143,7 +143,7 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
             maxLength={60}
             value={catName}
             onChange={(e) => setCatName(e.target.value)}
-            placeholder="Ex.: Nail Art Editorial"
+            placeholder="Ex.: Nail Art"
             className="flex-1 min-h-[42px] rounded-xl border border-[#E8D6CB] bg-[#FAF6F1]/70 px-3.5 text-sm focus:border-[#C4A477] focus:bg-white focus:outline-none"
           />
           <button

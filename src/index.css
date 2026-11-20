@@ -38,7 +38,8 @@
   }
 
   h1, h2, h3, .font-editorial {
-    font-family: var(--font-display);
+    font-family: var(--font-sans);
+    letter-spacing: -0.015em;
     text-wrap: balance;
   }
 

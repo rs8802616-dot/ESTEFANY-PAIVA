@@ -13,7 +13,6 @@ import {
   LogOut,
   MessageCircle,
   Scissors,
-  Sparkles,
   Target,
   TrendingUp,
   User,
@@ -864,26 +863,26 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   onClick={() => setShow33Explorer((v) => !v)}
                   className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#F2EAE4] border border-[#E8D6CB] text-xs font-semibold text-[#594943] cursor-pointer"
                 >
-                  <Sparkles className="w-3.5 h-3.5 text-[#C4A477]" />
+                  <Layers className="w-3.5 h-3.5 text-[#C4A477]" />
                   <span>Explorar as 33 Telas</span>
                 </button>
               </div>
 
-              {/* TELA 2: ABERTURA (Luxury Nude Splash / Welcome Screen) */}
+              {/* TELA 2: ABERTURA (Splash / Welcome Screen) */}
               {showSplashScreen2 ? (
                 <div className="rounded-3xl bg-gradient-to-br from-[#594943] via-[#433631] to-[#594943] text-[#FAF6F1] p-8 sm:p-14 text-center space-y-6 shadow-xl border border-[#C4A477]/40">
                   <div className="w-20 h-20 rounded-3xl bg-[#FAF6F1]/10 border border-[#C4A477] flex items-center justify-center mx-auto shadow-lg">
-                    <Sparkles className="w-9 h-9 text-[#C4A477]" />
+                    <Scissors className="w-9 h-9 text-[#C4A477]" />
                   </div>
                   <div className="space-y-2 max-w-lg mx-auto">
                     <span className="text-[11px] font-bold uppercase tracking-[0.3em] text-[#C4A477] block">
-                      Tela 2 • Abertura Luxury Nude
+                      Tela 2 · Abertura
                     </span>
                     <h1 className="font-editorial text-3xl sm:text-5xl font-semibold text-[#FAF6F1]">
                       {settings.studioName}
                     </h1>
                     <p className="text-sm text-[#E8D6CB] leading-relaxed">
-                      {settings.tagline} • Gestão Exclusiva, Minimalista e Sofisticada.
+                      {settings.tagline}
                     </p>
                   </div>
                   <div className="flex flex-wrap items-center justify-center gap-3 pt-2">

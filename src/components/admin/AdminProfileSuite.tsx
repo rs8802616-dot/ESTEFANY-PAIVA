@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import {
   Camera, Plus, MessageSquare, User, Clock, Sliders, Palette, ShieldCheck,
   HelpCircle, Trash2, Send, CheckCircle2, Lock, KeyRound, Smartphone,
-  Sparkles, ExternalLink, Copy, Upload, Layers, RefreshCw, X
+  ChevronRight, ExternalLink, Copy, Upload, Layers, RefreshCw, X
 } from 'lucide-react';
 import type { SalonSettings, ClientProfileSummary, Appointment, Service } from '../../types/salon';
 import { adminSaveSettings } from '../../lib/db';
@@ -1137,7 +1137,7 @@ export const AdminProfileSuite: React.FC<Props> = ({
                       <p className="text-[10px] text-[#95847C] uppercase tracking-wider">Aba: {item.tab}</p>
                     </div>
                   </div>
-                  <Sparkles className="w-3.5 h-3.5 text-[#C4A477] shrink-0 opacity-70 group-hover:opacity-100" />
+                  <ChevronRight className="w-4 h-4 text-[#C4A477] shrink-0 opacity-70 group-hover:opacity-100" />
                 </button>
               ))}
             </div>

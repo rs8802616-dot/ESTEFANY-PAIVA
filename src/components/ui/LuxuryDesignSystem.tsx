@@ -9,7 +9,6 @@ import {
   LayoutGrid,
   Loader2,
   SlidersHorizontal,
-  Sparkles,
   TrendingDown,
   TrendingUp,
 } from 'lucide-react';
@@ -104,7 +103,7 @@ export const LuxuryKpiCard: React.FC<{
       <div className="flex items-center justify-between gap-2">
         <span className="text-xs font-medium text-[#95847C]">{label}</span>
         <span className={`w-8 h-8 rounded-xl border flex items-center justify-center shrink-0 ${accentMap}`}>
-          {icon || <Sparkles className="w-4 h-4" />}
+          {icon || <TrendingUp className="w-4 h-4" />}
         </span>
       </div>
       <div>

@@ -13,7 +13,7 @@ export const STUDIO_IMAGE_PRESETS = [
   { label: 'Alongamento em Gel / Fibra', url: STUDIO_IMAGES.alongamento },
   { label: 'Banho de Gel / Blindagem', url: STUDIO_IMAGES.banho },
   { label: 'Esmaltação em Gel Marsala', url: STUDIO_IMAGES.esmaltacao },
-  { label: 'Spa dos Pés & Pedicure', url: STUDIO_IMAGES.spa },
+  { label: 'Spa dos Pés e Pedicure', url: STUDIO_IMAGES.spa },
   { label: 'Atelier Estefany Paiva', url: STUDIO_IMAGES.hero },
 ];
 
@@ -69,7 +69,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
   { id: 'cat_alongamentos', name: 'Alongamentos', order: 1, active: true },
   { id: 'cat_blindagem', name: 'Banho de Gel', order: 2, active: true },
   { id: 'cat_esmaltacao', name: 'Esmaltação', order: 3, active: true },
-  { id: 'cat_spa', name: 'Spa & Pés', order: 4, active: true },
+  { id: 'cat_spa', name: 'Spa e Pés', order: 4, active: true },
 ];
 
 export const DEFAULT_SERVICES: Service[] = [
@@ -101,7 +101,7 @@ export const DEFAULT_SERVICES: Service[] = [
   },
   {
     id: 'svc_banho_gel',
-    name: 'Banho de Gel & Blindagem',
+    name: 'Banho de Gel e Blindagem',
     categoryId: 'cat_blindagem',
     description:
       'Camada protetora por cima da sua própria unha pra dar mais força, evitar quebras e manter o esmalte intacto por semanas.',
@@ -127,7 +127,7 @@ export const DEFAULT_SERVICES: Service[] = [
   },
   {
     id: 'svc_spa_pes',
-    name: 'Spa dos Pés & Pedicure em Gel',
+    name: 'Spa dos Pés e Pedicure em Gel',
     categoryId: 'cat_spa',
     description:
       'Esfoliação, hidratação caprichada nos pés, cutilagem completa e esmaltação em gel pra durar bastante.',

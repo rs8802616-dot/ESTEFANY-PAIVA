@@ -206,10 +206,10 @@ export const BookingSheet: React.FC<BookingSheetProps> = ({
 
   const title =
     step === 'schedule'
-      ? 'Seu Combo & Horário'
+      ? 'Seu Combo e Horário'
       : step === 'details'
-        ? 'Seus Dados & Confirmação'
-        : 'Reserva Confirmada';
+        ? 'Seus Dados e Confirmação'
+        : 'Agendamento Confirmado';
 
   const subtitle =
     step === 'schedule'

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { onAuthStateChanged, type User } from 'firebase/auth';
-import { ArrowLeft, Eye, Sparkles } from 'lucide-react';
+import { ArrowLeft, Eye } from 'lucide-react';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { ToastProvider } from './components/Toast';
 import { OfflineIndicator } from './components/PWAInstallButton';
@@ -166,7 +166,6 @@ function SalonAppShell() {
               >
                 <ArrowLeft className="w-4 h-4" />
                 <span>Voltar ao Painel da Admin</span>
-                <Sparkles className="w-3.5 h-3.5" />
               </button>
             </div>
           )}

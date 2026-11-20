@@ -47,7 +47,7 @@ export default defineConfig(() => {
           ],
         },
         workbox: {
-          cacheId: 'estefany-nails-v50-humanized-copy',
+          cacheId: 'estefany-nails-v51-clean-typography-icons',
           skipWaiting: true,
           clientsClaim: true,
           cleanupOutdatedCaches: true,

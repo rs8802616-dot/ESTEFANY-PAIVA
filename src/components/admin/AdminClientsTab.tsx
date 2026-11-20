@@ -134,7 +134,7 @@ export const AdminClientsTab: React.FC<AdminClientsTabProps> = ({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="font-editorial text-3xl font-semibold text-[#594943]">
-            Clientes & Ficha Técnica
+            Clientes e Ficha Técnica
           </h1>
           <p className="text-sm text-[#95847C]">
             Acompanhamento de retorno ({settings.returnAlertDays}+ dias) e preferências técnicas individuais.

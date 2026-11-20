@@ -6,12 +6,13 @@ import {
   Check,
   Clock,
   Instagram,
+  LayoutGrid,
   MapPin,
   MessageCircle,
   Plus,
   Search,
+  ShieldCheck,
   ShoppingBag,
-  Sparkles,
   Store,
 } from 'lucide-react';
 import { BookingSheet } from './BookingSheet';
@@ -525,7 +526,7 @@ export const ClientPortal: React.FC<ClientPortalProps> = ({
               </div>
 
               <div className="p-5 flex items-start gap-4">
-                <Sparkles className="w-5 h-5 text-[#C4A477] mt-0.5 shrink-0" />
+                <ShieldCheck className="w-5 h-5 text-[#C4A477] mt-0.5 shrink-0" />
                 <div>
                   <div className="text-sm font-semibold text-[#594943]">
                     Política de reserva, remarcação e manutenção
@@ -583,7 +584,7 @@ export const ClientPortal: React.FC<ClientPortalProps> = ({
               activeTab === 'catalog' ? 'text-[#C4A477] bg-white/10' : 'text-[#FAF6F1]/75'
             }`}
           >
-            <Sparkles className="w-5 h-5" />
+            <LayoutGrid className="w-5 h-5" />
             <span className="text-[10px] font-medium">Catálogo</span>
           </button>
 

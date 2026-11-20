@@ -194,3 +194,14 @@ O projeto foi migrado para a arquitetura completa em **React 19 + TypeScript + V
   - `src/lib/utils.ts` e `src/components/admin/AdminProfileSuite.tsx`: Reescritos os modelos de mensagens de WhatsApp (Lembrete, Pix, Pós-Atendimento, Retorno e Manutenção 5 dias antes) para soarem como conversa natural de WhatsApp da Estefany com suas clientes.
   - `src/components/admin/AdminPanel.tsx`, `AdminAgendaTab.tsx`, `AdminCatalogTab.tsx`, `AdminFinanceSuite.tsx`: Removidos jargões técnicos e bordões artificiais de interface, mantendo os textos curtos e naturais.
   - Cache do Workbox PWA elevado para `estefany-nails-v50-humanized-copy`.
+
+
+### v51 — Tipografia Limpa (Sem Serifas de Template), Remoção do Ícone `Sparkles` (Ícone de IA) e Substituição de `&` por Linguagem Natural
+- **Tipografia de App Real (`src/index.css` e `index.html`)**:
+  - Alterado `h1, h2, h3, .font-editorial` para usar `Inter` (`var(--font-sans)`) com `letter-spacing: -0.015em`, eliminando a fonte serifada (`Playfair Display`) que dava aparência de template/IA nos títulos e nomes de procedimentos (como *"Spa dos Pés & Pedicure em Gel"*).
+  - Título e metadados em `index.html` atualizados para `"Estefany Paiva Nails — Agendamento Online"` (removendo `"Luxury Nude Atelier"`).
+- **Remoção Completa do Ícone `Sparkles` (associado a ferramentas de IA) e Emojis Decorativos**:
+  - Substituídos todos os usos de `Sparkles` em `src/App.tsx`, `ClientPortal.tsx`, `AdminAgendaTab.tsx`, `AdminPanel.tsx`, `AdminProfileSuite.tsx` e `LuxuryDesignSystem.tsx` por ícones funcionais reais (`LayoutGrid`, `ShieldCheck`, `Calendar`, `Scissors`, `Layers`, `ChevronRight`, `TrendingUp`).
+- **Títulos e Nomes Naturais sem `&` Comercial**:
+  - Substituído `&` por `e` nos serviços e títulos principais (`Spa dos Pés e Pedicure em Gel`, `Banho de Gel e Blindagem`, `Seu Combo e Horário`, `Serviços e Categorias`, `Clientes e Ficha Técnica`, `Detalhes e WhatsApp`).
+  - Cache do Workbox PWA elevado para `estefany-nails-v51-clean-typography-icons`.

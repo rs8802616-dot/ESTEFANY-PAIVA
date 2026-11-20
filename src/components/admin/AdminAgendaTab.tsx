@@ -12,7 +12,6 @@ import {
   Phone,
   Plus,
   QrCode,
-  Sparkles,
   Trash2,
   Unlock,
   XCircle,
@@ -481,7 +480,7 @@ export const AdminAgendaTab: React.FC<AdminAgendaTabProps> = ({
                   className="min-h-[40px] inline-flex items-center gap-1.5 rounded-xl border border-[#E8D6CB] bg-white px-3 py-1.5 text-xs font-medium text-[#594943] hover:border-[#C4A477] transition-colors"
                 >
                   <MessageCircle className="w-3.5 h-3.5 text-[#C4A477]" />
-                  <span>Detalhes & WhatsApp</span>
+                  <span>Detalhes e WhatsApp</span>
                 </button>
               </div>
             </article>
@@ -820,12 +819,12 @@ export const AdminAgendaTab: React.FC<AdminAgendaTabProps> = ({
                       : settings.returnAlertDays || 21;
                   if (cycleDays <= 0) return null;
                   const nextDate = addDaysISO(selectedAppointment.date, cycleDays);
-                  const askMsg = `Olá, ${selectedAppointment.clientName}! ✨ Como o prazo ideal de manutenção para ${selectedAppointment.serviceNames.join(' + ')} é de ${cycleDays} dias (por volta de ${formatDateBR(nextDate)}), posso já deixar seu horário de retorno reservado?`;
+                  const askMsg = `Oi, ${selectedAppointment.clientName}! Tudo bem? O prazo de manutenção de ${selectedAppointment.serviceNames.join(' + ')} é de ${cycleDays} dias (por volta de ${formatDateBR(nextDate)}). Quer que eu já deixe seu horário reservado?`;
 
                   return (
                     <div className="mt-4 pt-4 border-t border-[#E8D6CB] space-y-2.5 bg-[#FAF6F1] p-3.5 rounded-2xl border">
                       <div className="flex items-center gap-2">
-                        <Sparkles className="w-4 h-4 text-[#C4A477]" />
+                        <Calendar className="w-4 h-4 text-[#C4A477]" />
                         <h4 className="text-xs font-bold uppercase tracking-wider text-[#594943]">
                           Manutenção Recomendada ({cycleDays} dias · {formatDateBR(nextDate)})
                         </h4>
