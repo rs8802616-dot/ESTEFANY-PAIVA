@@ -201,6 +201,15 @@ export function subscribeSalonSettings(onData: (settings: SalonSettings) => void
               ...localSettings,
               ...cloudSettings,
             };
+        merged.workDays =
+          Array.isArray(merged.workDays) && merged.workDays.length > 0
+            ? merged.workDays
+            : DEFAULT_SETTINGS.workDays;
+        merged.configuredSlots = Array.isArray(merged.configuredSlots)
+          ? merged.configuredSlots
+          : DEFAULT_SETTINGS.configuredSlots;
+        merged.blockedDates = Array.isArray(merged.blockedDates) ? merged.blockedDates : [];
+        merged.closedMonths = Array.isArray(merged.closedMonths) ? merged.closedMonths : [];
         saveCachedSettingsSync(merged, false);
         onData(merged);
       } else {
@@ -757,6 +766,30 @@ function addDeletedAptId(id: string): void {
   }
 }
 
+function normalizeAppointmentDoc(id: string, raw: Partial<Appointment>): Appointment {
+  return {
+    id,
+    clientUid: String(raw.clientUid || `guest_${id}`),
+    clientName: String(raw.clientName || 'Cliente'),
+    clientPhone: String(raw.clientPhone || ''),
+    clientEmail: String(raw.clientEmail || ''),
+    serviceIds: Array.isArray(raw.serviceIds) ? raw.serviceIds : [],
+    serviceNames: Array.isArray(raw.serviceNames) ? raw.serviceNames : [],
+    totalPrice: Number(raw.totalPrice) || 0,
+    totalDurationMinutes: Number(raw.totalDurationMinutes) || 60,
+    date: String(raw.date || ''),
+    startTime: String(raw.startTime || '09:00'),
+    endTime: String(raw.endTime || '10:00'),
+    status: raw.status || 'pending',
+    paymentMethod: raw.paymentMethod || 'presencial',
+    pixPaid: Boolean(raw.pixPaid),
+    notes: String(raw.notes || ''),
+    rescheduleCount: Number(raw.rescheduleCount) || 0,
+    bookingToken: String(raw.bookingToken || id),
+    lastVerifiedToken: String(raw.lastVerifiedToken || ''),
+  };
+}
+
 export function subscribeAllAppointmentsAdmin(
   onData: (appointments: Appointment[]) => void,
 ): Unsubscribe {
@@ -817,10 +850,9 @@ export function subscribeAllAppointmentsAdmin(
   const unsubCloud = onSnapshot(
     collection(db, 'appointments'),
     (snap) => {
-      cloudAppointments = snap.docs.map((d) => ({
-        id: d.id,
-        ...(d.data() as Omit<Appointment, 'id'>),
-      }));
+      cloudAppointments = snap.docs.map((d) =>
+        normalizeAppointmentDoc(d.id, d.data() as Partial<Appointment>),
+      );
       saveAllLocalBookings(
         [...cloudAppointments, ...loadLocalBookings()].reduce<Appointment[]>((acc, item) => {
           if (!acc.some((x) => x.id === item.id)) acc.push(item);

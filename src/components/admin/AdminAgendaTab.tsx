@@ -811,7 +811,7 @@ export const AdminAgendaTab: React.FC<AdminAgendaTabProps> = ({
                 selectedAppointment.status === 'completed') &&
                 (() => {
                   const matchedSvc = services.find((s) =>
-                    selectedAppointment.serviceIds.includes(s.id),
+                    (selectedAppointment.serviceIds || []).includes(s.id),
                   );
                   const cycleDays =
                     matchedSvc?.maintenanceDays !== undefined

@@ -272,3 +272,12 @@ O projeto foi migrado para a arquitetura completa em **React 19 + TypeScript + V
   - Ao entrar no `/painel`, `ensureEmailUserSignedIn` autentica (ou cria automaticamente no primeiro acesso) a conta administrativa no `studio-de-beleza-8045a`.
   - Ao abrir o painel, `syncPendingLocalChangesToCloud()` envia automaticamente todas as fotos de capa, perfil e procedimentos já salvos localmente para o Firestore na nuvem, atualizando a tela das clientes em todos os aparelhos.
   - Cache do Workbox PWA elevado para `estefany-nails-v59-studio-de-beleza-firebase`.
+
+
+### v60 — Correção do Erro `Cannot read properties of undefined (reading 'includes')` ao Ler Documentos Antigos do Firestore
+- **Normalização Segura de Documentos (`db.ts`)**:
+  - Criada a função `normalizeAppointmentDoc` para garantir que agendamentos antigos já existentes no banco `studio-de-beleza-8045a` sempre tenham `serviceIds`, `serviceNames`, `clientName`, `clientPhone` e demais campos inicializados como arrays/strings válidos.
+  - Garantido em `subscribeSalonSettings` que `workDays`, `configuredSlots`, `blockedDates` e `closedMonths` sempre sejam arrays válidos.
+- **Proteções Defensivas (`AdminPanel.tsx`, `AdminAgendaTab.tsx`, `CalendarPicker.tsx`, `utils.ts`)**:
+  - Protegidas todas as chamadas `.includes(...)` em listas de serviços e dias úteis contra valores `undefined`.
+  - Cache do Workbox PWA elevado para `estefany-nails-v60-fix-undefined-includes-crash`.

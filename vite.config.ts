@@ -47,7 +47,7 @@ export default defineConfig(() => {
           ],
         },
         workbox: {
-          cacheId: 'estefany-nails-v59-studio-de-beleza-firebase',
+          cacheId: 'estefany-nails-v60-fix-undefined-includes-crash',
           skipWaiting: true,
           clientsClaim: true,
           cleanupOutdatedCaches: true,

@@ -148,7 +148,7 @@ export function generateTimeSlotsForDate(
   const targetDate = new Date(y, m - 1, d);
   const weekday = targetDate.getDay();
 
-  if (!settings.workDays.includes(weekday)) {
+  if (!(settings.workDays || []).includes(weekday)) {
     return [];
   }
 

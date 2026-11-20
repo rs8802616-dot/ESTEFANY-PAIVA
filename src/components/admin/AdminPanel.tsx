@@ -177,7 +177,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     });
 
     const getCycleDaysForApt = (apt: Appointment) => {
-      const matched = services.find((s) => apt.serviceIds.includes(s.id));
+      const ids = Array.isArray(apt.serviceIds) ? apt.serviceIds : [];
+      const matched = services.find((s) => ids.includes(s.id));
       if (matched?.maintenanceDays !== undefined && matched.maintenanceDays > 0) {
         return matched.maintenanceDays;
       }
