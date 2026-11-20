@@ -47,7 +47,7 @@ export default defineConfig(() => {
           ],
         },
         workbox: {
-          cacheId: 'estefany-nails-v57-sync-feedback-and-google-redirect',
+          cacheId: 'estefany-nails-v58-clean-no-google-prompt',
           skipWaiting: true,
           clientsClaim: true,
           cleanupOutdatedCaches: true,

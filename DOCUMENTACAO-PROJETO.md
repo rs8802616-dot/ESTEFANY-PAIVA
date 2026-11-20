@@ -256,3 +256,10 @@ O projeto foi migrado para a arquitetura completa em **React 19 + TypeScript + V
 - **Fallback Automático no Login Google (`firebase.ts` e `AdminPanel.tsx`)**:
   - Se o navegador/tablet bloquear o popup do Google (`auth/popup-blocked`), `signInWithGoogle` usa automaticamente `signInWithRedirect`, além de exibir o código exato caso falte domínio autorizado (`auth/unauthorized-domain`).
   - Cache do Workbox PWA elevado para `estefany-nails-v57-sync-feedback-and-google-redirect`.
+
+
+### v58 — Remoção do Banner de Login Google no Painel Admin
+- **Interface Limpa sem Sincronização por E-mail/Google (`AdminPanel.tsx`, `AdminProfileSuite.tsx`, `AdminCatalogTab.tsx`)**:
+  - Removido o banner `"Conectar Google e Sincronizar"` do topo do Painel Admin e os avisos pedindo conexão com conta Google ao salvar procedimentos e configurações, atendendo à solicitação de manter o painel direto e sem login de e-mail.
+  - Mantida integralmente a proteção contra reversão de fotos/dados (`v55`) e o ajuste responsivo sem vazamento lateral (`v56`).
+  - Cache do Workbox PWA elevado para `estefany-nails-v58-clean-no-google-prompt`.

@@ -226,15 +226,8 @@ export const AdminProfileSuite: React.FC<Props> = ({
       };
       setForm(updatedForm);
       setSlotsText(finalSlots.join(', '));
-      const synced = await adminSaveSettings(updatedForm);
-      if (synced) {
-        showToast('Configurações salvas e atualizadas para todas as clientes!', 'success');
-      } else {
-        showToast(
-          'Salvo só neste aparelho! Clique em "Conectar Google e Sincronizar" no topo para enviar para outros aparelhos.',
-          'info',
-        );
-      }
+      await adminSaveSettings(updatedForm);
+      showToast('Configurações salvas!', 'success');
     } catch {
       showToast('Não foi possível salvar as configurações.', 'error');
     } finally {
