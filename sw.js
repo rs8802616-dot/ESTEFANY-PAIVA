@@ -1,4 +1,4 @@
-const CACHE_NAME = 'estefany-nails-v34-professional-rebuild';
+const CACHE_NAME = 'estefany-nails-v35-firebase-ready';
 const STATIC_ASSETS = [
   './',
   './index.html',

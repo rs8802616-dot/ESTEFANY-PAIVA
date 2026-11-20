@@ -45,3 +45,8 @@ O projeto foi reconstruído do zero com arquitetura modular limpa em **ES Module
   4. Criação da camada de dados `src/db.js` pronta para **Supabase (PostgreSQL + Auth + RLS)** via `supabase-schema.sql`, com fallback local seguro.
   5. Eliminação total de números e avaliações falsas no painel administrativo (100% métricas reais).
   6. Cache do Service Worker atualizado para `estefany-nails-v34-professional-rebuild`.
+- **v35**: **Integração Nativa com Firebase (Cloud Firestore + Firebase Auth)**:
+  1. `src/db.js` e `src/config.js` adaptados para o **Firebase Modular Web SDK v11** (`firebase-app`, `firebase-firestore`, `firebase-auth`) via CDN oficial da Google.
+  2. Coleções estruturadas no Firestore: `salon_settings/main`, `categories`, `services`, `appointments`, `personal_blocks` e `client_tech_notes`.
+  3. Autenticação do painel administrativo integrada ao `signInWithEmailAndPassword` do Firebase Auth (com fallback local seguro enquanto `FIREBASE_CONFIG` não estiver preenchido).
+  4. Cache do Service Worker atualizado para `estefany-nails-v35-firebase-ready`.

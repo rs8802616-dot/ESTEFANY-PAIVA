@@ -1,6 +1,6 @@
 /**
- * Camada de Dados Unificada (Supabase Cloud + Fallback Local Seguro)
- * Zero senhas em texto puro, zero vazamento em canais públicos.
+ * Camada de Dados Unificada — Firebase (Firestore + Auth) + Fallback Local Seguro
+ * Utiliza Firebase Modular Web SDK v11 via CDN oficial da Google (gstatic).
  */
 import { APP_CONFIG } from './config.js';
 import { cleanPhoneDigits, timeToMinutes, sha256 } from './utils.js';
@@ -15,7 +15,10 @@ const KEYS = {
   ADMIN_AUTH_HASH: 'epn_admin_private_pass_hash'
 };
 
-let supabaseClient = null;
+let fsDb = null;
+let fbAuth = null;
+let fsApi = null;
+let authApi = null;
 let isCloudMode = false;
 
 function readJSON(key, fallback) {
@@ -31,24 +34,37 @@ function writeJSON(key, value) {
   localStorage.setItem(key, JSON.stringify(value));
 }
 
+function hasFirebaseConfig() {
+  const cfg = APP_CONFIG.FIREBASE_CONFIG;
+  return Boolean(cfg && cfg.apiKey && cfg.projectId);
+}
+
 export const db = {
   get mode() {
-    return isCloudMode ? 'supabase' : 'local';
+    return isCloudMode ? 'firebase' : 'local';
   },
 
   async init() {
-    if (APP_CONFIG.SUPABASE_URL && APP_CONFIG.SUPABASE_ANON_KEY) {
+    if (hasFirebaseConfig()) {
       try {
-        const mod = await import('https://esm.sh/@supabase/supabase-js@2');
-        supabaseClient = mod.createClient(APP_CONFIG.SUPABASE_URL, APP_CONFIG.SUPABASE_ANON_KEY);
+        const [appMod, fsMod, authMod] = await Promise.all([
+          import('https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js'),
+          import('https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js'),
+          import('https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js')
+        ]);
+
+        const app = appMod.initializeApp(APP_CONFIG.FIREBASE_CONFIG);
+        fsDb = fsMod.getFirestore(app);
+        fbAuth = authMod.getAuth(app);
+        fsApi = fsMod;
+        authApi = authMod;
         isCloudMode = true;
       } catch (err) {
-        console.warn('Supabase indisponível, operando em modo local:', err);
+        console.warn('Firebase indisponível, operando em modo local:', err);
         isCloudMode = false;
       }
     }
 
-    // Seed inicial apenas se ainda não existir nada salvo localmente
     if (!localStorage.getItem(KEYS.SETTINGS)) {
       writeJSON(KEYS.SETTINGS, { ...APP_CONFIG.DEFAULT_SALON });
     }
@@ -70,7 +86,7 @@ export const db = {
   },
 
   // ========================================================
-  // AUTENTICAÇÃO DO ADMIN (Supabase Auth ou Senha Privada Local)
+  // AUTENTICAÇÃO DO ADMIN (Firebase Auth ou Senha Privada Local)
   // ========================================================
   hasLocalAdminPassword() {
     return Boolean(localStorage.getItem(KEYS.ADMIN_AUTH_HASH));
@@ -84,9 +100,8 @@ export const db = {
   },
 
   async loginAdmin({ email, password }) {
-    if (isCloudMode && supabaseClient) {
-      const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
-      if (error) throw new Error(error.message || 'Credenciais inválidas.');
+    if (isCloudMode && fbAuth && authApi) {
+      await authApi.signInWithEmailAndPassword(fbAuth, email, password);
       return true;
     }
     const savedHash = localStorage.getItem(KEYS.ADMIN_AUTH_HASH);
@@ -102,30 +117,39 @@ export const db = {
   },
 
   async isAdminAuthenticated() {
-    if (isCloudMode && supabaseClient) {
-      const { data } = await supabaseClient.auth.getSession();
-      return Boolean(data?.session);
+    if (isCloudMode && fbAuth && authApi) {
+      if (fbAuth.currentUser) return true;
+      return new Promise((resolve) => {
+        const unsub = authApi.onAuthStateChanged(fbAuth, (user) => {
+          unsub();
+          resolve(Boolean(user));
+        });
+      });
     }
     return sessionStorage.getItem('epn_admin_session') === '1';
   },
 
   async logoutAdmin() {
-    if (isCloudMode && supabaseClient) {
-      await supabaseClient.auth.signOut();
+    if (isCloudMode && fbAuth && authApi) {
+      await authApi.signOut(fbAuth);
     }
     sessionStorage.removeItem('epn_admin_session');
   },
 
   // ========================================================
-  // CONFIGURAÇÕES DO ESTÚDIO
+  // CONFIGURAÇÕES DO ESTÚDIO (salon_settings/main)
   // ========================================================
   async getSettings() {
-    if (isCloudMode && supabaseClient) {
-      const { data } = await supabaseClient.from('salon_settings').select('data').eq('id', 'main').maybeSingle();
-      if (data?.data) {
-        const merged = { ...APP_CONFIG.DEFAULT_SALON, ...data.data };
-        writeJSON(KEYS.SETTINGS, merged);
-        return merged;
+    if (isCloudMode && fsDb && fsApi) {
+      try {
+        const snap = await fsApi.getDoc(fsApi.doc(fsDb, 'salon_settings', 'main'));
+        if (snap.exists()) {
+          const merged = { ...APP_CONFIG.DEFAULT_SALON, ...snap.data() };
+          writeJSON(KEYS.SETTINGS, merged);
+          return merged;
+        }
+      } catch (e) {
+        console.warn('Firestore getSettings fallback:', e);
       }
     }
     return { ...APP_CONFIG.DEFAULT_SALON, ...readJSON(KEYS.SETTINGS, {}) };
@@ -135,21 +159,26 @@ export const db = {
     const current = await this.getSettings();
     const updated = { ...current, ...partial, updatedAt: new Date().toISOString() };
     writeJSON(KEYS.SETTINGS, updated);
-    if (isCloudMode && supabaseClient) {
-      await supabaseClient.from('salon_settings').upsert({ id: 'main', data: updated });
+    if (isCloudMode && fsDb && fsApi) {
+      await fsApi.setDoc(fsApi.doc(fsDb, 'salon_settings', 'main'), updated, { merge: true });
     }
     return updated;
   },
 
   // ========================================================
-  // CATEGORIAS
+  // CATEGORIAS (categories/{id})
   // ========================================================
   async getCategories() {
-    if (isCloudMode && supabaseClient) {
-      const { data } = await supabaseClient.from('categories').select('*').order('name');
-      if (Array.isArray(data) && data.length > 0) {
-        writeJSON(KEYS.CATEGORIES, data);
-        return data;
+    if (isCloudMode && fsDb && fsApi) {
+      try {
+        const snap = await fsApi.getDocs(fsApi.collection(fsDb, 'categories'));
+        if (!snap.empty) {
+          const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+          writeJSON(KEYS.CATEGORIES, data);
+          return data;
+        }
+      } catch (e) {
+        console.warn('Firestore getCategories fallback:', e);
       }
     }
     return readJSON(KEYS.CATEGORIES, [...APP_CONFIG.DEFAULT_CATEGORIES]);
@@ -162,8 +191,8 @@ export const db = {
     if (idx >= 0) list[idx] = item;
     else list.push(item);
     writeJSON(KEYS.CATEGORIES, list);
-    if (isCloudMode && supabaseClient) {
-      await supabaseClient.from('categories').upsert(item);
+    if (isCloudMode && fsDb && fsApi) {
+      await fsApi.setDoc(fsApi.doc(fsDb, 'categories', item.id), item);
     }
     return list;
   },
@@ -171,22 +200,26 @@ export const db = {
   async deleteCategory(id) {
     const list = (await this.getCategories()).filter(c => c.id !== id);
     writeJSON(KEYS.CATEGORIES, list);
-    if (isCloudMode && supabaseClient) {
-      await supabaseClient.from('categories').delete().eq('id', id);
+    if (isCloudMode && fsDb && fsApi) {
+      await fsApi.deleteDoc(fsApi.doc(fsDb, 'categories', id));
     }
     return list;
   },
 
   // ========================================================
-  // SERVIÇOS
+  // SERVIÇOS (services/{id})
   // ========================================================
   async getServices(onlyActive = false) {
-    let list;
-    if (isCloudMode && supabaseClient) {
-      const { data } = await supabaseClient.from('services').select('*').order('name');
-      if (Array.isArray(data)) {
-        writeJSON(KEYS.SERVICES, data);
-        list = data;
+    let list = null;
+    if (isCloudMode && fsDb && fsApi) {
+      try {
+        const snap = await fsApi.getDocs(fsApi.collection(fsDb, 'services'));
+        if (!snap.empty) {
+          list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+          writeJSON(KEYS.SERVICES, list);
+        }
+      } catch (e) {
+        console.warn('Firestore getServices fallback:', e);
       }
     }
     if (!list) list = readJSON(KEYS.SERVICES, [...APP_CONFIG.DEFAULT_SERVICES]);
@@ -209,8 +242,8 @@ export const db = {
     if (idx >= 0) list[idx] = item;
     else list.push(item);
     writeJSON(KEYS.SERVICES, list);
-    if (isCloudMode && supabaseClient) {
-      await supabaseClient.from('services').upsert(item);
+    if (isCloudMode && fsDb && fsApi) {
+      await fsApi.setDoc(fsApi.doc(fsDb, 'services', item.id), item);
     }
     return item;
   },
@@ -218,8 +251,8 @@ export const db = {
   async deleteService(id) {
     const list = (await this.getServices(false)).filter(s => s.id !== id);
     writeJSON(KEYS.SERVICES, list);
-    if (isCloudMode && supabaseClient) {
-      await supabaseClient.from('services').delete().eq('id', id);
+    if (isCloudMode && fsDb && fsApi) {
+      await fsApi.deleteDoc(fsApi.doc(fsDb, 'services', id));
     }
     return list;
   },
@@ -228,26 +261,30 @@ export const db = {
   // AGENDAMENTOS & BLOQUEIO INTELIGENTE POR DURAÇÃO
   // ========================================================
   async getAppointments() {
-    if (isCloudMode && supabaseClient) {
-      const { data } = await supabaseClient
-        .from('appointments')
-        .select('*')
-        .order('date', { ascending: false })
-        .order('time', { ascending: true });
-      if (Array.isArray(data)) {
+    if (isCloudMode && fsDb && fsApi) {
+      try {
+        const snap = await fsApi.getDocs(fsApi.collection(fsDb, 'appointments'));
+        const data = snap.docs
+          .map(d => ({ id: d.id, ...d.data() }))
+          .sort((a, b) => `${b.date} ${b.time}`.localeCompare(`${a.date} ${a.time}`));
         writeJSON(KEYS.APPOINTMENTS, data);
         return data;
+      } catch (e) {
+        console.warn('Firestore getAppointments fallback:', e);
       }
     }
     return readJSON(KEYS.APPOINTMENTS, []);
   },
 
   async getPersonalBlocks() {
-    if (isCloudMode && supabaseClient) {
-      const { data } = await supabaseClient.from('personal_blocks').select('*').order('date');
-      if (Array.isArray(data)) {
+    if (isCloudMode && fsDb && fsApi) {
+      try {
+        const snap = await fsApi.getDocs(fsApi.collection(fsDb, 'personal_blocks'));
+        const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         writeJSON(KEYS.BLOCKS, data);
         return data;
+      } catch (e) {
+        console.warn('Firestore getPersonalBlocks fallback:', e);
       }
     }
     return readJSON(KEYS.BLOCKS, []);
@@ -265,8 +302,8 @@ export const db = {
     };
     list.unshift(item);
     writeJSON(KEYS.BLOCKS, list);
-    if (isCloudMode && supabaseClient) {
-      await supabaseClient.from('personal_blocks').upsert(item);
+    if (isCloudMode && fsDb && fsApi) {
+      await fsApi.setDoc(fsApi.doc(fsDb, 'personal_blocks', item.id), item);
     }
     return item;
   },
@@ -274,8 +311,8 @@ export const db = {
   async deletePersonalBlock(id) {
     const list = (await this.getPersonalBlocks()).filter(b => b.id !== id);
     writeJSON(KEYS.BLOCKS, list);
-    if (isCloudMode && supabaseClient) {
-      await supabaseClient.from('personal_blocks').delete().eq('id', id);
+    if (isCloudMode && fsDb && fsApi) {
+      await fsApi.deleteDoc(fsApi.doc(fsDb, 'personal_blocks', id));
     }
     return list;
   },
@@ -359,8 +396,8 @@ export const db = {
     const list = await this.getAppointments();
     list.unshift(newApp);
     writeJSON(KEYS.APPOINTMENTS, list);
-    if (isCloudMode && supabaseClient) {
-      await supabaseClient.from('appointments').insert(newApp);
+    if (isCloudMode && fsDb && fsApi) {
+      await fsApi.setDoc(fsApi.doc(fsDb, 'appointments', newApp.id), newApp);
     }
     return newApp;
   },
@@ -372,8 +409,8 @@ export const db = {
     const updated = { ...list[idx], ...updates, updatedAt: new Date().toISOString() };
     list[idx] = updated;
     writeJSON(KEYS.APPOINTMENTS, list);
-    if (isCloudMode && supabaseClient) {
-      await supabaseClient.from('appointments').update(updated).eq('id', id);
+    if (isCloudMode && fsDb && fsApi) {
+      await fsApi.setDoc(fsApi.doc(fsDb, 'appointments', id), updated, { merge: true });
     }
     return updated;
   },
@@ -389,16 +426,20 @@ export const db = {
   },
 
   // ========================================================
-  // FICHA TÉCNICA DA CLIENTE
+  // FICHA TÉCNICA DA CLIENTE (client_tech_notes/{phoneKey})
   // ========================================================
   async getClientTechNotes(phone) {
     const key = cleanPhoneDigits(phone);
     const empty = { nailShape: '', favoriteColor: '', allergies: '', notes: '' };
     if (!key) return empty;
 
-    if (isCloudMode && supabaseClient) {
-      const { data } = await supabaseClient.from('client_tech_notes').select('*').eq('phoneKey', key).maybeSingle();
-      if (data) return data;
+    if (isCloudMode && fsDb && fsApi) {
+      try {
+        const snap = await fsApi.getDoc(fsApi.doc(fsDb, 'client_tech_notes', key));
+        if (snap.exists()) return snap.data();
+      } catch (e) {
+        console.warn('Firestore getClientTechNotes fallback:', e);
+      }
     }
     const map = readJSON(KEYS.TECH_NOTES, {});
     return map[key] || empty;
@@ -418,8 +459,8 @@ export const db = {
     const map = readJSON(KEYS.TECH_NOTES, {});
     map[key] = record;
     writeJSON(KEYS.TECH_NOTES, map);
-    if (isCloudMode && supabaseClient) {
-      await supabaseClient.from('client_tech_notes').upsert(record);
+    if (isCloudMode && fsDb && fsApi) {
+      await fsApi.setDoc(fsApi.doc(fsDb, 'client_tech_notes', key), record, { merge: true });
     }
     return record;
   }

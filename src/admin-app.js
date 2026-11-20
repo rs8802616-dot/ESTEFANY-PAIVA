@@ -64,9 +64,9 @@ function renderHeader() {
   document.getElementById('adminGreeting').textContent = `Olá, ${(s.ownerName || 'Estefany').split(' ')[0]}!`;
   document.getElementById('adminAvatarImg').src = s.avatarImage || 'assets/images/trabalho-amendoada-ouro.png';
   document.getElementById('adminModeBadge').textContent =
-    db.mode === 'supabase'
-      ? 'Conectado ao Banco de Dados na Nuvem (Supabase)'
-      : 'Modo Local Seguro (configure src/config.js para ativar Supabase)';
+    db.mode === 'firebase'
+      ? 'Conectado ao Firebase Firestore (Nuvem)'
+      : 'Modo Local Seguro (cole seu firebaseConfig em src/config.js)';
 }
 
 function switchTab(tabName) {
@@ -742,10 +742,10 @@ async function bootstrap() {
   const passLabel = document.getElementById('loginPasswordLabel');
   const btnSubmit = document.getElementById('btnLoginSubmit');
 
-  if (db.mode === 'supabase') {
+  if (db.mode === 'firebase') {
     emailField.hidden = false;
     document.getElementById('inputLoginEmail').required = true;
-    subtitle.textContent = 'Entre com seu e-mail e senha do Supabase';
+    subtitle.textContent = 'Entre com seu e-mail e senha do Firebase';
   } else if (!db.hasLocalAdminPassword()) {
     subtitle.textContent = 'Primeiro acesso: crie sua senha privada de administradora';
     passLabel.textContent = 'Crie sua Senha (mín. 4 caracteres)';
