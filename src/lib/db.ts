@@ -20,6 +20,7 @@ import {
   handleFirestoreError,
   OperationType,
 } from './firebase';
+import { isAdminGateUnlocked } from './adminRoute';
 import { DEFAULT_CATEGORIES, DEFAULT_SERVICES, DEFAULT_SETTINGS } from './defaults';
 import { saveCachedSettingsSync } from './localClientStore';
 import {
@@ -52,7 +53,7 @@ function clampStr(val: string, max: number): string {
 export async function checkIsAdminUser(
   uid: string,
   email?: string | null,
-  emailVerified?: boolean,
+  _emailVerified?: boolean,
 ): Promise<boolean> {
   if (!uid) return false;
   if (
@@ -68,10 +69,12 @@ export async function checkIsAdminUser(
   } catch {
     // fallback below
   }
-  // Caso o usuário autenticado via E-mail/Senha ainda não tenha documento em admins/{uid}
-  // mas já esteja autenticado no Firebase Auth (conta criada pela proprietária no Console)
-  if (email && emailVerified === false) {
-    return false;
+  // Conta autenticada via E-mail/Senha (criada no Firebase Console) na rota secreta desbloqueada
+  const isPasswordProvider = auth.currentUser?.providerData?.some(
+    (p) => p.providerId === 'password',
+  );
+  if (isPasswordProvider && isAdminGateUnlocked()) {
+    return true;
   }
   return false;
 }
