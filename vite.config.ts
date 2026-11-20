@@ -47,7 +47,7 @@ export default defineConfig(() => {
           ],
         },
         workbox: {
-          cacheId: 'estefany-nails-v69-google-calendar-inicio',
+          cacheId: 'estefany-nails-v70-timeline-calendar-pastel',
           skipWaiting: true,
           clientsClaim: true,
           cleanupOutdatedCaches: true,
