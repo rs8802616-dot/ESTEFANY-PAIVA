@@ -1,60 +1,45 @@
 # DOCUMENTAÇÃO OFICIAL DO PROJETO: ESTEFANY PAIVA NAILS
 **Data da Última Atualização:** 19/11/2026  
-**Versão Atual:** **v34 (Reconstrução Arquitetural Profissional)**  
+**Versão Atual:** **v37 (React 19 + TypeScript + Vite + Tailwind v4 + Firebase Firestore/Auth + PWA)**  
 **Repositório:** `https://github.com/rs8802616-dot/ESTEFANY-PAIVA.git`  
-**Branch:** `main`
+**Branch:** `main`  
+**Hospedagem:** Vercel (`paiva-nails.vercel.app`)
 
 ---
 
-## 1. Nova Arquitetura Modular (v34)
-O projeto foi reconstruído do zero com arquitetura modular limpa em **ES Modules nativos** (sem frameworks pesados, deploy imediato na Vercel), eliminando os 579 `!important`, os 777 estilos inline, as senhas em texto puro, o canal público `ntfy.sh` e os dados fictícios chumbados no HTML.
+## 1. Arquitetura Atual (v37)
+O projeto foi migrado para a arquitetura completa em **React 19 + TypeScript + Vite 8 + Tailwind CSS v4 + Motion + Firebase 13 (Firestore + Google Auth) + VitePWA**, baseada no pacote oficial `estefany-paiva-nails.zip` gerado a partir do `PRD-ESTEFANY-PAIVA-NAILS.md`.
 
-### Estrutura de Arquivos
-- **`index.html`** (269 linhas, 0 `style=""` inline): Portal da Cliente semântico e instantâneo.
-- **`admin.html`** (437 linhas, 0 `style=""` inline): Painel Administrativo limpo com Login Gate seguro.
-- **`assets/css/design-system.css`**: Design System único (Vinho/Marsala `#350B19`, Rosé `#D83F79`, Cream `#FAF4F5`), mobile-first e **zero `!important`**.
-- **`src/config.js`**: Configurações padrão do estúdio e credenciais opcionais do **Supabase** (`SUPABASE_URL` e `SUPABASE_ANON_KEY`).
-- **`src/utils.js`**: Utilitários puros (formatação BRL, datas, máscaras, escape XSS, compressão de imagem, SHA-256, WhatsApp, Google Agenda, `.ics` e Toast).
-- **`src/db.js`**: Camada de Dados Unificada com adaptador duplo:
-  - **Modo Nuvem (Supabase)**: Ativado automaticamente ao preencher `src/config.js`, utilizando PostgreSQL real, Row Level Security (RLS) e Supabase Auth.
-  - **Modo Local Seguro**: Funciona imediatamente sem backend externo, sem vazar dados em canais públicos e com criação de senha privada (hash SHA-256) no primeiro acesso do Admin.
-- **`src/client-app.js`**: Controlador do Portal da Cliente (catálogo, filtros, Combo de serviços, calendário 7 colunas, bloqueio inteligente por duração, Pix Copia e Cola e remarcação online).
-- **`src/admin-app.js`**: Controlador do Painel Administrativo (100% dados reais, Dashboard, Agenda com mensagens prontas de 1 clique, Clientes com alerta de retorno 21+ dias e Ficha Técnica, Serviços/Categorias, Relatórios com CSV/PDF e Ajustes).
-- **`supabase-schema.sql`**: Script SQL pronto para criar todas as tabelas, índices únicos de horário e políticas RLS no Supabase.
-- **`sw.js`**: Service Worker atualizado (`estefany-nails-v34-professional-rebuild`).
+### Estrutura Principal
+- **`src/App.tsx`**: Roteamento unificado entre **Portal da Cliente** (`/`) e **Painel Administrativo** (`#/admin`, `/admin` ou `/admin.html`), com hidratação síncrona de configurações para evitar piscar imagens antigas e sincronização em tempo real via Firestore `onSnapshot`.
+- **`src/lib/firebase.ts` & `firebase-applet-config.json`**: Conexão ativa com o projeto Firebase (`adega-delivery-pdv`, banco Firestore `ai-studio-2b450244-1a2e-44b5-b80e-5608c17cd674`, login Google Auth com admin bootstrap `rs8802616@gmail.com`).
+- **`src/lib/db.ts`**: Camada de dados em tempo real com Firestore (configurações do estúdio, categorias, serviços, agendamentos, bloqueios de disponibilidade e ficha técnica de clientes).
+- **`src/components/client/`**:
+  - `ClientPortal.tsx` — Portal da Cliente nativo mobile/tablet com catálogo, filtros, banner hero e acesso aos agendamentos.
+  - `BookingSheet.tsx` — Bottom Sheet / tela cheia de agendamento com combo de serviços, calendário interativo, bloqueio por duração, Pix Copia e Cola, WhatsApp e Google Agenda/`.ics`.
+  - `ClientAppointmentsSheet.tsx` — Consulta de horários e remarcação online respeitando regra de antecedência.
+- **`src/components/admin/`**:
+  - `AdminPanel.tsx` — Painel administrativo com autenticação Google Firebase e navegação responsiva (sidebar fixa em tablets/desktop + barra inferior mobile).
+  - `AdminAgendaTab.tsx`, `AdminClientsTab.tsx`, `AdminCatalogTab.tsx`, `AdminReportsSettingsTabs.tsx` — Gestão completa de agenda, mensagens prontas de WhatsApp, clientes + ficha técnica + retorno 21+ dias, serviços/categorias, relatórios e configurações.
+- **`firestore.rules` & `firestore.rules.test.ts`**: Regras de segurança de produção do Cloud Firestore.
+- **`vite.config.ts` & `vercel.json`**: Build Vite + PWA (`vite-plugin-pwa`) com geração automática de Service Worker/Manifesto e rewrites SPA na Vercel.
 
 ---
 
-## 2. Como Ativar o Banco de Dados Real na Nuvem (Supabase — Gratuito)
-1. Crie uma conta gratuita em `https://supabase.com` e crie um novo projeto.
-2. No menu **SQL Editor**, cole e execute o conteúdo de `supabase-schema.sql`.
-3. Em **Authentication → Users**, crie seu usuário administrador (e-mail e senha).
-4. Em **Settings → API**, copie a **Project URL** e a **anon public key** e cole em `src/config.js`.
-5. Faça push para a branch `main` — o site passa a operar 100% em PostgreSQL real na nuvem.
+## 2. Comandos Principais
+- `npm install` — Instala as dependências.
+- `npm run dev` — Inicia servidor local de desenvolvimento (`localhost:3000`).
+- `npm run lint` — Validação de tipos TypeScript (`tsc --noEmit`).
+- `npm run build` — Gera build de produção otimizado em `dist/`.
 
 ---
 
 ## 3. Histórico de Versões Recentes
-- **v31**: Remoção completa da funcionalidade de Stories.
-- **v32**: Remoção do iframe embutido no admin e limpeza inicial de código morto.
-- **v33**: Combo de serviços, bloqueio por duração, Pix Copia e Cola, remarcação online, mensagens prontas de 1 clique, Ficha Técnica e alerta de retorno (21+ dias).
-- **v34**: **Reconstrução Arquitetural Profissional do Zero**:
-  1. Redução de `index.html` de 1.661 para 269 linhas (0 inline styles) e `admin.html` de 3.583 para 437 linhas (0 inline styles).
-  2. Novo `assets/css/design-system.css` com **zero `!important`** (eliminando os 579 `!important` antigos).
-  3. Remoção definitiva de senhas em texto puro e do canal público `ntfy.sh` que expunha dados das clientes.
-  4. Criação da camada de dados `src/db.js` pronta para **Supabase (PostgreSQL + Auth + RLS)** via `supabase-schema.sql`, com fallback local seguro.
-  5. Eliminação total de números e avaliações falsas no painel administrativo (100% métricas reais).
-  6. Cache do Service Worker atualizado para `estefany-nails-v34-professional-rebuild`.
-- **v35**: **Integração Nativa com Firebase (Cloud Firestore + Firebase Auth)**:
-  1. `src/db.js` e `src/config.js` adaptados para o **Firebase Modular Web SDK v11** (`firebase-app`, `firebase-firestore`, `firebase-auth`) via CDN oficial da Google.
-  2. Coleções estruturadas no Firestore: `salon_settings/main`, `categories`, `services`, `appointments`, `personal_blocks` e `client_tech_notes`.
-  3. Autenticação do painel administrativo integrada ao `signInWithEmailAndPassword` do Firebase Auth (com fallback local seguro enquanto `FIREBASE_CONFIG` não estiver preenchido).
-  4. Cache do Service Worker atualizado para `estefany-nails-v35-firebase-ready`.
-- **v36**: **Redesign Completo para Visual de Aplicativo Nativo (Celular & Tablet / iPadOS)**:
-  1. **Barra Inferior Flutuante Glassmórfica (Mobile)**: Substituída a barra chapada por uma tab bar flutuante translúcida (`backdrop-filter: blur(18px)`) com cantos arredondados, destaque ativo rosé e suporte completo a `safe-area-inset-bottom`.
-  2. **Modais Estilo Native Bottom Sheet (Celular)**: No celular, todos os modais agora sobem suavemente de baixo para cima com alça superior (*drag handle*), cantos superiores arredondados (`28px`) e scroll táctil nativo.
-  3. **Cards Horizontais Compactos no Celular & Grid 2–3 Colunas no Tablet/Desktop**: No smartphone, os procedimentos aparecem em cards horizontais ágeis (foto à esquerda + duração + preço + botão Agendar), eliminando rolagens gigantescas; em tablets (`>= 640px`), expandem automaticamente para grade de luxo.
-  4. **Hero Banner Full-Bleed**: Banner promocional redesenhado com imagem em tela cheia + gradiente vinho elegante, sem textos espremidos em telas de 360px.
-  5. **Sidebar Fixa Estilo iPadOS no Painel Admin (Tablet `>= 768px`)**: Em tablets e PCs, o painel administrativo agora possui barra lateral fixa elegante com ícones + KPIs com ícones destacados.
-  6. **Manifesto PWA Ajustado**: `theme_color` alinhado ao vinho oficial `#350B19` e `orientation: "any"` para uso fluido em celular e tablet. Cache atualizado para `estefany-nails-v36-native-mobile-tablet-app`.
-- **PRD Oficial**: Criado o documento completo de produto em `PRD-ESTEFANY-PAIVA-NAILS.md` detalhando personas, arquitetura modular, fluxos do cliente e do admin, modelo de dados Firestore, regras de negócio e roadmap.
+- **v34**: Reconstrução modular sem `!important` e remoção de dados falsos/senhas expostas.
+- **v35**: Preparação da camada de dados para Firebase Firestore + Auth.
+- **v36**: Redesign para visual de aplicativo nativo mobile/tablet + criação do `PRD-ESTEFANY-PAIVA-NAILS.md`.
+- **v37**: **Implantação Completa do App React 19 + TypeScript + Vite + Tailwind v4 + Firebase Firestore/Auth + VitePWA**:
+  1. Migração integral do pacote `estefany-paiva-nails.zip` para o repositório oficial (`main`), removendo arquivos legados estáticos.
+  2. Configuração de `vercel.json` com rewrites SPA para suportar `/`, `/admin`, `/admin.html` e `#/admin` sem erro 404 na Vercel.
+  3. Ajuste em `src/App.tsx` para reconhecer tanto `#/admin` quanto `/admin` e `/admin.html` na URL inicial.
+  4. Validação completa de TypeScript (`npm run lint`) e build de produção (`npm run build`).

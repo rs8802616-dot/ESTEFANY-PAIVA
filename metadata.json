@@ -1,0 +1,6 @@
+{
+  "name": "Estefany Paiva Nails",
+  "description": "Portal de agendamentos online e painel administrativo profissional do estúdio Estefany Paiva Nails.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

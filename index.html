@@ -1,272 +1,36 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Estefany Paiva Nails — Agendamento Online</title>
-  <meta name="theme-color" content="#350B19">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="manifest" href="manifest.json">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-  <link rel="stylesheet" href="assets/css/design-system.css">
-</head>
-<body>
-  <div class="app-shell">
-    <!-- Cabeçalho do Estúdio -->
-    <header class="hero-header">
-      <div class="container">
-        <div class="topbar">
-          <a href="index.html" class="brand">
-            <span class="brand-monogram">Ep</span>
-            <div class="brand-titles">
-              <span class="brand-name" id="headerSalonName">Estefany Paiva</span>
-              <span class="brand-sub" id="headerSalonSub">NAIL DESIGNER</span>
-            </div>
-          </a>
-
-          <div class="topbar-actions">
-            <button type="button" class="btn btn-ghost" id="btnOpenMyBookings">
-              <i class="fa-regular fa-calendar-check"></i> Meus Horários
-            </button>
-            <button type="button" class="icon-btn" id="btnQuickWhatsapp" aria-label="Falar no WhatsApp">
-              <i class="fa-brands fa-whatsapp"></i>
-            </button>
-          </div>
-        </div>
-
-        <div class="profile-row">
-          <div class="profile-left">
-            <div class="avatar-frame">
-              <img id="salonAvatarImg" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Estefany Paiva">
-            </div>
-            <div class="profile-greeting">
-              <h1 id="clientGreeting">Olá, bem-vinda!</h1>
-              <p id="salonBioText">Especialista em alongamento em gel, banho de gel e nail art.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </header>
-
-    <!-- Hidratação síncrona da foto de perfil salva (evita piscar imagem antiga) -->
-    <script>
-      (function () {
-        try {
-          var s = JSON.parse(localStorage.getItem('epn_salon_settings') || '{}');
-          var av = document.getElementById('salonAvatarImg');
-          if (av) av.src = s.avatarImage || 'assets/images/trabalho-amendoada-ouro.png';
-          if (s.salonName) document.getElementById('headerSalonName').textContent = s.salonName;
-          if (s.bio) document.getElementById('salonBioText').textContent = s.bio;
-        } catch (e) {}
-      })();
-    </script>
-
-    <!-- Conteúdo Principal -->
-    <main class="main-content">
-      <!-- Próximo Agendamento da Cliente (só aparece quando existir) -->
-      <section class="next-booking-strip" id="nextBookingStrip" hidden>
-        <div class="list-item-main">
-          <div class="list-item-title" id="nextBookingTitle">Seu próximo horário</div>
-          <div class="list-item-sub" id="nextBookingMeta"></div>
-        </div>
-        <button type="button" class="btn btn-outline btn-sm" id="btnManageNextBooking">
-          Ver / Remarcar
-        </button>
-      </section>
-
-      <!-- Banner Destaque -->
-      <section class="promo-card">
-        <div class="promo-img-wrap">
-          <img id="promoBannerImg" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Studio Estefany Paiva">
-        </div>
-        <div class="promo-content">
-          <h2 id="promoTitle">Realce a beleza das suas mãos</h2>
-          <p id="promoSubtitle">Horários exclusivos com atendimento personalizado.</p>
-          <button type="button" class="btn btn-primary" id="btnHeroBookNow">
-            <i class="fa-regular fa-calendar-plus"></i> Agendar Agora
-          </button>
-        </div>
-      </section>
-
-      <!-- Catálogo de Procedimentos -->
-      <section>
-        <div class="section-header">
-          <h2>Procedimentos</h2>
-        </div>
-
-        <div class="pills-row" id="categoryPills"></div>
-        <div class="services-grid" id="servicesGrid"></div>
-      </section>
-    </main>
-
-    <!-- Navegação Inferior Mobile -->
-    <nav class="bottom-nav">
-      <button type="button" class="bottom-nav-btn is-active" id="navHome">
-        <i class="fa-solid fa-house"></i>
-        <span>Início</span>
-      </button>
-      <button type="button" class="bottom-nav-btn" id="navBook">
-        <i class="fa-regular fa-calendar-plus"></i>
-        <span>Agendar</span>
-      </button>
-      <button type="button" class="bottom-nav-btn" id="navMyBookings">
-        <i class="fa-regular fa-clock"></i>
-        <span>Meus Horários</span>
-      </button>
-      <button type="button" class="bottom-nav-btn" id="navWhatsapp">
-        <i class="fa-brands fa-whatsapp"></i>
-        <span>WhatsApp</span>
-      </button>
-    </nav>
-  </div>
-
-  <!-- MODAL: AGENDAMENTO EM TELA CHEIA -->
-  <div class="modal-backdrop modal-fullscreen" id="modalBooking">
-    <div class="modal-card">
-      <div class="modal-topbar">
-        <button type="button" class="btn btn-ghost btn-sm" id="btnCloseBookingTop">
-          <i class="fa-solid fa-arrow-left"></i> Voltar
-        </button>
-        <strong id="bookingModalTitle">Agendar Horário</strong>
-        <button type="button" class="icon-btn" id="btnCloseBookingX" aria-label="Fechar">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-      </div>
-
-      <div class="modal-body">
-        <!-- Aviso de Remarcação -->
-        <div class="card" id="rescheduleNotice" hidden>
-          <div class="list-item-main">
-            <div class="list-item-title"><i class="fa-solid fa-rotate"></i> Remarcando horário</div>
-            <div class="list-item-sub" id="rescheduleNoticeText"></div>
-          </div>
-          <button type="button" class="btn btn-outline btn-sm" id="btnCancelReschedule">Cancelar remarcação</button>
-        </div>
-
-        <!-- Resumo do Serviço Selecionado -->
-        <div class="list-item" id="selectedServiceSummary">
-          <div class="list-item-main">
-            <div class="list-item-title" id="summaryServiceName">Procedimento</div>
-            <div class="list-item-sub" id="summaryServiceMeta">R$ 0,00 • 90 min</div>
-          </div>
-          <button type="button" class="btn btn-outline btn-sm" id="btnToggleCombo">
-            <i class="fa-solid fa-plus"></i> Combo
-          </button>
-        </div>
-
-        <!-- Seletor de Procedimentos Extras (Combo) -->
-        <div class="card" id="comboPickerBox" hidden>
-          <div class="list-item-sub">Selecione procedimentos extras para o mesmo horário:</div>
-          <div class="card-stack" id="comboList"></div>
-        </div>
-
-        <!-- Calendário 7 Colunas -->
-        <div class="calendar-box">
-          <div class="calendar-nav">
-            <button type="button" class="icon-btn icon-btn-dark" id="btnCalPrev" aria-label="Mês anterior">
-              <i class="fa-solid fa-chevron-left"></i>
-            </button>
-            <h4 id="calMonthLabel">Novembro 2026</h4>
-            <button type="button" class="icon-btn icon-btn-dark" id="btnCalNext" aria-label="Próximo mês">
-              <i class="fa-solid fa-chevron-right"></i>
-            </button>
-          </div>
-          <div class="calendar-weekdays">
-            <span>Dom</span><span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sáb</span>
-          </div>
-          <div class="calendar-days" id="calDaysGrid"></div>
-        </div>
-
-        <!-- Horários Disponíveis -->
-        <div class="field">
-          <label>Horários disponíveis em <span id="selectedDateLabel"></span></label>
-          <div class="slots-grid" id="slotsGrid"></div>
-        </div>
-
-        <!-- Dados da Cliente -->
-        <form id="bookingForm">
-          <div class="field">
-            <label for="inputClientName">Seu Nome Completo *</label>
-            <input type="text" id="inputClientName" required placeholder="Ex: Mariana Silva">
-          </div>
-          <div class="field">
-            <label for="inputClientPhone">Seu WhatsApp com DDD *</label>
-            <input type="tel" id="inputClientPhone" required placeholder="(61) 99999-9999">
-          </div>
-          <button type="submit" class="btn btn-primary btn-block" id="btnSubmitBooking">
-            <i class="fa-solid fa-check"></i> Confirmar Agendamento
-          </button>
-        </form>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL: CONFIRMAÇÃO + PIX COPIA E COLA -->
-  <div class="modal-backdrop" id="modalSuccess">
-    <div class="modal-card">
-      <div class="modal-header">
-        <h3>Agendamento Confirmado!</h3>
-        <button type="button" class="icon-btn icon-btn-dark" id="btnCloseSuccess" aria-label="Fechar">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-      </div>
-
-      <div class="card card-stack" id="successDetailsBox"></div>
-
-      <div class="card card-stack" id="successPixBox" hidden>
-        <div class="list-item-title" id="successPixTitle">Chave Pix</div>
-        <div class="list-item-sub">Valor: <strong id="successPixValue"></strong></div>
-        <div class="list-item">
-          <code id="successPixKey"></code>
-          <button type="button" class="btn btn-dark btn-sm" id="btnCopyPix">
-            <i class="fa-regular fa-copy"></i> Copiar
-          </button>
-        </div>
-      </div>
-
-      <div class="card-stack">
-        <button type="button" class="btn btn-whatsapp btn-block" id="btnSuccessWhatsapp">
-          <i class="fa-brands fa-whatsapp"></i> Confirmar / Enviar Comprovante no WhatsApp
-        </button>
-        <button type="button" class="btn btn-google btn-block" id="btnSuccessGcal">
-          <i class="fa-brands fa-google"></i> Salvar no Google Agenda
-        </button>
-        <button type="button" class="btn btn-outline btn-block" id="btnSuccessIcs">
-          <i class="fa-regular fa-calendar"></i> Baixar p/ Calendário do Celular (.ics)
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL: MEUS AGENDAMENTOS & REMARCAÇÃO -->
-  <div class="modal-backdrop" id="modalMyBookings">
-    <div class="modal-card">
-      <div class="modal-header">
-        <h3>Meus Agendamentos</h3>
-        <button type="button" class="icon-btn icon-btn-dark" id="btnCloseMyBookings" aria-label="Fechar">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-      </div>
-
-      <div class="field">
-        <label for="inputSearchMyPhone">Buscar pelo seu WhatsApp</label>
-        <input type="tel" id="inputSearchMyPhone" placeholder="Digite seu número com DDD...">
-      </div>
-
-      <div class="card-stack" id="myBookingsList"></div>
-    </div>
-  </div>
-
-  <script type="module" src="src/client-app.js"></script>
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
-    }
-  </script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Estefany Paiva Nails — Agendamento & Atelier</title>
+    <meta
+      name="description"
+      content="Portal de agendamentos online e painel administrativo profissional do estúdio Estefany Paiva Nails."
+    />
+    <meta property="og:title" content="Estefany Paiva Nails — Agendamento & Atelier" />
+    <meta
+      property="og:description"
+      content="Portal de agendamentos online e painel administrativo profissional do estúdio Estefany Paiva Nails."
+    />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="theme-color" content="#350B19" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="E.P. Nails" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="bg-[#FAF4F5] text-[#2A0E17] antialiased selection:bg-[#D83F79]/20 selection:text-[#350B19]">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
 </html>

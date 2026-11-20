@@ -1,0 +1,112 @@
+@import "tailwindcss";
+
+@theme {
+  --color-marsala: #350B19;
+  --color-marsala-soft: #4F172A;
+  --color-marsala-deep: #240610;
+  --color-rose-brand: #D83F79;
+  --color-rose-hover: #BD2D65;
+  --color-rose-tint: #F7E2EA;
+  --color-cream: #FAF4F5;
+  --color-cream-surface: #FFFFFF;
+  --color-cream-border: #EBDCE0;
+  --color-ink: #2A0E17;
+  --color-ink-muted: #6E4F59;
+
+  --font-display: "Cormorant Garamond", Georgia, serif;
+  --font-sans: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+@layer base {
+  html {
+    font-family: var(--font-sans);
+    background-color: var(--color-cream);
+    color: var(--color-ink);
+    scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  h1, h2, .font-editorial {
+    font-family: var(--font-display);
+    text-wrap: balance;
+  }
+
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]) {
+    cursor: pointer;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-rose-brand);
+    outline-offset: 2px;
+  }
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+.pb-safe {
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+}
+
+.mb-safe {
+  margin-bottom: max(0.75rem, env(safe-area-inset-bottom));
+}
+
+/* Native glassmorphic tab bar & sheet transitions */
+.glass-nav {
+  background: rgba(53, 11, 25, 0.9);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.sheet-backdrop {
+  animation: fade-in 180ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.sheet-panel {
+  animation: sheet-up 220ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes sheet-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sheet-backdrop,
+  .sheet-panel {
+    animation: none;
+  }
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* Clean PDF Print Layout for Admin Reports */
+@media print {
+  .no-print {
+    display: none;
+  }
+  body {
+    background: #ffffff;
+    color: #000000;
+  }
+}

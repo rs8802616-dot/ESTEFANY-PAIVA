@@ -1,0 +1,469 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Pillar 1 / Global Safety Net: Default-deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // ------------------------------------------------------------------
+    // Hardened Global Primitives
+    // ------------------------------------------------------------------
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerified() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isBootstrappedAdmin() {
+      return isVerified() && request.auth.token.email == 'rs8802616@gmail.com';
+    }
+
+    function isAdmin() {
+      return isBootstrappedAdmin() || (
+        isVerified() && exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    function isValidDateStr(d) {
+      return d is string && d.size() == 10 && d.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$');
+    }
+
+    function isValidTimeStr(t) {
+      return t is string && t.size() == 5 && t.matches('^[0-2][0-9]:[0-5][0-9]$');
+    }
+
+    function isValidToken(t) {
+      return t is string && t.size() >= 12 && t.size() <= 64 && t.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isGuestUid(uid) {
+      return uid is string && uid.size() >= 10 && uid.size() <= 80 && uid.matches('^guest_[a-zA-Z0-9_\\-]+$');
+    }
+
+    // ------------------------------------------------------------------
+    // Validation Blueprints (Anti-Update-Gap)
+    // ------------------------------------------------------------------
+    function isValidSalonSettings(data) {
+      return data.keys().hasAll([
+        'studioName', 'tagline', 'ownerName', 'bio', 'avatarImage',
+        'heroTitle', 'heroSubtitle', 'heroImageUrl',
+        'whatsapp', 'instagram', 'address', 'pixKey', 'pixName', 'pixCity',
+        'depositPercent', 'rescheduleMinHours', 'monthlyGoal',
+        'openTime', 'closeTime', 'slotIntervalMinutes', 'configuredSlots',
+        'workDays', 'blockedDates', 'returnAlertDays', 'updatedAt'
+      ]) && data.keys().hasOnly([
+        'studioName', 'tagline', 'ownerName', 'bio', 'avatarImage',
+        'heroTitle', 'heroSubtitle', 'heroImageUrl',
+        'whatsapp', 'instagram', 'address', 'pixKey', 'pixName', 'pixCity',
+        'depositPercent', 'rescheduleMinHours', 'monthlyGoal',
+        'openTime', 'closeTime', 'slotIntervalMinutes', 'configuredSlots',
+        'workDays', 'blockedDates', 'returnAlertDays', 'updatedAt'
+      ])
+      && data.studioName is string && data.studioName.size() >= 2 && data.studioName.size() <= 80
+      && data.tagline is string && data.tagline.size() <= 160
+      && data.ownerName is string && data.ownerName.size() <= 80
+      && data.bio is string && data.bio.size() <= 260
+      && data.avatarImage is string && data.avatarImage.size() <= 250000
+      && data.heroTitle is string && data.heroTitle.size() <= 120
+      && data.heroSubtitle is string && data.heroSubtitle.size() <= 240
+      && data.heroImageUrl is string && data.heroImageUrl.size() <= 250000
+      && data.whatsapp is string && data.whatsapp.size() <= 30
+      && data.instagram is string && data.instagram.size() <= 60
+      && data.address is string && data.address.size() <= 200
+      && data.pixKey is string && data.pixKey.size() <= 120
+      && data.pixName is string && data.pixName.size() <= 80
+      && data.pixCity is string && data.pixCity.size() <= 60
+      && data.depositPercent is number && data.depositPercent >= 0 && data.depositPercent <= 100
+      && data.rescheduleMinHours is number && data.rescheduleMinHours >= 0 && data.rescheduleMinHours <= 168
+      && data.monthlyGoal is number && data.monthlyGoal >= 0 && data.monthlyGoal <= 500000
+      && isValidTimeStr(data.openTime)
+      && isValidTimeStr(data.closeTime)
+      && data.slotIntervalMinutes is number && data.slotIntervalMinutes >= 15 && data.slotIntervalMinutes <= 120
+      && data.configuredSlots is list && data.configuredSlots.size() <= 48 && (data.configuredSlots.size() == 0 || (data.configuredSlots[0] is string && data.configuredSlots[0].size() == 5))
+      && data.workDays is list && data.workDays.size() >= 1 && data.workDays.size() <= 7 && data.workDays[0] is int
+      && data.blockedDates is list && data.blockedDates.size() <= 120 && (data.blockedDates.size() == 0 || (data.blockedDates[0] is string && data.blockedDates[0].size() == 10))
+      && data.returnAlertDays is number && data.returnAlertDays >= 1 && data.returnAlertDays <= 180
+      && data.updatedAt == request.time;
+    }
+
+    function isValidCategory(data) {
+      return data.keys().hasAll(['name', 'order', 'active', 'createdAt', 'updatedAt'])
+      && data.keys().hasOnly(['name', 'order', 'active', 'createdAt', 'updatedAt'])
+      && data.name is string && data.name.size() >= 1 && data.name.size() <= 60
+      && data.order is number && data.order >= 0 && data.order <= 1000
+      && data.active is bool
+      && data.createdAt is timestamp
+      && data.updatedAt == request.time;
+    }
+
+    function isValidService(data) {
+      return data.keys().hasAll([
+        'name', 'categoryId', 'description', 'price', 'durationMinutes',
+        'imageUrl', 'featured', 'active', 'order', 'createdAt', 'updatedAt'
+      ]) && data.keys().hasOnly([
+        'name', 'categoryId', 'description', 'price', 'durationMinutes',
+        'imageUrl', 'featured', 'active', 'order', 'createdAt', 'updatedAt'
+      ])
+      && data.name is string && data.name.size() >= 1 && data.name.size() <= 100
+      && isValidId(data.categoryId)
+      && data.description is string && data.description.size() <= 400
+      && data.price is number && data.price >= 0 && data.price <= 50000
+      && data.durationMinutes is number && data.durationMinutes >= 10 && data.durationMinutes <= 600
+      && data.imageUrl is string && data.imageUrl.size() <= 250000
+      && data.featured is bool
+      && data.active is bool
+      && data.order is number && data.order >= 0 && data.order <= 1000
+      && data.createdAt is timestamp
+      && data.updatedAt == request.time;
+    }
+
+    function isValidAppointment(data) {
+      return data.keys().hasAll([
+        'clientUid', 'clientName', 'clientPhone', 'clientEmail',
+        'serviceIds', 'serviceNames', 'totalPrice', 'totalDurationMinutes',
+        'date', 'startTime', 'endTime', 'status', 'paymentMethod',
+        'pixPaid', 'notes', 'rescheduleCount', 'bookingToken', 'lastVerifiedToken',
+        'createdAt', 'updatedAt'
+      ]) && data.keys().hasOnly([
+        'clientUid', 'clientName', 'clientPhone', 'clientEmail',
+        'serviceIds', 'serviceNames', 'totalPrice', 'totalDurationMinutes',
+        'date', 'startTime', 'endTime', 'status', 'paymentMethod',
+        'pixPaid', 'notes', 'rescheduleCount', 'bookingToken', 'lastVerifiedToken',
+        'createdAt', 'updatedAt'
+      ])
+      && isValidId(data.clientUid)
+      && data.clientName is string && data.clientName.size() >= 2 && data.clientName.size() <= 100
+      && data.clientPhone is string && data.clientPhone.size() >= 8 && data.clientPhone.size() <= 25
+      && data.clientEmail is string && data.clientEmail.size() <= 120
+      && data.serviceIds is list && data.serviceIds.size() >= 1 && data.serviceIds.size() <= 10 && data.serviceIds[0] is string && data.serviceIds[0].size() <= 128
+      && data.serviceNames is list && data.serviceNames.size() >= 1 && data.serviceNames.size() <= 10 && data.serviceNames[0] is string && data.serviceNames[0].size() <= 120
+      && data.totalPrice is number && data.totalPrice >= 0 && data.totalPrice <= 50000
+      && data.totalDurationMinutes is number && data.totalDurationMinutes >= 10 && data.totalDurationMinutes <= 600
+      && isValidDateStr(data.date)
+      && isValidTimeStr(data.startTime)
+      && isValidTimeStr(data.endTime)
+      && data.status in ['pending', 'confirmed', 'completed', 'cancelled']
+      && data.paymentMethod in ['pix', 'presencial']
+      && data.pixPaid is bool
+      && data.notes is string && data.notes.size() <= 500
+      && data.rescheduleCount is number && data.rescheduleCount >= 0 && data.rescheduleCount <= 10
+      && isValidToken(data.bookingToken)
+      && data.lastVerifiedToken is string && data.lastVerifiedToken.size() <= 64
+      && data.createdAt is timestamp
+      && data.updatedAt == request.time;
+    }
+
+    function isValidAvailabilitySlot(data) {
+      return data.keys().hasAll([
+        'date', 'startTime', 'endTime', 'durationMinutes', 'kind', 'active', 'ownerUid', 'updatedAt'
+      ]) && data.keys().hasOnly([
+        'date', 'startTime', 'endTime', 'durationMinutes', 'kind', 'active', 'ownerUid', 'updatedAt'
+      ])
+      && isValidDateStr(data.date)
+      && isValidTimeStr(data.startTime)
+      && isValidTimeStr(data.endTime)
+      && data.durationMinutes is number && data.durationMinutes >= 10 && data.durationMinutes <= 1440
+      && data.kind in ['appointment', 'block']
+      && data.active is bool
+      && isValidId(data.ownerUid)
+      && data.updatedAt == request.time;
+    }
+
+    function isValidPersonalBlock(data) {
+      return data.keys().hasAll(['title', 'date', 'startTime', 'endTime', 'allDay', 'createdAt', 'updatedAt'])
+      && data.keys().hasOnly(['title', 'date', 'startTime', 'endTime', 'allDay', 'createdAt', 'updatedAt'])
+      && data.title is string && data.title.size() >= 1 && data.title.size() <= 100
+      && isValidDateStr(data.date)
+      && isValidTimeStr(data.startTime)
+      && isValidTimeStr(data.endTime)
+      && data.allDay is bool
+      && data.createdAt is timestamp
+      && data.updatedAt == request.time;
+    }
+
+    function isValidClientTechNote(data) {
+      return data.keys().hasAll([
+        'clientName', 'clientPhone', 'nailFormat', 'gelBrand',
+        'favoriteColors', 'allergies', 'cuticleNotes', 'notes', 'updatedAt'
+      ]) && data.keys().hasOnly([
+        'clientName', 'clientPhone', 'nailFormat', 'gelBrand',
+        'favoriteColors', 'allergies', 'cuticleNotes', 'notes', 'updatedAt'
+      ])
+      && data.clientName is string && data.clientName.size() >= 1 && data.clientName.size() <= 100
+      && data.clientPhone is string && data.clientPhone.size() >= 6 && data.clientPhone.size() <= 25
+      && data.nailFormat is string && data.nailFormat.size() <= 50
+      && data.gelBrand is string && data.gelBrand.size() <= 100
+      && data.favoriteColors is string && data.favoriteColors.size() <= 160
+      && data.allergies is string && data.allergies.size() <= 240
+      && data.cuticleNotes is string && data.cuticleNotes.size() <= 300
+      && data.notes is string && data.notes.size() <= 1000
+      && data.updatedAt == request.time;
+    }
+
+    function isValidAdminRecord(data) {
+      return data.keys().hasAll(['email', 'createdAt'])
+      && data.keys().hasOnly(['email', 'createdAt'])
+      && data.email is string && data.email.size() >= 5 && data.email.size() <= 120
+      && data.createdAt == request.time;
+    }
+
+    function isValidGuestTokenRotation() {
+      return isGuestUid(existing().clientUid)
+        && incoming().lastVerifiedToken == existing().bookingToken
+        && incoming().bookingToken != existing().bookingToken;
+    }
+
+    // ------------------------------------------------------------------
+    // Collection Match Blocks (Exhaustive)
+    // ------------------------------------------------------------------
+
+    // 1. Studio Public Settings (main)
+    match /salon_settings/{settingId} {
+      allow get: if isValidId(settingId) && settingId == 'main';
+      allow list: if false;
+      allow create: if isVerified() && isValidId(settingId) && settingId == 'main'
+        && isValidSalonSettings(incoming()) && isAdmin();
+      allow update: if isVerified() && isValidId(settingId) && settingId == 'main'
+        && isValidSalonSettings(incoming())
+        && incoming().diff(existing()).affectedKeys().hasOnly([
+          'studioName', 'tagline', 'ownerName', 'bio', 'avatarImage',
+          'heroTitle', 'heroSubtitle', 'heroImageUrl',
+          'whatsapp', 'instagram', 'address', 'pixKey', 'pixName', 'pixCity',
+          'depositPercent', 'rescheduleMinHours', 'monthlyGoal',
+          'openTime', 'closeTime', 'slotIntervalMinutes', 'configuredSlots',
+          'workDays', 'blockedDates', 'returnAlertDays', 'updatedAt'
+        ])
+        && isAdmin();
+      allow delete: if false;
+    }
+
+    // 2. Public Categories
+    match /categories/{categoryId} {
+      allow get: if isValidId(categoryId);
+      allow list: if resource.data.active == true || isBootstrappedAdmin();
+      allow create: if isVerified() && isValidId(categoryId)
+        && isValidCategory(incoming()) && incoming().createdAt == request.time && isAdmin();
+      allow update: if isVerified() && isValidId(categoryId)
+        && isValidCategory(incoming())
+        && incoming().createdAt == existing().createdAt
+        && incoming().diff(existing()).affectedKeys().hasOnly(['name', 'order', 'active', 'updatedAt'])
+        && isAdmin();
+      allow delete: if isVerified() && isValidId(categoryId) && isAdmin();
+    }
+
+    // 3. Public Services Catalog
+    match /services/{serviceId} {
+      allow get: if isValidId(serviceId);
+      allow list: if resource.data.active == true || isBootstrappedAdmin();
+      allow create: if isVerified() && isValidId(serviceId)
+        && isValidService(incoming()) && incoming().createdAt == request.time && isAdmin();
+      allow update: if isVerified() && isValidId(serviceId)
+        && isValidService(incoming())
+        && incoming().createdAt == existing().createdAt
+        && incoming().diff(existing()).affectedKeys().hasOnly([
+          'name', 'categoryId', 'description', 'price', 'durationMinutes',
+          'imageUrl', 'featured', 'active', 'order', 'updatedAt'
+        ])
+        && isAdmin();
+      allow delete: if isVerified() && isValidId(serviceId) && isAdmin();
+    }
+
+    // 4. Private Appointments (PII Strictly Isolated to Owner Client + Admin)
+    match /appointments/{appointmentId} {
+      allow get: if isSignedIn() && isValidId(appointmentId)
+        && (existing().clientUid == request.auth.uid || isAdmin());
+      allow list: if isSignedIn()
+        && (resource.data.clientUid == request.auth.uid || isBootstrappedAdmin());
+
+      allow create: if isValidId(appointmentId)
+        && isValidAppointment(incoming())
+        && incoming().createdAt == request.time
+        && incoming().lastVerifiedToken == ''
+        && existsAfter(/databases/$(database)/documents/availability_slots/$(appointmentId))
+        && (
+          isAdmin()
+          || (
+            isVerified()
+            && incoming().clientUid == request.auth.uid
+            && incoming().status == 'pending'
+            && incoming().pixPaid == false
+            && incoming().rescheduleCount == 0
+          )
+          || (
+            !isSignedIn()
+            && isGuestUid(incoming().clientUid)
+            && incoming().status == 'pending'
+            && incoming().pixPaid == false
+            && incoming().rescheduleCount == 0
+          )
+        );
+
+      allow update: if isValidId(appointmentId)
+        && isValidAppointment(incoming())
+        && incoming().createdAt == existing().createdAt
+        && incoming().clientUid == existing().clientUid
+        && (
+          // Tier 1: Admin full appointment lifecycle control
+          (
+            isAdmin()
+            && incoming().diff(existing()).affectedKeys().hasOnly([
+              'clientName', 'clientPhone', 'clientEmail', 'serviceIds', 'serviceNames',
+              'totalPrice', 'totalDurationMinutes', 'date', 'startTime', 'endTime',
+              'status', 'paymentMethod', 'pixPaid', 'notes', 'rescheduleCount', 'updatedAt'
+            ])
+          )
+          ||
+          // Tier 2A: Authenticated Client Online Reschedule (Terminal State Locked)
+          (
+            isVerified()
+            && existing().clientUid == request.auth.uid
+            && existing().status in ['pending', 'confirmed']
+            && incoming().diff(existing()).affectedKeys().hasOnly(['date', 'startTime', 'endTime', 'rescheduleCount', 'updatedAt'])
+            && incoming().rescheduleCount == existing().rescheduleCount + 1
+            && existsAfter(/databases/$(database)/documents/availability_slots/$(appointmentId))
+          )
+          ||
+          // Tier 2B: Authenticated Client Cancel Booking (Terminal State Locked)
+          (
+            isVerified()
+            && existing().clientUid == request.auth.uid
+            && existing().status in ['pending', 'confirmed']
+            && incoming().diff(existing()).affectedKeys().hasOnly(['status', 'updatedAt'])
+            && incoming().status == 'cancelled'
+          )
+          ||
+          // Tier 2C: Guest Client Online Reschedule via Cryptographic Token Rotation
+          (
+            isValidGuestTokenRotation()
+            && existing().status in ['pending', 'confirmed']
+            && incoming().diff(existing()).affectedKeys().hasOnly([
+              'date', 'startTime', 'endTime', 'rescheduleCount',
+              'bookingToken', 'lastVerifiedToken', 'updatedAt'
+            ])
+            && incoming().rescheduleCount == existing().rescheduleCount + 1
+            && existsAfter(/databases/$(database)/documents/availability_slots/$(appointmentId))
+          )
+          ||
+          // Tier 2D: Guest Client Cancel Booking via Cryptographic Token Rotation
+          (
+            isValidGuestTokenRotation()
+            && existing().status in ['pending', 'confirmed']
+            && incoming().diff(existing()).affectedKeys().hasOnly([
+              'status', 'bookingToken', 'lastVerifiedToken', 'updatedAt'
+            ])
+            && incoming().status == 'cancelled'
+          )
+        );
+
+      allow delete: if isVerified() && isValidId(appointmentId) && isAdmin();
+    }
+
+    // 5. Public Zero-PII Availability Slots (Split Collection for Calendar Blocking)
+    match /availability_slots/{slotId} {
+      allow get: if isValidId(slotId)
+        && (existing().active == true || (isSignedIn() && existing().ownerUid == request.auth.uid) || isAdmin());
+      allow list: if resource.data.active == true
+        || (isSignedIn() && resource.data.ownerUid == request.auth.uid)
+        || isBootstrappedAdmin();
+
+      allow create: if isValidId(slotId)
+        && isValidAvailabilitySlot(incoming())
+        && (
+          (isVerified() && isAdmin() && incoming().kind in ['appointment', 'block'])
+          || (
+            incoming().kind == 'appointment'
+            && incoming().active == true
+            && existsAfter(/databases/$(database)/documents/appointments/$(slotId))
+            && (
+              (isVerified() && incoming().ownerUid == request.auth.uid)
+              || (!isSignedIn() && isGuestUid(incoming().ownerUid))
+            )
+          )
+        );
+
+      allow update: if isValidId(slotId)
+        && isValidAvailabilitySlot(incoming())
+        && incoming().kind == existing().kind
+        && incoming().ownerUid == existing().ownerUid
+        && (
+          (
+            isVerified() && isAdmin()
+            && incoming().diff(existing()).affectedKeys().hasOnly(['date', 'startTime', 'endTime', 'durationMinutes', 'active', 'updatedAt'])
+          )
+          ||
+          (
+            existing().kind == 'appointment'
+            && existing().active == true
+            && incoming().diff(existing()).affectedKeys().hasOnly(['date', 'startTime', 'endTime', 'active', 'updatedAt'])
+            && getAfter(/databases/$(database)/documents/appointments/$(slotId)).data.updatedAt == request.time
+            && getAfter(/databases/$(database)/documents/appointments/$(slotId)).data.date == incoming().date
+            && getAfter(/databases/$(database)/documents/appointments/$(slotId)).data.startTime == incoming().startTime
+            && getAfter(/databases/$(database)/documents/appointments/$(slotId)).data.endTime == incoming().endTime
+          )
+        );
+
+      allow delete: if isVerified() && isValidId(slotId) && isAdmin();
+    }
+
+    // 6. Admin-Only Personal Schedule Blocks
+    match /personal_blocks/{blockId} {
+      allow get: if isVerified() && isValidId(blockId) && isAdmin();
+      allow list: if isBootstrappedAdmin();
+      allow create: if isVerified() && isValidId(blockId)
+        && isValidPersonalBlock(incoming())
+        && incoming().createdAt == request.time
+        && existsAfter(/databases/$(database)/documents/availability_slots/$(blockId))
+        && isAdmin();
+      allow update: if isVerified() && isValidId(blockId)
+        && isValidPersonalBlock(incoming())
+        && incoming().createdAt == existing().createdAt
+        && incoming().diff(existing()).affectedKeys().hasOnly(['title', 'date', 'startTime', 'endTime', 'allDay', 'updatedAt'])
+        && isAdmin();
+      allow delete: if isVerified() && isValidId(blockId) && isAdmin();
+    }
+
+    // 7. Admin-Only Client Technical Notes (Ficha Técnica — PII Protected)
+    match /client_tech_notes/{noteId} {
+      allow get: if isVerified() && isValidId(noteId) && isAdmin();
+      allow list: if isBootstrappedAdmin();
+      allow create: if isVerified() && isValidId(noteId)
+        && isValidClientTechNote(incoming())
+        && isAdmin();
+      allow update: if isVerified() && isValidId(noteId)
+        && isValidClientTechNote(incoming())
+        && incoming().diff(existing()).affectedKeys().hasOnly([
+          'clientName', 'clientPhone', 'nailFormat', 'gelBrand',
+          'favoriteColors', 'allergies', 'cuticleNotes', 'notes', 'updatedAt'
+        ])
+        && isAdmin();
+      allow delete: if isVerified() && isValidId(noteId) && isAdmin();
+    }
+
+    // 8. Trusted Admins Registry (Strictly Admin-Managed)
+    match /admins/{uid} {
+      allow get: if isVerified() && isValidId(uid) && (request.auth.uid == uid || isBootstrappedAdmin());
+      allow list: if isBootstrappedAdmin();
+      allow create: if isVerified() && isValidId(uid)
+        && isValidAdminRecord(incoming())
+        && isBootstrappedAdmin();
+      allow update: if false;
+      allow delete: if isVerified() && isValidId(uid) && isBootstrappedAdmin();
+    }
+  }
+}

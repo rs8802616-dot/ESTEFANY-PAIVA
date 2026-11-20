@@ -1,0 +1,10 @@
+# Security Specification — Estefany Paiva Nails v36 (Firestore ABAC & Zero-Trust)
+
+## 1. Data Invariants
+1. **PII Isolation (Split Collection)**: Client appointments (`/appointments/{id}`) contain PII (`clientName`, `clientPhone`, `clientEmail`) and may ONLY be read by the authenticated owning client (`resource.data.clientUid == request.auth.uid`) or a verified Admin. Unauthenticated guests NEVER read or list `/appointments`. Public calendar conflict resolution reads strictly from `/availability_slots/{id}`, which contains zero PII and requires `resource.data.active == true`.
+2. **Cryptographic Token Rotation for Guest Self-Management**: When a client books with Name + WhatsApp (without Google Login), the device generates a high-entropy `bookingToken` and stores its own booking receipt locally. To reschedule or cancel online, the client MUST supply `lastVerifiedToken == existing().bookingToken` AND rotate `bookingToken` to a fresh secret. Because `/appointments` is unreadable to guests, no third party can forge a reschedule or cancel.
+3. **Atomicity Guarantee**: Every appointment creation, reschedule, or cancellation atomically updates `/availability_slots/{appointmentId}` in the same `writeBatch`, verified via `existsAfter` and `getAfter` matching `updatedAt`, `date`, `startTime`, and `endTime`.
+4. **Terminal State Locking**: Once an appointment reaches `completed` or `cancelled`, non-admin clients (Google or guest) are strictly forbidden from modifying any field.
+5. **Immutable Fields**: `createdAt`, `clientUid`, `totalPrice`, `totalDurationMinutes`, `serviceIds`, and `serviceNames` cannot be altered by non-admin clients after creation.
+6. **Temporal Integrity**: All `createdAt` on create and `updatedAt` on create/update MUST equal `request.time`.
+7. **Admin Exclusivity**: `salon_settings`, `categories`, `services`, `personal_blocks`, `client_tech_notes`, and `admins` are strictly write-protected to verified Admins (`rs8802616@gmail.com` with `email_verified == true` or verified UID in `/admins/{uid}`).
