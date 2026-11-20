@@ -337,8 +337,16 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
               />
             </div>
 
-            <div className="space-y-2">
-              <div className="text-xs font-medium text-[#95847C]">Fotografia do procedimento</div>
+            <div className="space-y-2.5">
+              <div className="text-xs font-medium text-[#95847C]">Foto do procedimento</div>
+              {editingSvc.imageUrl && (
+                <div className="flex items-center gap-3 p-2 rounded-xl bg-[#FAF6F1] border border-[#E8D6CB]">
+                  <div className="w-16 h-12 rounded-lg overflow-hidden shrink-0 bg-white">
+                    <SafeImage src={editingSvc.imageUrl} alt="Prévia" className="w-full h-full object-cover" />
+                  </div>
+                  <span className="text-xs text-[#95847C]">Foto atual selecionada</span>
+                </div>
+              )}
               <div className="grid grid-cols-5 gap-2">
                 {STUDIO_IMAGE_PRESETS.map((preset) => (
                   <button
@@ -356,9 +364,9 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
                   </button>
                 ))}
               </div>
-              <label className="min-h-[42px] inline-flex items-center gap-2 rounded-xl border border-[#E8D6CB] bg-white px-4 py-2 text-xs font-medium text-[#594943] hover:border-[#C4A477] cursor-pointer">
-                <Upload className="w-3.5 h-3.5 text-[#C4A477]" />
-                <span>Ou enviar foto do dispositivo (comprimida)</span>
+              <label className="min-h-[42px] inline-flex items-center gap-2 rounded-xl border border-[#E8D6CB] bg-white px-4 py-2 text-xs font-semibold text-[#594943] hover:border-[#C4A477] cursor-pointer">
+                <Upload className="w-4 h-4 text-[#C4A477]" />
+                <span>Escolher foto do celular / PC</span>
                 <input
                   type="file"
                   accept="image/*"

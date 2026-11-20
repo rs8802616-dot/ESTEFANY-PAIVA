@@ -205,3 +205,11 @@ O projeto foi migrado para a arquitetura completa em **React 19 + TypeScript + V
 - **Títulos e Nomes Naturais sem `&` Comercial**:
   - Substituído `&` por `e` nos serviços e títulos principais (`Spa dos Pés e Pedicure em Gel`, `Banho de Gel e Blindagem`, `Seu Combo e Horário`, `Serviços e Categorias`, `Clientes e Ficha Técnica`, `Detalhes e WhatsApp`).
   - Cache do Workbox PWA elevado para `estefany-nails-v51-clean-typography-icons`.
+
+
+### v52 — Atalhos Diretos para Editar Procedimentos, Preços e Fotos
+- **Acesso Rápido no Início (Dashboard) e no Menu Lateral (`AdminPanel.tsx`)**:
+  - Adicionados os botões **"Editar Procedimentos e Fotos"** e **"Foto de Capa e Perfil"** diretamente no topo do Dashboard (`Início`) e na barra lateral (`Menu 2 Traços`), eliminando a necessidade de procurar dentro da aba `Clientes` ou `Perfil`.
+- **Prévia e Upload Simplificado (`AdminCatalogTab.tsx`)**:
+  - Ao editar qualquer procedimento, agora aparece a prévia da foto atual selecionada e o botão **"Escolher foto do celular / PC"** em destaque.
+  - Cache do Workbox PWA elevado para `estefany-nails-v52-easy-edit-services-photos`.

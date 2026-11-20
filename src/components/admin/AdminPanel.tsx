@@ -4,6 +4,7 @@ import {
   ArrowLeft,
   CalendarDays,
   CalendarPlus,
+  Camera,
   DollarSign,
   Eye,
   EyeOff,
@@ -654,7 +655,37 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             );
           })}
 
-          <div className="pt-4 mt-4 border-t border-white/10">
+          <div className="pt-4 mt-4 border-t border-white/10 space-y-1.5">
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab('clientes');
+                setClientsSubView('catalog');
+                setSidebarOpen(false);
+              }}
+              className={`w-full min-h-[44px] flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium transition-colors cursor-pointer ${
+                activeTab === 'clientes' && clientsSubView === 'catalog'
+                  ? 'bg-[#C4A477] text-[#594943] font-semibold'
+                  : 'text-[#FAF6F1]/85 hover:bg-white/10 hover:text-white'
+              }`}
+            >
+              <Scissors className="w-4 h-4 shrink-0 text-[#C4A477]" />
+              <span className="truncate">Procedimentos e Fotos</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setProfileScreen(31);
+                setActiveTab('perfil');
+                setSidebarOpen(false);
+              }}
+              className="w-full min-h-[44px] flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium text-[#FAF6F1]/85 hover:bg-white/10 hover:text-white transition-colors cursor-pointer"
+            >
+              <Camera className="w-4 h-4 shrink-0 text-[#C4A477]" />
+              <span className="truncate">Capa e Foto do Studio</span>
+            </button>
+
             <button
               type="button"
               onClick={() => {
@@ -918,14 +949,40 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       </p>
                     </div>
 
-                    <button
-                      type="button"
-                      onClick={handleOpenNewWalkIn}
-                      className="min-h-[44px] inline-flex items-center justify-center gap-2 rounded-xl bg-[#594943] px-4 py-2 text-xs sm:text-sm font-semibold text-white hover:bg-[#433631] transition-colors shrink-0 cursor-pointer"
-                    >
-                      <CalendarPlus className="w-4 h-4 text-[#C4A477]" />
-                      <span>5. Novo Agendamento</span>
-                    </button>
+                    <div className="flex flex-wrap items-center gap-2 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setActiveTab('clientes');
+                          setClientsSubView('catalog');
+                        }}
+                        className="min-h-[44px] inline-flex items-center justify-center gap-2 rounded-xl bg-white border border-[#E8D6CB] px-4 py-2 text-xs sm:text-sm font-semibold text-[#594943] hover:border-[#C4A477] transition-colors cursor-pointer"
+                      >
+                        <Scissors className="w-4 h-4 text-[#C4A477]" />
+                        <span>Editar Procedimentos e Fotos</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setProfileScreen(31);
+                          setActiveTab('perfil');
+                        }}
+                        className="min-h-[44px] inline-flex items-center justify-center gap-2 rounded-xl bg-white border border-[#E8D6CB] px-4 py-2 text-xs sm:text-sm font-semibold text-[#594943] hover:border-[#C4A477] transition-colors cursor-pointer"
+                      >
+                        <Camera className="w-4 h-4 text-[#C4A477]" />
+                        <span>Foto de Capa e Perfil</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={handleOpenNewWalkIn}
+                        className="min-h-[44px] inline-flex items-center justify-center gap-2 rounded-xl bg-[#594943] px-4 py-2 text-xs sm:text-sm font-semibold text-white hover:bg-[#433631] transition-colors shrink-0 cursor-pointer"
+                      >
+                        <CalendarPlus className="w-4 h-4 text-[#C4A477]" />
+                        <span>Novo Agendamento</span>
+                      </button>
+                    </div>
                   </div>
 
                   {/* 4 Exact KPIs */}
@@ -1230,7 +1287,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   }`}
                 >
                   <Users className="w-3.5 h-3.5 text-[#C4A477]" />
-                  <span>12–14. Lista, Cadastro & Perfil da Cliente</span>
+                  <span>Clientes e Ficha</span>
                 </button>
                 <button
                   type="button"
@@ -1242,7 +1299,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   }`}
                 >
                   <Scissors className="w-3.5 h-3.5 text-[#C4A477]" />
-                  <span>15–16. Catálogo & Cadastro de Serviços</span>
+                  <span>Procedimentos e Fotos (Catálogo)</span>
                 </button>
               </div>
 
