@@ -47,7 +47,7 @@ export default defineConfig(() => {
           ],
         },
         workbox: {
-          cacheId: 'estefany-nails-v47-recharts-unified-finance',
+          cacheId: 'estefany-nails-v48-atendeja-faithful-bi',
           skipWaiting: true,
           clientsClaim: true,
           cleanupOutdatedCaches: true,

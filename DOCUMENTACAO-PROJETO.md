@@ -163,3 +163,12 @@ O projeto foi migrado para a arquitetura completa em **React 19 + TypeScript + V
   - **Gráfico de Rosca (`PieChart` Donut)** com alternador único entre `Receitas` (por origem/pagamento) e `Despesas` (por categoria).
 - **Central Financeira Unificada em Um Único Local (Zero Poluição e Zero Duplicação)**:
   - Removidas as 8 sub-abas repetidas (`17. Resumo` a `24. Desempenho`). Agora todas as áreas financeiras, gráficos, lançamento único (`(+) Receita` / `(-) Despesa`), contas a pagar/receber, fechamento DRE, calculadora de lucro por hora e extrato estão organizados de forma limpa em uma única tela contínua (mantendo o salto automático pelas âncoras caso o usuário clique no Mapa das 33 Telas).
+
+
+### v48 — Fidelidade Total ao Painel de Relatórios do AtendeJá (`GraficosVendasPanel.tsx`) na Paleta Luxury Nude
+- **Novos Blocos Fiéis ao `AtendeJá` (`src/components/admin/AdminFinanceSuite.tsx`)**:
+  - **Botão "Copiar Resumo"** na barra superior: copia o resumo executivo formatado pronto para enviar no WhatsApp.
+  - **Gráfico de Rosca (`PieChart`) com "Total Mix" centralizado + Legenda Detalhada** exibindo cada categoria com `%` e `R$`.
+  - **Horários de Pico do Studio (`BarChart` 08h–18h)** com cores dinâmicas por volume de atendimentos e badge indicando o horário de pico.
+  - **Receitas por Forma de Pagamento** com barras de progresso, ícones (`Pix`, `Cartão`, `Presencial/Dinheiro`), percentuais e valores exatos.
+  - **Tabela Analítica de Performance de Serviços com Busca Instantânea**: medalhas de Rank (`1º`, `2º`, `3º`), Preço Médio, Qtd Vendida, Faturamento Total e `% do Total` com mini-barra de progresso.
