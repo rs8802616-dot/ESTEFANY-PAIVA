@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { onAuthStateChanged, type User } from 'firebase/auth';
+import { ArrowLeft, Eye, Sparkles } from 'lucide-react';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { ToastProvider } from './components/Toast';
 import { OfflineIndicator } from './components/PWAInstallButton';
@@ -33,6 +34,7 @@ type AppMode = 'client' | 'admin';
 
 function SalonAppShell() {
   const [mode, setMode] = useState<AppMode>('client');
+  const [adminPreviewClient, setAdminPreviewClient] = useState(false);
   const [routeChecked, setRouteChecked] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -119,8 +121,11 @@ function SalonAppShell() {
     setLocalBookings(updated);
   }, []);
 
-  const exitAdmin = () => {
-    window.open('/', '_blank', 'noopener,noreferrer');
+  // Quando a admin clica para visualizar a Página Pública (Telas 7 a 11),
+  // permanece dentro de /painel com barra flutuante para voltar em 1 clique!
+  const handlePreviewClientFromAdmin = () => {
+    setAdminPreviewClient(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   if (!routeChecked) {
@@ -130,25 +135,48 @@ function SalonAppShell() {
   return (
     <>
       <OfflineIndicator />
-      {mode === 'admin' ? (
+      {mode === 'admin' && !adminPreviewClient ? (
         <AdminPanel
           user={user}
           isAdmin={isAdmin}
           authReady={authReady}
           settings={settings}
-          onExitAdmin={exitAdmin}
+          onExitAdmin={handlePreviewClientFromAdmin}
         />
       ) : (
-        <ClientPortal
-          settings={settings}
-          categories={categories}
-          services={services}
-          busySlots={busySlots}
-          user={user}
-          clientAppointments={clientAppointments}
-          onAppointmentCreated={handleUpsertClientBooking}
-          onAppointmentUpdated={handleUpsertClientBooking}
-        />
+        <>
+          {mode === 'admin' && adminPreviewClient && (
+            <div className="sticky top-0 z-50 bg-[#594943] text-[#FAF6F1] border-b border-[#C4A477]/40 px-4 py-2.5 shadow-md flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-2 text-xs sm:text-sm font-medium">
+                <span className="w-7 h-7 rounded-lg bg-[#C4A477]/20 text-[#C4A477] flex items-center justify-center shrink-0">
+                  <Eye className="w-4 h-4" />
+                </span>
+                <span>
+                  <strong className="text-[#C4A477]">Modo Visualização (Telas 7 a 11):</strong> Você está vendo a Página da Cliente sem sair do Painel Admin.
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setAdminPreviewClient(false)}
+                className="min-h-[38px] inline-flex items-center gap-2 rounded-xl bg-[#C4A477] px-4 py-1.5 text-xs font-bold text-[#594943] hover:bg-[#E8D6CB] transition-colors cursor-pointer shrink-0 shadow-sm"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                <span>Voltar ao Painel da Admin</span>
+                <Sparkles className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
+          <ClientPortal
+            settings={settings}
+            categories={categories}
+            services={services}
+            busySlots={busySlots}
+            user={user}
+            clientAppointments={clientAppointments}
+            onAppointmentCreated={handleUpsertClientBooking}
+            onAppointmentUpdated={handleUpsertClientBooking}
+          />
+        </>
       )}
     </>
   );

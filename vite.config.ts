@@ -47,7 +47,7 @@ export default defineConfig(() => {
           ],
         },
         workbox: {
-          cacheId: 'estefany-nails-v42-strict-token-vault',
+          cacheId: 'estefany-nails-v43-drawer-tablet-persistent',
           skipWaiting: true,
           clientsClaim: true,
           cleanupOutdatedCaches: true,

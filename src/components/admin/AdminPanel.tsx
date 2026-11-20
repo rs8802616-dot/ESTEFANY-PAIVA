@@ -19,6 +19,7 @@ import {
   User,
   Users,
   Wallet,
+  X,
 } from 'lucide-react';
 import { AdminAgendaTab } from './AdminAgendaTab';
 import { AdminClientsTab } from './AdminClientsTab';
@@ -104,6 +105,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 }) => {
   const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState<AdminTab>('inicio');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showSplashScreen2, setShowSplashScreen2] = useState(false);
   const [show33Explorer, setShow33Explorer] = useState(false);
   const [clientsSubView, setClientsSubView] = useState<'crm' | 'catalog'>('crm');
@@ -280,6 +282,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
    * Navegador Direto para qualquer uma das 33 Telas Obrigatórias
    */
   const handleJumpToScreen = (screenId: number) => {
+    setSidebarOpen(false);
     setShow33Explorer(false);
     setShowSplashScreen2(false);
 
@@ -538,17 +541,41 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   }
 
   return (
-    <div className="min-h-screen bg-[#FAF6F1] text-[#594943] flex">
-      {/* Fixed Sidebar (>= 768px) — 5 Official Navigation Tabs */}
-      <aside className="hidden md:flex md:flex-col md:w-64 lg:w-68 bg-[#594943] text-[#FAF6F1] fixed inset-y-0 left-0 z-40 no-print">
-        <div className="px-6 py-6 border-b border-white/10">
-          <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#C4A477] block mb-1">
-            Luxury Nude Edition
-          </span>
-          <div className="font-editorial text-2xl font-semibold leading-tight">
-            {settings.studioName}
+    <div className="min-h-screen bg-[#FAF6F1] text-[#594943] flex flex-col">
+      {/* Backdrop escuro suave quando o Menu 2 Traços (Aba Lateral) está aberto */}
+      {sidebarOpen && (
+        <div
+          onClick={() => setSidebarOpen(false)}
+          className="fixed inset-0 z-40 bg-[#594943]/45 backdrop-blur-xs transition-opacity no-print"
+          aria-hidden="true"
+        />
+      )}
+
+      {/* Aba Lateral Recolhível (Drawer acionado pelo botão Menu 2 Traços) */}
+      <aside
+        aria-label="Menu lateral retrátil"
+        className={`fixed inset-y-0 left-0 z-50 w-72 bg-[#594943] text-[#FAF6F1] flex flex-col shadow-2xl transition-transform duration-300 ease-in-out no-print ${
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
+        <div className="px-6 py-5 border-b border-white/10 flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#C4A477] block mb-1">
+              Luxury Nude Edition
+            </span>
+            <div className="font-editorial text-2xl font-semibold leading-tight truncate">
+              {settings.studioName}
+            </div>
+            <div className="mt-1 text-xs text-[#E8D6CB]/75 truncate">{effectiveEmail}</div>
           </div>
-          <div className="mt-1 text-xs text-[#E8D6CB]/75 truncate">{effectiveEmail}</div>
+          <button
+            type="button"
+            onClick={() => setSidebarOpen(false)}
+            aria-label="Recolher menu lateral"
+            className="p-2 rounded-xl bg-white/10 text-[#FAF6F1] hover:bg-white/20 transition-colors cursor-pointer shrink-0"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
 
         <nav className="flex-1 px-3 py-5 space-y-1.5 overflow-y-auto">
@@ -559,7 +586,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
               <button
                 key={item.id}
                 type="button"
-                onClick={() => setActiveTab(item.id)}
+                onClick={() => {
+                  setActiveTab(item.id);
+                  setSidebarOpen(false);
+                }}
                 className={`w-full min-h-[46px] flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium transition-colors cursor-pointer ${
                   active
                     ? 'bg-[#C4A477] text-[#594943] font-semibold shadow-sm'
@@ -575,7 +605,14 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           <div className="pt-4 mt-4 border-t border-white/10">
             <button
               type="button"
-              onClick={() => setShow33Explorer((v) => !v)}
+              onClick={() => {
+                setSidebarOpen(false);
+                if (activeTab === 'perfil' && profileSubScreen === 33) {
+                  setShow33Explorer(false);
+                } else {
+                  setShow33Explorer((v) => !v);
+                }
+              }}
               className="w-full min-h-[42px] flex items-center justify-between rounded-xl px-3.5 py-2 text-xs font-semibold bg-white/10 text-[#E8D6CB] hover:bg-white/15 transition-colors cursor-pointer"
             >
               <span className="flex items-center gap-2">
@@ -592,16 +629,19 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
         <div className="p-3 border-t border-white/10 space-y-1.5">
           <button
             type="button"
-            onClick={onExitAdmin}
-            className="w-full min-h-[42px] flex items-center gap-2.5 rounded-xl px-3.5 py-2 text-xs font-medium text-[#FAF6F1]/85 hover:bg-white/10 hover:text-white transition-colors"
+            onClick={() => {
+              setSidebarOpen(false);
+              onExitAdmin();
+            }}
+            className="w-full min-h-[42px] flex items-center gap-2.5 rounded-xl px-3.5 py-2 text-xs font-medium text-[#FAF6F1]/85 hover:bg-white/10 hover:text-white transition-colors cursor-pointer"
           >
-            <ArrowLeft className="w-4 h-4" />
-            <span>7. Página Pública</span>
+            <Eye className="w-4 h-4 text-[#C4A477]" />
+            <span>7. Ver Tela da Cliente</span>
           </button>
           <button
             type="button"
             onClick={() => void handleSignOutAdmin()}
-            className="w-full min-h-[42px] flex items-center gap-2.5 rounded-xl px-3.5 py-2 text-xs font-medium text-[#FAF6F1]/65 hover:bg-white/10 hover:text-white transition-colors"
+            className="w-full min-h-[42px] flex items-center gap-2.5 rounded-xl px-3.5 py-2 text-xs font-medium text-[#FAF6F1]/65 hover:bg-white/10 hover:text-white transition-colors cursor-pointer"
           >
             <LogOut className="w-4 h-4" />
             <span>Sair do painel</span>
@@ -609,23 +649,76 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
         </div>
       </aside>
 
-      {/* Main Content Area */}
-      <div className="flex-1 md:pl-64 lg:pl-68 min-w-0 pb-24 md:pb-12">
-        {/* Mobile Admin Header */}
-        <header className="md:hidden px-4 pt-4 pb-3 flex items-center justify-between gap-2 border-b border-[#E8D6CB] bg-white no-print">
-          <div className="min-w-0">
-            <span className="text-[9px] font-bold uppercase tracking-widest text-[#C4A477] block">
-              Luxury Nude • 33 Telas
-            </span>
-            <div className="font-editorial text-lg font-semibold text-[#594943] truncate">
-              {settings.studioName}
-            </div>
-          </div>
-          <div className="flex items-center gap-1.5 shrink-0">
+      {/* Main Content Area — 100% Expansivo no Tablet Horizontal & Desktop */}
+      <div className="flex-1 w-full min-w-0 pb-24 lg:pb-12">
+        {/* Top Header Universal com Botão "Menu 2 Traços" */}
+        <header className="sticky top-0 z-30 px-4 sm:px-6 lg:px-10 py-3 flex items-center justify-between gap-3 border-b border-[#E8D6CB] bg-white/95 backdrop-blur-md no-print">
+          <div className="flex items-center gap-3 min-w-0">
+            {/* Botão Menu 2 Traços para Abrir/Recolher a Aba Lateral */}
             <button
               type="button"
-              onClick={() => setShow33Explorer((v) => !v)}
-              className="min-h-[38px] inline-flex items-center gap-1 rounded-xl bg-[#F2EAE4] border border-[#E8D6CB] px-2.5 py-1.5 text-xs font-semibold text-[#594943]"
+              onClick={() => setSidebarOpen((v) => !v)}
+              aria-label="Abrir ou recolher menu lateral"
+              className="min-h-[42px] inline-flex items-center gap-2.5 rounded-xl bg-[#FAF6F1] hover:bg-[#F2EAE4] border border-[#E8D6CB] px-3.5 py-2 text-xs font-semibold text-[#594943] transition-colors cursor-pointer shrink-0 shadow-2xs"
+            >
+              <svg
+                className="w-5 h-5 text-[#594943]"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.3"
+                strokeLinecap="round"
+              >
+                <line x1="3" y1="8.5" x2="21" y2="8.5" />
+                <line x1="3" y1="15.5" x2="15" y2="15.5" />
+              </svg>
+              <span className="hidden sm:inline">Menu</span>
+            </button>
+
+            <div className="min-w-0">
+              <span className="text-[9px] font-bold uppercase tracking-widest text-[#C4A477] block">
+                Luxury Nude • Gestão Exclusiva
+              </span>
+              <div className="font-editorial text-lg sm:text-xl font-semibold text-[#594943] truncate">
+                {settings.studioName}
+              </div>
+            </div>
+          </div>
+
+          {/* Navegação Horizontal Rápida em Tablet Horizontal / Desktop (>= 1024px) */}
+          <div className="hidden lg:flex items-center gap-1.5 bg-[#FAF6F1] p-1 rounded-2xl border border-[#E8D6CB]">
+            {NAV_ITEMS.map((item) => {
+              const Icon = item.icon;
+              const active = activeTab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => setActiveTab(item.id)}
+                  className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                    active
+                      ? 'bg-[#594943] text-[#FAF6F1] shadow-2xs'
+                      : 'text-[#95847C] hover:text-[#594943]'
+                  }`}
+                >
+                  <Icon className={`w-3.5 h-3.5 ${active ? 'text-[#C4A477]' : 'text-[#95847C]'}`} />
+                  <span>{item.label}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={() => {
+                if (activeTab === 'perfil' && profileSubScreen === 33) {
+                  setShow33Explorer(false);
+                } else {
+                  setShow33Explorer((v) => !v);
+                }
+              }}
+              className="min-h-[40px] inline-flex items-center gap-1.5 rounded-xl bg-[#F2EAE4] hover:bg-[#E8D6CB] border border-[#E8D6CB] px-3 py-1.5 text-xs font-semibold text-[#594943] transition-colors cursor-pointer"
             >
               <Layers className="w-3.5 h-3.5 text-[#C4A477]" />
               <span>33 Telas</span>
@@ -633,18 +726,19 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             <button
               type="button"
               onClick={onExitAdmin}
-              className="min-h-[38px] inline-flex items-center gap-1 rounded-xl border border-[#E8D6CB] px-2.5 py-1.5 text-xs font-medium text-[#594943]"
+              className="min-h-[40px] inline-flex items-center gap-1.5 rounded-xl bg-[#594943] hover:bg-[#433631] px-3.5 py-1.5 text-xs font-semibold text-[#FAF6F1] transition-colors cursor-pointer"
             >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Site</span>
+              <Eye className="w-3.5 h-3.5 text-[#C4A477]" />
+              <span className="hidden sm:inline">Ver Tela da Cliente</span>
+              <span className="sm:hidden">Cliente</span>
             </button>
           </div>
         </header>
 
-        <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
-          {/* Interactive 33-Screen Quick Jumper Drawer */}
-          {show33Explorer && (
-            <section className="bg-white rounded-3xl border border-[#C4A477] p-5 shadow-lg space-y-4 no-print">
+        <main className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-10 py-6 sm:py-8 space-y-6">
+          {/* Interactive 33-Screen Quick Jumper (Sem scroll interno cortando cards e sem duplicar na Tela 33) */}
+          {show33Explorer && !(activeTab === 'perfil' && profileSubScreen === 33) && (
+            <section className="bg-white rounded-3xl border border-[#C4A477] p-5 sm:p-6 shadow-lg space-y-4 no-print">
               <div className="flex items-center justify-between gap-2">
                 <div>
                   <span className="text-[10px] font-bold uppercase tracking-widest text-[#C4A477] block">
@@ -657,18 +751,18 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 <button
                   type="button"
                   onClick={() => setShow33Explorer(false)}
-                  className="px-3 py-1.5 rounded-xl bg-[#FAF6F1] border border-[#E8D6CB] text-xs font-semibold text-[#594943]"
+                  className="px-3.5 py-1.5 rounded-xl bg-[#FAF6F1] border border-[#E8D6CB] text-xs font-semibold text-[#594943] cursor-pointer"
                 >
                   Fechar
                 </button>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 max-h-72 overflow-y-auto pr-1">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2.5">
                 {MANDATORY_SCREENS_33.map((scr) => (
                   <button
                     key={scr.number}
                     type="button"
                     onClick={() => handleJumpToScreen(scr.number)}
-                    className="flex items-center gap-2 p-2.5 rounded-xl bg-[#FAF6F1] hover:bg-[#F2EAE4] border border-[#E8D6CB] text-left transition-colors cursor-pointer"
+                    className="flex items-center gap-2.5 p-2.5 rounded-xl bg-[#FAF6F1] hover:bg-[#F2EAE4] border border-[#E8D6CB] text-left transition-colors cursor-pointer"
                   >
                     <span className="w-6 h-6 rounded-lg bg-[#594943] text-[#FAF6F1] text-[11px] font-bold flex items-center justify-center shrink-0">
                       {scr.number}
@@ -1100,10 +1194,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
         </main>
       </div>
 
-      {/* Mobile Floating Glassmorphic Bottom Navigation — 5 Official Tabs */}
+      {/* Mobile & Tablet Vertical Floating Glassmorphic Bottom Navigation — 5 Official Tabs */}
       <nav
         aria-label="Menu inferior principal"
-        className="md:hidden fixed bottom-3 left-3 right-3 z-50 mb-safe no-print"
+        className="lg:hidden fixed bottom-3 left-3 right-3 z-40 mb-safe no-print"
       >
         <div className="glass-nav rounded-2xl border border-white/15 shadow-xl px-1.5 py-1.5 grid grid-cols-5 items-center">
           {NAV_ITEMS.map((item) => {

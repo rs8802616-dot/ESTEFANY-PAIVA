@@ -1,17 +1,20 @@
 /**
  * Proteção criptográfica da rota administrativa via token secreto na URL +
- * Autenticação PBKDF2-HMAC-SHA256 (250.000 iterações via Web Crypto API).
+ * Autenticação persistente PBKDF2-HMAC-SHA256 (250.000 iterações via Web Crypto API).
  *
- * REGRAS DE SEGURANÇA:
- * 1. As rotas `/admin` e `#/admin` são 100% bloqueadas e redirecionam para `/`.
- * 2. A rota `/painel` SEM o parâmetro `?k=<TOKEN_SECRETO>` é 100% bloqueada enquanto
- *    a administradora não estiver autenticada com login e senha.
- * 3. Nenhum token, e-mail ou senha em texto puro fica salvo no código ou no Git:
- *    apenas hashes irreversíveis SHA-256 e chaves derivadas PBKDF2-HMAC-SHA256 (250.000 iterações).
+ * REGRAS DE SEGURANÇA E PERSISTÊNCIA NO TABLET / CELULAR:
+ * 1. Para quem NÃO está autenticado: `/admin`, `#/admin` e `/painel` (sem `?k=<TOKEN_SECRETO>`)
+ *    são 100% bloqueados e redirecionam imediatamente para `/`.
+ * 2. Após a administradora entrar pelo link com token e fazer login com e-mail e senha,
+ *    a sessão criptografada fica salva no dispositivo (`localStorage`). Assim, se ela fechar
+ *    o app no tablet/celular e abrir novamente, o aplicativo abre direto no Painel Admin
+ *    sem voltar para a tela da cliente.
+ * 3. Ao clicar em "Sair do painel", a sessão criptografada é apagada do dispositivo.
  */
 
-const VAULT_AUTH_SESSION_KEY = 'epn_admin_vault_auth_v42';
-const VAULT_AUTH_EMAIL_KEY = 'epn_admin_vault_email_v42';
+const VAULT_AUTH_SESSION_KEY = 'epn_admin_vault_auth_v43';
+const VAULT_AUTH_EMAIL_KEY = 'epn_admin_vault_email_v43';
+const VAULT_PERSISTENT_MODE_KEY = 'epn_admin_persistent_mode_v43';
 
 // Hash SHA-256 irreversível de 256 bits do token secreto da URL
 const DEFAULT_ADMIN_TOKEN_SHA256 =
@@ -65,7 +68,10 @@ function getExpectedTokenHash(): string {
 
 export function isVaultAdminAuthenticated(): boolean {
   try {
-    const stored = sessionStorage.getItem(VAULT_AUTH_SESSION_KEY) || '';
+    const stored =
+      localStorage.getItem(VAULT_AUTH_SESSION_KEY) ||
+      sessionStorage.getItem(VAULT_AUTH_SESSION_KEY) ||
+      '';
     return ALLOWED_PBKDF2_HASHES.includes(stored);
   } catch {
     return false;
@@ -75,7 +81,10 @@ export function isVaultAdminAuthenticated(): boolean {
 export function getVaultAdminEmail(): string | null {
   try {
     if (!isVaultAdminAuthenticated()) return null;
-    return sessionStorage.getItem(VAULT_AUTH_EMAIL_KEY);
+    return (
+      localStorage.getItem(VAULT_AUTH_EMAIL_KEY) ||
+      sessionStorage.getItem(VAULT_AUTH_EMAIL_KEY)
+    );
   } catch {
     return null;
   }
@@ -88,9 +97,13 @@ export async function verifyAdminVaultCredentials(
   const derived = await pbkdf2Hex(email, password);
   if (ALLOWED_PBKDF2_HASHES.includes(derived)) {
     try {
+      const cleanEmail = email.toLowerCase().trim();
+      localStorage.setItem(VAULT_AUTH_SESSION_KEY, derived);
+      localStorage.setItem(VAULT_AUTH_EMAIL_KEY, cleanEmail);
+      localStorage.setItem(VAULT_PERSISTENT_MODE_KEY, 'admin');
       sessionStorage.setItem(VAULT_AUTH_SESSION_KEY, derived);
-      sessionStorage.setItem(VAULT_AUTH_EMAIL_KEY, email.toLowerCase().trim());
-      // Remove o token secreto da barra de endereço somente APÓS o login concluído
+      sessionStorage.setItem(VAULT_AUTH_EMAIL_KEY, cleanEmail);
+      // Limpa o token da barra de endereços mantendo na rota /painel
       window.history.replaceState({}, '', '/painel');
     } catch {
       // ignore storage errors
@@ -105,9 +118,10 @@ export function isAdminGateUnlocked(): boolean {
 }
 
 /**
- * Valida se o visitante tem autorização para abrir a rota administrativa.
- * - `/admin` e `#/admin` são SEMPRE bloqueados e redirecionados para `/`.
- * - `/painel` SEM `?k=<TOKEN_SECRETO>` é SEMPRE bloqueado se o usuário não estiver autenticado!
+ * Valida se o visitante tem autorização para abrir o Painel Administrativo.
+ * - Se a administradora JÁ estiver autenticada no dispositivo (`isVaultAdminAuthenticated()`),
+ *   mantém e restaura automaticamente a tela do Admin (`/painel`) ao reabrir o app no tablet/celular!
+ * - Se NÃO estiver autenticada: `/admin`, `#/admin` e `/painel` sem `?k=<TOKEN_SECRETO>` são bloqueados.
  */
 export async function resolveAdminRouteAccess(): Promise<boolean> {
   if (typeof window === 'undefined') return false;
@@ -115,14 +129,26 @@ export async function resolveAdminRouteAccess(): Promise<boolean> {
   const pathname = window.location.pathname.toLowerCase();
   const hash = window.location.hash.toLowerCase();
 
-  // 1. Bloqueia /admin e #/admin em 100% dos casos
+  // 1. Se a administradora já está logada no dispositivo e não clicou em Sair,
+  // reabre direto no Painel Admin mesmo quando o tablet/PWA inicia em "/"
+  if (isVaultAdminAuthenticated()) {
+    const persistentMode = localStorage.getItem(VAULT_PERSISTENT_MODE_KEY);
+    if (persistentMode === 'admin' || pathname.startsWith('/painel') || hash.startsWith('#/painel')) {
+      if (!pathname.startsWith('/painel')) {
+        window.history.replaceState({}, '', '/painel');
+      }
+      return true;
+    }
+  }
+
+  // 2. Bloqueia /admin e #/admin em 100% dos casos para quem não está autenticado
   if (pathname.startsWith('/admin') || hash.includes('/admin') || hash === '#admin') {
     clearAdminGateSession();
     window.history.replaceState({}, '', '/');
     return false;
   }
 
-  // 2. Verifica se está na rota /painel
+  // 3. Verifica se está na rota /painel
   const isPainelRoute = pathname.startsWith('/painel') || hash.startsWith('#/painel');
   if (!isPainelRoute) {
     return false;
@@ -130,14 +156,14 @@ export async function resolveAdminRouteAccess(): Promise<boolean> {
 
   const expectedHash = getExpectedTokenHash();
 
-  // 3. Extrai o parâmetro ?k=TOKEN da URL
+  // 4. Extrai o parâmetro ?k=TOKEN da URL
   let providedToken = new URLSearchParams(window.location.search).get('k') || '';
   if (!providedToken && window.location.hash.includes('?')) {
     const hashQuery = window.location.hash.split('?')[1] || '';
     providedToken = new URLSearchParams(hashQuery).get('k') || '';
   }
 
-  // 4. Se tem token na URL, valida o hash SHA-256 imediatamente
+  // 5. Se tem token na URL, valida o hash SHA-256 imediatamente para liberar a tela de Login
   if (providedToken) {
     const computedHash = await sha256Hex(providedToken.trim());
     if (computedHash === expectedHash) {
@@ -148,20 +174,20 @@ export async function resolveAdminRouteAccess(): Promise<boolean> {
     return false;
   }
 
-  // 5. Sem token na URL: SÓ permite permanecer em /painel se JÁ estiver autenticado com login e senha!
-  if (isVaultAdminAuthenticated()) {
-    return true;
-  }
-
-  // Caso contrário, bloqueia /painel sem token e redireciona para o site da cliente (/)
+  // 6. Sem token na URL e sem sessão autenticada: bloqueia e redireciona para o site da cliente (/)
   window.history.replaceState({}, '', '/');
   return false;
 }
 
 export function clearAdminGateSession(): void {
   try {
+    localStorage.removeItem(VAULT_AUTH_SESSION_KEY);
+    localStorage.removeItem(VAULT_AUTH_EMAIL_KEY);
+    localStorage.removeItem(VAULT_PERSISTENT_MODE_KEY);
     sessionStorage.removeItem(VAULT_AUTH_SESSION_KEY);
     sessionStorage.removeItem(VAULT_AUTH_EMAIL_KEY);
+    sessionStorage.removeItem('epn_admin_vault_auth_v42');
+    sessionStorage.removeItem('epn_admin_vault_email_v42');
     sessionStorage.removeItem('epn_admin_gate_unlocked_v2');
   } catch {
     // ignore

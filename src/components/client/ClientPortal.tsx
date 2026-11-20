@@ -135,7 +135,7 @@ export const ClientPortal: React.FC<ClientPortalProps> = ({
     <div className="min-h-screen bg-[#FAF6F1] text-[#594943] pb-24 md:pb-16">
       {/* Desktop & Tablet Top Bar Contract (3 zones separated by gap-8) */}
       <header className="hidden md:block sticky top-0 z-40 bg-[#FAF6F1]/90 backdrop-blur-md border-b border-[#E8D6CB]">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 h-16 flex items-center justify-between gap-8">
+        <div className="w-full max-w-[1600px] mx-auto px-6 lg:px-10 h-16 flex items-center justify-between gap-8">
           {/* Zone 1: Single wordmark */}
           <button
             type="button"
@@ -224,7 +224,7 @@ export const ClientPortal: React.FC<ClientPortalProps> = ({
       </header>
 
       {/* Main Viewport */}
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-5 sm:space-y-7 pt-4 sm:pt-6">
+      <main className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-10 space-y-5 sm:space-y-7 pt-4 sm:pt-6">
 
         {/* Faixa de Próximo Agendamento (PRD v36) */}
         {nextUpcomingAppointment && activeTab === 'catalog' && (

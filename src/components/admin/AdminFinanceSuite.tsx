@@ -247,7 +247,7 @@ export const AdminFinanceSuite: React.FC<{
   return (
     <div className="space-y-6">
       {/* Sub-navegação das 8 Telas Financeiras (Telas 17 a 24) */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1 no-print">
+      <div className="grid grid-cols-2 sm:grid-cols-4 xl:grid-cols-8 gap-2 no-print">
         {NAV_ITEMS.map((item) => (
           <button
             key={item.id}
@@ -256,7 +256,7 @@ export const AdminFinanceSuite: React.FC<{
               setUiState('idle');
               setSubScreen(item.id);
             }}
-            className={`min-h-[38px] rounded-xl px-3.5 py-1.5 text-xs font-semibold whitespace-nowrap transition-colors ${
+            className={`min-h-[38px] rounded-xl px-3 py-1.5 text-xs font-semibold truncate transition-colors ${
               subScreen === item.id
                 ? 'bg-[#594943] text-white'
                 : 'bg-white border border-[#E8D6CB] text-[#95847C] hover:text-[#594943]'

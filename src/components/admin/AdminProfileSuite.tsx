@@ -236,7 +236,7 @@ export const AdminProfileSuite: React.FC<Props> = ({
           </span>
         </div>
 
-        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 xl:grid-cols-9 gap-2">
           {PROFILE_SCREENS.map(scr => {
             const Icon = scr.icon;
             const active = currentScreen === scr.id;
@@ -244,14 +244,14 @@ export const AdminProfileSuite: React.FC<Props> = ({
               <button
                 key={scr.id}
                 onClick={() => setScreen(scr.id)}
-                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                className={`flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
                   active
                     ? 'bg-[#594943] text-[#FAF6F1] shadow-sm'
                     : 'bg-[#FAF6F1] text-[#95847C] hover:text-[#594943] border border-[#E8D6CB]/60'
                 }`}
               >
-                <Icon className={`w-3.5 h-3.5 ${active ? 'text-[#C4A477]' : 'text-[#95847C]'}`} />
-                <span>{scr.number}. {scr.label}</span>
+                <Icon className={`w-3.5 h-3.5 shrink-0 ${active ? 'text-[#C4A477]' : 'text-[#95847C]'}`} />
+                <span className="truncate">{scr.number}. {scr.label}</span>
               </button>
             );
           })}
@@ -344,7 +344,7 @@ export const AdminProfileSuite: React.FC<Props> = ({
 
       {/* SCREEN 26: ADICIONAR FOTOGRAFIA */}
       {currentScreen === 26 && (
-        <div className="bg-white rounded-3xl p-6 border border-[#E8D6CB] shadow-sm max-w-2xl">
+        <div className="bg-white rounded-3xl p-6 border border-[#E8D6CB] shadow-sm w-full">
           <span className="text-[10px] font-bold uppercase tracking-widest text-[#C4A477] block mb-1">
             Tela 26 • Upload & Curadoria Visual
           </span>
@@ -553,7 +553,7 @@ export const AdminProfileSuite: React.FC<Props> = ({
 
       {/* SCREEN 28: PERFIL DA PROFISSIONAL */}
       {currentScreen === 28 && (
-        <form onSubmit={handleSaveSettings} className="bg-white rounded-3xl p-6 border border-[#E8D6CB] shadow-sm space-y-5 max-w-3xl">
+        <form onSubmit={handleSaveSettings} className="bg-white rounded-3xl p-6 border border-[#E8D6CB] shadow-sm space-y-5 w-full">
           <div className="flex items-center justify-between">
             <div>
               <span className="text-[10px] font-bold uppercase tracking-widest text-[#C4A477] block">
@@ -641,7 +641,7 @@ export const AdminProfileSuite: React.FC<Props> = ({
 
       {/* SCREEN 29: HORÁRIOS DE FUNCIONAMENTO */}
       {currentScreen === 29 && (
-        <form onSubmit={handleSaveSettings} className="bg-white rounded-3xl p-6 border border-[#E8D6CB] shadow-sm space-y-5 max-w-3xl">
+        <form onSubmit={handleSaveSettings} className="bg-white rounded-3xl p-6 border border-[#E8D6CB] shadow-sm space-y-5 w-full">
           <div>
             <span className="text-[10px] font-bold uppercase tracking-widest text-[#C4A477] block">
               Tela 29 • Grade de Atendimento
@@ -727,7 +727,7 @@ export const AdminProfileSuite: React.FC<Props> = ({
 
       {/* SCREEN 30: CONFIGURAÇÕES DE AGENDAMENTO */}
       {currentScreen === 30 && (
-        <form onSubmit={handleSaveSettings} className="bg-white rounded-3xl p-6 border border-[#E8D6CB] shadow-sm space-y-5 max-w-3xl">
+        <form onSubmit={handleSaveSettings} className="bg-white rounded-3xl p-6 border border-[#E8D6CB] shadow-sm space-y-5 w-full">
           <div>
             <span className="text-[10px] font-bold uppercase tracking-widest text-[#C4A477] block">
               Tela 30 • Regras de Negócio & Sinal Pix
@@ -815,7 +815,7 @@ export const AdminProfileSuite: React.FC<Props> = ({
 
       {/* SCREEN 31: PERSONALIZAÇÃO DA PÁGINA PÚBLICA */}
       {currentScreen === 31 && (
-        <form onSubmit={handleSaveSettings} className="bg-white rounded-3xl p-6 border border-[#E8D6CB] shadow-sm space-y-5 max-w-3xl">
+        <form onSubmit={handleSaveSettings} className="bg-white rounded-3xl p-6 border border-[#E8D6CB] shadow-sm space-y-5 w-full">
           <div>
             <span className="text-[10px] font-bold uppercase tracking-widest text-[#C4A477] block">
               Tela 31 • Vitrine Online da Cliente (Tela 7)
@@ -886,22 +886,21 @@ export const AdminProfileSuite: React.FC<Props> = ({
             >
               {saving ? 'Salvando...' : 'Publicar Alterações na Página Pública'}
             </button>
-            <a
-              href="/"
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-1.5 px-4 py-3 rounded-xl bg-[#FAF6F1] text-[#594943] text-xs font-semibold border border-[#E8D6CB]"
+            <button
+              type="button"
+              onClick={() => onJumpToAnyScreen?.(7)}
+              className="inline-flex items-center gap-1.5 px-4 py-3 rounded-xl bg-[#FAF6F1] text-[#594943] text-xs font-semibold border border-[#E8D6CB] cursor-pointer"
             >
               <ExternalLink className="w-3.5 h-3.5 text-[#C4A477]" />
-              Abrir Página Pública (Tela 7)
-            </a>
+              Visualizar Página Pública (Tela 7)
+            </button>
           </div>
         </form>
       )}
 
       {/* SCREEN 32: SEGURANÇA */}
       {currentScreen === 32 && (
-        <div className="bg-white rounded-3xl p-6 border border-[#E8D6CB] shadow-sm space-y-5 max-w-2xl">
+        <div className="bg-white rounded-3xl p-6 border border-[#E8D6CB] shadow-sm space-y-5 w-full">
           <div>
             <span className="text-[10px] font-bold uppercase tracking-widest text-[#C4A477] block">
               Tela 32 • Criptografia & Controle de Acesso
@@ -993,7 +992,7 @@ export const AdminProfileSuite: React.FC<Props> = ({
               A arquitetura de tokens em <code>src/theme/luxuryNudeTheme.ts</code> é 100% compatível com React Web PWA, React Native e Expo + TypeScript.
             </p>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-2.5">
               {MANDATORY_SCREENS_33.map(item => (
                 <button
                   key={item.number}

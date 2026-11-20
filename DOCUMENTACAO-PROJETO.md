@@ -87,3 +87,16 @@ O projeto foi migrado para a arquitetura completa em **React 19 + TypeScript + V
   3. Em `vite.config.ts` e `src/main.tsx`, foram ativados `skipWaiting: true`, `clientsClaim: true` e `cleanupOutdatedCaches: true` (`cacheId: 'estefany-nails-v42-strict-token-vault'`) para forçar a atualização imediata do PWA no navegador.
 - **Autenticação Bancária PBKDF2-HMAC-SHA256 (250.000 iterações)**:
   - Implementada em `src/lib/adminRoute.ts` via Web Crypto API (`crypto.subtle.deriveBits` com `PBKDF2`, `SHA-256`, `250000` iterações e salt criptográfico), funcionando imediatamente mesmo quando o provedor `PASSWORD_LOGIN_DISABLED` do Firebase Console ainda não foi habilitado, sem armazenar nenhum login, senha ou token em texto puro no código ou no Git.
+
+
+### v43 — Aba Lateral Recolhível (Menu 2 Traços), Expansividade no Tablet Horizontal, Persistência da Sessão Admin no Tablet e Visualização da Cliente sem Sair do Painel
+- **Aba Lateral Recolhível com Botão "Menu 2 Traços" (`src/components/admin/AdminPanel.tsx`)**:
+  - A barra lateral marrom (`<aside>`) agora fica **recolhida por padrão** (`-translate-x-full`) para não roubar espaço da tela no tablet.
+  - Adicionado botão **"Menu 2 Traços"** (ícone de duas barras horizontais) no topo esquerdo que abre e recolhe a aba lateral suavemente com backdrop.
+- **Expansividade Total no Tablet Horizontal & Correção do Bug Visual da 2ª Imagem**:
+  - O container principal foi expandido para `w-full max-w-[1600px]` (sem margem esquerda fixa `md:pl-64` e sem `max-w-2xl`/`max-w-3xl` nos formulários).
+  - Removidas as barras de rolagem horizontais e verticais internas (`overflow-x-auto` / `max-h-72 overflow-y-auto`) que cortavam botões ao meio em `AdminProfileSuite.tsx` (Telas 25 a 33), `AdminFinanceSuite.tsx` (Telas 17 a 24) e no navegador rápido das 33 telas, substituindo por grids responsivos completos (`grid-cols-2 sm:grid-cols-3 md:grid-cols-5 xl:grid-cols-9`) e eliminando a duplicação do mapa na Tela 33.
+- **Persistência da Sessão Admin ao Fechar e Reabrir o App no Tablet (`src/lib/adminRoute.ts`)**:
+  - A sessão autenticada com token + login/senha agora é persistida no `localStorage` (`VAULT_PERSISTENT_MODE_KEY = 'admin'`). Ao fechar o app no tablet/celular e abrir novamente, ele abre direto no **Painel Admin (`/painel`)** em vez de voltar para a tela da cliente (só volta ao modo cliente quando a administradora clica em **"Sair do painel"**).
+- **Visualização da Tela da Cliente sem Sair do Link do Admin (`src/App.tsx`)**:
+  - Ao clicar em **"Ver Tela da Cliente"** (ou nas Telas 7 a 11), a administradora **não sai mais de `/painel`**: a tela da cliente é exibida dentro do próprio painel com uma barra superior fixa **"Modo Visualização (Telas 7 a 11) • ← Voltar ao Painel da Admin"** para retornar à gestão em 1 clique.
