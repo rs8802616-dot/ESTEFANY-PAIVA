@@ -47,7 +47,7 @@ export default defineConfig(() => {
           ],
         },
         workbox: {
-          cacheId: 'estefany-nails-v46-phone-sync-modern-charts',
+          cacheId: 'estefany-nails-v47-recharts-unified-finance',
           skipWaiting: true,
           clientsClaim: true,
           cleanupOutdatedCaches: true,

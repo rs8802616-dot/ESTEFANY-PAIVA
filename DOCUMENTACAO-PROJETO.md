@@ -153,3 +153,13 @@ O projeto foi migrado para a arquitetura completa em **React 19 + TypeScript + V
   2. **Cápsulas Preenchidas (`Full-Track Capsules`)**: Colunas dentro de cápsulas completas com o valor em Reais e o saldo líquido integrados ao card.
   3. **Ondas Suaves Spline (`Smooth Cubic-Bezier Waves`)**: Curvas suaves contínuas com cálculo de pontos de controle Cubic Bezier (`C ...`), badges flutuantes e rótulos HTML nítidos.
   4. **Cards de Mapa de Calor (`Weekly Heatmap Cards`)**: Cards executivos por dia da semana com classificação automática de ritmo (`Alta Demanda`, `Bom Ritmo`, `Estável`).
+
+
+### v47 — Gráficos Profissionais `Recharts` (mesmo padrão do App de Delivery) + Central Financeira Única Sem Duplicações
+- **Biblioteca `Recharts` Integrada (`package.json`, `AdminFinanceSuite.tsx`)**:
+  - Trazida do projeto `sistema-pizzaria` (`GraficosVendasPanel.tsx`) e adaptada para a paleta **Luxury Nude** (`#594943`, `#C4A477`, `#BE9293`, `#95847C`, `#FAF6F1`, `#E8D6CB`).
+  - **Gráfico Principal Interativo (`AreaChart`, `BarChart` e `LineChart`)** com preenchimento degradê, linhas de grade, legenda, eixo Y em Reais e Tooltip flutuante ao passar o dedo/mouse.
+  - **Ranking Horizontal de Procedimentos (`BarChart layout="vertical"`)** com alternador entre `R$ Faturamento` e `Qtd` (igual ao "Top Produtos Mais Vendidos" do delivery).
+  - **Gráfico de Rosca (`PieChart` Donut)** com alternador único entre `Receitas` (por origem/pagamento) e `Despesas` (por categoria).
+- **Central Financeira Unificada em Um Único Local (Zero Poluição e Zero Duplicação)**:
+  - Removidas as 8 sub-abas repetidas (`17. Resumo` a `24. Desempenho`). Agora todas as áreas financeiras, gráficos, lançamento único (`(+) Receita` / `(-) Despesa`), contas a pagar/receber, fechamento DRE, calculadora de lucro por hora e extrato estão organizados de forma limpa em uma única tela contínua (mantendo o salto automático pelas âncoras caso o usuário clique no Mapa das 33 Telas).
