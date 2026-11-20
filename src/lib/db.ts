@@ -210,6 +210,13 @@ export function subscribeSalonSettings(onData: (settings: SalonSettings) => void
           : DEFAULT_SETTINGS.configuredSlots;
         merged.blockedDates = Array.isArray(merged.blockedDates) ? merged.blockedDates : [];
         merged.closedMonths = Array.isArray(merged.closedMonths) ? merged.closedMonths : [];
+        if (!merged.heroTitle?.trim()) merged.heroTitle = DEFAULT_SETTINGS.heroTitle;
+        if (!merged.heroSubtitle?.trim()) merged.heroSubtitle = DEFAULT_SETTINGS.heroSubtitle;
+        if (!merged.bio?.trim()) merged.bio = DEFAULT_SETTINGS.bio;
+        if (!merged.tagline?.trim()) merged.tagline = DEFAULT_SETTINGS.tagline;
+        if (!merged.whatsapp?.trim() || merged.whatsapp.replace(/\D/g, '') === '5511999999999') {
+          merged.whatsapp = DEFAULT_SETTINGS.whatsapp;
+        }
         saveCachedSettingsSync(merged, false);
         onData(merged);
       } else {

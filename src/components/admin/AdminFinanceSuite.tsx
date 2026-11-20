@@ -624,11 +624,8 @@ export const AdminFinanceSuite: React.FC<{
       {/* BARRA ÚNICA DE CONTROLE DO FINANCEIRO & RELATÓRIOS (SEM POLUIÇÃO) */}
       <div className="bg-white rounded-3xl border border-[#E8D6CB] p-4 sm:p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4 no-print shadow-2xs">
         <div>
-          <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#C4A477] block">
-            Central Financeira Unificada • Telas 17 a 24
-          </span>
           <h2 className="font-editorial text-2xl font-bold text-[#594943]">
-            Financeiro, Gráficos & Relatórios
+            Financeiro e Relatórios
           </h2>
         </div>
 
@@ -654,15 +651,6 @@ export const AdminFinanceSuite: React.FC<{
               </button>
             ))}
           </div>
-
-          <button
-            type="button"
-            onClick={handleRestoreSampleData}
-            className="min-h-[36px] inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#F2EAE4] hover:bg-[#E8D6CB] text-[#594943] text-xs font-semibold border border-[#E8D6CB] cursor-pointer"
-          >
-            <RefreshCw className="w-3.5 h-3.5 text-[#C4A477]" />
-            <span>Exemplo</span>
-          </button>
 
           {(manualRevenues.length > 0 || expenses.length > 0) && (
             <button
@@ -758,7 +746,13 @@ export const AdminFinanceSuite: React.FC<{
         />
       </div>
 
-      {/* BLOCO 2: GRÁFICO PRINCIPAL RECHARTS (ESTILO DELIVERY: ÁREA / BARRAS / LINHA) */}
+      {/* BLOCO 2: GRÁFICO PRINCIPAL RECHARTS (OCULTO QUANDO NÃO HÁ MOVIMENTAÇÃO) */}
+      {totalRevenue === 0 && totalPaidExpenses === 0 ? (
+        <div className="bg-white rounded-3xl border border-[#E8D6CB] p-6 text-center text-sm text-[#95847C]">
+          Os gráficos e relatórios detalhados aparecem automaticamente assim que houver receitas ou despesas registradas.
+        </div>
+      ) : (
+        <>
       <div id="fin-graficos" className="bg-white rounded-3xl border border-[#E8D6CB] p-5 sm:p-6 space-y-4 shadow-2xs">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E8D6CB]/70 pb-4">
           <div>
@@ -1294,6 +1288,9 @@ export const AdminFinanceSuite: React.FC<{
           )}
         </div>
       </div>
+
+        </>
+      )}
 
       {/* BLOCO 5: LANÇAMENTO UNIFICADO (RECEITA OU DESPESA) + HISTÓRICO LIMPO */}
       <div id="fin-lancamentos" className="bg-white rounded-3xl border border-[#E8D6CB] p-5 sm:p-6 space-y-5 shadow-2xs">

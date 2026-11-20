@@ -413,7 +413,7 @@ export const ClientPortal: React.FC<ClientPortalProps> = ({
                         <div className="flex-1 p-3 sm:p-4 flex flex-col justify-between gap-2 min-w-0">
                           <div className="min-w-0">
                             {categoryMap.get(svc.categoryId) && (
-                              <span className="text-[10px] font-bold uppercase tracking-wider text-[#C4A477] block mb-0.5">
+                              <span className="text-[11px] font-semibold uppercase tracking-wide text-[#594943] bg-[#F2EAE4] px-2 py-0.5 rounded-md inline-block mb-1">
                                 {categoryMap.get(svc.categoryId)}
                               </span>
                             )}
@@ -444,17 +444,22 @@ export const ClientPortal: React.FC<ClientPortalProps> = ({
                                     ? `Remover ${svc.name} do combo`
                                     : `Adicionar ${svc.name} ao combo`
                                 }
-                                title={inCombo ? 'No combo' : 'Adicionar ao combo'}
-                                className={`min-h-[36px] min-w-[36px] inline-flex items-center justify-center rounded-xl text-xs font-medium transition-colors border ${
+                                className={`min-h-[36px] inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold transition-colors border whitespace-nowrap ${
                                   inCombo
                                     ? 'bg-[#F2EAE4] border-[#C4A477] text-[#594943]'
                                     : 'bg-white border-[#E8D6CB] text-[#594943] hover:border-[#C4A477]'
                                 }`}
                               >
                                 {inCombo ? (
-                                  <Check className="w-3.5 h-3.5 text-[#C4A477]" />
+                                  <>
+                                    <Check className="w-3.5 h-3.5 text-[#C4A477]" />
+                                    <span>No Combo</span>
+                                  </>
                                 ) : (
-                                  <Plus className="w-3.5 h-3.5" />
+                                  <>
+                                    <Plus className="w-3.5 h-3.5 text-[#C4A477]" />
+                                    <span>Combo</span>
+                                  </>
                                 )}
                               </button>
 
@@ -474,6 +479,48 @@ export const ClientPortal: React.FC<ClientPortalProps> = ({
                 </div>
               )}
             </section>
+
+            {/* Galeria de Trabalhos Reais */}
+            {(() => {
+              let photos: Array<{ id: string; title: string; category: string; imageUrl: string }> = [];
+              try {
+                const raw = typeof window !== 'undefined' ? window.localStorage.getItem('epn_luxury_gallery_v41') : null;
+                if (raw) {
+                  const parsed = JSON.parse(raw);
+                  if (Array.isArray(parsed)) photos = parsed;
+                }
+              } catch {
+                photos = [];
+              }
+              if (photos.length === 0) return null;
+              return (
+                <section className="space-y-4 pt-4">
+                  <div className="flex items-center justify-between gap-2">
+                    <h2 className="text-xl sm:text-2xl font-semibold text-[#594943]">
+                      Trabalhos Recentes
+                    </h2>
+                    <span className="text-xs text-[#95847C]">{photos.length} fotos</span>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                    {photos.slice(0, 8).map((p) => (
+                      <div
+                        key={p.id}
+                        className="group relative aspect-square rounded-2xl overflow-hidden border border-[#E8D6CB] bg-white"
+                      >
+                        <SafeImage
+                          src={p.imageUrl}
+                          alt={p.title}
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#433631]/85 to-transparent p-2.5">
+                          <p className="text-[11px] font-semibold text-white truncate">{p.title}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              );
+            })()}
           </>
         )}
 
@@ -561,15 +608,67 @@ export const ClientPortal: React.FC<ClientPortalProps> = ({
         )}
       </main>
 
-      {/* Quiet Desktop Footer */}
-      <footer className="hidden md:block max-w-7xl mx-auto px-6 lg:px-8 mt-16 pt-8 border-t border-[#E8D6CB] text-xs text-[#95847C]">
-        <div className="flex items-center justify-between gap-4">
-          <span>
-            {settings.studioName} · {settings.address}
-          </span>
-          <span>© {new Date().getFullYear()} {settings.studioName}</span>
+      {/* Rodapé com links reais de WhatsApp, Instagram e Endereço */}
+      <footer className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 pt-8 border-t border-[#E8D6CB] text-xs text-[#95847C]">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <div className="font-semibold text-[#594943]">{settings.studioName}</div>
+            <div className="flex items-center gap-1.5">
+              <MapPin className="w-3.5 h-3.5 text-[#C4A477] shrink-0" />
+              <span>{settings.address}</span>
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center gap-4">
+            <a
+              href={buildWhatsAppUrl(
+                settings.whatsapp,
+                `Oi! Gostaria de tirar uma dúvida sobre os horários no ${settings.studioName}.`,
+              )}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1.5 font-semibold text-[#594943] hover:text-[#C4A477] transition-colors"
+            >
+              <MessageCircle className="w-3.5 h-3.5 text-[#C4A477]" />
+              <span>WhatsApp</span>
+            </a>
+            {settings.instagram && (
+              <a
+                href={`https://instagram.com/${settings.instagram.replace(/^@/, '')}`}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1.5 font-semibold text-[#594943] hover:text-[#C4A477] transition-colors"
+              >
+                <Instagram className="w-3.5 h-3.5 text-[#C4A477]" />
+                <span>{settings.instagram}</span>
+              </a>
+            )}
+            <span>© {new Date().getFullYear()}</span>
+          </div>
         </div>
       </footer>
+
+      {/* Barra fixa de resumo do combo no celular */}
+      {comboServices.length > 0 && (
+        <div className="md:hidden fixed bottom-20 left-3 right-3 z-40">
+          <div className="rounded-2xl bg-white border border-[#C4A477] shadow-lg px-4 py-2.5 flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <div className="text-xs font-semibold text-[#594943] truncate">
+                {comboServices.length} {comboServices.length === 1 ? 'serviço' : 'serviços'} · {formatDuration(comboDuration)}
+              </div>
+              <div className="text-sm font-bold text-[#594943] tabular-nums">
+                {formatBRL(comboTotal)}
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setBookingOpen(true)}
+              className="min-h-[38px] rounded-xl bg-[#594943] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#433631] transition-colors shrink-0"
+            >
+              Continuar →
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Mobile Floating Glassmorphic Bottom Tab Bar (v36) */}
       <nav

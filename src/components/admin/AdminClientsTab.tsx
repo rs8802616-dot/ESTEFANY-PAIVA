@@ -203,8 +203,10 @@ export const AdminClientsTab: React.FC<AdminClientsTabProps> = ({
                     </div>
                   </div>
                   {client.needsReturnAlert && client.daysSinceLastVisit !== null && (
-                    <span className="text-xs font-semibold text-[#C4A477] tabular-nums shrink-0">
-                      {client.daysSinceLastVisit} dias sem retorno
+                    <span className="px-2.5 py-0.5 rounded-full bg-[#F2EAE4] text-xs font-semibold text-[#594943] tabular-nums shrink-0">
+                      {client.daysSinceLastVisit > 60
+                        ? `Inativa (${client.daysSinceLastVisit}d)`
+                        : `${client.daysSinceLastVisit}d sem retorno`}
                     </span>
                   )}
                 </div>
@@ -246,15 +248,6 @@ export const AdminClientsTab: React.FC<AdminClientsTabProps> = ({
               </div>
 
               <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-[#E8D6CB]">
-                <button
-                  type="button"
-                  onClick={() => openTechSheet(client)}
-                  className="min-h-[40px] flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#594943] px-3.5 py-2 text-xs font-semibold text-white hover:bg-[#433631] transition-colors"
-                >
-                  <ClipboardList className="w-3.5 h-3.5 text-[#C4A477]" />
-                  <span>{client.techNote ? 'Editar Ficha Técnica' : 'Criar Ficha Técnica'}</span>
-                </button>
-
                 {client.clientPhone && (
                   <a
                     href={
@@ -275,12 +268,21 @@ export const AdminClientsTab: React.FC<AdminClientsTabProps> = ({
                     }
                     target="_blank"
                     rel="noreferrer"
-                    className="min-h-[40px] inline-flex items-center justify-center gap-1.5 rounded-xl border border-[#E8D6CB] bg-white px-3.5 py-2 text-xs font-medium text-[#594943] hover:border-[#C4A477] transition-colors"
+                    className="min-h-[40px] flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#594943] px-3.5 py-2 text-xs font-semibold text-white hover:bg-[#433631] transition-colors"
                   >
                     <MessageCircle className="w-3.5 h-3.5 text-[#C4A477]" />
-                    <span>Chamar Manutenção</span>
+                    <span>Chamar no WhatsApp</span>
                   </a>
                 )}
+
+                <button
+                  type="button"
+                  onClick={() => openTechSheet(client)}
+                  className="min-h-[40px] inline-flex items-center justify-center gap-1.5 rounded-xl border border-[#E8D6CB] bg-white px-3.5 py-2 text-xs font-medium text-[#594943] hover:border-[#C4A477] transition-colors"
+                >
+                  <ClipboardList className="w-3.5 h-3.5 text-[#C4A477]" />
+                  <span>{client.techNote ? 'Editar Ficha' : 'Ficha Técnica'}</span>
+                </button>
               </div>
             </article>
           ))}

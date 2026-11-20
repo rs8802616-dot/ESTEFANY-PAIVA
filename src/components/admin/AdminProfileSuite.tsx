@@ -28,29 +28,29 @@ const DEFAULT_GALLERY_PHOTOS: GalleryPhoto[] = [
     id: 'gal-1',
     title: 'Alongamento Fibra Natural Nude',
     category: 'Alongamento',
-    imageUrl: 'https://images.unsplash.com/photo-1604654894610-df63bc536371?auto=format&fit=crop&w=900&q=85',
-    createdAt: '2025-05-01',
+    imageUrl: '/src/assets/images/service-alongamento.jpg',
+    createdAt: '2026-11-01',
   },
   {
     id: 'gal-2',
-    title: 'Banho de Gel Luxury Rosé',
+    title: 'Banho de Gel Natural',
     category: 'Banho de Gel',
-    imageUrl: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=900&q=85',
-    createdAt: '2025-05-03',
+    imageUrl: '/src/assets/images/service-banho.jpg',
+    createdAt: '2026-11-03',
   },
   {
     id: 'gal-3',
-    title: 'Blindagem Diamante & Francesa Fina',
-    category: 'Blindagem',
-    imageUrl: 'https://images.unsplash.com/photo-1632345031435-8727f6897d53?auto=format&fit=crop&w=900&q=85',
-    createdAt: '2025-05-05',
+    title: 'Esmaltação em Gel Clássica',
+    category: 'Gel',
+    imageUrl: '/src/assets/images/service-esmaltacao.jpg',
+    createdAt: '2026-11-05',
   },
   {
     id: 'gal-4',
-    title: 'Esmaltação em Gel Clássica',
-    category: 'Gel',
-    imageUrl: 'https://images.unsplash.com/photo-1519014816548-bf5fe059798b?auto=format&fit=crop&w=900&q=85',
-    createdAt: '2025-05-07',
+    title: 'Spa dos Pés e Pedicure',
+    category: 'Spa',
+    imageUrl: '/src/assets/images/service-spa.jpg',
+    createdAt: '2026-11-07',
   },
 ];
 
@@ -84,7 +84,7 @@ const PROFILE_SCREENS: { id: ProfileScreenId; number: number; label: string; ico
   { id: 26, number: 26, label: 'Adicionar Foto', icon: Plus },
   { id: 27, number: 27, label: 'WhatsApp', icon: MessageSquare },
   { id: 32, number: 32, label: 'Segurança', icon: ShieldCheck },
-  { id: 33, number: 33, label: 'Ajuda e 33 Telas', icon: HelpCircle },
+  { id: 33, number: 33, label: 'Ajuda', icon: HelpCircle },
 ];
 
 const WEEKDAYS = [
@@ -438,26 +438,16 @@ export const AdminProfileSuite: React.FC<Props> = ({
               </select>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
-              <div>
-                <label className="block text-xs font-semibold text-[#594943] mb-1.5">
-                  Enviar do Celular / Computador
-                </label>
-                <label className="flex flex-col items-center justify-center gap-2 p-6 rounded-2xl border-2 border-dashed border-[#C4A477] bg-[#FAF6F1] hover:bg-[#F2EAE4] transition-colors cursor-pointer text-center">
-                  <Upload className="w-6 h-6 text-[#C4A477]" />
-                  <span className="text-xs font-semibold text-[#594943]">Selecionar Fotografia</span>
-                  <span className="text-[11px] text-[#95847C]">Compressão automática HD</span>
-                  <input type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
-                </label>
-              </div>
+            <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center">
+              <label className="flex-1 flex flex-col items-center justify-center gap-1.5 p-5 rounded-2xl border-2 border-dashed border-[#C4A477] bg-[#FAF6F1] hover:bg-[#F2EAE4] transition-colors cursor-pointer text-center">
+                <Upload className="w-5 h-5 text-[#C4A477]" />
+                <span className="text-xs font-semibold text-[#594943]">Selecionar foto do celular / PC</span>
+                <input type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
+              </label>
 
-              {newPhotoUrl ? (
-                <div className="aspect-square rounded-2xl overflow-hidden border border-[#E8D6CB] bg-[#F2EAE4]">
-                  <img src={newPhotoUrl} alt="Preview" className="w-full h-full object-cover" />
-                </div>
-              ) : (
-                <div className="aspect-square rounded-2xl border border-[#E8D6CB] bg-[#FAF6F1] flex items-center justify-center text-xs text-[#95847C] p-4 text-center">
-                  Pré-visualização Luxury Nude aparecerá aqui
+              {newPhotoUrl && (
+                <div className="w-28 h-28 rounded-2xl overflow-hidden border border-[#E8D6CB] bg-[#F2EAE4] shrink-0">
+                  <img src={newPhotoUrl} alt="Prévia" className="w-full h-full object-cover" />
                 </div>
               )}
             </div>
@@ -1061,38 +1051,14 @@ export const AdminProfileSuite: React.FC<Props> = ({
       {currentScreen === 32 && (
         <div className="bg-white rounded-3xl p-6 border border-[#E8D6CB] shadow-sm space-y-5 w-full">
           <div>
-            <span className="text-[10px] font-bold uppercase tracking-widest text-[#C4A477] block">
-              Tela 32 • Criptografia & Controle de Acesso
-            </span>
-            <h3 className="font-serif text-xl font-bold text-[#594943]">Segurança do Aplicativo</h3>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="p-4 rounded-2xl bg-[#FAF6F1] border border-[#E8D6CB] space-y-1.5">
-              <div className="flex items-center gap-2 text-[#4E7D5B] text-xs font-bold">
-                <Lock className="w-4 h-4" />
-                Rota Secreta SHA-256 Ativa
-              </div>
-              <p className="text-xs text-[#95847C]">
-                Rotas <code>/admin</code> e <code>#/admin</code> bloqueadas. Acesso permitido exclusivamente via token criptográfico 256-bit.
-              </p>
-            </div>
-
-            <div className="p-4 rounded-2xl bg-[#FAF6F1] border border-[#E8D6CB] space-y-1.5">
-              <div className="flex items-center gap-2 text-[#594943] text-xs font-bold">
-                <KeyRound className="w-4 h-4 text-[#C4A477]" />
-                Autenticação Firebase TLS 1.3
-              </div>
-              <p className="text-xs text-[#95847C]">
-                Sessão autenticada com e-mail e senha (scrypt) via Google Identity Platform.
-              </p>
-            </div>
+            <h3 className="font-serif text-xl font-bold text-[#594943]">Segurança da Conta</h3>
+            <p className="text-xs text-[#95847C]">Acesso restrito da administradora do estúdio.</p>
           </div>
 
           <div className="p-4 rounded-2xl bg-[#F2EAE4] border border-[#E8D6CB] flex flex-wrap items-center justify-between gap-3">
             <div>
               <p className="text-xs font-bold text-[#594943]">Conta Administrativa Conectada</p>
-              <p className="text-xs text-[#95847C]">{adminEmail || 'Autenticada com segurança'}</p>
+              <p className="text-xs text-[#95847C]">{adminEmail || 'rs8802616@gmail.com'}</p>
             </div>
             <div className="flex items-center gap-2">
               {adminEmail && (

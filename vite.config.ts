@@ -47,7 +47,7 @@ export default defineConfig(() => {
           ],
         },
         workbox: {
-          cacheId: 'estefany-nails-v61-fix-undefined-join-crash',
+          cacheId: 'estefany-nails-v62-full-audit-cleanup',
           skipWaiting: true,
           clientsClaim: true,
           cleanupOutdatedCaches: true,

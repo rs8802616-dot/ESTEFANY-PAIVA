@@ -289,3 +289,19 @@ O projeto foi migrado para a arquitetura completa em **React 19 + TypeScript + V
 - **Proteções Defensivas em `.join()`**:
   - Adicionado `(array || []).join(...)` em `AdminPanel.tsx`, `AdminAgendaTab.tsx`, `AdminClientsTab.tsx` e `AdminFinanceSuite.tsx`.
   - Cache do Workbox PWA elevado para `estefany-nails-v61-fix-undefined-join-crash`.
+
+
+### v62 — Revisão Geral de Produção (Verificação de Dados, Remoção de Textos de Protótipo, Agenda Compacta, Financeiro Limpo e Melhorias na Cliente)
+- **Dados Reais e Fallbacks (`db.ts`, `AdminPanel.tsx`, `AdminAgendaTab.tsx`)**:
+  - `subscribeSalonSettings` agora restaura automaticamente `heroTitle`, `heroSubtitle`, `bio`, `tagline` e `whatsapp` real (`5561985543452`) caso o documento do Firestore venha com campos vazios ou número de exemplo (`5511999999999`).
+  - Adicionado botão **"Apagar testes (R$ 0,00)"** na Agenda para limpar registros de teste antigos em 1 clique.
+  - E-mail na tela Segurança alinhado para `rs8802616@gmail.com`.
+- **Painel Admin Limpo (`AdminPanel.tsx`, `AdminAgendaTab.tsx`, `AdminClientsTab.tsx`, `AdminFinanceSuite.tsx`, `AdminProfileSuite.tsx`)**:
+  - Removidos todos os textos de protótipo (`TELA 3 •`, `2. Tela de Abertura (Splash)`, `33 Telas`, `Mapa das 33 Telas`, `Métricas 100% reais`, jargões de criptografia em Segurança) e removida a barra duplicada no topo.
+  - **Agenda** redesenhada com linhas compactas, selo colorido de status e filtro padrão mostrando **Hoje e Próximos dias** (com botão `"Ver histórico"`).
+  - **Clientes** com WhatsApp como botão principal, botão `"Ficha Técnica"` leve e selo de retorno legível; **Lembretes** no Início limitados aos 5 mais recentes (separando inativas > 60 dias).
+  - **Financeiro** sem o botão `"Exemplo"` e ocultando gráficos vazios quando não há lançamentos.
+  - **Galeria** sem fotos genéricas de banco de imagem (usando imagens do estúdio e exibindo **"Trabalhos Recentes"** também no site da cliente) e tela **Adicionar Foto** sem espaço vazio.
+- **Portal da Cliente (`ClientPortal.tsx`)**:
+  - Botão de combo alterado para **`+ Combo`** / **`No Combo`** com texto claro; rótulos de categoria com contraste alto; rodapé completo com links de **WhatsApp**, **Instagram** e **Endereço**; barra fixa inferior no celular mostrando o total e botão **`Continuar →`** quando há serviços selecionados.
+  - Cache do Workbox PWA elevado para `estefany-nails-v62-full-audit-cleanup`.

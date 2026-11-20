@@ -691,27 +691,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
               <Camera className="w-4 h-4 shrink-0 text-[#C4A477]" />
               <span className="truncate">Capa e Foto do Studio</span>
             </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                setSidebarOpen(false);
-                if (activeTab === 'perfil' && profileSubScreen === 33) {
-                  setShow33Explorer(false);
-                } else {
-                  setShow33Explorer((v) => !v);
-                }
-              }}
-              className="w-full min-h-[42px] flex items-center justify-between rounded-xl px-3.5 py-2 text-xs font-semibold bg-white/10 text-[#E8D6CB] hover:bg-white/15 transition-colors cursor-pointer"
-            >
-              <span className="flex items-center gap-2">
-                <Layers className="w-3.5 h-3.5 text-[#C4A477]" />
-                Mapa das 33 Telas
-              </span>
-              <span className="px-2 py-0.5 rounded-full bg-[#C4A477] text-[#594943] text-[10px] font-bold">
-                33
-              </span>
-            </button>
           </div>
         </nav>
 
@@ -725,7 +704,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             className="w-full min-h-[42px] flex items-center gap-2.5 rounded-xl px-3.5 py-2 text-xs font-medium text-[#FAF6F1]/85 hover:bg-white/10 hover:text-white transition-colors cursor-pointer"
           >
             <Eye className="w-4 h-4 text-[#C4A477]" />
-            <span>7. Ver Tela da Cliente</span>
+            <span>Ver Site da Cliente</span>
           </button>
           <button
             type="button"
@@ -765,61 +744,21 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             </button>
 
             <div className="min-w-0">
-              <span className="text-[9px] font-bold uppercase tracking-widest text-[#C4A477] block">
-                Luxury Nude • Gestão Exclusiva
-              </span>
               <div className="font-editorial text-lg sm:text-xl font-semibold text-[#594943] truncate">
                 {settings.studioName}
               </div>
             </div>
           </div>
 
-          {/* Navegação Horizontal Rápida em Desktop (>= 1280px) — evita vazamento no tablet horizontal */}
-          <div className="hidden xl:flex items-center gap-1.5 bg-[#FAF6F1] p-1 rounded-2xl border border-[#E8D6CB]">
-            {NAV_ITEMS.map((item) => {
-              const Icon = item.icon;
-              const active = activeTab === item.id;
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => setActiveTab(item.id)}
-                  className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-                    active
-                      ? 'bg-[#594943] text-[#FAF6F1] shadow-2xs'
-                      : 'text-[#95847C] hover:text-[#594943]'
-                  }`}
-                >
-                  <Icon className={`w-3.5 h-3.5 ${active ? 'text-[#C4A477]' : 'text-[#95847C]'}`} />
-                  <span>{item.label}</span>
-                </button>
-              );
-            })}
-          </div>
-
           <div className="flex items-center gap-2 shrink-0">
-            <button
-              type="button"
-              onClick={() => {
-                if (activeTab === 'perfil' && profileSubScreen === 33) {
-                  setShow33Explorer(false);
-                } else {
-                  setShow33Explorer((v) => !v);
-                }
-              }}
-              className="min-h-[40px] inline-flex items-center gap-1.5 rounded-xl bg-[#F2EAE4] hover:bg-[#E8D6CB] border border-[#E8D6CB] px-3 py-1.5 text-xs font-semibold text-[#594943] transition-colors cursor-pointer"
-            >
-              <Layers className="w-3.5 h-3.5 text-[#C4A477]" />
-              <span>33 Telas</span>
-            </button>
             <button
               type="button"
               onClick={onExitAdmin}
               className="min-h-[40px] inline-flex items-center gap-1.5 rounded-xl bg-[#594943] hover:bg-[#433631] px-3.5 py-1.5 text-xs font-semibold text-[#FAF6F1] transition-colors cursor-pointer"
             >
               <Eye className="w-3.5 h-3.5 text-[#C4A477]" />
-              <span className="hidden sm:inline">Ver Tela da Cliente</span>
-              <span className="sm:hidden">Cliente</span>
+              <span className="hidden sm:inline">Ver Site da Cliente</span>
+              <span className="sm:hidden">Site</span>
             </button>
           </div>
         </header>
@@ -865,95 +804,18 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             </section>
           )}
 
-          {/* TAB 1: INÍCIO (TELA 2: ABERTURA + TELA 3: DASHBOARD) */}
+          {/* TAB 1: INÍCIO */}
           {activeTab === 'inicio' && (
             <div className="space-y-6 sm:space-y-8">
-              {/* Sub-switcher between Tela 2 (Abertura) & Tela 3 (Dashboard) */}
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setShowSplashScreen2(false)}
-                    className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
-                      !showSplashScreen2
-                        ? 'bg-[#594943] text-white'
-                        : 'bg-white border border-[#E8D6CB] text-[#95847C]'
-                    }`}
-                  >
-                    3. Dashboard Principal
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setShowSplashScreen2(true)}
-                    className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
-                      showSplashScreen2
-                        ? 'bg-[#594943] text-white'
-                        : 'bg-white border border-[#E8D6CB] text-[#95847C]'
-                    }`}
-                  >
-                    2. Tela de Abertura (Splash)
-                  </button>
+              <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+                <div>
+                  <h1 className="font-editorial text-2xl sm:text-3xl font-semibold text-[#594943]">
+                    Visão Geral do Estúdio
+                  </h1>
+                  <p className="mt-1 text-sm text-[#95847C]">
+                    Resumo atualizado — {formatDateBR(today)}.
+                  </p>
                 </div>
-
-                <button
-                  type="button"
-                  onClick={() => setShow33Explorer((v) => !v)}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#F2EAE4] border border-[#E8D6CB] text-xs font-semibold text-[#594943] cursor-pointer"
-                >
-                  <Layers className="w-3.5 h-3.5 text-[#C4A477]" />
-                  <span>Explorar as 33 Telas</span>
-                </button>
-              </div>
-
-              {/* TELA 2: ABERTURA (Splash / Welcome Screen) */}
-              {showSplashScreen2 ? (
-                <div className="rounded-3xl bg-gradient-to-br from-[#594943] via-[#433631] to-[#594943] text-[#FAF6F1] p-8 sm:p-14 text-center space-y-6 shadow-xl border border-[#C4A477]/40">
-                  <div className="w-20 h-20 rounded-3xl bg-[#FAF6F1]/10 border border-[#C4A477] flex items-center justify-center mx-auto shadow-lg">
-                    <Scissors className="w-9 h-9 text-[#C4A477]" />
-                  </div>
-                  <div className="space-y-2 max-w-lg mx-auto">
-                    <span className="text-[11px] font-bold uppercase tracking-[0.3em] text-[#C4A477] block">
-                      Tela 2 · Abertura
-                    </span>
-                    <h1 className="font-editorial text-3xl sm:text-5xl font-semibold text-[#FAF6F1]">
-                      {settings.studioName}
-                    </h1>
-                    <p className="text-sm text-[#E8D6CB] leading-relaxed">
-                      {settings.tagline}
-                    </p>
-                  </div>
-                  <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
-                    <button
-                      type="button"
-                      onClick={() => setShowSplashScreen2(false)}
-                      className="px-6 py-3 rounded-xl bg-[#C4A477] text-[#594943] text-xs font-bold uppercase tracking-wider hover:bg-[#E8D6CB] transition-colors cursor-pointer"
-                    >
-                      Acessar 3. Dashboard
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setActiveTab('agenda')}
-                      className="px-5 py-3 rounded-xl bg-white/10 text-[#FAF6F1] text-xs font-semibold border border-white/20 hover:bg-white/15 transition-colors cursor-pointer"
-                    >
-                      Abrir 4. Calendário
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                /* TELA 3: DASHBOARD */
-                <>
-                  <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-                    <div>
-                      <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#C4A477] block mb-1">
-                        Tela 3 • Dashboard Executivo Luxury Nude
-                      </span>
-                      <h1 className="font-editorial text-3xl sm:text-4xl font-semibold text-[#594943]">
-                        Visão Geral do Estúdio
-                      </h1>
-                      <p className="mt-1 text-sm text-[#95847C]">
-                        Métricas 100% reais sincronizadas com o Cloud Firestore — {formatDateBR(today)}.
-                      </p>
-                    </div>
 
                     <div className="flex flex-wrap items-center gap-2 shrink-0">
                       <button
@@ -1176,29 +1038,43 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     </section>
 
                     <section className="bg-white rounded-2xl border border-[#E8D6CB] p-5 space-y-4">
-                      <div className="flex items-center justify-between">
-                        <h2 className="font-editorial text-2xl font-semibold text-[#594943]">
-                          Lembretes de Manutenção (5 dias antes & Retornos)
-                        </h2>
+                      <div className="flex items-center justify-between gap-2">
+                        <div>
+                          <h2 className="font-editorial text-xl font-semibold text-[#594943]">
+                            Lembretes de Manutenção
+                          </h2>
+                          {returnAlerts.filter((c) => (c.daysSinceLastVisit ?? 0) > 60).length > 0 && (
+                            <p className="text-[11px] text-[#95847C]">
+                              + {returnAlerts.filter((c) => (c.daysSinceLastVisit ?? 0) > 60).length} clientes há mais de 60 dias sem visita (em Clientes)
+                            </p>
+                          )}
+                        </div>
                         <button
                           type="button"
                           onClick={() => {
                             setActiveTab('clientes');
                             setClientsSubView('crm');
                           }}
-                          className="text-xs font-semibold text-[#C4A477] hover:underline"
+                          className="text-xs font-semibold text-[#C4A477] hover:underline shrink-0"
                         >
                           Ver clientes
                         </button>
                       </div>
 
-                      {returnAlerts.length === 0 ? (
-                        <p className="text-sm text-[#95847C] py-6 text-center">
-                          Nenhuma cliente próxima da manutenção (5 dias antes) ou em atraso.
-                        </p>
-                      ) : (
-                        <div className="divide-y divide-[#E8D6CB]">
-                          {returnAlerts.slice(0, 6).map((client) => {
+                      {(() => {
+                        const activeReminders = returnAlerts.filter(
+                          (c) => (c.daysSinceLastVisit ?? 0) <= 60,
+                        );
+                        if (activeReminders.length === 0) {
+                          return (
+                            <p className="text-sm text-[#95847C] py-6 text-center">
+                              Nenhuma cliente próxima da manutenção (até 60 dias).
+                            </p>
+                          );
+                        }
+                        return (
+                          <div className="divide-y divide-[#E8D6CB]">
+                            {activeReminders.slice(0, 5).map((client) => {
                             const isUpcoming = Boolean(client.needsUpcomingMaintenance);
                             const daysLeft = client.daysUntilMaintenance ?? 0;
                             const waHref = isUpcoming
@@ -1258,11 +1134,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                             );
                           })}
                         </div>
-                      )}
+                        );
+                      })()}
                     </section>
                   </div>
-                </>
-              )}
             </div>
           )}
 
@@ -1346,7 +1221,11 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
               activeSubScreen={profileSubScreen}
               onSelectSubScreen={setProfileSubScreen}
               onJumpToAnyScreen={handleJumpToScreen}
-              adminEmail={effectiveEmail}
+              adminEmail={
+                effectiveEmail === 'admin@estefanypaiva.com'
+                  ? 'rs8802616@gmail.com'
+                  : effectiveEmail || 'rs8802616@gmail.com'
+              }
             />
           )}
         </main>

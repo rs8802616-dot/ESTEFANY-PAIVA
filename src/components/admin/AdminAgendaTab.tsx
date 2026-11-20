@@ -71,6 +71,7 @@ export const AdminAgendaTab: React.FC<AdminAgendaTabProps> = ({
   const { showToast } = useToast();
   const [statusFilter, setStatusFilter] = useState<'all' | AppointmentStatus>('all');
   const [dateFilter, setDateFilter] = useState('');
+  const [showPast, setShowPast] = useState(false);
   const [detailAppointmentId, setDetailAppointmentId] = useState<string | null>(null);
   const [blockSheetOpen, setBlockSheetOpen] = useState(false);
   const [walkInOpen, setWalkInOpen] = useState(false);
@@ -136,13 +137,37 @@ export const AdminAgendaTab: React.FC<AdminAgendaTabProps> = ({
     }
   }, [initialDetailAppointmentId, onClearInitialDetail]);
 
+  const todayStr = todayISO();
+
+  const testRecordsCount = useMemo(
+    () => appointments.filter((a) => a.totalPrice === 0 || (a.date < '2026-10-01' && a.totalPrice === 0)).length,
+    [appointments],
+  );
+
+  const handleClearTestRecords = async () => {
+    const targets = appointments.filter((a) => a.totalPrice === 0);
+    if (targets.length === 0) return;
+    setSaving(true);
+    try {
+      for (const apt of targets) {
+        await adminDeleteAppointment(apt.id);
+      }
+      showToast(`${targets.length} registros de teste removidos da agenda.`, 'success');
+    } catch {
+      showToast('Erro ao limpar registros de teste.', 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const filteredAppointments = useMemo(() => {
     return appointments.filter((apt) => {
       if (statusFilter !== 'all' && apt.status !== statusFilter) return false;
       if (dateFilter && apt.date !== dateFilter) return false;
+      if (!dateFilter && !showPast && apt.date < todayStr) return false;
       return true;
     });
-  }, [appointments, statusFilter, dateFilter]);
+  }, [appointments, statusFilter, dateFilter, showPast, todayStr]);
 
   const selectedAppointment = useMemo(
     () => appointments.find((a) => a.id === detailAppointmentId) || null,
@@ -345,7 +370,30 @@ export const AdminAgendaTab: React.FC<AdminAgendaTabProps> = ({
           ))}
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
+          <button
+            type="button"
+            onClick={() => setShowPast((v) => !v)}
+            className={`min-h-[40px] rounded-xl border px-3 py-1.5 text-xs font-semibold transition-colors cursor-pointer ${
+              showPast
+                ? 'bg-[#594943] border-[#594943] text-white'
+                : 'bg-[#FAF6F1] border-[#E8D6CB] text-[#594943] hover:border-[#C4A477]'
+            }`}
+          >
+            {showPast ? 'Ocultar anteriores' : 'Ver histórico'}
+          </button>
+
+          {testRecordsCount > 0 && (
+            <button
+              type="button"
+              disabled={saving}
+              onClick={() => void handleClearTestRecords()}
+              className="min-h-[40px] rounded-xl border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-100 transition-colors cursor-pointer disabled:opacity-50"
+            >
+              Apagar testes (R$ 0,00)
+            </button>
+          )}
+
           <input
             type="date"
             value={dateFilter}
@@ -373,118 +421,75 @@ export const AdminAgendaTab: React.FC<AdminAgendaTabProps> = ({
           </p>
         </div>
       ) : (
-        <div className="space-y-3">
-          {filteredAppointments.map((apt) => (
-            <article
-              key={apt.id}
-              className="bg-white rounded-2xl border border-[#E8D6CB] hover:border-[#C4A477]/60 transition-colors overflow-hidden"
-            >
-              <button
-                type="button"
-                onClick={() => setDetailAppointmentId(apt.id)}
-                className="w-full text-left p-4 sm:p-5 flex flex-col sm:flex-row sm:items-start justify-between gap-3 hover:bg-[#FAF6F1]/40 transition-colors"
+        <div className="bg-white rounded-2xl border border-[#E8D6CB] divide-y divide-[#E8D6CB] overflow-hidden">
+          {filteredAppointments.map((apt) => {
+            const statusPill =
+              apt.status === 'confirmed'
+                ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                : apt.status === 'completed'
+                  ? 'bg-[#F2EAE4] text-[#594943] border-[#E8D6CB]'
+                  : apt.status === 'cancelled'
+                    ? 'bg-neutral-100 text-[#95847C] border-neutral-200'
+                    : 'bg-amber-50 text-amber-800 border-amber-200';
+            return (
+              <div
+                key={apt.id}
+                className="px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 hover:bg-[#FAF6F1]/50 transition-colors"
               >
-                <div className="space-y-1 min-w-0">
-                  <div className="flex flex-wrap items-center gap-x-2 text-xs text-[#95847C] tabular-nums">
-                    <span className="font-semibold text-[#594943]">
-                      {formatDateBR(apt.date)} · {apt.startTime}–{apt.endTime}
-                    </span>
-                    <span aria-hidden="true">·</span>
-                    <span>{formatDuration(apt.totalDurationMinutes)}</span>
-                    <span aria-hidden="true">·</span>
-                    <span
-                      className={`font-semibold ${
-                        apt.status === 'confirmed'
-                          ? 'text-emerald-700'
-                          : apt.status === 'completed'
-                            ? 'text-[#594943]'
-                            : apt.status === 'cancelled'
-                              ? 'text-[#95847C]'
-                              : 'text-[#C4A477]'
-                      }`}
-                    >
-                      {statusLabelPT(apt.status)}
-                    </span>
-                  </div>
-
-                  <h3 className="text-base font-semibold text-[#594943] flex items-center gap-2">
-                    <span className="truncate">{apt.clientName}</span>
-                    <span className="text-xs font-normal text-[#95847C] tabular-nums shrink-0">
-                      {apt.clientPhone}
-                    </span>
-                  </h3>
-
-                  <p className="text-sm text-[#594943]">{apt.serviceNames.join(' + ')}</p>
-
-                  {apt.notes && (
-                    <p className="text-xs text-[#95847C] italic line-clamp-1">Obs.: {apt.notes}</p>
-                  )}
-                </div>
-
-                <div className="flex sm:flex-col items-center sm:items-end justify-between gap-1 shrink-0">
-                  <span className="text-lg font-semibold text-[#594943] tabular-nums">
-                    {formatBRL(apt.totalPrice)}
-                  </span>
-                  <div className="flex items-center gap-1.5 text-xs text-[#95847C]">
-                    <span>
-                      {apt.paymentMethod === 'pix'
-                        ? apt.pixPaid
-                          ? 'Pix pago'
-                          : 'Pix pendente'
-                        : 'Presencial'}
-                    </span>
-                    <ChevronRight className="w-4 h-4 text-[#C4A477]" />
-                  </div>
-                </div>
-              </button>
-
-              {/* Compact Quick Action Strip */}
-              <div className="px-4 sm:px-5 py-2.5 bg-[#FAF6F1]/60 border-t border-[#E8D6CB] flex flex-wrap items-center gap-2">
-                {apt.status === 'pending' && (
-                  <button
-                    type="button"
-                    onClick={() =>
-                      void handleStatusChange(
-                        apt,
-                        { status: 'confirmed' },
-                        'Agendamento confirmado.',
-                      )
-                    }
-                    className="min-h-[40px] inline-flex items-center gap-1.5 rounded-xl bg-[#594943] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#433631] transition-colors"
-                  >
-                    <Check className="w-3.5 h-3.5" />
-                    <span>Confirmar</span>
-                  </button>
-                )}
-
-                {(apt.status === 'pending' || apt.status === 'confirmed') && (
-                  <button
-                    type="button"
-                    onClick={() =>
-                      void handleStatusChange(
-                        apt,
-                        { status: 'completed' },
-                        'Atendimento concluído.',
-                      )
-                    }
-                    className="min-h-[40px] inline-flex items-center gap-1.5 rounded-xl bg-emerald-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-800 transition-colors"
-                  >
-                    <CheckCircle2 className="w-3.5 h-3.5" />
-                    <span>Concluir</span>
-                  </button>
-                )}
-
                 <button
                   type="button"
                   onClick={() => setDetailAppointmentId(apt.id)}
-                  className="min-h-[40px] inline-flex items-center gap-1.5 rounded-xl border border-[#E8D6CB] bg-white px-3 py-1.5 text-xs font-medium text-[#594943] hover:border-[#C4A477] transition-colors"
+                  className="flex-1 text-left min-w-0 flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-4"
                 >
-                  <MessageCircle className="w-3.5 h-3.5 text-[#C4A477]" />
-                  <span>Detalhes e WhatsApp</span>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className="text-xs font-bold text-[#594943] tabular-nums">
+                      {apt.date === todayStr ? 'Hoje' : formatDateBR(apt.date)} · {apt.startTime}
+                    </span>
+                    <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold border ${statusPill}`}>
+                      {statusLabelPT(apt.status)}
+                    </span>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <span className="text-sm font-semibold text-[#594943] truncate block sm:inline">
+                      {apt.clientName}
+                    </span>
+                    <span className="text-xs text-[#95847C] sm:ml-2 truncate block sm:inline">
+                      {(apt.serviceNames || []).join(' + ') || 'Procedimento'}
+                    </span>
+                  </div>
                 </button>
+
+                <div className="flex items-center justify-between sm:justify-end gap-2 shrink-0">
+                  <span className="text-sm font-semibold text-[#594943] tabular-nums">
+                    {formatBRL(apt.totalPrice)}
+                  </span>
+                  {apt.status === 'pending' && (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        void handleStatusChange(
+                          apt,
+                          { status: 'confirmed' },
+                          'Agendamento confirmado.',
+                        )
+                      }
+                      className="min-h-[34px] px-2.5 py-1 rounded-lg bg-[#594943] text-white text-xs font-semibold hover:bg-[#433631]"
+                    >
+                      Confirmar
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setDetailAppointmentId(apt.id)}
+                    className="min-h-[34px] inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-[#E8D6CB] bg-white text-xs font-medium text-[#594943] hover:border-[#C4A477]"
+                  >
+                    <span>Detalhes</span>
+                    <ChevronRight className="w-3.5 h-3.5 text-[#C4A477]" />
+                  </button>
+                </div>
               </div>
-            </article>
-          ))}
+            );
+          })}
         </div>
       )}
 
