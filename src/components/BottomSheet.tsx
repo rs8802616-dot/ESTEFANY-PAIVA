@@ -7,6 +7,7 @@ interface BottomSheetProps {
   title: string;
   subtitle?: string;
   maxWidthClass?: string;
+  closeOnBackdrop?: boolean;
   footer?: React.ReactNode;
   children: React.ReactNode;
 }
@@ -17,6 +18,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
   title,
   subtitle,
   maxWidthClass = 'sm:max-w-xl',
+  closeOnBackdrop = true,
   footer,
   children,
 }) => {
@@ -43,7 +45,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
       className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center sm:p-6 no-print"
     >
       <div
-        onClick={onClose}
+        onClick={closeOnBackdrop ? onClose : undefined}
         className="sheet-backdrop fixed inset-0 bg-[#433631]/55 backdrop-blur-sm"
       />
       <div

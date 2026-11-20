@@ -47,7 +47,7 @@ export default defineConfig(() => {
           ],
         },
         workbox: {
-          cacheId: 'estefany-nails-v53-unified-settings',
+          cacheId: 'estefany-nails-v54-booking-modal-lock-and-combo-highlight',
           skipWaiting: true,
           clientsClaim: true,
           cleanupOutdatedCaches: true,

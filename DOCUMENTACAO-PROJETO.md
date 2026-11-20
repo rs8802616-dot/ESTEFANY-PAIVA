@@ -220,3 +220,11 @@ O projeto foi migrado para a arquitetura completa em **React 19 + TypeScript + V
   - Antes espalhadas em 4 abas e 4 formulários separados (`Perfil`, `Horários`, `Config. Agenda`, `Página Pública`), agora todas as configurações do aplicativo ficam em uma **única tela contínua** chamada **Configurações do Studio**.
   - Barra superior com atalhos internos (`1. Perfil e Foto`, `2. Horários`, `3. Pix, Sinal e Folgas`, `4. Capa e Textos do Site`) e **1 único botão "Salvar Tudo" / "Salvar Todas as Configurações"**.
   - Cache do Workbox PWA elevado para `estefany-nails-v53-unified-settings`.
+
+
+### v54 — Bloqueio de Fechamento Acidental no Agendamento e Destaque do Botão `+ Combo`
+- **Proteção contra clique fora do modal (`BottomSheet.tsx` e `BookingSheet.tsx`)**:
+  - Adicionada a propriedade `closeOnBackdrop` em `BottomSheet.tsx` e configurada como `false` em `BookingSheet.tsx`, impedindo que a cliente saia do agendamento sem querer ao tocar fora da janela (agora fecha somente no botão `X` ou ao concluir).
+- **Destaque do botão de Combo (`BookingSheet.tsx`)**:
+  - Substituído o texto apagado `+ + Combo (adicionar outro serviço)` por um botão destacado em `#F2EAE4` com borda dourada `#C4A477`, ícone em bloco escuro `#594943` e selo `+ Combo`.
+  - Cache do Workbox PWA elevado para `estefany-nails-v54-booking-modal-lock-and-combo-highlight`.
