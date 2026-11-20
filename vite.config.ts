@@ -47,7 +47,7 @@ export default defineConfig(() => {
           ],
         },
         workbox: {
-          cacheId: 'estefany-nails-v45-luxury-bi-charts',
+          cacheId: 'estefany-nails-v46-phone-sync-modern-charts',
           skipWaiting: true,
           clientsClaim: true,
           cleanupOutdatedCaches: true,

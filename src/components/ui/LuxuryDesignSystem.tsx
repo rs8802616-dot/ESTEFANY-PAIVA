@@ -1,9 +1,14 @@
 import React, { useState } from 'react';
 import {
+  Activity,
   AlertCircle,
+  BarChart2,
   CheckCircle2,
+  Flame,
   Inbox,
+  LayoutGrid,
   Loader2,
+  SlidersHorizontal,
   Sparkles,
   TrendingDown,
   TrendingUp,
@@ -131,7 +136,27 @@ export const LuxuryKpiCard: React.FC<{
 };
 
 // ------------------------------------------------------------------
-// 3. GRÁFICO INTERATIVO DE BARRAS COMPARATIVAS COM ESCALA, RÓTULOS E DETALHE
+// HELPER: Geração de Curva Suave Cubic Bezier (Catmull-Rom / Monotone Spline)
+// ------------------------------------------------------------------
+function buildSmoothBezierPath(pts: { x: number; y: number }[]): string {
+  if (pts.length === 0) return '';
+  if (pts.length === 1) return `M ${pts[0].x} ${pts[0].y}`;
+  let d = `M ${pts[0].x.toFixed(1)} ${pts[0].y.toFixed(1)}`;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[i];
+    const p1 = pts[i + 1];
+    const midX = (p0.x + p1.x) / 2;
+    d += ` C ${midX.toFixed(1)} ${p0.y.toFixed(1)}, ${midX.toFixed(1)} ${p1.y.toFixed(1)}, ${p1.x.toFixed(1)} ${p1.y.toFixed(1)}`;
+  }
+  return d;
+}
+
+// ------------------------------------------------------------------
+// 3. SUPER-COMPONENTE DE GRÁFICOS MODERNOS (4 ESTILOS INTERATIVOS)
+// 1) Barras Horizontais Estilo Nubank/Apple
+// 2) Colunas em Cápsula Preenchida (com valor colado na barra)
+// 3) Ondas Suaves Spline (Bezier)
+// 4) Cards de Mapa de Calor & Performance
 // ------------------------------------------------------------------
 export interface ChartPoint {
   label: string;
@@ -141,14 +166,48 @@ export interface ChartPoint {
   count?: number;
 }
 
+type ModernChartMode = 'horizontal' | 'capsules' | 'spline' | 'heatmap';
+
+const CHART_MODE_STORAGE_KEY = 'ep_nails_preferred_chart_mode_v46';
+
+function loadPreferredChartMode(fallback: ModernChartMode): ModernChartMode {
+  try {
+    const saved = localStorage.getItem(CHART_MODE_STORAGE_KEY) as ModernChartMode | null;
+    if (saved && ['horizontal', 'capsules', 'spline', 'heatmap'].includes(saved)) {
+      return saved;
+    }
+  } catch {
+    // ignore
+  }
+  return fallback;
+}
+
 export const LuxuryBarChart: React.FC<{
   title: string;
   subtitle?: string;
   data: ChartPoint[];
   primaryLabel?: string;
   secondaryLabel?: string;
-}> = ({ title, subtitle, data, primaryLabel = 'Receitas', secondaryLabel = 'Despesas' }) => {
+  defaultMode?: ModernChartMode;
+}> = ({
+  title,
+  subtitle,
+  data,
+  primaryLabel = 'Entradas',
+  secondaryLabel = 'Saídas',
+  defaultMode = 'horizontal',
+}) => {
+  const [mode, setMode] = useState<ModernChartMode>(() => loadPreferredChartMode(defaultMode));
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+
+  const changeMode = (next: ModernChartMode) => {
+    setMode(next);
+    try {
+      localStorage.setItem(CHART_MODE_STORAGE_KEY, next);
+    } catch {
+      // ignore
+    }
+  };
 
   const maxVal = Math.max(
     100,
@@ -157,182 +216,432 @@ export const LuxuryBarChart: React.FC<{
 
   const totalPrimary = data.reduce((acc, d) => acc + d.primary, 0);
   const totalSecondary = data.reduce((acc, d) => acc + (d.secondary || 0), 0);
+  const hasSecondary = data.some((d) => d.secondary !== undefined);
   const bestPoint = [...data].sort((a, b) => b.primary - a.primary)[0];
-  const activePoint = selectedIndex !== null ? data[selectedIndex] : null;
 
-  const gridLevels = [1, 0.75, 0.5, 0.25, 0];
+  // Spline coordinates for mode === 'spline'
+  const svgW = 860;
+  const svgH = 210;
+  const padX = 32;
+  const padY = 26;
+  const innerW = svgW - padX * 2;
+  const innerH = svgH - padY * 2;
+
+  const splinePrimaryPts = data.map((d, idx) => {
+    const x = data.length <= 1 ? padX + innerW / 2 : padX + (idx / (data.length - 1)) * innerW;
+    const y = padY + innerH - (Math.max(0, d.primary) / maxVal) * innerH;
+    return { x, y, val: d.primary, label: d.label };
+  });
+
+  const splineSecondaryPts = data.map((d, idx) => {
+    const x = data.length <= 1 ? padX + innerW / 2 : padX + (idx / (data.length - 1)) * innerW;
+    const y = padY + innerH - (Math.max(0, d.secondary || 0) / maxVal) * innerH;
+    return { x, y, val: d.secondary || 0, label: d.label };
+  });
+
+  const smoothPrimaryLine = buildSmoothBezierPath(splinePrimaryPts);
+  const smoothPrimaryArea =
+    splinePrimaryPts.length > 0
+      ? `${smoothPrimaryLine} L ${splinePrimaryPts[splinePrimaryPts.length - 1].x.toFixed(1)} ${(padY + innerH).toFixed(1)} L ${splinePrimaryPts[0].x.toFixed(1)} ${(padY + innerH).toFixed(1)} Z`
+      : '';
+  const smoothSecondaryLine = hasSecondary ? buildSmoothBezierPath(splineSecondaryPts) : '';
 
   return (
     <div className="bg-white rounded-3xl border border-[#E8D6CB] p-5 sm:p-6 space-y-5 shadow-2xs">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      {/* Top Header + Seletor de 4 Modelos de Gráficos */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 border-b border-[#E8D6CB]/70 pb-4">
         <div>
-          <h4 className="font-editorial text-xl font-semibold text-[#594943]">{title}</h4>
+          <h4 className="font-editorial text-xl sm:text-2xl font-semibold text-[#594943]">
+            {title}
+          </h4>
           {subtitle && <p className="text-xs text-[#95847C] mt-0.5">{subtitle}</p>}
         </div>
-        <div className="flex flex-wrap items-center gap-4 text-xs font-medium text-[#594943]">
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#FAF6F1] border border-[#E8D6CB]">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#C4A477]" />
-            <span>{primaryLabel}:</span>
-            <strong className="tabular-nums">{formatBRL(totalPrimary)}</strong>
-          </span>
-          {data.some((d) => d.secondary !== undefined) && (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#FAF6F1] border border-[#E8D6CB]">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#BE9293]" />
-              <span>{secondaryLabel}:</span>
-              <strong className="tabular-nums">{formatBRL(totalSecondary)}</strong>
-            </span>
-          )}
+
+        <div className="flex flex-wrap items-center gap-2">
+          {/* 4-Style Chart Switcher */}
+          <div className="inline-flex flex-wrap items-center gap-1 rounded-2xl bg-[#FAF6F1] p-1 border border-[#E8D6CB]">
+            <button
+              type="button"
+              onClick={() => changeMode('horizontal')}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                mode === 'horizontal'
+                  ? 'bg-[#594943] text-white shadow-2xs'
+                  : 'text-[#95847C] hover:text-[#594943]'
+              }`}
+            >
+              <SlidersHorizontal className="w-3.5 h-3.5 text-[#C4A477]" />
+              <span>Barras Horizontais</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => changeMode('capsules')}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                mode === 'capsules'
+                  ? 'bg-[#594943] text-white shadow-2xs'
+                  : 'text-[#95847C] hover:text-[#594943]'
+              }`}
+            >
+              <BarChart2 className="w-3.5 h-3.5 text-[#C4A477]" />
+              <span>Cápsulas</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => changeMode('spline')}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                mode === 'spline'
+                  ? 'bg-[#594943] text-white shadow-2xs'
+                  : 'text-[#95847C] hover:text-[#594943]'
+              }`}
+            >
+              <Activity className="w-3.5 h-3.5 text-[#C4A477]" />
+              <span>Ondas Suaves</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => changeMode('heatmap')}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                mode === 'heatmap'
+                  ? 'bg-[#594943] text-white shadow-2xs'
+                  : 'text-[#95847C] hover:text-[#594943]'
+              }`}
+            >
+              <LayoutGrid className="w-3.5 h-3.5 text-[#C4A477]" />
+              <span>Cards de Calor</span>
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Painel de inspeção do ponto clicado */}
-      {activePoint && (
-        <div className="rounded-2xl bg-[#FAF6F1] border border-[#C4A477] px-4 py-3 flex flex-wrap items-center justify-between gap-3 text-xs">
-          <div className="flex items-center gap-2">
-            <span className="px-2.5 py-1 rounded-lg bg-[#594943] text-[#FAF6F1] font-bold">
-              {activePoint.label}
+      {/* Resumo de Legenda no Topo */}
+      <div className="flex flex-wrap items-center justify-between gap-3 text-xs">
+        <div className="flex flex-wrap items-center gap-3">
+          <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#FAF6F1] border border-[#E8D6CB]">
+            <span className="w-3 h-3 rounded-full bg-gradient-to-r from-[#594943] to-[#C4A477]" />
+            <span className="text-[#95847C]">{primaryLabel}:</span>
+            <strong className="text-[#594943] tabular-nums">{formatBRL(totalPrimary)}</strong>
+          </span>
+          {hasSecondary && (
+            <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#FAF6F1] border border-[#E8D6CB]">
+              <span className="w-3 h-3 rounded-full bg-[#BE9293]" />
+              <span className="text-[#95847C]">{secondaryLabel}:</span>
+              <strong className="text-[#BE9293] tabular-nums">{formatBRL(totalSecondary)}</strong>
             </span>
-            <span className="text-[#95847C]">Detalhes do período selecionado</span>
-          </div>
-          <div className="flex flex-wrap items-center gap-4 tabular-nums">
-            <span>
-              {primaryLabel}: <strong className="text-[#594943]">{formatBRL(activePoint.primary)}</strong>
-            </span>
-            {activePoint.secondary !== undefined && (
-              <span>
-                {secondaryLabel}: <strong className="text-[#BE9293]">{formatBRL(activePoint.secondary)}</strong>
-              </span>
-            )}
-            {activePoint.secondary !== undefined && (
-              <span>
-                Saldo:{' '}
-                <strong
-                  className={
-                    activePoint.primary - activePoint.secondary >= 0
-                      ? 'text-[#4E7D5B]'
-                      : 'text-[#B45353]'
-                  }
-                >
-                  {formatBRL(activePoint.primary - activePoint.secondary)}
-                </strong>
-              </span>
-            )}
-          </div>
+          )}
+        </div>
+        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#F2EAE4] text-[#594943] font-semibold">
+          <span>Saldo do Período:</span>
+          <strong
+            className={`tabular-nums ${
+              totalPrimary - totalSecondary >= 0 ? 'text-[#4E7D5B]' : 'text-[#B45353]'
+            }`}
+          >
+            {formatBRL(totalPrimary - totalSecondary)}
+          </strong>
+        </span>
+      </div>
+
+      {/* MODELO 1: BARRAS HORIZONTAIS EXECUTIVAS ESTILO NUBANK / APPLE HEALTH */}
+      {mode === 'horizontal' && (
+        <div className="space-y-3">
+          {data.map((pt, idx) => {
+            const pct1 = Math.min(100, Math.round((pt.primary / maxVal) * 100));
+            const pct2 =
+              pt.secondary !== undefined
+                ? Math.min(100, Math.round((pt.secondary / maxVal) * 100))
+                : 0;
+            const net = pt.primary - (pt.secondary || 0);
+            const isSelected = selectedIndex === idx;
+
+            return (
+              <div
+                key={idx}
+                onClick={() => setSelectedIndex(isSelected ? null : idx)}
+                className={`p-3.5 sm:p-4 rounded-2xl border transition-all cursor-pointer ${
+                  isSelected
+                    ? 'bg-[#F2EAE4]/80 border-[#C4A477] shadow-2xs'
+                    : 'bg-[#FAF6F1]/75 border-[#E8D6CB] hover:border-[#C4A477]/60'
+                }`}
+              >
+                <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+                  <div className="flex items-center gap-2.5">
+                    <span className="px-2.5 py-1 rounded-lg bg-[#594943] text-[#FAF6F1] text-xs font-bold min-w-[48px] text-center">
+                      {pt.label}
+                    </span>
+                    {pt.primary === bestPoint?.primary && pt.primary > 0 && (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#C4A477]/20 text-[#594943] text-[10px] font-bold">
+                        <Flame className="w-3 h-3 text-[#C4A477]" />
+                        Recorde
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-3 text-xs tabular-nums">
+                    <span className="text-[#594943]">
+                      {primaryLabel}: <strong className="text-[#4E7D5B]">{formatBRL(pt.primary)}</strong>
+                    </span>
+                    {pt.secondary !== undefined && (
+                      <span className="text-[#95847C]">
+                        {secondaryLabel}: <strong className="text-[#BE9293]">{formatBRL(pt.secondary)}</strong>
+                      </span>
+                    )}
+                    <span
+                      className={`px-2.5 py-0.5 rounded-lg font-bold ${
+                        net >= 0
+                          ? 'bg-[#4E7D5B]/15 text-[#4E7D5B]'
+                          : 'bg-[#B45353]/15 text-[#B45353]'
+                      }`}
+                    >
+                      Saldo: {net >= 0 ? `+${formatBRL(net)}` : formatBRL(net)}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Trilhos Horizontais Duplos */}
+                <div className="space-y-1.5">
+                  <div className="w-full h-3.5 rounded-full bg-white border border-[#E8D6CB] overflow-hidden p-0.5">
+                    <div
+                      style={{ width: `${pt.primary > 0 ? Math.max(4, pct1) : 0}%` }}
+                      className="h-full rounded-full bg-gradient-to-r from-[#594943] via-[#8C6D53] to-[#C4A477] transition-all duration-500"
+                    />
+                  </div>
+                  {pt.secondary !== undefined && pt.secondary > 0 && (
+                    <div className="w-full h-2 rounded-full bg-white/80 border border-[#E8D6CB]/60 overflow-hidden">
+                      <div
+                        style={{ width: `${Math.max(3, pct2)}%` }}
+                        className="h-full rounded-full bg-[#BE9293] transition-all duration-500"
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
 
-      {/* Área do Gráfico com Linhas de Grade Y e Barras Largas */}
-      <div className="relative pt-4">
-        <div className="flex">
-          {/* Eixo Y */}
-          <div className="hidden sm:flex flex-col justify-between h-56 pr-3 text-[10px] font-medium text-[#95847C] tabular-nums select-none">
-            {gridLevels.map((lvl, i) => (
-              <span key={i}>{formatBRL(Math.round(maxVal * lvl))}</span>
-            ))}
-          </div>
+      {/* MODELO 2: COLUNAS EM CÁPSULAS PREENCHIDAS (COM RÓTULO COLADO NA BARRA) */}
+      {mode === 'capsules' && (
+        <div
+          className="grid gap-3 pt-2"
+          style={{
+            gridTemplateColumns: `repeat(${Math.max(1, data.length)}, minmax(0, 1fr))`,
+          }}
+        >
+          {data.map((pt, idx) => {
+            const pct1 = pt.primary > 0 ? Math.max(12, Math.round((pt.primary / maxVal) * 100)) : 4;
+            const pct2 =
+              pt.secondary !== undefined && pt.secondary > 0
+                ? Math.max(10, Math.round((pt.secondary / maxVal) * 100))
+                : 0;
+            const net = pt.primary - (pt.secondary || 0);
 
-          {/* Grade + Colunas */}
-          <div className="relative flex-1 h-56">
-            {/* Linhas horizontais de referência */}
-            <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
-              {gridLevels.map((_, i) => (
-                <div
-                  key={i}
-                  className={`w-full border-b ${
-                    i === gridLevels.length - 1
-                      ? 'border-[#594943]/30'
-                      : 'border-dashed border-[#E8D6CB]'
-                  }`}
+            return (
+              <div
+                key={idx}
+                className="bg-[#FAF6F1] rounded-2xl border border-[#E8D6CB] p-2.5 sm:p-3 flex flex-col justify-between gap-2.5 hover:border-[#C4A477] transition-all"
+              >
+                {/* Topo da cápsula: Dia + Valor principal */}
+                <div className="text-center">
+                  <span className="text-xs font-bold text-[#594943] block">{pt.label}</span>
+                  <span className="text-[11px] font-bold text-[#4E7D5B] tabular-nums block mt-0.5">
+                    {formatBRL(pt.primary)}
+                  </span>
+                </div>
+
+                {/* Trilho vertical com barra preenchida e valor colado */}
+                <div className="h-44 w-full rounded-xl bg-white border border-[#E8D6CB]/70 p-2 flex items-end justify-center gap-1.5">
+                  <div className="h-full flex-1 flex flex-col justify-end items-center">
+                    <div
+                      style={{ height: `${pct1}%` }}
+                      title={`${primaryLabel}: ${formatBRL(pt.primary)}`}
+                      className="w-full max-w-[28px] rounded-xl bg-gradient-to-t from-[#594943] to-[#C4A477] shadow-2xs transition-all duration-500"
+                    />
+                  </div>
+                  {pt.secondary !== undefined && (
+                    <div className="h-full flex-1 flex flex-col justify-end items-center">
+                      <div
+                        style={{ height: `${Math.max(4, pct2)}%` }}
+                        title={`${secondaryLabel}: ${formatBRL(pt.secondary)}`}
+                        className={`w-full max-w-[22px] rounded-xl transition-all duration-500 ${
+                          pt.secondary > 0 ? 'bg-[#BE9293]' : 'bg-[#E8D6CB]/40'
+                        }`}
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* Rodapé da cápsula: Saldo Líquido */}
+                <div className="text-center pt-1 border-t border-[#E8D6CB]/70">
+                  <span className="text-[10px] text-[#95847C] block">Saldo</span>
+                  <strong
+                    className={`text-[11px] tabular-nums ${
+                      net >= 0 ? 'text-[#594943]' : 'text-[#B45353]'
+                    }`}
+                  >
+                    {formatBRL(net)}
+                  </strong>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* MODELO 3: ONDAS SUAVES SPLINE (CUBIC BEZIER) */}
+      {mode === 'spline' && (
+        <div className="space-y-3">
+          <div className="rounded-2xl bg-[#FAF6F1] border border-[#E8D6CB] p-3 sm:p-4">
+            <svg
+              viewBox={`0 0 ${svgW} ${svgH}`}
+              className="w-full h-52 sm:h-60 overflow-visible"
+              role="img"
+              aria-label={title}
+            >
+              <defs>
+                <linearGradient id="luxurySplineGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#C4A477" stopOpacity="0.45" />
+                  <stop offset="100%" stopColor="#C4A477" stopOpacity="0.02" />
+                </linearGradient>
+              </defs>
+
+              {[0, 0.33, 0.66, 1].map((s, i) => {
+                const y = padY + s * innerH;
+                return (
+                  <line
+                    key={i}
+                    x1={padX}
+                    y1={y}
+                    x2={svgW - padX}
+                    y2={y}
+                    stroke="#E8D6CB"
+                    strokeDasharray={s === 1 ? undefined : '5 5'}
+                    strokeWidth="1"
+                  />
+                );
+              })}
+
+              {smoothPrimaryArea && <path d={smoothPrimaryArea} fill="url(#luxurySplineGrad)" />}
+              {smoothPrimaryLine && (
+                <path
+                  d={smoothPrimaryLine}
+                  fill="none"
+                  stroke="#594943"
+                  strokeWidth="3.5"
+                  strokeLinecap="round"
                 />
-              ))}
-            </div>
+              )}
+              {smoothSecondaryLine && (
+                <path
+                  d={smoothSecondaryLine}
+                  fill="none"
+                  stroke="#BE9293"
+                  strokeWidth="2.5"
+                  strokeDasharray="6 4"
+                  strokeLinecap="round"
+                />
+              )}
 
-            {/* Colunas interativas */}
+              {splinePrimaryPts.map((pt, idx) => (
+                <g key={idx}>
+                  <circle
+                    cx={pt.x}
+                    cy={pt.y}
+                    r="6"
+                    fill="#FAF6F1"
+                    stroke="#594943"
+                    strokeWidth="3"
+                  />
+                  <rect
+                    x={pt.x - 32}
+                    y={Math.max(2, pt.y - 28)}
+                    width="64"
+                    height="18"
+                    rx="6"
+                    fill="#594943"
+                  />
+                  <text
+                    x={pt.x}
+                    y={Math.max(14, pt.y - 16)}
+                    textAnchor="middle"
+                    className="fill-[#FAF6F1] text-[10px] font-bold"
+                  >
+                    R$ {Math.round(pt.val)}
+                  </text>
+                </g>
+              ))}
+            </svg>
+
+            {/* Rótulos HTML Nítidos Abaixo da Curva */}
             <div
-              className="relative z-10 grid h-full items-end gap-2 sm:gap-3 px-1"
+              className="grid gap-2 pt-2 border-t border-[#E8D6CB]"
               style={{
                 gridTemplateColumns: `repeat(${Math.max(1, data.length)}, minmax(0, 1fr))`,
               }}
             >
-              {data.map((pt, idx) => {
-                const pct1 = pt.primary > 0 ? Math.max(8, Math.round((pt.primary / maxVal) * 100)) : 3;
-                const pct2 =
-                  pt.secondary !== undefined
-                    ? pt.secondary > 0
-                      ? Math.max(8, Math.round((pt.secondary / maxVal) * 100))
-                      : 3
-                    : 0;
-                const isSelected = selectedIndex === idx;
-
-                return (
-                  <button
-                    key={idx}
-                    type="button"
-                    onClick={() => setSelectedIndex(isSelected ? null : idx)}
-                    className={`group h-full flex flex-col items-center justify-end rounded-xl px-1 pt-6 pb-0 transition-colors cursor-pointer ${
-                      isSelected ? 'bg-[#F2EAE4]/70 ring-1 ring-[#C4A477]' : 'hover:bg-[#FAF6F1]/60'
-                    }`}
-                  >
-                    {/* Rótulo de valor no topo da barra */}
-                    <span className="text-[10px] font-bold text-[#594943] tabular-nums mb-1 opacity-85 group-hover:opacity-100 truncate max-w-full">
-                      {pt.primary > 0 ? `R$${Math.round(pt.primary)}` : 'R$0'}
-                    </span>
-
-                    <div className="w-full flex items-end justify-center gap-1 sm:gap-1.5 h-full">
-                      <div
-                        style={{ height: `${pct1}%` }}
-                        title={`${primaryLabel}: ${formatBRL(pt.primary)}`}
-                        className={`w-4 sm:w-6 md:w-7 rounded-t-xl transition-all duration-300 ${
-                          pt.primary > 0
-                            ? 'bg-gradient-to-t from-[#594943] to-[#C4A477] shadow-2xs'
-                            : 'bg-[#E8D6CB]/60'
-                        }`}
-                      />
-                      {pt.secondary !== undefined && (
-                        <div
-                          style={{ height: `${pct2}%` }}
-                          title={`${secondaryLabel}: ${formatBRL(pt.secondary)}`}
-                          className={`w-3.5 sm:w-5 md:w-6 rounded-t-xl transition-all duration-300 ${
-                            pt.secondary > 0
-                              ? 'bg-gradient-to-t from-[#BE9293] to-[#E8D6CB]'
-                              : 'bg-[#E8D6CB]/40'
-                          }`}
-                        />
-                      )}
-                    </div>
-                  </button>
-                );
-              })}
+              {data.map((pt, idx) => (
+                <div key={idx} className="text-center">
+                  <span className="text-xs font-bold text-[#594943] block">{pt.label}</span>
+                  <span className="text-[11px] text-[#95847C] tabular-nums">
+                    {formatBRL(pt.primary)}
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
+      )}
 
-        {/* Rótulos do Eixo X */}
-        <div className="flex mt-2">
-          <div className="hidden sm:block w-16 pr-3" />
-          <div
-            className="flex-1 grid gap-2 sm:gap-3 text-center"
-            style={{
-              gridTemplateColumns: `repeat(${Math.max(1, data.length)}, minmax(0, 1fr))`,
-            }}
-          >
-            {data.map((pt, idx) => (
-              <button
+      {/* MODELO 4: CARDS DE MAPA DE CALOR & EFICIÊNCIA */}
+      {mode === 'heatmap' && (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          {data.map((pt, idx) => {
+            const intensity = maxVal > 0 ? pt.primary / maxVal : 0;
+            const net = pt.primary - (pt.secondary || 0);
+            const badge =
+              intensity >= 0.75
+                ? { text: 'Alta Demanda', cls: 'bg-[#594943] text-[#C4A477]' }
+                : intensity >= 0.4
+                  ? { text: 'Bom Ritmo', cls: 'bg-[#C4A477]/25 text-[#594943]' }
+                  : { text: 'Estável', cls: 'bg-[#F2EAE4] text-[#95847C]' };
+
+            return (
+              <div
                 key={idx}
-                type="button"
-                onClick={() => setSelectedIndex(selectedIndex === idx ? null : idx)}
-                className={`text-[11px] font-semibold truncate py-1 rounded-lg cursor-pointer transition-colors ${
-                  selectedIndex === idx
-                    ? 'bg-[#594943] text-[#FAF6F1]'
-                    : 'text-[#594943] hover:bg-[#FAF6F1]'
-                }`}
+                className="rounded-2xl border border-[#E8D6CB] bg-[#FAF6F1] p-4 flex flex-col justify-between gap-3 hover:border-[#C4A477] transition-all"
               >
-                {pt.label}
-              </button>
-            ))}
-          </div>
+                <div className="flex items-center justify-between gap-1">
+                  <span className="font-editorial text-lg font-bold text-[#594943]">
+                    {pt.label}
+                  </span>
+                  <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${badge.cls}`}>
+                    {badge.text}
+                  </span>
+                </div>
+
+                <div className="space-y-1 text-xs tabular-nums">
+                  <div className="flex justify-between">
+                    <span className="text-[#95847C]">Entradas:</span>
+                    <strong className="text-[#4E7D5B]">+{formatBRL(pt.primary)}</strong>
+                  </div>
+                  {pt.secondary !== undefined && (
+                    <div className="flex justify-between">
+                      <span className="text-[#95847C]">Saídas:</span>
+                      <strong className="text-[#BE9293]">-{formatBRL(pt.secondary)}</strong>
+                    </div>
+                  )}
+                </div>
+
+                <div className="pt-2 border-t border-[#E8D6CB] flex items-center justify-between text-xs">
+                  <span className="text-[#95847C]">Líquido:</span>
+                  <strong className={net >= 0 ? 'text-[#594943]' : 'text-[#B45353]'}>
+                    {formatBRL(net)}
+                  </strong>
+                </div>
+              </div>
+            );
+          })}
         </div>
-      </div>
+      )}
 
       {/* Rodapé Analítico Rápido */}
       <div className="pt-3 border-t border-[#E8D6CB] grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
@@ -362,7 +671,7 @@ export const LuxuryBarChart: React.FC<{
 };
 
 // ------------------------------------------------------------------
-// 4. GRÁFICO DE CURVA DE ÁREA & EVOLUÇÃO DE SALDO EM SVG (LuxuryAreaLineChart)
+// 4. GRÁFICO DE CURVA SUAVE SPLINE DE EVOLUÇÃO DE SALDO (LuxuryAreaLineChart)
 // ------------------------------------------------------------------
 export const LuxuryAreaLineChart: React.FC<{
   title: string;
@@ -374,183 +683,23 @@ export const LuxuryAreaLineChart: React.FC<{
   title,
   subtitle,
   data,
-  primaryLabel = 'Entradas / Saldo',
+  primaryLabel = 'Saldo Acumulado',
   secondaryLabel = 'Saídas',
 }) => {
-  const [hoverIdx, setHoverIdx] = useState<number | null>(null);
-
-  const safeData = data.length > 0 ? data : [{ label: 'Hoje', primary: 0, secondary: 0 }];
-  const maxVal = Math.max(
-    100,
-    ...safeData.flatMap((d) => [Math.max(0, d.primary), Math.max(0, d.secondary || 0)]),
-  );
-
-  const width = 720;
-  const height = 220;
-  const padX = 36;
-  const padY = 24;
-  const innerW = width - padX * 2;
-  const innerH = height - padY * 2;
-
-  const getCoords = (values: number[]) =>
-    values.map((val, idx) => {
-      const x =
-        safeData.length === 1
-          ? padX + innerW / 2
-          : padX + (idx / (safeData.length - 1)) * innerW;
-      const clamped = Math.max(0, val);
-      const y = padY + innerH - (clamped / maxVal) * innerH;
-      return { x, y, val };
-    });
-
-  const primaryPts = getCoords(safeData.map((d) => d.primary));
-  const hasSecondary = safeData.some((d) => d.secondary !== undefined);
-  const secondaryPts = hasSecondary ? getCoords(safeData.map((d) => d.secondary || 0)) : [];
-
-  const buildPath = (pts: { x: number; y: number }[]) =>
-    pts.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(' ');
-
-  const primaryLine = buildPath(primaryPts);
-  const primaryArea =
-    primaryPts.length > 0
-      ? `${primaryLine} L ${primaryPts[primaryPts.length - 1].x.toFixed(1)} ${(padY + innerH).toFixed(1)} L ${primaryPts[0].x.toFixed(1)} ${(padY + innerH).toFixed(1)} Z`
-      : '';
-
-  const secondaryLine = hasSecondary ? buildPath(secondaryPts) : '';
-
   return (
-    <div className="bg-white rounded-3xl border border-[#E8D6CB] p-5 sm:p-6 space-y-4 shadow-2xs">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-        <div>
-          <h4 className="font-editorial text-xl font-semibold text-[#594943]">{title}</h4>
-          {subtitle && <p className="text-xs text-[#95847C] mt-0.5">{subtitle}</p>}
-        </div>
-        <div className="flex items-center gap-4 text-xs font-semibold text-[#594943]">
-          <span className="inline-flex items-center gap-1.5">
-            <span className="w-3 h-1.5 rounded-full bg-[#C4A477]" />
-            {primaryLabel}
-          </span>
-          {hasSecondary && (
-            <span className="inline-flex items-center gap-1.5">
-              <span className="w-3 h-1.5 rounded-full bg-[#BE9293]" />
-              {secondaryLabel}
-            </span>
-          )}
-        </div>
-      </div>
-
-      <div className="w-full overflow-x-auto">
-        <svg
-          viewBox={`0 0 ${width} ${height + 26}`}
-          className="w-full h-56 sm:h-64 select-none"
-          role="img"
-          aria-label={title}
-        >
-          <defs>
-            <linearGradient id="luxuryGoldArea" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#C4A477" stopOpacity="0.42" />
-              <stop offset="100%" stopColor="#C4A477" stopOpacity="0.03" />
-            </linearGradient>
-          </defs>
-
-          {/* Linhas de grade horizontais */}
-          {[0, 0.25, 0.5, 0.75, 1].map((step, i) => {
-            const y = padY + step * innerH;
-            const labelVal = Math.round(maxVal * (1 - step));
-            return (
-              <g key={i}>
-                <line
-                  x1={padX}
-                  y1={y}
-                  x2={width - padX}
-                  y2={y}
-                  stroke="#E8D6CB"
-                  strokeDasharray={step === 1 ? undefined : '4 4'}
-                  strokeWidth={step === 1 ? '1.5' : '1'}
-                />
-                <text
-                  x={padX - 6}
-                  y={y + 3}
-                  textAnchor="end"
-                  className="fill-[#95847C] text-[9px]"
-                >
-                  {labelVal}
-                </text>
-              </g>
-            );
-          })}
-
-          {/* Área preenchida e linha principal */}
-          {primaryArea && <path d={primaryArea} fill="url(#luxuryGoldArea)" />}
-          {primaryLine && (
-            <path
-              d={primaryLine}
-              fill="none"
-              stroke="#594943"
-              strokeWidth="3"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          )}
-
-          {/* Linha secundária (Despesas) */}
-          {secondaryLine && (
-            <path
-              d={secondaryLine}
-              fill="none"
-              stroke="#BE9293"
-              strokeWidth="2.4"
-              strokeDasharray="6 4"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          )}
-
-          {/* Pontos interativos */}
-          {primaryPts.map((pt, idx) => {
-            const active = hoverIdx === idx;
-            return (
-              <g
-                key={idx}
-                className="cursor-pointer"
-                onClick={() => setHoverIdx(active ? null : idx)}
-                onMouseEnter={() => setHoverIdx(idx)}
-              >
-                <circle
-                  cx={pt.x}
-                  cy={pt.y}
-                  r={active ? 7 : 5}
-                  fill="#FAF6F1"
-                  stroke="#594943"
-                  strokeWidth="2.5"
-                />
-                <text
-                  x={pt.x}
-                  y={pt.y - 10}
-                  textAnchor="middle"
-                  className="fill-[#594943] text-[10px] font-bold"
-                >
-                  R${Math.round(pt.val)}
-                </text>
-                <text
-                  x={pt.x}
-                  y={height + 16}
-                  textAnchor="middle"
-                  className="fill-[#95847C] text-[11px] font-semibold"
-                >
-                  {safeData[idx].label}
-                </text>
-              </g>
-            );
-          })}
-        </svg>
-      </div>
-    </div>
+    <LuxuryBarChart
+      title={title}
+      subtitle={subtitle}
+      data={data}
+      primaryLabel={primaryLabel}
+      secondaryLabel={secondaryLabel}
+      defaultMode="spline"
+    />
   );
 };
 
 // ------------------------------------------------------------------
-// 5. GRÁFICO DE ROSCA / DONUT SVG INTERATIVO (LuxuryDonutChart)
+// 5. GRÁFICO DE ROSCA / DONUT MODERNO COM BARRAS DE PROGRESSO (LuxuryDonutChart)
 // ------------------------------------------------------------------
 export interface DonutSlice {
   label: string;
@@ -571,7 +720,7 @@ export const LuxuryDonutChart: React.FC<{
   const positiveSlices = slices.filter((s) => s.value > 0);
   const total = positiveSlices.reduce((acc, s) => acc + s.value, 0);
 
-  const radius = 64;
+  const radius = 62;
   const circumference = 2 * Math.PI * radius;
   let accumulatedPct = 0;
 
@@ -583,7 +732,7 @@ export const LuxuryDonutChart: React.FC<{
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 items-center">
-        {/* SVG Donut */}
+        {/* SVG Donut Moderno */}
         <div className="relative w-44 h-44 mx-auto flex items-center justify-center">
           <svg viewBox="0 0 160 160" className="w-full h-full -rotate-90">
             <circle
@@ -591,13 +740,13 @@ export const LuxuryDonutChart: React.FC<{
               cy="80"
               r={radius}
               fill="none"
-              stroke="#F2EAE4"
-              strokeWidth="20"
+              stroke="#FAF6F1"
+              strokeWidth="22"
             />
             {total > 0 &&
               positiveSlices.map((slice, idx) => {
                 const pct = slice.value / total;
-                const dash = pct * circumference;
+                const dash = Math.max(0, pct * circumference - 2);
                 const offset = -accumulatedPct * circumference;
                 accumulatedPct += pct;
                 const color = slice.color || LUXURY_DONUT_COLORS[idx % LUXURY_DONUT_COLORS.length];
@@ -611,7 +760,7 @@ export const LuxuryDonutChart: React.FC<{
                     r={radius}
                     fill="none"
                     stroke={color}
-                    strokeWidth={isSelected ? '24' : '20'}
+                    strokeWidth={isSelected ? '25' : '21'}
                     strokeDasharray={`${dash} ${circumference}`}
                     strokeDashoffset={offset}
                     className="transition-all duration-300 cursor-pointer"
@@ -621,7 +770,7 @@ export const LuxuryDonutChart: React.FC<{
               })}
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4 pointer-events-none">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-[#95847C]">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-[#95847C] truncate max-w-[110px]">
               {activeSlice !== null && positiveSlices[activeSlice]
                 ? positiveSlices[activeSlice].label
                 : centerLabel}
@@ -634,11 +783,11 @@ export const LuxuryDonutChart: React.FC<{
           </div>
         </div>
 
-        {/* Legenda Detalhada com Percentuais */}
-        <div className="space-y-2">
+        {/* Lista de Categorias com Barra de Progresso Integrada */}
+        <div className="space-y-2.5">
           {positiveSlices.length === 0 ? (
             <p className="text-xs text-[#95847C]">
-              Sem valores lançados nesta categoria. Adicione registros ou carregue os dados de exemplo.
+              Sem valores lançados nesta categoria.
             </p>
           ) : (
             positiveSlices.map((slice, idx) => {
@@ -651,28 +800,36 @@ export const LuxuryDonutChart: React.FC<{
                   key={idx}
                   type="button"
                   onClick={() => setActiveSlice(isSelected ? null : idx)}
-                  className={`w-full flex items-center justify-between gap-2 p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
+                  className={`w-full p-2.5 rounded-2xl border text-left transition-all cursor-pointer space-y-1.5 ${
                     isSelected
                       ? 'bg-[#F2EAE4] border-[#C4A477]'
-                      : 'bg-[#FAF6F1] border-[#E8D6CB]/70 hover:bg-[#F2EAE4]/60'
+                      : 'bg-[#FAF6F1] border-[#E8D6CB]/80 hover:bg-[#F2EAE4]/60'
                   }`}
                 >
-                  <div className="flex items-center gap-2 min-w-0">
-                    <span
-                      className="w-3 h-3 rounded-full shrink-0"
-                      style={{ backgroundColor: color }}
-                    />
-                    <span className="text-xs font-semibold text-[#594943] truncate">
-                      {slice.label}
-                    </span>
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span
+                        className="w-3 h-3 rounded-full shrink-0"
+                        style={{ backgroundColor: color }}
+                      />
+                      <span className="text-xs font-semibold text-[#594943] truncate">
+                        {slice.label}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0 tabular-nums">
+                      <span className="text-xs font-bold text-[#594943]">
+                        {formatBRL(slice.value)}
+                      </span>
+                      <span className="px-1.5 py-0.5 rounded-md bg-white text-[10px] font-bold text-[#594943] border border-[#E8D6CB]">
+                        {pct}%
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2 shrink-0 tabular-nums">
-                    <span className="text-xs font-bold text-[#594943]">
-                      {formatBRL(slice.value)}
-                    </span>
-                    <span className="px-1.5 py-0.5 rounded-md bg-white text-[10px] font-bold text-[#C4A477] border border-[#E8D6CB]">
-                      {pct}%
-                    </span>
+                  <div className="w-full h-1.5 rounded-full bg-white overflow-hidden">
+                    <div
+                      style={{ width: `${Math.max(4, pct)}%`, backgroundColor: color }}
+                      className="h-full rounded-full transition-all duration-500"
+                    />
                   </div>
                 </button>
               );
@@ -701,7 +858,6 @@ export const LuxuryGaugeCard: React.FC<{
   const breakEvenRemaining = Math.max(0, totalExpenses - currentRevenue);
   const isBreakEvenReached = currentRevenue >= totalExpenses;
 
-  // Semi-circle gauge arc
   const radius = 66;
   const arcLength = Math.PI * radius;
   const filledArc = (pct / 100) * arcLength;
@@ -718,7 +874,6 @@ export const LuxuryGaugeCard: React.FC<{
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
-        {/* SVG Semi-Circular Gauge */}
         <div className="relative w-48 h-28 mx-auto flex flex-col items-center justify-end">
           <svg viewBox="0 0 160 95" className="w-full h-full">
             <path
@@ -747,7 +902,6 @@ export const LuxuryGaugeCard: React.FC<{
           </div>
         </div>
 
-        {/* Insights Acionáveis */}
         <div className="space-y-2.5 text-xs">
           <div className="p-3 rounded-2xl bg-[#FAF6F1] border border-[#E8D6CB]">
             <span className="text-[#95847C] block">Faltam para a Meta ({formatBRL(safeGoal)}):</span>

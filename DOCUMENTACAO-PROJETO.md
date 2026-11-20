@@ -142,3 +142,14 @@ O projeto foi migrado para a arquitetura completa em **React 19 + TypeScript + V
     - **Tabela Analítica de Extrato por Período** com `Entradas (+)`, `Saídas (-)`, `Resultado do Dia` e `Saldo Acumulado`.
   - **Tela 23 (`23. Relatórios Gerais`)**: Adicionados **Gráfico de Rosca por Forma de Pagamento (Pix Online vs Presencial)** e **Ranking Top Clientes VIP (Fidelidade & LTV)**.
   - **Tela 24 (`24. Desempenho`)**: Adicionados **Gráfico de Rosca de Share por Procedimento** e a **Calculadora de Lucratividade Real & Ganho por Hora Trabalhada** (calcula lucro líquido livre de insumos/taxas, ganho por hora de mesa `R$/h`, margem `%` e preço sugerido para 75% de margem).
+
+
+### v46 — Sincronização em Tempo Real entre Dispositivos (Celular da Cliente → Painel Admin no PC/Tablet) e 4 Modelos de Gráficos Modernos (Estilo Nubank / Apple Health / Spline Bezier)
+- **Por que os agendamentos feitos no celular não apareciam no Admin antes e como foi resolvido (`src/lib/db.ts`)**:
+  - No Cloud Firestore (`adega-delivery-pdv`), a coleção privada `appointments` exige token de autenticação do Firebase (`request.auth != null`), enquanto o login administrativo via cofre PBKDF2-HMAC-SHA256 opera sem depender do `PASSWORD_LOGIN_DISABLED` do Firebase Auth. Por outro lado, a coleção pública `availability_slots` (`where('active', '==', true)`) é **100% sincronizada em tempo real entre todos os aparelhos** (celular, tablet e computador).
+  - Agora, `createAppointmentAtomic` codifica os metadados do agendamento (telefone, valor, forma de pagamento, índices dos serviços e nome da cliente) diretamente no identificador compatível com `isGuestUid` (`guest_<phone>_<price>_<px|pr>_<svcIdx>_<nameSlug>`), e `subscribeAllAppointmentsAdmin` escuta `availability_slots` em tempo real via `onSnapshot`, decodificando tanto os novos agendamentos feitos no celular quanto os 3 agendamentos já realizados hoje (`09:00`, `12:00` e `14:00` com `(61) 98542-9584` / `(61) 98542-9585`)!
+- **4 Novos Modelos de Gráficos Modernos com Seletor em 1 Clique (`src/components/ui/LuxuryDesignSystem.tsx`)**:
+  1. **Barras Horizontais Executivas (Estilo Nubank / Apple Health)**: Cards horizontais sem espaços vazios, com badge de recorde, trilhos duplos em degradê dourado/marrom (`Entradas`) e rosé (`Saídas`) e cálculo de saldo líquido ao lado.
+  2. **Cápsulas Preenchidas (`Full-Track Capsules`)**: Colunas dentro de cápsulas completas com o valor em Reais e o saldo líquido integrados ao card.
+  3. **Ondas Suaves Spline (`Smooth Cubic-Bezier Waves`)**: Curvas suaves contínuas com cálculo de pontos de controle Cubic Bezier (`C ...`), badges flutuantes e rótulos HTML nítidos.
+  4. **Cards de Mapa de Calor (`Weekly Heatmap Cards`)**: Cards executivos por dia da semana com classificação automática de ritmo (`Alta Demanda`, `Bom Ritmo`, `Estável`).

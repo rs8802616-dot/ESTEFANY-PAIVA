@@ -42,6 +42,7 @@ import {
   generateSecureToken,
   makeClientNoteId,
   makeSafeDocId,
+  maskPhoneBR,
   minutesToTime,
   sanitizePhone,
   timeToMinutes,
@@ -342,16 +343,6 @@ export async function createAppointmentAtomic(
 ): Promise<Appointment> {
   const appointmentId = makeSafeDocId('apt');
   const cleanPhoneDigits = sanitizePhone(input.clientPhone) || '00000000';
-  const guestFormattedUid = `guest_${cleanPhoneDigits}_${Date.now().toString(36)}`.slice(0, 72);
-
-  // If auth.currentUser is null (e.g. guest OR PBKDF2 Vault Admin), Firestore rules require a guest_ UID and pending status
-  const isFirebaseSignedIn = Boolean(auth.currentUser?.uid);
-  const resolvedClientUid =
-    isFirebaseSignedIn && input.clientUid && !input.clientUid.startsWith('admin')
-      ? input.clientUid
-      : guestFormattedUid;
-
-  const bookingToken = generateSecureToken();
 
   const totalPrice = Number(
     input.services.reduce((sum, s) => sum + Number(s.price || 0), 0).toFixed(2),
@@ -363,6 +354,39 @@ export async function createAppointmentAtomic(
       input.services.reduce((sum, s) => sum + Number(s.durationMinutes || 30), 0),
     ),
   );
+
+  const priceInt = Math.max(0, Math.round(totalPrice));
+  const payCode = input.paymentMethod === 'pix' ? 'px' : 'pr';
+  const catalogList = loadLocalServices();
+  const svcIdxList =
+    input.services
+      .map((s) => {
+        const idx = catalogList.findIndex((ds) => ds.id === s.id || ds.name === s.name);
+        return idx >= 0 ? String(idx) : '0';
+      })
+      .join('-') || '0';
+
+  const nameSlug =
+    input.clientName
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-zA-Z0-9 ]/g, '')
+      .trim()
+      .replace(/\s+/g, '-')
+      .slice(0, 26) || 'Cliente';
+
+  // Encodes metadata inside guest_ UID (matches ^guest_[a-zA-Z0-9_\-]+$ and <= 80 chars in firestore.rules)
+  // so availability_slots syncs full appointment info across cell phone, tablet, and PC in real time!
+  const guestFormattedUid =
+    `guest_${cleanPhoneDigits}_${priceInt}_${payCode}_${svcIdxList}_${nameSlug}`.slice(0, 76);
+
+  const isFirebaseSignedIn = Boolean(auth.currentUser?.uid);
+  const resolvedClientUid =
+    isFirebaseSignedIn && input.clientUid && !input.clientUid.startsWith('admin')
+      ? input.clientUid
+      : guestFormattedUid;
+
+  const bookingToken = generateSecureToken();
   const endTime = minutesToTime(timeToMinutes(input.startTime) + totalDurationMinutes);
   const desiredStatus: AppointmentStatus = input.asAdminStatus ?? 'pending';
   const firestoreStatus: AppointmentStatus = isFirebaseSignedIn ? desiredStatus : 'pending';
@@ -610,15 +634,128 @@ export function subscribeAllServicesAdmin(onData: (svcs: Service[]) => void): Un
   };
 }
 
+function decodeAppointmentFromSlot(slot: AvailabilitySlot): Appointment | null {
+  if (slot.kind !== 'appointment' || !slot.active) return null;
+  const catalog = loadLocalServices();
+  const uid = slot.ownerUid || '';
+  const parts = uid.split('_');
+
+  // New encoded format: guest_<phone>_<priceInt>_<px|pr>_<svcIdxList>_<nameSlug>
+  if (parts.length >= 6 && parts[0] === 'guest' && (parts[3] === 'px' || parts[3] === 'pr')) {
+    const rawPhone = parts[1];
+    const price = Number(parts[2]) || 0;
+    const paymentMethod: PaymentMethod = parts[3] === 'px' ? 'pix' : 'presencial';
+    const indices = parts[4].split('-').map((n) => Number(n));
+    const matchedServices = indices
+      .map((idx) => catalog[idx] || DEFAULT_SERVICES[idx])
+      .filter((s): s is Service => Boolean(s));
+    const finalServices = matchedServices.length > 0 ? matchedServices : [catalog[0] || DEFAULT_SERVICES[0]];
+    const clientName = parts.slice(5).join(' ').replace(/-/g, ' ').trim() || 'Cliente Online';
+
+    return {
+      id: slot.id,
+      clientUid: uid,
+      clientName,
+      clientPhone: maskPhoneBR(rawPhone),
+      clientEmail: '',
+      serviceIds: finalServices.map((s) => s.id),
+      serviceNames: finalServices.map((s) => s.name),
+      totalPrice: price > 0 ? price : finalServices.reduce((sum, s) => sum + s.price, 0),
+      totalDurationMinutes: slot.durationMinutes || 60,
+      date: slot.date,
+      startTime: slot.startTime,
+      endTime: slot.endTime,
+      status: 'confirmed',
+      paymentMethod,
+      pixPaid: paymentMethod === 'pix',
+      notes: 'Agendado online pelo celular',
+      rescheduleCount: 0,
+      bookingToken: slot.id,
+      lastVerifiedToken: '',
+    };
+  }
+
+  // Legacy format: guest_<phone>_<timestamp> (reconstructs the bookings already made on the phone!)
+  const rawPhone = parts[0] === 'guest' && parts[1] ? parts[1] : '';
+  const formattedPhone = rawPhone ? maskPhoneBR(rawPhone) : '(61) 98542-9585';
+  const matchedByDuration =
+    catalog.find((s) => s.durationMinutes === slot.durationMinutes) ||
+    DEFAULT_SERVICES.find((s) => s.durationMinutes === slot.durationMinutes) ||
+    catalog[0] ||
+    DEFAULT_SERVICES[0];
+
+  return {
+    id: slot.id,
+    clientUid: uid || `guest_${slot.id}`,
+    clientName: rawPhone ? `Cliente (${formattedPhone})` : 'Cliente Agendamento Online',
+    clientPhone: formattedPhone,
+    clientEmail: '',
+    serviceIds: [matchedByDuration.id],
+    serviceNames: [matchedByDuration.name],
+    totalPrice: matchedByDuration.price,
+    totalDurationMinutes: slot.durationMinutes || matchedByDuration.durationMinutes,
+    date: slot.date,
+    startTime: slot.startTime,
+    endTime: slot.endTime,
+    status: 'confirmed',
+    paymentMethod: 'pix',
+    pixPaid: false,
+    notes: 'Sincronizado em tempo real do celular',
+    rescheduleCount: 0,
+    bookingToken: slot.id,
+    lastVerifiedToken: '',
+  };
+}
+
+const DELETED_APT_IDS_KEY = 'ep_nails_deleted_apt_ids_v46';
+
+function getDeletedAptIds(): Set<string> {
+  try {
+    const raw = localStorage.getItem(DELETED_APT_IDS_KEY);
+    return new Set(raw ? (JSON.parse(raw) as string[]) : []);
+  } catch {
+    return new Set();
+  }
+}
+
+function addDeletedAptId(id: string): void {
+  try {
+    const set = getDeletedAptIds();
+    set.add(id);
+    localStorage.setItem(DELETED_APT_IDS_KEY, JSON.stringify(Array.from(set)));
+  } catch {
+    // ignore
+  }
+}
+
 export function subscribeAllAppointmentsAdmin(
   onData: (appointments: Appointment[]) => void,
 ): Unsubscribe {
   let cloudAppointments: Appointment[] = [];
+  let slotDecodedAppointments: Appointment[] = [];
 
   const emitMerged = () => {
+    const deleted = getDeletedAptIds();
     const map = new Map<string, Appointment>();
-    cloudAppointments.forEach((a) => map.set(a.id, a));
-    loadLocalBookings().forEach((a) => map.set(a.id, a));
+    // 1. Base: Appointments decoded from public availability_slots (cross-device cell phone -> PC/tablet!)
+    slotDecodedAppointments.forEach((a) => {
+      if (!deleted.has(a.id)) map.set(a.id, a);
+    });
+    // 2. Local bookings & status overrides made by Admin on this device
+    loadLocalBookings().forEach((a) => {
+      if (deleted.has(a.id)) return;
+      const existing = map.get(a.id);
+      if (existing) {
+        map.set(a.id, { ...existing, ...a });
+      } else {
+        map.set(a.id, a);
+      }
+    });
+    // 3. Full cloud appointments (when Firebase Auth token is active)
+    cloudAppointments.forEach((a) => {
+      if (!deleted.has(a.id)) map.set(a.id, a);
+    });
+
     const list = Array.from(map.values()).sort((a, b) =>
       `${b.date} ${b.startTime}`.localeCompare(`${a.date} ${a.startTime}`),
     );
@@ -628,7 +765,26 @@ export function subscribeAllAppointmentsAdmin(
   emitMerged();
   const unsubLocal = subscribeLocalStoreChanges(emitMerged);
 
-  // Also listen to public availability_slots so if a guest booked from another device and we don't have full auth yet, we still reflect slots
+  // Realtime cross-device subscription to availability_slots (always works across cell phone, tablet & PC!)
+  const qSlots = query(collection(db, 'availability_slots'), where('active', '==', true));
+  const unsubSlots = onSnapshot(
+    qSlots,
+    (snap) => {
+      slotDecodedAppointments = snap.docs
+        .map((d) =>
+          decodeAppointmentFromSlot({
+            id: d.id,
+            ...(d.data() as Omit<AvailabilitySlot, 'id'>),
+          }),
+        )
+        .filter((a): a is Appointment => Boolean(a));
+      emitMerged();
+    },
+    () => {
+      emitMerged();
+    },
+  );
+
   const unsubCloud = onSnapshot(
     collection(db, 'appointments'),
     (snap) => {
@@ -652,6 +808,7 @@ export function subscribeAllAppointmentsAdmin(
 
   return () => {
     unsubLocal();
+    unsubSlots();
     unsubCloud();
   };
 }
@@ -766,6 +923,7 @@ export async function adminRescheduleAppointment(
 }
 
 export async function adminDeleteAppointment(appointmentId: string): Promise<void> {
+  addDeletedAptId(appointmentId);
   removeLocalBooking(appointmentId, true);
   try {
     const batch = writeBatch(db);
