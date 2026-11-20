@@ -12,7 +12,7 @@ export default defineConfig(() => {
       tailwindcss(),
       VitePWA({
         registerType: 'autoUpdate',
-        includeAssets: ['icon.svg', 'apple-touch-icon.png', 'pwa-192x192.png', 'pwa-512x512.png', 'pwa-maskable-512x512.png'],
+        includeAssets: ['icon.svg', 'apple-touch-icon.png', 'pwa-192x192.png', 'pwa-512x512.png', 'pwa-maskable-512x512.png', 'splash-capa.jpg'],
         manifest: {
           id: '/',
           name: 'Estefany Paiva Nails',
@@ -47,7 +47,7 @@ export default defineConfig(() => {
           ],
         },
         workbox: {
-          cacheId: 'estefany-nails-v72-fullscreen-calendar-edge-to-edge',
+          cacheId: 'estefany-nails-v73-splash-capa-abertura',
           skipWaiting: true,
           clientsClaim: true,
           cleanupOutdatedCaches: true,

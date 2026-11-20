@@ -12,7 +12,7 @@ if ('serviceWorker' in navigator) {
   });
 
   // Limpa qualquer Service Worker antigo (v38/v39/v40) que ainda estivesse preso no cache do navegador
-  const SW_MIGRATION_KEY = 'epn_sw_v72_fullscreen_calendar_edge_to_edge';
+  const SW_MIGRATION_KEY = 'epn_sw_v73_splash_capa_abertura';
   if (!localStorage.getItem(SW_MIGRATION_KEY)) {
     localStorage.setItem(SW_MIGRATION_KEY, '1');
     localStorage.removeItem('ep_nails_guest_bookings_v36');

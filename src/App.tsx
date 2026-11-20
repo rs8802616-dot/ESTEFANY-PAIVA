@@ -37,6 +37,8 @@ function SalonAppShell() {
   const [mode, setMode] = useState<AppMode>('client');
   const [adminPreviewClient, setAdminPreviewClient] = useState(false);
   const [routeChecked, setRouteChecked] = useState(false);
+  const [showSplash, setShowSplash] = useState(true);
+  const [splashFading, setSplashFading] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [authReady, setAuthReady] = useState(false);
@@ -47,6 +49,15 @@ function SalonAppShell() {
   const [busySlots, setBusySlots] = useState<AvailabilitySlot[]>([]);
   const [googleAppointments, setGoogleAppointments] = useState<Appointment[]>([]);
   const [localBookings, setLocalBookings] = useState<Appointment[]>(() => loadLocalBookings());
+
+  useEffect(() => {
+    const fadeTimer = window.setTimeout(() => setSplashFading(true), 1500);
+    const hideTimer = window.setTimeout(() => setShowSplash(false), 1950);
+    return () => {
+      window.clearTimeout(fadeTimer);
+      window.clearTimeout(hideTimer);
+    };
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -138,6 +149,25 @@ function SalonAppShell() {
 
   return (
     <>
+      {showSplash && (
+        <div
+          aria-hidden="true"
+          className={`fixed inset-0 z-[100] bg-[#141110] flex items-center justify-center transition-opacity duration-500 ${
+            splashFading ? 'opacity-0 pointer-events-none' : 'opacity-100'
+          }`}
+        >
+          <img
+            src="/splash-capa.jpg"
+            alt="Estefany Paiva Nail Designer"
+            className="w-full h-full object-cover sm:object-contain"
+          />
+          <div className="absolute bottom-8 inset-x-0 flex justify-center pointer-events-none">
+            <div className="px-4 py-1.5 rounded-full bg-black/55 backdrop-blur-sm border border-[#C4A477]/40 text-[11px] font-medium text-[#FAF6F1] tracking-wider">
+              Carregando...
+            </div>
+          </div>
+        </div>
+      )}
       <OfflineIndicator />
       {mode === 'admin' && !adminPreviewClient ? (
         <AdminPanel
