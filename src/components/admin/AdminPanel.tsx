@@ -123,6 +123,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   const [showPassword, setShowPassword] = useState(false);
   const [vaultEmail, setVaultEmail] = useState<string | null>(() => getVaultAdminEmail());
   const [walkInSignal, setWalkInSignal] = useState(0);
+  const [newClientSignal, setNewClientSignal] = useState(0);
+  const [firstProfileSignal, setFirstProfileSignal] = useState(0);
+  const [newServiceSignal, setNewServiceSignal] = useState(0);
   const [pendingDetailId, setPendingDetailId] = useState<string | null>(null);
 
   const effectiveAdmin = Boolean((user && isAdmin) || vaultEmail);
@@ -159,11 +162,22 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       noteByPhone.set(key, n);
     });
 
+    const hasFutureAppointmentKeys = new Set<string>();
+    appointments.forEach((apt) => {
+      if (apt.status === 'cancelled') return;
+      const phoneDigits = sanitizePhone(apt.clientPhone);
+      const key = phoneDigits || apt.clientEmail || apt.clientName.toLowerCase();
+      if (apt.date > today && (apt.status === 'pending' || apt.status === 'confirmed')) {
+        hasFutureAppointmentKeys.add(key);
+      }
+    });
+
     appointments.forEach((apt) => {
       if (apt.status === 'cancelled') return;
       const phoneDigits = sanitizePhone(apt.clientPhone);
       const key = phoneDigits || apt.clientEmail || apt.clientName.toLowerCase();
       const existing = map.get(key);
+      const hasUpcoming = hasFutureAppointmentKeys.has(key);
 
       if (!existing) {
         const diff = apt.date <= today ? daysBetween(apt.date, today) : null;
@@ -176,7 +190,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           totalSpent: apt.totalPrice,
           lastVisitDate: apt.date <= today ? apt.date : null,
           daysSinceLastVisit: diff,
-          needsReturnAlert: diff !== null && diff >= settings.returnAlertDays,
+          needsReturnAlert: !hasUpcoming && diff !== null && diff >= settings.returnAlertDays,
           lastServices: apt.serviceNames,
           techNote: noteByPhone.get(phoneDigits),
         });
@@ -186,7 +200,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
         if (apt.date <= today && (!existing.lastVisitDate || apt.date > existing.lastVisitDate)) {
           existing.lastVisitDate = apt.date;
           existing.daysSinceLastVisit = daysBetween(apt.date, today);
-          existing.needsReturnAlert = existing.daysSinceLastVisit >= settings.returnAlertDays;
+          existing.needsReturnAlert =
+            !hasUpcoming && existing.daysSinceLastVisit >= settings.returnAlertDays;
           existing.lastServices = apt.serviceNames;
         }
       }
@@ -311,6 +326,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       setActiveTab('agenda');
       if (appointments[0]) {
         setPendingDetailId(appointments[0].id);
+      } else {
+        showToast('Crie ou selecione um agendamento na Agenda para abrir a Tela 6.', 'info');
       }
       return;
     }
@@ -318,14 +335,32 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       onExitAdmin();
       return;
     }
-    if (screenId >= 12 && screenId <= 14) {
+    if (screenId === 12) {
       setActiveTab('clientes');
       setClientsSubView('crm');
       return;
     }
-    if (screenId === 15 || screenId === 16) {
+    if (screenId === 13) {
+      setActiveTab('clientes');
+      setClientsSubView('crm');
+      setNewClientSignal((n) => n + 1);
+      return;
+    }
+    if (screenId === 14) {
+      setActiveTab('clientes');
+      setClientsSubView('crm');
+      setFirstProfileSignal((n) => n + 1);
+      return;
+    }
+    if (screenId === 15) {
       setActiveTab('clientes');
       setClientsSubView('catalog');
+      return;
+    }
+    if (screenId === 16) {
+      setActiveTab('clientes');
+      setClientsSubView('catalog');
+      setNewServiceSignal((n) => n + 1);
       return;
     }
     if (screenId >= 17 && screenId <= 24) {
@@ -1067,7 +1102,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                         </h2>
                         <button
                           type="button"
-                          onClick={() => setActiveTab('clientes')}
+                          onClick={() => {
+                            setActiveTab('clientes');
+                            setClientsSubView('crm');
+                          }}
                           className="text-xs font-semibold text-[#C4A477] hover:underline"
                         >
                           Ver clientes
@@ -1162,9 +1200,18 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
               </div>
 
               {clientsSubView === 'crm' ? (
-                <AdminClientsTab clients={clientProfiles} settings={settings} />
+                <AdminClientsTab
+                  clients={clientProfiles}
+                  settings={settings}
+                  openNewClientSignal={newClientSignal}
+                  openFirstProfileSignal={firstProfileSignal}
+                />
               ) : (
-                <AdminCatalogTab categories={categories} services={services} />
+                <AdminCatalogTab
+                  categories={categories}
+                  services={services}
+                  openNewServiceSignal={newServiceSignal}
+                />
               )}
             </div>
           )}
@@ -1175,6 +1222,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
               appointments={appointments}
               settings={settings}
               initialSubScreen={financeSubScreen}
+              onSelectSubScreen={setFinanceSubScreen}
             />
           )}
 

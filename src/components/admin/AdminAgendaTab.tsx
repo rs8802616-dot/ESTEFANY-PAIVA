@@ -20,6 +20,7 @@ import {
   adminCreatePersonalBlock,
   adminDeleteAppointment,
   adminDeletePersonalBlock,
+  adminRescheduleAppointment,
   adminUpdateAppointmentStatus,
   createAppointmentAtomic,
 } from '../../lib/db';
@@ -111,6 +112,16 @@ export const AdminAgendaTab: React.FC<AdminAgendaTabProps> = ({
     () => appointments.find((a) => a.id === detailAppointmentId) || null,
     [appointments, detailAppointmentId],
   );
+
+  const [rescheduleDate, setRescheduleDate] = useState('');
+  const [rescheduleTime, setRescheduleTime] = useState('');
+
+  useEffect(() => {
+    if (selectedAppointment) {
+      setRescheduleDate(selectedAppointment.date);
+      setRescheduleTime(selectedAppointment.startTime);
+    }
+  }, [selectedAppointment]);
 
   const selectedTemplates = useMemo(
     () => (selectedAppointment ? getAdminWhatsAppTemplates(selectedAppointment, settings) : []),
@@ -662,6 +673,49 @@ export const AdminAgendaTab: React.FC<AdminAgendaTabProps> = ({
                   </button>
                 )}
               </div>
+
+              {/* Remarcar Horário pela Administradora */}
+              {selectedAppointment.status !== 'cancelled' &&
+                selectedAppointment.status !== 'completed' && (
+                  <div className="mt-4 pt-4 border-t border-[#E8D6CB] space-y-2.5">
+                    <h4 className="text-xs font-semibold uppercase tracking-wider text-[#594943]">
+                      Remarcar Data e Horário
+                    </h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                      <input
+                        type="date"
+                        value={rescheduleDate}
+                        onChange={(e) => setRescheduleDate(e.target.value)}
+                        className="min-h-[42px] rounded-xl border border-[#E8D6CB] bg-[#FAF6F1] px-3 text-sm text-[#594943]"
+                      />
+                      <input
+                        type="time"
+                        value={rescheduleTime}
+                        onChange={(e) => setRescheduleTime(e.target.value)}
+                        className="min-h-[42px] rounded-xl border border-[#E8D6CB] bg-[#FAF6F1] px-3 text-sm text-[#594943]"
+                      />
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          if (!rescheduleDate || !rescheduleTime) return;
+                          try {
+                            await adminRescheduleAppointment(
+                              selectedAppointment,
+                              rescheduleDate,
+                              rescheduleTime,
+                            );
+                            showToast('Horário remarcado com sucesso!');
+                          } catch {
+                            showToast('Não foi possível remarcar o horário.', 'error');
+                          }
+                        }}
+                        className="min-h-[42px] rounded-xl bg-[#594943] text-white text-xs font-semibold hover:bg-[#433631] transition-colors cursor-pointer"
+                      >
+                        Salvar Nova Data
+                      </button>
+                    </div>
+                  </div>
+                )}
             </div>
           </div>
         )}

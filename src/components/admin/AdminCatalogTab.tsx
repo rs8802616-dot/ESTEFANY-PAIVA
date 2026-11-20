@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Pencil, Plus, Trash2, Upload } from 'lucide-react';
 import { BottomSheet } from '../BottomSheet';
 import { SafeImage } from '../SafeImage';
@@ -16,9 +16,14 @@ import type { Category, Service } from '../../types/salon';
 interface AdminCatalogTabProps {
   categories: Category[];
   services: Service[];
+  openNewServiceSignal?: number;
 }
 
-export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({ categories, services }) => {
+export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
+  categories,
+  services,
+  openNewServiceSignal = 0,
+}) => {
   const { showToast } = useToast();
   const [catName, setCatName] = useState('');
   const [editingSvc, setEditingSvc] = useState<Partial<Service> | null>(null);
@@ -56,6 +61,12 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({ categories, se
       order: services.length + 1,
     });
   };
+
+  useEffect(() => {
+    if (openNewServiceSignal > 0) {
+      openNewService();
+    }
+  }, [openNewServiceSignal]);
 
   const handleUploadImage = async (file?: File | null) => {
     if (!file || !editingSvc) return;

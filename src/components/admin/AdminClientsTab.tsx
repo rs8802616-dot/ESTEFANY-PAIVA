@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   BellRing,
   ClipboardList,
@@ -25,11 +25,18 @@ import type {
 interface AdminClientsTabProps {
   clients: ClientProfileSummary[];
   settings: SalonSettings;
+  openNewClientSignal?: number;
+  openFirstProfileSignal?: number;
 }
 
 const NAIL_FORMATS = ['Amendoada', 'Quadrada', 'Bailarina', 'Stiletto', 'Natural / Curta', 'Oval'];
 
-export const AdminClientsTab: React.FC<AdminClientsTabProps> = ({ clients, settings }) => {
+export const AdminClientsTab: React.FC<AdminClientsTabProps> = ({
+  clients,
+  settings,
+  openNewClientSignal = 0,
+  openFirstProfileSignal = 0,
+}) => {
   const { showToast } = useToast();
   const [search, setSearch] = useState('');
   const [onlyReturnAlert, setOnlyReturnAlert] = useState(false);
@@ -79,6 +86,18 @@ export const AdminClientsTab: React.FC<AdminClientsTabProps> = ({ clients, setti
       });
     }
   };
+
+  useEffect(() => {
+    if (openNewClientSignal > 0) {
+      openTechSheet();
+    }
+  }, [openNewClientSignal]);
+
+  useEffect(() => {
+    if (openFirstProfileSignal > 0) {
+      openTechSheet(clients[0]);
+    }
+  }, [openFirstProfileSignal, clients]);
 
   const handleSaveNote = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -47,9 +47,9 @@ export const AdminReportsTab: React.FC<{ appointments: Appointment[] }> = ({ app
     return appointments.filter((a) => {
       if (period === 'all') return true;
       const diff = daysBetween(a.date, today);
-      if (period === '7d') return diff >= -7 && diff <= 7;
-      if (period === '30d') return diff >= -30 && diff <= 30;
-      if (period === '6m') return diff >= -30 && diff <= 183;
+      if (period === '7d') return diff >= -1 && diff <= 7;
+      if (period === '30d') return diff >= -7 && diff <= 30;
+      if (period === '6m') return diff >= -14 && diff <= 183;
       return true;
     });
   }, [appointments, period, today]);

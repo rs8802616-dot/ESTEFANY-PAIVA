@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ChevronLeft, ChevronRight, Clock } from 'lucide-react';
 import type { AvailabilitySlot, SalonSettings } from '../types/salon';
 import { formatDuration, generateTimeSlotsForDate, todayISO } from '../lib/utils';
@@ -45,6 +45,15 @@ export const CalendarPicker: React.FC<CalendarPickerProps> = ({
   const [viewYear, setViewYear] = useState(initY);
   const [viewMonth, setViewMonth] = useState(initM - 1);
 
+  useEffect(() => {
+    if (!selectedDate) return;
+    const [y, m] = selectedDate.split('-').map(Number);
+    if (y && m) {
+      setViewYear(y);
+      setViewMonth(m - 1);
+    }
+  }, [selectedDate]);
+
   const blockedDateSet = useMemo(
     () => new Set(settings.blockedDates || []),
     [settings.blockedDates],
@@ -89,6 +98,14 @@ export const CalendarPicker: React.FC<CalendarPickerProps> = ({
     () => timeSlots.filter((s) => s.available).length,
     [timeSlots],
   );
+
+  useEffect(() => {
+    if (!selectedTime) return;
+    const stillValid = timeSlots.some((s) => s.startTime === selectedTime && s.available);
+    if (!stillValid) {
+      onSelectTime('');
+    }
+  }, [selectedTime, timeSlots, onSelectTime]);
 
   const prevMonth = () => {
     if (viewMonth === 0) {

@@ -47,7 +47,7 @@ export default defineConfig(() => {
           ],
         },
         workbox: {
-          cacheId: 'estefany-nails-v43-drawer-tablet-persistent',
+          cacheId: 'estefany-nails-v44-full-reactive-audit-fix',
           skipWaiting: true,
           clientsClaim: true,
           cleanupOutdatedCaches: true,

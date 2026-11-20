@@ -63,6 +63,9 @@ export function canRescheduleAppointment(
   if (appointment.status === 'cancelled' || appointment.status === 'completed') {
     return { allowed: false, hoursLeft: 0, reason: 'Atendimento já encerrado.' };
   }
+  if ((appointment.rescheduleCount || 0) >= 10) {
+    return { allowed: false, hoursLeft: 0, reason: 'Limite máximo de remarcações atingido.' };
+  }
   const hoursLeft = hoursUntilAppointment(appointment.date, appointment.startTime);
   if (hoursLeft <= 0) {
     return { allowed: false, hoursLeft: 0, reason: 'Horário já iniciado ou passado.' };
@@ -226,6 +229,32 @@ function crc16ccitt(payload: string): string {
   return crc.toString(16).toUpperCase().padStart(4, '0');
 }
 
+function normalizePixKeyBACEN(rawKey: string): string {
+  const trimmed = rawKey.trim();
+  if (!trimmed) return '';
+  if (trimmed.includes('@')) return trimmed.toLowerCase();
+  if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(trimmed)) {
+    return trimmed.toLowerCase();
+  }
+  const digits = trimmed.replace(/\D/g, '');
+  // Se contém parênteses ou espaço (ex: "(61) 98554-3452") ou 10/11 dígitos de telefone celular
+  if (trimmed.startsWith('+') || trimmed.includes('(') || digits.length === 10) {
+    const cleanPhone = digits.startsWith('55') && digits.length >= 12 ? digits : `55${digits}`;
+    return `+${cleanPhone}`;
+  }
+  if (digits.length === 11) {
+    // 11 dígitos com 3º dígito 9 e DDD válido (11..99) sem pontos de CPF -> Telefone celular
+    if (!trimmed.includes('.') && digits[2] === '9') {
+      return `+55${digits}`;
+    }
+    return digits;
+  }
+  if (digits.length === 14) {
+    return digits;
+  }
+  return trimmed;
+}
+
 export function generatePixPayload(params: {
   pixKey: string;
   pixName: string;
@@ -233,7 +262,7 @@ export function generatePixPayload(params: {
   amount: number;
   txid?: string;
 }): string {
-  const key = params.pixKey.trim();
+  const key = normalizePixKeyBACEN(params.pixKey);
   if (!key) return '';
   const merchantName = normalizeAscii(params.pixName || 'ESTEFANY PAIVA', 25).toUpperCase();
   const merchantCity = normalizeAscii(params.pixCity || 'SAO PAULO', 15).toUpperCase();

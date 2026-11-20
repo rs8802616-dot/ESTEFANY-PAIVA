@@ -411,10 +411,20 @@ export const ClientPortal: React.FC<ClientPortalProps> = ({
 
                         <div className="flex-1 p-3 sm:p-4 flex flex-col justify-between gap-2 min-w-0">
                           <div className="min-w-0">
+                            {categoryMap.get(svc.categoryId) && (
+                              <span className="text-[10px] font-bold uppercase tracking-wider text-[#C4A477] block mb-0.5">
+                                {categoryMap.get(svc.categoryId)}
+                              </span>
+                            )}
                             <h3 className="text-sm sm:text-base font-semibold text-[#594943] leading-snug line-clamp-2">
                               {svc.name}
                             </h3>
-                            <span className="mt-0.5 inline-block text-[11px] sm:text-xs text-[#95847C] tabular-nums">
+                            {svc.description && (
+                              <p className="mt-0.5 text-xs text-[#95847C] line-clamp-2 leading-relaxed">
+                                {svc.description}
+                              </p>
+                            )}
+                            <span className="mt-1 inline-block text-[11px] sm:text-xs font-medium text-[#95847C] tabular-nums">
                               {formatDuration(svc.durationMinutes)}
                             </span>
                           </div>

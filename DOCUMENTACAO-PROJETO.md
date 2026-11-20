@@ -100,3 +100,27 @@ O projeto foi migrado para a arquitetura completa em **React 19 + TypeScript + V
   - A sessão autenticada com token + login/senha agora é persistida no `localStorage` (`VAULT_PERSISTENT_MODE_KEY = 'admin'`). Ao fechar o app no tablet/celular e abrir novamente, ele abre direto no **Painel Admin (`/painel`)** em vez de voltar para a tela da cliente (só volta ao modo cliente quando a administradora clica em **"Sair do painel"**).
 - **Visualização da Tela da Cliente sem Sair do Link do Admin (`src/App.tsx`)**:
   - Ao clicar em **"Ver Tela da Cliente"** (ou nas Telas 7 a 11), a administradora **não sai mais de `/painel`**: a tela da cliente é exibida dentro do próprio painel com uma barra superior fixa **"Modo Visualização (Telas 7 a 11) • ← Voltar ao Painel da Admin"** para retornar à gestão em 1 clique.
+
+
+### v44 — Auditoria Multi-Agente (3 Agentes Simuladores) e Correção Integral de Todas as Funções e Fluxos
+- **Motor Híbrido Reativo Cloud + Local (`src/lib/localClientStore.ts` e `src/lib/db.ts`)**:
+  - Implementado barramento reativo em tempo real (`subscribeLocalStoreChanges` / `notifyLocalStoreChanges`) integrado a todas as coleções (`salon_settings`, `categories`, `services`, `appointments`, `availability_slots`, `personal_blocks`, `client_tech_notes`).
+  - Todas as funções administrativas (**Novo Horário / Encaixe**, **Confirmar / Concluir / Cancelar / Excluir Agendamento**, **Marcar Pix Pago**, **Remarcar Horário**, **Criar / Excluir Bloqueio Pessoal**, **Criar / Editar / Excluir Serviços e Categorias**, **Criar / Editar Ficha Técnica de Clientes** e **Salvar Configurações**) agora atualizam a interface em **0ms** e persistem tanto localmente quanto no Cloud Firestore, sem falhar quando autenticadas via cofre PBKDF2-HMAC-SHA256.
+- **Agenda Administrativa (`src/components/admin/AdminAgendaTab.tsx`)**:
+  - Adicionado controle completo de **Remarcar Data e Horário** dentro da Tela 6 (Detalhes do Atendimento).
+  - Corrigido o cadastro de encaixe administrativo (**Tela 5 — Novo Horário**) para formatar `clientUid` e status de forma compatível com as regras do Firestore e atualizar o calendário instantaneamente.
+- **Módulo Financeiro (`src/components/admin/AdminFinanceSuite.tsx` — Telas 17 a 24)**:
+  - Separadas **Receitas Realizadas** (`confirmed` | `completed`) de **Valores a Receber** (`pending`), eliminando dupla contagem.
+  - Gráfico semanal (**Telas 17 e 20**) conectado aos valores reais por dia da semana (`Seg` a `Sáb`).
+  - Adicionado botão de exclusão (`Trash2`) para receitas extras manuais na **Tela 18**.
+  - Adicionados seletor de data, seletor `Pago` / `A pagar` e botão de alternância rápida (`Pago` <-> `A pagar`) na **Tela 19 (Despesas)**.
+  - Adicionado botão **"Confirmar"** em **Valores a Receber (Tela 21)** para dar baixa em agendamentos pendentes com 1 clique.
+- **Módulo Perfil, Galeria & Configurações (`src/components/admin/AdminProfileSuite.tsx` — Telas 25 a 33)**:
+  - Sincronização automática via `useEffect` do formulário com `settings` e da lista de clientes na **Tela 27 (Central de Comunicação)**.
+  - Adicionado filtro `'Spa'` na **Tela 25 (Galeria)** e validação do WhatsApp via `buildWhatsAppUrl` (evitando duplicação do prefixo `55`).
+  - Adicionado botão **"Gerar do Expediente"** e proteção para manter ao menos 1 dia útil ativo na **Tela 29 (Horários)**.
+  - Adicionados campo **Cidade do Pix (BACEN)** e gerenciador completo de **Dias de Folga & Feriados (`blockedDates`)** na **Tela 30 (Configurações de Agendamento)**.
+- **Portal da Cliente & Agendamento (`src/components/client/ClientPortal.tsx`, `BookingSheet.tsx`, `CalendarPicker.tsx` e `src/lib/utils.ts` — Telas 7 a 11)**:
+  - **Pix Copia e Cola Padrão BACEN**: `generatePixPayload` agora normaliza chaves de telefone formatadas (como `(61) 98554-3452`) para o padrão internacional E.164 (`+5561985543452`), CPF/CNPJ, e-mail e EVP.
+  - **Seleção de Serviços Dentro do Modal (Tela 8)**: Ao clicar em `"Agendar Agora"` sem ter pré-selecionado um serviço no catálogo, o modal exibe a lista interativa de procedimentos para escolha imediata sem precisar fechar a janela.
+  - **Validação Automática de Horário (`CalendarPicker.tsx`)**: Limpa automaticamente `selectedTime` caso a cliente altere a data ou adicione mais procedimentos cuja duração ultrapasse o expediente.

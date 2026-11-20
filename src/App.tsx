@@ -20,6 +20,7 @@ import { DEFAULT_CATEGORIES, DEFAULT_SERVICES } from './lib/defaults';
 import {
   loadCachedSettingsSync,
   loadLocalBookings,
+  subscribeLocalStoreChanges,
   upsertLocalBooking,
 } from './lib/localClientStore';
 import type {
@@ -93,6 +94,9 @@ function SalonAppShell() {
       subscribePublicCategories(setCategories),
       subscribePublicServices(setServices),
       subscribeActiveAvailabilitySlots(setBusySlots),
+      subscribeLocalStoreChanges(() => {
+        setLocalBookings(loadLocalBookings());
+      }),
     ];
     return () => {
       unsubs.forEach((fn) => fn());

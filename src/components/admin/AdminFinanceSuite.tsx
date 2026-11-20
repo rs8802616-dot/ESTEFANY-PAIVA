@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   ArrowDownRight,
   ArrowUpRight,
@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { LuxuryBarChart, LuxuryKpiCard, LuxuryStateView, type ScreenUiState } from '../ui/LuxuryDesignSystem';
 import { AdminReportsTab } from './AdminReportsSettingsTabs';
+import { adminUpdateAppointmentStatus } from '../../lib/db';
 import { formatBRL, formatDateBR, todayISO } from '../../lib/utils';
 import type { Appointment, SalonSettings } from '../../types/salon';
 
@@ -74,7 +75,8 @@ export const AdminFinanceSuite: React.FC<{
   appointments: Appointment[];
   settings: SalonSettings;
   initialSubScreen?: FinanceSubScreen;
-}> = ({ appointments, settings, initialSubScreen = 'resumo_financeiro' }) => {
+  onSelectSubScreen?: (sub: FinanceSubScreen) => void;
+}> = ({ appointments, settings, initialSubScreen = 'resumo_financeiro', onSelectSubScreen }) => {
   const [subScreen, setSubScreen] = useState<FinanceSubScreen>(initialSubScreen);
   const [expenses, setExpenses] = useState<ExpenseItem[]>(() => loadExpenses());
   const [manualRevenues, setManualRevenues] = useState<ManualRevenueItem[]>(() => loadManualRevenues());
@@ -91,9 +93,15 @@ export const AdminFinanceSuite: React.FC<{
   const [revVal, setRevVal] = useState('');
   const [revDate, setRevDate] = useState(todayISO());
 
-  React.useEffect(() => {
+  useEffect(() => {
     setSubScreen(initialSubScreen);
   }, [initialSubScreen]);
+
+  const handleSelectSubScreen = (next: FinanceSubScreen) => {
+    setUiState('idle');
+    setSubScreen(next);
+    onSelectSubScreen?.(next);
+  };
 
   const saveExpensesList = (next: ExpenseItem[]) => {
     setExpenses(next);
@@ -105,14 +113,19 @@ export const AdminFinanceSuite: React.FC<{
     localStorage.setItem(REVENUES_KEY, JSON.stringify(next));
   };
 
-  const validAppointments = useMemo(
-    () => appointments.filter((a) => a.status !== 'cancelled'),
+  const realizedAppointments = useMemo(
+    () => appointments.filter((a) => a.status === 'confirmed' || a.status === 'completed'),
+    [appointments],
+  );
+
+  const pendingAppointments = useMemo(
+    () => appointments.filter((a) => a.status === 'pending'),
     [appointments],
   );
 
   const totalAppRevenue = useMemo(
-    () => validAppointments.reduce((acc, a) => acc + (Number(a.totalPrice) || 0), 0),
-    [validAppointments],
+    () => realizedAppointments.reduce((acc, a) => acc + (Number(a.totalPrice) || 0), 0),
+    [realizedAppointments],
   );
 
   const totalManualRevenue = useMemo(
@@ -133,31 +146,60 @@ export const AdminFinanceSuite: React.FC<{
   );
 
   const pendingReceivables = useMemo(
-    () =>
-      validAppointments
-        .filter((a) => a.status === 'pending')
-        .reduce((acc, a) => acc + (Number(a.totalPrice) || 0), 0),
-    [validAppointments],
+    () => pendingAppointments.reduce((acc, a) => acc + (Number(a.totalPrice) || 0), 0),
+    [pendingAppointments],
   );
 
   const netProfit = totalRevenue - totalPaidExpenses;
   const profitMargin = totalRevenue > 0 ? Math.round((netProfit / totalRevenue) * 100) : 0;
   const goalPct = settings.monthlyGoal > 0 ? Math.min(100, Math.round((totalRevenue / settings.monthlyGoal) * 100)) : 0;
 
+  // Real data grouped by day of week (Seg=1 .. Sáb=6)
   const chartData = useMemo(() => {
-    const labels = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-    const baseRev = Math.max(180, Math.round(totalRevenue / 6));
-    const baseExp = Math.max(45, Math.round(totalPaidExpenses / 6));
-    return labels.map((label, idx) => ({
+    const days = [
+      { day: 1, label: 'Seg' },
+      { day: 2, label: 'Ter' },
+      { day: 3, label: 'Qua' },
+      { day: 4, label: 'Qui' },
+      { day: 5, label: 'Sex' },
+      { day: 6, label: 'Sáb' },
+    ];
+    const revByDay = new Map<number, number>();
+    const expByDay = new Map<number, number>();
+
+    realizedAppointments.forEach((apt) => {
+      const [y, m, d] = apt.date.split('-').map(Number);
+      if (!y || !m || !d) return;
+      const wd = new Date(y, m - 1, d).getDay();
+      revByDay.set(wd, (revByDay.get(wd) || 0) + (Number(apt.totalPrice) || 0));
+    });
+
+    manualRevenues.forEach((rev) => {
+      if (!rev.received) return;
+      const [y, m, d] = rev.date.split('-').map(Number);
+      if (!y || !m || !d) return;
+      const wd = new Date(y, m - 1, d).getDay();
+      revByDay.set(wd, (revByDay.get(wd) || 0) + rev.amount);
+    });
+
+    expenses.forEach((ex) => {
+      if (!ex.paid) return;
+      const [y, m, d] = ex.date.split('-').map(Number);
+      if (!y || !m || !d) return;
+      const wd = new Date(y, m - 1, d).getDay();
+      expByDay.set(wd, (expByDay.get(wd) || 0) + ex.amount);
+    });
+
+    return days.map(({ day, label }) => ({
       label,
-      primary: Math.round(baseRev * (0.75 + (idx % 3) * 0.25)),
-      secondary: Math.round(baseExp * (0.6 + (idx % 2) * 0.3)),
+      primary: Math.round(revByDay.get(day) || 0),
+      secondary: Math.round(expByDay.get(day) || 0),
     }));
-  }, [totalRevenue, totalPaidExpenses]);
+  }, [realizedAppointments, manualRevenues, expenses]);
 
   const servicePerformance = useMemo(() => {
     const map = new Map<string, { name: string; count: number; revenue: number }>();
-    validAppointments.forEach((apt) => {
+    realizedAppointments.forEach((apt) => {
       const name = apt.serviceNames.join(' + ') || 'Procedimento';
       const cur = map.get(name) || { name, count: 0, revenue: 0 };
       cur.count += 1;
@@ -165,7 +207,7 @@ export const AdminFinanceSuite: React.FC<{
       map.set(name, cur);
     });
     return Array.from(map.values()).sort((a, b) => b.revenue - a.revenue);
-  }, [validAppointments]);
+  }, [realizedAppointments]);
 
   const handleAddExpense = (e: React.FormEvent) => {
     e.preventDefault();
@@ -213,7 +255,7 @@ export const AdminFinanceSuite: React.FC<{
   const exportMonthlyClosingCSV = () => {
     const rows = [
       ['Tipo', 'Data', 'Descricao', 'Valor (R$)', 'Status'],
-      ...validAppointments.map((a) => [
+      ...realizedAppointments.map((a) => [
         'Receita Atendimento',
         a.date,
         `${a.clientName} - ${a.serviceNames.join(' + ')}`,
@@ -223,13 +265,17 @@ export const AdminFinanceSuite: React.FC<{
       ...manualRevenues.map((r) => ['Receita Extra', r.date, r.description, String(r.amount), 'Recebido']),
       ...expenses.map((ex) => ['Despesa', ex.date, `${ex.category}: ${ex.description}`, String(-ex.amount), ex.paid ? 'Pago' : 'Pendente']),
     ];
-    const csv = '\uFEFF' + rows.map((r) => r.map((c) => `"${c}"`).join(';')).join('\n');
+    const csv =
+      '\uFEFF' +
+      rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(';')).join('\n');
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
     a.download = `fechamento-luxury-nude-${todayISO()}.csv`;
+    document.body.appendChild(a);
     a.click();
+    document.body.removeChild(a);
     URL.revokeObjectURL(url);
   };
 
@@ -252,11 +298,8 @@ export const AdminFinanceSuite: React.FC<{
           <button
             key={item.id}
             type="button"
-            onClick={() => {
-              setUiState('idle');
-              setSubScreen(item.id);
-            }}
-            className={`min-h-[38px] rounded-xl px-3 py-1.5 text-xs font-semibold truncate transition-colors ${
+            onClick={() => handleSelectSubScreen(item.id)}
+            className={`min-h-[38px] rounded-xl px-3 py-1.5 text-xs font-semibold truncate transition-colors cursor-pointer ${
               subScreen === item.id
                 ? 'bg-[#594943] text-white'
                 : 'bg-white border border-[#E8D6CB] text-[#95847C] hover:text-[#594943]'
@@ -274,16 +317,16 @@ export const AdminFinanceSuite: React.FC<{
         <div className="space-y-6">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
             <LuxuryKpiCard
-              label="Receita Total"
+              label="Receita Realizada"
               value={formatBRL(totalRevenue)}
-              subtitle={`${validAppointments.length} atendimentos`}
+              subtitle={`${realizedAppointments.length} atendimentos confirmados`}
               accent="gold"
               icon={<ArrowUpRight className="w-4 h-4" />}
             />
             <LuxuryKpiCard
               label="Despesas Pagas"
               value={formatBRL(totalPaidExpenses)}
-              subtitle={`${expenses.length} lançamentos`}
+              subtitle={`${expenses.filter((e) => e.paid).length} lançamentos pagos`}
               accent="rose"
               icon={<ArrowDownRight className="w-4 h-4" />}
             />
@@ -304,8 +347,8 @@ export const AdminFinanceSuite: React.FC<{
           </div>
 
           <LuxuryBarChart
-            title="Balanço Semanal — Luxury Nude"
-            subtitle="Comparativo entre entradas de procedimentos e custos operacionais"
+            title="Balanço por Dia da Semana — Luxury Nude"
+            subtitle="Comparativo real entre entradas de procedimentos e custos operacionais"
             data={chartData}
           />
         </div>
@@ -315,7 +358,7 @@ export const AdminFinanceSuite: React.FC<{
       {subScreen === 'receitas' && (
         <div className="space-y-5">
           <form onSubmit={handleAddRevenue} className="bg-white rounded-2xl border border-[#E8D6CB] p-5 space-y-4">
-            <h3 className="font-editorial text-xl font-semibold text-[#594943]">18. Lançar Nova Receita</h3>
+            <h3 className="font-editorial text-xl font-semibold text-[#594943]">18. Lançar Nova Receita Extra</h3>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <input
                 type="text"
@@ -341,7 +384,7 @@ export const AdminFinanceSuite: React.FC<{
                 />
                 <button
                   type="submit"
-                  className="min-h-[42px] rounded-xl bg-[#594943] px-4 text-xs font-semibold text-white inline-flex items-center gap-1.5"
+                  className="min-h-[42px] rounded-xl bg-[#594943] px-4 text-xs font-semibold text-white inline-flex items-center gap-1.5 cursor-pointer"
                 >
                   <Plus className="w-4 h-4 text-[#C4A477]" />
                   <span>Salvar</span>
@@ -352,7 +395,7 @@ export const AdminFinanceSuite: React.FC<{
 
           <div className="bg-white rounded-2xl border border-[#E8D6CB] p-5 space-y-3">
             <h4 className="font-editorial text-lg font-semibold text-[#594943]">Entradas Registradas</h4>
-            {validAppointments.length === 0 && manualRevenues.length === 0 ? (
+            {realizedAppointments.length === 0 && manualRevenues.length === 0 ? (
               <LuxuryStateView state="empty" title="Nenhuma receita registrada" />
             ) : (
               <div className="divide-y divide-[#E8D6CB]/60">
@@ -362,10 +405,20 @@ export const AdminFinanceSuite: React.FC<{
                       <div className="text-sm font-semibold text-[#594943]">{r.description}</div>
                       <div className="text-xs text-[#95847C]">{formatDateBR(r.date)} · Receita Extra</div>
                     </div>
-                    <span className="text-sm font-bold text-[#594943] tabular-nums">+{formatBRL(r.amount)}</span>
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm font-bold text-[#594943] tabular-nums">+{formatBRL(r.amount)}</span>
+                      <button
+                        type="button"
+                        onClick={() => saveRevenuesList(manualRevenues.filter((item) => item.id !== r.id))}
+                        className="p-1.5 text-[#95847C] hover:text-[#594943] cursor-pointer"
+                        aria-label="Excluir receita manual"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
                 ))}
-                {validAppointments.slice(0, 12).map((a) => (
+                {realizedAppointments.map((a) => (
                   <div key={a.id} className="py-3 flex items-center justify-between gap-3">
                     <div>
                       <div className="text-sm font-semibold text-[#594943]">
@@ -389,13 +442,13 @@ export const AdminFinanceSuite: React.FC<{
         <div className="space-y-5">
           <form onSubmit={handleAddExpense} className="bg-white rounded-2xl border border-[#E8D6CB] p-5 space-y-4">
             <h3 className="font-editorial text-xl font-semibold text-[#594943]">19. Registrar Despesa do Atelier</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
               <input
                 type="text"
                 value={expDesc}
                 onChange={(e) => setExpDesc(e.target.value)}
                 placeholder="Ex: Gel Nude / Cabine / Aluguel"
-                className="min-h-[42px] rounded-xl border border-[#E8D6CB] bg-[#FAF6F1] px-3.5 text-sm text-[#594943]"
+                className="lg:col-span-2 min-h-[42px] rounded-xl border border-[#E8D6CB] bg-[#FAF6F1] px-3.5 text-sm text-[#594943]"
               />
               <select
                 value={expCat}
@@ -415,13 +468,29 @@ export const AdminFinanceSuite: React.FC<{
                 placeholder="Valor R$"
                 className="min-h-[42px] rounded-xl border border-[#E8D6CB] bg-[#FAF6F1] px-3.5 text-sm text-[#594943]"
               />
-              <button
-                type="submit"
-                className="min-h-[42px] rounded-xl bg-[#594943] px-4 text-xs font-semibold text-white inline-flex items-center justify-center gap-1.5"
-              >
-                <Plus className="w-4 h-4 text-[#C4A477]" />
-                <span>Adicionar Despesa</span>
-              </button>
+              <input
+                type="date"
+                value={expDate}
+                onChange={(e) => setExpDate(e.target.value)}
+                className="min-h-[42px] rounded-xl border border-[#E8D6CB] bg-[#FAF6F1] px-3 text-sm text-[#594943]"
+              />
+              <div className="flex gap-2">
+                <select
+                  value={expPaid ? 'paid' : 'pending'}
+                  onChange={(e) => setExpPaid(e.target.value === 'paid')}
+                  className="flex-1 min-h-[42px] rounded-xl border border-[#E8D6CB] bg-[#FAF6F1] px-2.5 text-xs font-semibold text-[#594943]"
+                >
+                  <option value="paid">Pago</option>
+                  <option value="pending">A pagar</option>
+                </select>
+                <button
+                  type="submit"
+                  className="min-h-[42px] rounded-xl bg-[#594943] px-3.5 text-xs font-semibold text-white inline-flex items-center justify-center gap-1 cursor-pointer shrink-0"
+                >
+                  <Plus className="w-4 h-4 text-[#C4A477]" />
+                  <span>Salvar</span>
+                </button>
+              </div>
             </div>
           </form>
 
@@ -436,7 +505,20 @@ export const AdminFinanceSuite: React.FC<{
                     <div>
                       <div className="text-sm font-semibold text-[#594943]">{ex.description}</div>
                       <div className="text-xs text-[#95847C]">
-                        {ex.category} · {formatDateBR(ex.date)} · {ex.paid ? 'Pago' : 'A pagar'}
+                        {ex.category} · {formatDateBR(ex.date)} ·{' '}
+                        <button
+                          type="button"
+                          onClick={() =>
+                            saveExpensesList(
+                              expenses.map((i) => (i.id === ex.id ? { ...i, paid: !i.paid } : i)),
+                            )
+                          }
+                          className={`underline font-semibold cursor-pointer ${
+                            ex.paid ? 'text-emerald-700' : 'text-[#BE9293]'
+                          }`}
+                        >
+                          {ex.paid ? 'Pago (alterar)' : 'A pagar (dar baixa)'}
+                        </button>
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
@@ -444,7 +526,7 @@ export const AdminFinanceSuite: React.FC<{
                       <button
                         type="button"
                         onClick={() => saveExpensesList(expenses.filter((i) => i.id !== ex.id))}
-                        className="p-1.5 text-[#95847C] hover:text-[#594943]"
+                        className="p-1.5 text-[#95847C] hover:text-[#594943] cursor-pointer"
                         aria-label="Excluir despesa"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -468,7 +550,7 @@ export const AdminFinanceSuite: React.FC<{
           </div>
           <LuxuryBarChart
             title="20. Fluxo de Caixa Consolidado"
-            subtitle="Evolução diária de entradas e saídas de recursos do atelier"
+            subtitle="Evolução semanal de entradas e saídas de recursos do atelier"
             data={chartData}
           />
         </div>
@@ -498,7 +580,7 @@ export const AdminFinanceSuite: React.FC<{
                       onClick={() =>
                         saveExpensesList(expenses.map((i) => (i.id === ex.id ? { ...i, paid: true } : i)))
                       }
-                      className="min-h-[34px] rounded-lg bg-[#594943] px-3 text-xs font-semibold text-white inline-flex items-center gap-1"
+                      className="min-h-[34px] rounded-lg bg-[#594943] px-3 text-xs font-semibold text-white inline-flex items-center gap-1 cursor-pointer"
                     >
                       <CheckCircle2 className="w-3.5 h-3.5 text-[#C4A477]" />
                       <span>Dar Baixa</span>
@@ -513,20 +595,29 @@ export const AdminFinanceSuite: React.FC<{
               <h3 className="font-editorial text-xl font-semibold text-[#594943]">Valores a Receber</h3>
               <span className="text-xs font-semibold text-[#C4A477]">{formatBRL(pendingReceivables)}</span>
             </div>
-            {validAppointments.filter((a) => a.status === 'pending').length === 0 ? (
+            {pendingAppointments.length === 0 ? (
               <LuxuryStateView state="empty" title="Nenhum recebimento pendente" message="Todos os agendamentos ativos estão confirmados." />
             ) : (
-              validAppointments
-                .filter((a) => a.status === 'pending')
-                .map((a) => (
-                  <div key={a.id} className="p-3.5 rounded-xl bg-[#FAF6F1] border border-[#E8D6CB] flex items-center justify-between gap-3">
-                    <div>
-                      <div className="text-sm font-semibold text-[#594943]">{a.clientName}</div>
-                      <div className="text-xs text-[#95847C]">{formatDateBR(a.date)} · {a.serviceNames.join(' + ')}</div>
+              pendingAppointments.map((a) => (
+                <div key={a.id} className="p-3.5 rounded-xl bg-[#FAF6F1] border border-[#E8D6CB] flex items-center justify-between gap-3">
+                  <div>
+                    <div className="text-sm font-semibold text-[#594943]">{a.clientName}</div>
+                    <div className="text-xs text-[#95847C]">
+                      {formatDateBR(a.date)} às {a.startTime} · {a.serviceNames.join(' + ')} · {formatBRL(a.totalPrice)}
                     </div>
-                    <span className="text-sm font-bold text-[#594943]">{formatBRL(a.totalPrice)}</span>
                   </div>
-                ))
+                  <button
+                    type="button"
+                    onClick={() =>
+                      void adminUpdateAppointmentStatus(a, { status: 'confirmed', pixPaid: true })
+                    }
+                    className="min-h-[34px] rounded-lg bg-[#594943] px-3 text-xs font-semibold text-white inline-flex items-center gap-1 cursor-pointer shrink-0"
+                  >
+                    <CheckCircle2 className="w-3.5 h-3.5 text-[#C4A477]" />
+                    <span>Confirmar</span>
+                  </button>
+                </div>
+              ))
             )}
           </div>
         </div>
@@ -544,7 +635,7 @@ export const AdminFinanceSuite: React.FC<{
               <button
                 type="button"
                 onClick={exportMonthlyClosingCSV}
-                className="min-h-[38px] rounded-xl border border-[#E8D6CB] bg-[#FAF6F1] px-3.5 text-xs font-semibold text-[#594943] inline-flex items-center gap-1.5"
+                className="min-h-[38px] rounded-xl border border-[#E8D6CB] bg-[#FAF6F1] px-3.5 text-xs font-semibold text-[#594943] inline-flex items-center gap-1.5 cursor-pointer"
               >
                 <Download className="w-3.5 h-3.5 text-[#C4A477]" />
                 <span>Exportar CSV</span>
@@ -552,7 +643,7 @@ export const AdminFinanceSuite: React.FC<{
               <button
                 type="button"
                 onClick={() => window.print()}
-                className="min-h-[38px] rounded-xl bg-[#594943] px-3.5 text-xs font-semibold text-white inline-flex items-center gap-1.5"
+                className="min-h-[38px] rounded-xl bg-[#594943] px-3.5 text-xs font-semibold text-white inline-flex items-center gap-1.5 cursor-pointer"
               >
                 <Printer className="w-3.5 h-3.5 text-[#C4A477]" />
                 <span>Imprimir PDF</span>
@@ -562,7 +653,7 @@ export const AdminFinanceSuite: React.FC<{
 
           <div className="space-y-3 text-sm">
             <div className="flex justify-between py-2 border-b border-[#E8D6CB]/60">
-              <span className="text-[#95847C]">(+) Receita de Procedimentos</span>
+              <span className="text-[#95847C]">(+) Receita de Procedimentos Confirmados</span>
               <strong className="text-[#594943]">{formatBRL(totalAppRevenue)}</strong>
             </div>
             <div className="flex justify-between py-2 border-b border-[#E8D6CB]/60">
@@ -570,11 +661,11 @@ export const AdminFinanceSuite: React.FC<{
               <strong className="text-[#594943]">{formatBRL(totalManualRevenue)}</strong>
             </div>
             <div className="flex justify-between py-2 border-b border-[#E8D6CB]/60">
-              <span className="text-[#95847C]">(-) Despesas Operacionais & Insumos</span>
+              <span className="text-[#95847C]">(-) Despesas Operacionais & Insumos Pagos</span>
               <strong className="text-[#BE9293]">-{formatBRL(totalPaidExpenses)}</strong>
             </div>
             <div className="flex justify-between py-3 px-4 rounded-xl bg-[#F2EAE4] text-base">
-              <strong className="text-[#594943]">(=) Resultado Líquido do Mês</strong>
+              <strong className="text-[#594943]">(=) Resultado Líquido</strong>
               <strong className="text-[#594943]">{formatBRL(netProfit)} ({profitMargin}% margem)</strong>
             </div>
           </div>

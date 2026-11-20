@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Camera, Plus, MessageSquare, User, Clock, Sliders, Palette, ShieldCheck,
   HelpCircle, Trash2, Send, CheckCircle2, Lock, KeyRound, Smartphone,
-  Sparkles, ExternalLink, Copy, Upload, Layers
+  Sparkles, ExternalLink, Copy, Upload, Layers, RefreshCw, X
 } from 'lucide-react';
 import type { SalonSettings, ClientProfileSummary, Appointment, Service } from '../../types/salon';
 import { adminSaveSettings } from '../../lib/db';
-import { compressImageToDataUrl } from '../../lib/utils';
+import { buildWhatsAppUrl, compressImageToDataUrl, formatDateBR, minutesToTime, timeToMinutes } from '../../lib/utils';
 import { useToast } from '../Toast';
 import { LuxuryStateView } from '../ui/LuxuryDesignSystem';
 import { MANDATORY_SCREENS_33 } from '../../theme/luxuryNudeTheme';
@@ -134,14 +134,29 @@ export const AdminProfileSuite: React.FC<Props> = ({
   // Settings Form State (Screens 28, 29, 30, 31)
   const [form, setForm] = useState<SalonSettings>(settings);
   const [slotsText, setSlotsText] = useState((settings.configuredSlots || []).join(', '));
+  const [newBlockedDate, setNewBlockedDate] = useState('');
   const [saving, setSaving] = useState(false);
+
+  // Sincroniza o formulário sempre que settings atualizar
+  useEffect(() => {
+    setForm(settings);
+    setSlotsText((settings.configuredSlots || []).join(', '));
+  }, [settings]);
+
+  // Sincroniza a cliente inicial da Central de Comunicação quando a lista carregar
+  useEffect(() => {
+    if (!selectedClientPhone && clients.length > 0) {
+      setSelectedClientPhone(clients[0].clientPhone);
+      setSelectedClientName(clients[0].clientName);
+    }
+  }, [clients, selectedClientPhone]);
 
   const saveGallery = (next: GalleryPhoto[]) => {
     setGallery(next);
     try {
       localStorage.setItem(GALLERY_STORAGE_KEY, JSON.stringify(next));
     } catch {
-      // ignore storage quota errors
+      showToast('Limite de memória local atingido para fotos.', 'error');
     }
   };
 
@@ -149,7 +164,7 @@ export const AdminProfileSuite: React.FC<Props> = ({
     const file = e.target.files?.[0];
     if (!file) return;
     try {
-      const base64 = await compressImageToDataUrl(file, 900, 0.82);
+      const base64 = await compressImageToDataUrl(file, 720, 0.78);
       setNewPhotoUrl(base64);
       showToast('Fotografia otimizada em alta definição!', 'success');
     } catch {
@@ -183,19 +198,43 @@ export const AdminProfileSuite: React.FC<Props> = ({
     try {
       const parsedSlots = slotsText
         .split(',')
-        .map(s => s.trim())
+        .map(s => {
+          const t = s.trim();
+          return /^\d:\d{2}$/.test(t) ? `0${t}` : t;
+        })
         .filter(s => /^\d{2}:\d{2}$/.test(s));
 
-      await adminSaveSettings({
+      const finalSlots = parsedSlots.length > 0 ? parsedSlots : form.configuredSlots;
+      const updatedForm: SalonSettings = {
         ...form,
-        configuredSlots: parsedSlots.length > 0 ? parsedSlots : form.configuredSlots,
-      });
+        configuredSlots: finalSlots,
+      };
+      setForm(updatedForm);
+      setSlotsText(finalSlots.join(', '));
+      await adminSaveSettings(updatedForm);
       showToast('Configurações Luxury Nude salvas com sucesso!', 'success');
     } catch {
       showToast('Não foi possível salvar as configurações.', 'error');
     } finally {
       setSaving(false);
     }
+  };
+
+  const generateSlotsFromWorkHours = () => {
+    const startMin = timeToMinutes(form.openTime || '08:00');
+    const endMin = timeToMinutes(form.closeTime || '19:00');
+    const step = Math.max(15, Number(form.slotIntervalMinutes) || 90);
+    if (endMin <= startMin) {
+      showToast('O horário de fechamento deve ser maior que o de abertura.', 'error');
+      return;
+    }
+    const generated: string[] = [];
+    for (let m = startMin; m + 30 <= endMin && generated.length < 48; m += step) {
+      generated.push(minutesToTime(m));
+    }
+    setSlotsText(generated.join(', '));
+    setForm(prev => ({ ...prev, configuredSlots: generated }));
+    showToast(`${generated.length} horários gerados a partir do expediente!`, 'success');
   };
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>, field: 'avatarImage' | 'heroImageUrl') => {
@@ -212,6 +251,10 @@ export const AdminProfileSuite: React.FC<Props> = ({
 
   const toggleWorkDay = (day: number) => {
     const exists = form.workDays.includes(day);
+    if (exists && form.workDays.length <= 1) {
+      showToast('Mantenha pelo menos 1 dia de atendimento na semana.', 'error');
+      return;
+    }
     const nextDays = exists
       ? form.workDays.filter(d => d !== day)
       : [...form.workDays, day].sort();
@@ -269,7 +312,7 @@ export const AdminProfileSuite: React.FC<Props> = ({
               <h3 className="font-serif text-xl font-bold text-[#594943]">Galeria de Trabalhos</h3>
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              {['Todas', 'Alongamento', 'Banho de Gel', 'Blindagem', 'Gel'].map(cat => (
+              {['Todas', 'Alongamento', 'Banho de Gel', 'Blindagem', 'Gel', 'Spa'].map(cat => (
                 <button
                   key={cat}
                   onClick={() => setGalleryFilter(cat)}
@@ -437,9 +480,10 @@ export const AdminProfileSuite: React.FC<Props> = ({
               <select
                 value={selectedClientPhone}
                 onChange={e => {
-                  const found = clients.find(c => c.clientPhone === e.target.value);
-                  setSelectedClientPhone(e.target.value);
-                  if (found) setSelectedClientName(found.clientName);
+                  const val = e.target.value;
+                  setSelectedClientPhone(val);
+                  const found = clients.find(c => c.clientPhone === val);
+                  setSelectedClientName(found ? found.clientName : '');
                 }}
                 className="w-full px-3.5 py-2.5 rounded-xl border border-[#E8D6CB] bg-[#FAF6F1] text-sm text-[#594943]"
               >
@@ -526,15 +570,22 @@ export const AdminProfileSuite: React.FC<Props> = ({
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
-              <a
-                href={`https://wa.me/55${selectedClientPhone.replace(/\D/g, '')}?text=${encodeURIComponent(customMessage)}`}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#594943] text-white text-xs font-semibold hover:bg-[#433631] transition-colors"
+              <button
+                type="button"
+                onClick={() => {
+                  const digits = selectedClientPhone.replace(/\D/g, '');
+                  if (digits.length < 8) {
+                    showToast('Informe um número de WhatsApp válido com DDD.', 'error');
+                    return;
+                  }
+                  const url = buildWhatsAppUrl(selectedClientPhone, customMessage);
+                  window.open(url, '_blank', 'noopener,noreferrer');
+                }}
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#594943] text-white text-xs font-semibold hover:bg-[#433631] transition-colors cursor-pointer"
               >
                 <Send className="w-3.5 h-3.5 text-[#C4A477]" />
                 Enviar pelo WhatsApp Oficial
-              </a>
+              </button>
               <button
                 type="button"
                 onClick={() => {
@@ -702,10 +753,20 @@ export const AdminProfileSuite: React.FC<Props> = ({
             </div>
           </div>
 
-          <div>
-            <label className="block text-xs font-semibold text-[#594943] mb-1">
-              Horários Padrão Disponíveis (separados por vírgula)
-            </label>
+          <div className="space-y-2">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <label className="block text-xs font-semibold text-[#594943]">
+                Horários Padrão Disponíveis (separados por vírgula)
+              </label>
+              <button
+                type="button"
+                onClick={generateSlotsFromWorkHours}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#F2EAE4] hover:bg-[#E8D6CB] text-[#594943] text-xs font-semibold border border-[#E8D6CB] transition-colors cursor-pointer"
+              >
+                <RefreshCw className="w-3.5 h-3.5 text-[#C4A477]" />
+                <span>Gerar do Expediente</span>
+              </button>
+            </div>
             <input
               type="text"
               value={slotsText}
@@ -730,12 +791,12 @@ export const AdminProfileSuite: React.FC<Props> = ({
         <form onSubmit={handleSaveSettings} className="bg-white rounded-3xl p-6 border border-[#E8D6CB] shadow-sm space-y-5 w-full">
           <div>
             <span className="text-[10px] font-bold uppercase tracking-widest text-[#C4A477] block">
-              Tela 30 • Regras de Negócio & Sinal Pix
+              Tela 30 • Regras de Negócio, Sinal Pix & Folgas
             </span>
             <h3 className="font-serif text-xl font-bold text-[#594943]">Configurações de Agendamento</h3>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <div>
               <label className="block text-xs font-semibold text-[#594943] mb-1">Chave Pix Oficial</label>
               <input
@@ -751,6 +812,15 @@ export const AdminProfileSuite: React.FC<Props> = ({
                 type="text"
                 value={form.pixName}
                 onChange={e => setForm({ ...form, pixName: e.target.value })}
+                className="w-full px-4 py-2.5 rounded-xl border border-[#E8D6CB] bg-[#FAF6F1] text-sm text-[#594943]"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-[#594943] mb-1">Cidade do Pix (BACEN)</label>
+              <input
+                type="text"
+                value={form.pixCity}
+                onChange={e => setForm({ ...form, pixCity: e.target.value })}
                 className="w-full px-4 py-2.5 rounded-xl border border-[#E8D6CB] bg-[#FAF6F1] text-sm text-[#594943]"
               />
             </div>
@@ -801,6 +871,64 @@ export const AdminProfileSuite: React.FC<Props> = ({
                 className="w-full px-4 py-2.5 rounded-xl border border-[#E8D6CB] bg-[#FAF6F1] text-sm text-[#594943]"
               />
             </div>
+          </div>
+
+          {/* Gerenciador de Dias de Folga & Feriados (blockedDates) */}
+          <div className="pt-4 border-t border-[#E8D6CB] space-y-3">
+            <label className="block text-xs font-semibold text-[#594943]">
+              Dias de Folga & Feriados Fechados no Calendário
+            </label>
+            <div className="flex flex-wrap items-center gap-2">
+              <input
+                type="date"
+                value={newBlockedDate}
+                onChange={e => setNewBlockedDate(e.target.value)}
+                className="px-3.5 py-2 rounded-xl border border-[#E8D6CB] bg-[#FAF6F1] text-sm text-[#594943]"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  if (!newBlockedDate) return;
+                  if ((form.blockedDates || []).includes(newBlockedDate)) {
+                    showToast('Esta data já está bloqueada.', 'info');
+                    return;
+                  }
+                  const next = [...(form.blockedDates || []), newBlockedDate].sort();
+                  setForm({ ...form, blockedDates: next });
+                  setNewBlockedDate('');
+                  showToast('Folga adicionada! Clique em Salvar para confirmar.', 'success');
+                }}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#F2EAE4] hover:bg-[#E8D6CB] text-[#594943] text-xs font-semibold border border-[#E8D6CB] cursor-pointer"
+              >
+                <Plus className="w-3.5 h-3.5 text-[#C4A477]" />
+                <span>Adicionar Folga</span>
+              </button>
+            </div>
+
+            {(form.blockedDates || []).length > 0 && (
+              <div className="flex flex-wrap gap-2 pt-1">
+                {(form.blockedDates || []).map(d => (
+                  <span
+                    key={d}
+                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FAF6F1] border border-[#E8D6CB] text-xs font-semibold text-[#594943]"
+                  >
+                    <span>{formatDateBR(d)}</span>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setForm({
+                          ...form,
+                          blockedDates: (form.blockedDates || []).filter(x => x !== d),
+                        })
+                      }
+                      className="text-[#95847C] hover:text-[#594943] cursor-pointer"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
 
           <button

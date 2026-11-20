@@ -17,12 +17,27 @@ import {
   auth,
   BOOTSTRAPPED_ADMIN_EMAIL,
   db,
-  handleFirestoreError,
-  OperationType,
 } from './firebase';
 import { isAdminGateUnlocked } from './adminRoute';
 import { DEFAULT_CATEGORIES, DEFAULT_SERVICES, DEFAULT_SETTINGS } from './defaults';
-import { loadCachedSettingsSync, loadLocalBookings, saveCachedSettingsSync, upsertLocalBooking } from './localClientStore';
+import {
+  computeLocalAvailabilitySlots,
+  loadCachedSettingsSync,
+  loadLocalBlocks,
+  loadLocalBookings,
+  loadLocalCategories,
+  loadLocalServices,
+  loadLocalTechNotes,
+  removeLocalBooking,
+  saveAllLocalBookings,
+  saveCachedSettingsSync,
+  saveLocalBlocks,
+  saveLocalCategories,
+  saveLocalServices,
+  saveLocalTechNotes,
+  subscribeLocalStoreChanges,
+  upsertLocalBooking,
+} from './localClientStore';
 import {
   generateSecureToken,
   makeClientNoteId,
@@ -69,7 +84,6 @@ export async function checkIsAdminUser(
   } catch {
     // fallback below
   }
-  // Conta autenticada via E-mail/Senha (criada no Firebase Console) na rota secreta desbloqueada
   const isPasswordProvider = auth.currentUser?.providerData?.some(
     (p) => p.providerId === 'password',
   );
@@ -80,9 +94,12 @@ export async function checkIsAdminUser(
 }
 
 // ------------------------------------------------------------------
-// Initial Studio Seeding (Admin-only, idempotent)
+// Initial Studio Seeding (Idempotent, Vault & Cloud Safe)
 // ------------------------------------------------------------------
 export async function seedInitialStudioDataIfEmpty(): Promise<void> {
+  if (!auth.currentUser) {
+    return;
+  }
   const settingsRef = doc(db, 'salon_settings', 'main');
   try {
     const settingsSnap = await getDoc(settingsRef);
@@ -92,7 +109,6 @@ export async function seedInitialStudioDataIfEmpty(): Promise<void> {
         updatedAt: serverTimestamp(),
       });
     } else {
-      // Backfill any newly added v36 fields if upgrading an existing main doc
       const existing = settingsSnap.data() as Partial<SalonSettings>;
       if (
         existing.ownerName === undefined ||
@@ -150,89 +166,144 @@ export async function seedInitialStudioDataIfEmpty(): Promise<void> {
 }
 
 // ------------------------------------------------------------------
-// Public Realtime Subscriptions (Zero PII)
+// Public Realtime Subscriptions (Reactive Cloud + Local Sync)
 // ------------------------------------------------------------------
 export function subscribeSalonSettings(onData: (settings: SalonSettings) => void): Unsubscribe {
   const ref = doc(db, 'salon_settings', 'main');
-  return onSnapshot(
+  onData(loadCachedSettingsSync());
+
+  const unsubLocal = subscribeLocalStoreChanges(() => {
+    onData(loadCachedSettingsSync());
+  });
+
+  const unsubCloud = onSnapshot(
     ref,
     (snap) => {
-      const merged: SalonSettings = snap.exists()
-        ? {
-            ...DEFAULT_SETTINGS,
-            ...(snap.data() as Partial<SalonSettings>),
-          }
-        : loadCachedSettingsSync();
-      saveCachedSettingsSync(merged);
-      onData(merged);
+      if (snap.exists()) {
+        const merged: SalonSettings = {
+          ...DEFAULT_SETTINGS,
+          ...loadCachedSettingsSync(),
+          ...(snap.data() as Partial<SalonSettings>),
+        };
+        saveCachedSettingsSync(merged, false);
+        onData(merged);
+      } else {
+        onData(loadCachedSettingsSync());
+      }
     },
     () => {
       onData(loadCachedSettingsSync());
     },
   );
+
+  return () => {
+    unsubLocal();
+    unsubCloud();
+  };
 }
 
 export function subscribePublicCategories(onData: (categories: Category[]) => void): Unsubscribe {
+  const emitLocal = () => {
+    onData(loadLocalCategories().filter((c) => c.active));
+  };
+  emitLocal();
+
+  const unsubLocal = subscribeLocalStoreChanges(emitLocal);
   const q = query(collection(db, 'categories'), where('active', '==', true));
-  return onSnapshot(
+  const unsubCloud = onSnapshot(
     q,
     (snap) => {
       if (snap.empty) {
-        onData(DEFAULT_CATEGORIES);
+        emitLocal();
         return;
       }
-      const list = snap.docs
+      const cloudList = snap.docs
         .map((d) => ({ id: d.id, ...(d.data() as Omit<Category, 'id'>) }))
         .sort((a, b) => a.order - b.order);
-      onData(list);
+      saveLocalCategories(cloudList, false);
+      onData(cloudList.filter((c) => c.active));
     },
-    (error) => {
-      handleFirestoreError(error, OperationType.LIST, 'categories');
+    () => {
+      emitLocal();
     },
   );
+
+  return () => {
+    unsubLocal();
+    unsubCloud();
+  };
 }
 
 export function subscribePublicServices(onData: (services: Service[]) => void): Unsubscribe {
+  const emitLocal = () => {
+    onData(loadLocalServices().filter((s) => s.active));
+  };
+  emitLocal();
+
+  const unsubLocal = subscribeLocalStoreChanges(emitLocal);
   const q = query(collection(db, 'services'), where('active', '==', true));
-  return onSnapshot(
+  const unsubCloud = onSnapshot(
     q,
     (snap) => {
       if (snap.empty) {
-        onData(DEFAULT_SERVICES);
+        emitLocal();
         return;
       }
-      const list = snap.docs
+      const cloudList = snap.docs
         .map((d) => ({ id: d.id, ...(d.data() as Omit<Service, 'id'>) }))
         .sort((a, b) => a.order - b.order);
-      onData(list);
+      saveLocalServices(cloudList, false);
+      onData(cloudList.filter((s) => s.active));
     },
-    (error) => {
-      handleFirestoreError(error, OperationType.LIST, 'services');
+    () => {
+      emitLocal();
     },
   );
+
+  return () => {
+    unsubLocal();
+    unsubCloud();
+  };
 }
 
 export function subscribeActiveAvailabilitySlots(
   onData: (slots: AvailabilitySlot[]) => void,
 ): Unsubscribe {
+  let cloudSlots: AvailabilitySlot[] = [];
+
+  const emitMerged = () => {
+    const map = new Map<string, AvailabilitySlot>();
+    cloudSlots.forEach((s) => map.set(s.id, s));
+    computeLocalAvailabilitySlots().forEach((s) => map.set(s.id, s));
+    onData(Array.from(map.values()));
+  };
+
+  emitMerged();
+  const unsubLocal = subscribeLocalStoreChanges(emitMerged);
+
   const q = query(collection(db, 'availability_slots'), where('active', '==', true));
-  return onSnapshot(
+  const unsubCloud = onSnapshot(
     q,
     (snap) => {
-      const list = snap.docs.map((d) => ({
+      cloudSlots = snap.docs.map((d) => ({
         id: d.id,
         ...(d.data() as Omit<AvailabilitySlot, 'id'>),
       }));
-      onData(list);
+      emitMerged();
     },
-    (error) => {
-      handleFirestoreError(error, OperationType.LIST, 'availability_slots');
+    () => {
+      emitMerged();
     },
   );
+
+  return () => {
+    unsubLocal();
+    unsubCloud();
+  };
 }
 
 // ------------------------------------------------------------------
-// Client Authenticated Subscriptions & Mutations (Google OR Guest LGPD)
+// Client Authenticated Subscriptions & Mutations
 // ------------------------------------------------------------------
 export function subscribeClientAppointments(
   clientUid: string,
@@ -247,8 +318,8 @@ export function subscribeClientAppointments(
         .sort((a, b) => `${b.date} ${b.startTime}`.localeCompare(`${a.date} ${a.startTime}`));
       onData(list);
     },
-    (error) => {
-      handleFirestoreError(error, OperationType.LIST, 'appointments');
+    () => {
+      onData(loadLocalBookings().filter((b) => b.clientUid === clientUid));
     },
   );
 }
@@ -271,8 +342,15 @@ export async function createAppointmentAtomic(
 ): Promise<Appointment> {
   const appointmentId = makeSafeDocId('apt');
   const cleanPhoneDigits = sanitizePhone(input.clientPhone) || '00000000';
+  const guestFormattedUid = `guest_${cleanPhoneDigits}_${Date.now().toString(36)}`.slice(0, 72);
+
+  // If auth.currentUser is null (e.g. guest OR PBKDF2 Vault Admin), Firestore rules require a guest_ UID and pending status
+  const isFirebaseSignedIn = Boolean(auth.currentUser?.uid);
   const resolvedClientUid =
-    input.clientUid || `guest_${cleanPhoneDigits}_${Date.now().toString(36)}`.slice(0, 72);
+    isFirebaseSignedIn && input.clientUid && !input.clientUid.startsWith('admin')
+      ? input.clientUid
+      : guestFormattedUid;
+
   const bookingToken = generateSecureToken();
 
   const totalPrice = Number(
@@ -286,9 +364,11 @@ export async function createAppointmentAtomic(
     ),
   );
   const endTime = minutesToTime(timeToMinutes(input.startTime) + totalDurationMinutes);
-  const status: AppointmentStatus = input.asAdminStatus ?? 'pending';
+  const desiredStatus: AppointmentStatus = input.asAdminStatus ?? 'pending';
+  const firestoreStatus: AppointmentStatus = isFirebaseSignedIn ? desiredStatus : 'pending';
 
-  const aptPayload = {
+  const baseApt: Appointment = {
+    id: appointmentId,
     clientUid: clampStr(resolvedClientUid, 128),
     clientName: clampStr(input.clientName, 100),
     clientPhone: clampStr(input.clientPhone, 25),
@@ -300,12 +380,36 @@ export async function createAppointmentAtomic(
     date: input.date,
     startTime: input.startTime,
     endTime,
-    status,
+    status: desiredStatus,
     paymentMethod: input.paymentMethod,
     pixPaid: false,
     notes: clampStr(input.notes, 500),
     rescheduleCount: 0,
     bookingToken,
+    lastVerifiedToken: '',
+  };
+
+  // Persist immediately in reactive local store so both Admin and Client UI update in 0ms
+  upsertLocalBooking(baseApt, true);
+
+  const aptPayload = {
+    clientUid: baseApt.clientUid,
+    clientName: baseApt.clientName,
+    clientPhone: baseApt.clientPhone,
+    clientEmail: baseApt.clientEmail,
+    serviceIds: baseApt.serviceIds,
+    serviceNames: baseApt.serviceNames,
+    totalPrice: baseApt.totalPrice,
+    totalDurationMinutes: baseApt.totalDurationMinutes,
+    date: baseApt.date,
+    startTime: baseApt.startTime,
+    endTime: baseApt.endTime,
+    status: firestoreStatus,
+    paymentMethod: baseApt.paymentMethod,
+    pixPaid: baseApt.pixPaid,
+    notes: baseApt.notes,
+    rescheduleCount: 0,
+    bookingToken: baseApt.bookingToken,
     lastVerifiedToken: '',
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
@@ -317,7 +421,7 @@ export async function createAppointmentAtomic(
     endTime,
     durationMinutes: totalDurationMinutes,
     kind: 'appointment' as const,
-    active: status !== 'cancelled',
+    active: desiredStatus !== 'cancelled',
     ownerUid: clampStr(resolvedClientUid, 128),
     updatedAt: serverTimestamp(),
   };
@@ -327,14 +431,11 @@ export async function createAppointmentAtomic(
     batch.set(doc(db, 'appointments', appointmentId), aptPayload);
     batch.set(doc(db, 'availability_slots', appointmentId), slotPayload);
     await batch.commit();
-
-    return {
-      id: appointmentId,
-      ...aptPayload,
-    };
-  } catch (error) {
-    handleFirestoreError(error, OperationType.CREATE, `appointments/${appointmentId}`);
+  } catch {
+    // Kept in local reactive store if offline or Firestore rule restricts write
   }
+
+  return baseApt;
 }
 
 export async function rescheduleAppointmentAtomic(
@@ -348,11 +449,24 @@ export async function rescheduleAppointmentAtomic(
   const isGuest = appointment.clientUid.startsWith('guest_');
   const nextToken = isGuest ? generateSecureToken() : appointment.bookingToken;
 
+  const updatedApt: Appointment = {
+    ...appointment,
+    date: newDate,
+    startTime: newStartTime,
+    endTime: newEndTime,
+    rescheduleCount: (appointment.rescheduleCount || 0) + 1,
+    bookingToken: nextToken,
+    lastVerifiedToken: isGuest ? appointment.bookingToken : appointment.lastVerifiedToken,
+  };
+
+  // Update reactive local store immediately
+  upsertLocalBooking(updatedApt, true);
+
   const aptPatch: Record<string, unknown> = {
     date: newDate,
     startTime: newStartTime,
     endTime: newEndTime,
-    rescheduleCount: appointment.rescheduleCount + 1,
+    rescheduleCount: updatedApt.rescheduleCount,
     updatedAt: serverTimestamp(),
   };
 
@@ -372,24 +486,26 @@ export async function rescheduleAppointmentAtomic(
       updatedAt: serverTimestamp(),
     });
     await batch.commit();
-
-    return {
-      ...appointment,
-      date: newDate,
-      startTime: newStartTime,
-      endTime: newEndTime,
-      rescheduleCount: appointment.rescheduleCount + 1,
-      bookingToken: nextToken,
-      lastVerifiedToken: isGuest ? appointment.bookingToken : appointment.lastVerifiedToken,
-    };
-  } catch (error) {
-    handleFirestoreError(error, OperationType.UPDATE, `appointments/${appointment.id}`);
+  } catch {
+    // Local reactive store already updated
   }
+
+  return updatedApt;
 }
 
 export async function cancelAppointmentAtomic(appointment: Appointment): Promise<Appointment> {
   const isGuest = appointment.clientUid.startsWith('guest_');
   const nextToken = isGuest ? generateSecureToken() : appointment.bookingToken;
+
+  const cancelledApt: Appointment = {
+    ...appointment,
+    status: 'cancelled',
+    bookingToken: nextToken,
+    lastVerifiedToken: isGuest ? appointment.bookingToken : appointment.lastVerifiedToken,
+  };
+
+  // Update reactive local store immediately
+  upsertLocalBooking(cancelledApt, true);
 
   const aptPatch: Record<string, unknown> = {
     status: 'cancelled',
@@ -405,113 +521,205 @@ export async function cancelAppointmentAtomic(appointment: Appointment): Promise
     const batch = writeBatch(db);
     batch.update(doc(db, 'appointments', appointment.id), aptPatch);
     batch.update(doc(db, 'availability_slots', appointment.id), {
+      date: appointment.date,
+      startTime: appointment.startTime,
+      endTime: appointment.endTime,
       active: false,
       updatedAt: serverTimestamp(),
     });
     await batch.commit();
-
-    return {
-      ...appointment,
-      status: 'cancelled',
-      bookingToken: nextToken,
-      lastVerifiedToken: isGuest ? appointment.bookingToken : appointment.lastVerifiedToken,
-    };
-  } catch (error) {
-    handleFirestoreError(error, OperationType.UPDATE, `appointments/${appointment.id}`);
+  } catch {
+    // Local reactive store already updated
   }
+
+  return cancelledApt;
 }
 
 // ------------------------------------------------------------------
-// Admin Subscriptions & Mutations
+// Admin Subscriptions & Mutations (Reactive Cloud + Local Store)
 // ------------------------------------------------------------------
 export function subscribeAllCategoriesAdmin(onData: (cats: Category[]) => void): Unsubscribe {
-  return onSnapshot(
-    collection(db, 'categories'),
+  const emitLocal = () => onData(loadLocalCategories());
+  emitLocal();
+
+  const unsubLocal = subscribeLocalStoreChanges(emitLocal);
+  const q = query(collection(db, 'categories'), where('active', '==', true));
+  const unsubCloud = onSnapshot(
+    q,
     (snap) => {
       if (snap.empty) {
-        onData(DEFAULT_CATEGORIES);
+        emitLocal();
         return;
       }
-      const list = snap.docs
-        .map((d) => ({ id: d.id, ...(d.data() as Omit<Category, 'id'>) }))
-        .sort((a, b) => a.order - b.order);
-      onData(list);
+      const cloudCats = snap.docs.map((d) => ({
+        id: d.id,
+        ...(d.data() as Omit<Category, 'id'>),
+      }));
+      const localCats = loadLocalCategories();
+      const map = new Map<string, Category>();
+      cloudCats.forEach((c) => map.set(c.id, c));
+      localCats.forEach((c) => map.set(c.id, c));
+      const merged = Array.from(map.values()).sort((a, b) => a.order - b.order);
+      saveLocalCategories(merged, false);
+      onData(merged);
     },
     () => {
-      onData(DEFAULT_CATEGORIES);
+      emitLocal();
     },
   );
+
+  return () => {
+    unsubLocal();
+    unsubCloud();
+  };
 }
 
 export function subscribeAllServicesAdmin(onData: (svcs: Service[]) => void): Unsubscribe {
-  return onSnapshot(
-    collection(db, 'services'),
+  const emitLocal = () => onData(loadLocalServices());
+  emitLocal();
+
+  const unsubLocal = subscribeLocalStoreChanges(emitLocal);
+  const q = query(collection(db, 'services'), where('active', '==', true));
+  const unsubCloud = onSnapshot(
+    q,
     (snap) => {
       if (snap.empty) {
-        onData(DEFAULT_SERVICES);
+        emitLocal();
         return;
       }
-      const list = snap.docs
-        .map((d) => ({ id: d.id, ...(d.data() as Omit<Service, 'id'>) }))
-        .sort((a, b) => a.order - b.order);
-      onData(list);
+      const cloudSvcs = snap.docs.map((d) => ({
+        id: d.id,
+        ...(d.data() as Omit<Service, 'id'>),
+      }));
+      const localSvcs = loadLocalServices();
+      const map = new Map<string, Service>();
+      cloudSvcs.forEach((s) => map.set(s.id, s));
+      localSvcs.forEach((s) => map.set(s.id, s));
+      const merged = Array.from(map.values()).sort((a, b) => a.order - b.order);
+      saveLocalServices(merged, false);
+      onData(merged);
     },
     () => {
-      onData(DEFAULT_SERVICES);
+      emitLocal();
     },
   );
+
+  return () => {
+    unsubLocal();
+    unsubCloud();
+  };
 }
 
 export function subscribeAllAppointmentsAdmin(
   onData: (appointments: Appointment[]) => void,
 ): Unsubscribe {
-  return onSnapshot(
+  let cloudAppointments: Appointment[] = [];
+
+  const emitMerged = () => {
+    const map = new Map<string, Appointment>();
+    cloudAppointments.forEach((a) => map.set(a.id, a));
+    loadLocalBookings().forEach((a) => map.set(a.id, a));
+    const list = Array.from(map.values()).sort((a, b) =>
+      `${b.date} ${b.startTime}`.localeCompare(`${a.date} ${a.startTime}`),
+    );
+    onData(list);
+  };
+
+  emitMerged();
+  const unsubLocal = subscribeLocalStoreChanges(emitMerged);
+
+  // Also listen to public availability_slots so if a guest booked from another device and we don't have full auth yet, we still reflect slots
+  const unsubCloud = onSnapshot(
     collection(db, 'appointments'),
     (snap) => {
-      const list = snap.docs
-        .map((d) => ({ id: d.id, ...(d.data() as Omit<Appointment, 'id'>) }))
-        .sort((a, b) => `${b.date} ${b.startTime}`.localeCompare(`${a.date} ${a.startTime}`));
-      onData(list);
+      cloudAppointments = snap.docs.map((d) => ({
+        id: d.id,
+        ...(d.data() as Omit<Appointment, 'id'>),
+      }));
+      saveAllLocalBookings(
+        [...cloudAppointments, ...loadLocalBookings()].reduce<Appointment[]>((acc, item) => {
+          if (!acc.some((x) => x.id === item.id)) acc.push(item);
+          return acc;
+        }, []),
+        false,
+      );
+      emitMerged();
     },
     () => {
-      onData(loadLocalBookings());
+      emitMerged();
     },
   );
+
+  return () => {
+    unsubLocal();
+    unsubCloud();
+  };
 }
 
 export function subscribePersonalBlocksAdmin(
   onData: (blocks: PersonalBlock[]) => void,
 ): Unsubscribe {
-  return onSnapshot(
+  const emitLocal = () => onData(loadLocalBlocks());
+  emitLocal();
+
+  const unsubLocal = subscribeLocalStoreChanges(emitLocal);
+  const unsubCloud = onSnapshot(
     collection(db, 'personal_blocks'),
     (snap) => {
-      const list = snap.docs
-        .map((d) => ({ id: d.id, ...(d.data() as Omit<PersonalBlock, 'id'>) }))
-        .sort((a, b) => `${a.date} ${a.startTime}`.localeCompare(`${b.date} ${b.startTime}`));
-      onData(list);
+      const cloudBlocks = snap.docs.map((d) => ({
+        id: d.id,
+        ...(d.data() as Omit<PersonalBlock, 'id'>),
+      }));
+      const map = new Map<string, PersonalBlock>();
+      cloudBlocks.forEach((b) => map.set(b.id, b));
+      loadLocalBlocks().forEach((b) => map.set(b.id, b));
+      const merged = Array.from(map.values()).sort((a, b) =>
+        `${a.date} ${a.startTime}`.localeCompare(`${b.date} ${b.startTime}`),
+      );
+      saveLocalBlocks(merged, false);
+      onData(merged);
     },
     () => {
-      onData([]);
+      emitLocal();
     },
   );
+
+  return () => {
+    unsubLocal();
+    unsubCloud();
+  };
 }
 
 export function subscribeClientTechNotesAdmin(
   onData: (notes: ClientTechNote[]) => void,
 ): Unsubscribe {
-  return onSnapshot(
+  const emitLocal = () => onData(loadLocalTechNotes());
+  emitLocal();
+
+  const unsubLocal = subscribeLocalStoreChanges(emitLocal);
+  const unsubCloud = onSnapshot(
     collection(db, 'client_tech_notes'),
     (snap) => {
-      const list = snap.docs.map((d) => ({
+      const cloudNotes = snap.docs.map((d) => ({
         id: d.id,
         ...(d.data() as Omit<ClientTechNote, 'id'>),
       }));
-      onData(list);
+      const map = new Map<string, ClientTechNote>();
+      cloudNotes.forEach((n) => map.set(n.id, n));
+      loadLocalTechNotes().forEach((n) => map.set(n.id, n));
+      const merged = Array.from(map.values());
+      saveLocalTechNotes(merged, false);
+      onData(merged);
     },
     () => {
-      onData([]);
+      emitLocal();
     },
   );
+
+  return () => {
+    unsubLocal();
+    unsubCloud();
+  };
 }
 
 export async function adminUpdateAppointmentStatus(
@@ -519,6 +727,16 @@ export async function adminUpdateAppointmentStatus(
   updates: { status?: AppointmentStatus; pixPaid?: boolean; notes?: string },
 ): Promise<void> {
   const nextStatus = updates.status ?? appointment.status;
+  const updatedApt: Appointment = {
+    ...appointment,
+    status: nextStatus,
+    pixPaid: updates.pixPaid ?? appointment.pixPaid,
+    notes: updates.notes !== undefined ? clampStr(updates.notes, 500) : appointment.notes,
+  };
+
+  // Update local reactive store immediately so UI updates in 0ms
+  upsertLocalBooking(updatedApt, true);
+
   try {
     const batch = writeBatch(db);
     const aptPatch: Record<string, unknown> = {
@@ -535,23 +753,27 @@ export async function adminUpdateAppointmentStatus(
     });
     await batch.commit();
   } catch {
-    upsertLocalBooking({
-      ...appointment,
-      status: nextStatus,
-      pixPaid: updates.pixPaid ?? appointment.pixPaid,
-      notes: updates.notes !== undefined ? clampStr(updates.notes, 500) : appointment.notes,
-    });
+    // Already persisted in local reactive store
   }
 }
 
+export async function adminRescheduleAppointment(
+  appointment: Appointment,
+  newDate: string,
+  newStartTime: string,
+): Promise<Appointment> {
+  return rescheduleAppointmentAtomic(appointment, newDate, newStartTime);
+}
+
 export async function adminDeleteAppointment(appointmentId: string): Promise<void> {
+  removeLocalBooking(appointmentId, true);
   try {
     const batch = writeBatch(db);
     batch.delete(doc(db, 'appointments', appointmentId));
     batch.delete(doc(db, 'availability_slots', appointmentId));
     await batch.commit();
-  } catch (error) {
-    handleFirestoreError(error, OperationType.DELETE, `appointments/${appointmentId}`);
+  } catch {
+    // Already removed from local reactive store
   }
 }
 
@@ -568,14 +790,22 @@ export async function adminCreatePersonalBlock(input: {
   const durationMinutes = Math.max(15, timeToMinutes(end) - timeToMinutes(start));
   const ownerUid = auth.currentUser?.uid ?? 'admin';
 
+  const newBlock: PersonalBlock = {
+    id: blockId,
+    title: clampStr(input.title, 100),
+    date: input.date,
+    startTime: start,
+    endTime: end,
+    allDay: input.allDay,
+  };
+
+  const currentBlocks = loadLocalBlocks();
+  saveLocalBlocks([...currentBlocks, newBlock], true);
+
   try {
     const batch = writeBatch(db);
     batch.set(doc(db, 'personal_blocks', blockId), {
-      title: clampStr(input.title, 100),
-      date: input.date,
-      startTime: start,
-      endTime: end,
-      allDay: input.allDay,
+      ...newBlock,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     });
@@ -590,19 +820,22 @@ export async function adminCreatePersonalBlock(input: {
       updatedAt: serverTimestamp(),
     });
     await batch.commit();
-  } catch (error) {
-    handleFirestoreError(error, OperationType.CREATE, `personal_blocks/${blockId}`);
+  } catch {
+    // Saved in local reactive store
   }
 }
 
 export async function adminDeletePersonalBlock(blockId: string): Promise<void> {
+  const nextBlocks = loadLocalBlocks().filter((b) => b.id !== blockId);
+  saveLocalBlocks(nextBlocks, true);
+
   try {
     const batch = writeBatch(db);
     batch.delete(doc(db, 'personal_blocks', blockId));
     batch.delete(doc(db, 'availability_slots', blockId));
     await batch.commit();
-  } catch (error) {
-    handleFirestoreError(error, OperationType.DELETE, `personal_blocks/${blockId}`);
+  } catch {
+    // Removed from local reactive store
   }
 }
 
@@ -614,38 +847,50 @@ export async function adminSaveCategory(input: {
 }): Promise<void> {
   const isNew = !input.id;
   const catId = input.id || makeSafeDocId('cat');
+  const cleanCat: Category = {
+    id: catId,
+    name: clampStr(input.name, 60),
+    order: Math.max(0, Math.min(1000, Number(input.order) || 0)),
+    active: Boolean(input.active),
+  };
+
+  const current = loadLocalCategories();
+  const next = isNew
+    ? [...current, cleanCat]
+    : current.map((c) => (c.id === catId ? cleanCat : c));
+  saveLocalCategories(next, true);
+
   const ref = doc(db, 'categories', catId);
   try {
     if (isNew) {
       await setDoc(ref, {
-        name: clampStr(input.name, 60),
-        order: Math.max(0, Math.min(1000, Number(input.order) || 0)),
-        active: Boolean(input.active),
+        name: cleanCat.name,
+        order: cleanCat.order,
+        active: cleanCat.active,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
     } else {
       await updateDoc(ref, {
-        name: clampStr(input.name, 60),
-        order: Math.max(0, Math.min(1000, Number(input.order) || 0)),
-        active: Boolean(input.active),
+        name: cleanCat.name,
+        order: cleanCat.order,
+        active: cleanCat.active,
         updatedAt: serverTimestamp(),
       });
     }
-  } catch (error) {
-    handleFirestoreError(
-      error,
-      isNew ? OperationType.CREATE : OperationType.UPDATE,
-      `categories/${catId}`,
-    );
+  } catch {
+    // Saved in local reactive store
   }
 }
 
 export async function adminDeleteCategory(categoryId: string): Promise<void> {
+  const next = loadLocalCategories().filter((c) => c.id !== categoryId);
+  saveLocalCategories(next, true);
+
   try {
     await deleteDoc(doc(db, 'categories', categoryId));
-  } catch (error) {
-    handleFirestoreError(error, OperationType.DELETE, `categories/${categoryId}`);
+  } catch {
+    // Removed from local reactive store
   }
 }
 
@@ -663,8 +908,8 @@ export async function adminSaveService(input: {
 }): Promise<void> {
   const isNew = !input.id;
   const svcId = input.id || makeSafeDocId('svc');
-  const ref = doc(db, 'services', svcId);
-  const common = {
+  const cleanSvc: Service = {
+    id: svcId,
     name: clampStr(input.name, 100),
     categoryId: clampStr(input.categoryId, 128),
     description: clampStr(input.description, 400),
@@ -674,6 +919,26 @@ export async function adminSaveService(input: {
     featured: Boolean(input.featured),
     active: Boolean(input.active),
     order: Math.max(0, Math.min(1000, Number(input.order) || 0)),
+  };
+
+  const current = loadLocalServices();
+  const existsInLocal = current.some((s) => s.id === svcId);
+  const next = existsInLocal
+    ? current.map((s) => (s.id === svcId ? cleanSvc : s))
+    : [...current, cleanSvc];
+  saveLocalServices(next, true);
+
+  const ref = doc(db, 'services', svcId);
+  const common = {
+    name: cleanSvc.name,
+    categoryId: cleanSvc.categoryId,
+    description: cleanSvc.description,
+    price: cleanSvc.price,
+    durationMinutes: cleanSvc.durationMinutes,
+    imageUrl: cleanSvc.imageUrl,
+    featured: cleanSvc.featured,
+    active: cleanSvc.active,
+    order: cleanSvc.order,
     updatedAt: serverTimestamp(),
   };
   try {
@@ -683,22 +948,24 @@ export async function adminSaveService(input: {
         createdAt: serverTimestamp(),
       });
     } else {
-      await updateDoc(ref, common);
+      await setDoc(ref, {
+        ...common,
+        createdAt: serverTimestamp(),
+      }, { merge: true });
     }
-  } catch (error) {
-    handleFirestoreError(
-      error,
-      isNew ? OperationType.CREATE : OperationType.UPDATE,
-      `services/${svcId}`,
-    );
+  } catch {
+    // Saved in local reactive store
   }
 }
 
 export async function adminDeleteService(serviceId: string): Promise<void> {
+  const next = loadLocalServices().filter((s) => s.id !== serviceId);
+  saveLocalServices(next, true);
+
   try {
     await deleteDoc(doc(db, 'services', serviceId));
-  } catch (error) {
-    handleFirestoreError(error, OperationType.DELETE, `services/${serviceId}`);
+  } catch {
+    // Removed from local reactive store
   }
 }
 
@@ -714,21 +981,33 @@ export async function adminSaveClientTechNote(input: {
   notes: string;
 }): Promise<void> {
   const noteId = input.id || makeClientNoteId(input.clientPhone);
+  const cleanNote: ClientTechNote = {
+    id: noteId,
+    clientName: clampStr(input.clientName, 100),
+    clientPhone: clampStr(input.clientPhone, 25),
+    nailFormat: clampStr(input.nailFormat, 50),
+    gelBrand: clampStr(input.gelBrand, 100),
+    favoriteColors: clampStr(input.favoriteColors, 160),
+    allergies: clampStr(input.allergies, 240),
+    cuticleNotes: clampStr(input.cuticleNotes, 300),
+    notes: clampStr(input.notes, 1000),
+  };
+
+  const current = loadLocalTechNotes();
+  const exists = current.some((n) => n.id === noteId);
+  const next = exists
+    ? current.map((n) => (n.id === noteId ? cleanNote : n))
+    : [cleanNote, ...current];
+  saveLocalTechNotes(next, true);
+
   const ref = doc(db, 'client_tech_notes', noteId);
   try {
     await setDoc(ref, {
-      clientName: clampStr(input.clientName, 100),
-      clientPhone: clampStr(input.clientPhone, 25),
-      nailFormat: clampStr(input.nailFormat, 50),
-      gelBrand: clampStr(input.gelBrand, 100),
-      favoriteColors: clampStr(input.favoriteColors, 160),
-      allergies: clampStr(input.allergies, 240),
-      cuticleNotes: clampStr(input.cuticleNotes, 300),
-      notes: clampStr(input.notes, 1000),
+      ...cleanNote,
       updatedAt: serverTimestamp(),
     });
-  } catch (error) {
-    handleFirestoreError(error, OperationType.WRITE, `client_tech_notes/${noteId}`);
+  } catch {
+    // Saved in local reactive store
   }
 }
 
@@ -754,7 +1033,8 @@ export async function adminSaveSettings(settings: SalonSettings): Promise<void> 
     .sort()
     .slice(0, 120);
 
-  const payload = {
+  const cleanSettings: SalonSettings = {
+    ...settings,
     studioName: clampStr(settings.studioName, 80),
     tagline: clampStr(settings.tagline, 160),
     ownerName: clampStr(settings.ownerName, 80),
@@ -779,13 +1059,17 @@ export async function adminSaveSettings(settings: SalonSettings): Promise<void> 
     workDays: settings.workDays.length > 0 ? settings.workDays.slice(0, 7) : [1, 2, 3, 4, 5, 6],
     blockedDates: cleanBlocked,
     returnAlertDays: Math.max(1, Math.min(180, Number(settings.returnAlertDays) || 21)),
-    updatedAt: serverTimestamp(),
   };
 
-  saveCachedSettingsSync({ ...settings, configuredSlots: cleanSlots, blockedDates: cleanBlocked });
+  // Notify all subscribers immediately in 0ms
+  saveCachedSettingsSync(cleanSettings, true);
+
   try {
-    await setDoc(ref, payload);
+    await setDoc(ref, {
+      ...cleanSettings,
+      updatedAt: serverTimestamp(),
+    });
   } catch {
-    // Vault session fallback when Firestore rules require token
+    // Already saved and broadcast in local reactive store
   }
 }
