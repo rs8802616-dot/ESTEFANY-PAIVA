@@ -124,3 +124,21 @@ O projeto foi migrado para a arquitetura completa em **React 19 + TypeScript + V
   - **Pix Copia e Cola Padrão BACEN**: `generatePixPayload` agora normaliza chaves de telefone formatadas (como `(61) 98554-3452`) para o padrão internacional E.164 (`+5561985543452`), CPF/CNPJ, e-mail e EVP.
   - **Seleção de Serviços Dentro do Modal (Tela 8)**: Ao clicar em `"Agendar Agora"` sem ter pré-selecionado um serviço no catálogo, o modal exibe a lista interativa de procedimentos para escolha imediata sem precisar fechar a janela.
   - **Validação Automática de Horário (`CalendarPicker.tsx`)**: Limpa automaticamente `selectedTime` caso a cliente altere a data ou adicione mais procedimentos cuja duração ultrapasse o expediente.
+
+
+### v45 — Suíte de Inteligência Financeira (BI), Gráficos Interativos SVG e Novas Funções Analíticas (Telas 17 a 24)
+- **Novos Componentes de Gráficos Interativos em SVG (`src/components/ui/LuxuryDesignSystem.tsx`)**:
+  - `LuxuryBarChart` (Reformulado): Eixo Y com escala em Reais (`R$`), linhas de grade pontilhadas, barras largas com gradiente Luxury Nude, rótulos de valor no topo de cada barra, inspeção interativa ao clicar na coluna (exibindo `Receitas`, `Despesas` e `Saldo` do dia/período) e rodapé analítico (`Maior Pico`, `Média por Período` e `Resultado Líquido`).
+  - `LuxuryAreaLineChart` (Novo): Gráfico de curva de área em SVG com preenchimento degradê dourado (`#C4A477`), linha de evolução do saldo acumulado (`#594943`), linha tracejada de saídas (`#BE9293`) e pontos clicáveis com valores.
+  - `LuxuryDonutChart` (Novo): Gráfico de rosca (Donut SVG) interativo com seleção de fatias ao toque, valor central dinâmico e legenda com percentuais (`%`).
+  - `LuxuryGaugeCard` (Novo): Velocímetro semicircular em SVG ("Termômetro da Meta & Ponto de Equilíbrio") que calcula automaticamente quantos atendimentos faltam para bater a meta mensal e quanto falta para cobrir 100% dos custos (Break-Even).
+- **Novas Funções no Módulo Financeiro (`src/components/admin/AdminFinanceSuite.tsx` e `src/components/admin/AdminReportsSettingsTabs.tsx`)**:
+  - **Seletor Dinâmico de Período dos Gráficos**: Alternância instantânea entre **`Seg–Sáb` (Visão Diária)**, **`Semanas` (Semana 1 a 4 do Mês)** e **`6 Meses` (Visão Semestral)**.
+  - **Botões `"Carregar Exemplo"` e `"Zerar Manuais"`**: Carrega movimentação realista distribuída de Segunda a Sábado para visualização imediata de todos os gráficos ou limpa os lançamentos manuais com 1 clique.
+  - **Tela 20 (`20. Fluxo de Caixa Consolidado`)**:
+    - 4 KPIs (`Entradas Realizadas`, `Saídas Realizadas`, `Saldo em Caixa`, `Saldo Projetado c/ Pendentes`).
+    - **Lançamento Rápido no Fluxo de Caixa**: Permite registrar uma `(+)` Entrada ou `(-)` Saída escolhendo o dia (`Seg` a `Sáb`) diretamente na Tela 20 e ver os gráficos subirem na hora.
+    - **Seletor de Visualização**: `Barras + Curva`, `Só Barras` ou `Só Curva SVG`.
+    - **Tabela Analítica de Extrato por Período** com `Entradas (+)`, `Saídas (-)`, `Resultado do Dia` e `Saldo Acumulado`.
+  - **Tela 23 (`23. Relatórios Gerais`)**: Adicionados **Gráfico de Rosca por Forma de Pagamento (Pix Online vs Presencial)** e **Ranking Top Clientes VIP (Fidelidade & LTV)**.
+  - **Tela 24 (`24. Desempenho`)**: Adicionados **Gráfico de Rosca de Share por Procedimento** e a **Calculadora de Lucratividade Real & Ganho por Hora Trabalhada** (calcula lucro líquido livre de insumos/taxas, ganho por hora de mesa `R$/h`, margem `%` e preço sugerido para 75% de margem).

@@ -47,7 +47,7 @@ export default defineConfig(() => {
           ],
         },
         workbox: {
-          cacheId: 'estefany-nails-v44-full-reactive-audit-fix',
+          cacheId: 'estefany-nails-v45-luxury-bi-charts',
           skipWaiting: true,
           clientsClaim: true,
           cleanupOutdatedCaches: true,

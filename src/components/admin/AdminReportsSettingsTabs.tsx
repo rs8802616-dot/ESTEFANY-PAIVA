@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { SafeImage } from '../SafeImage';
 import { useToast } from '../Toast';
+import { LuxuryDonutChart } from '../ui/LuxuryDesignSystem';
 import { adminSaveSettings } from '../../lib/db';
 import { STUDIO_IMAGES, STUDIO_IMAGE_PRESETS } from '../../lib/defaults';
 import {
@@ -89,6 +90,31 @@ export const AdminReportsTab: React.FC<{ appointments: Appointment[] }> = ({ app
       });
     });
     return Array.from(map.entries()).sort((a, b) => b[1].count - a[1].count);
+  }, [validRevenueApts]);
+
+  const byPaymentMethodSlices = useMemo(() => {
+    let pixTotal = 0;
+    let presencialTotal = 0;
+    validRevenueApts.forEach((a) => {
+      if (a.paymentMethod === 'pix') pixTotal += a.totalPrice;
+      else presencialTotal += a.totalPrice;
+    });
+    return [
+      { label: 'Pix Online', value: pixTotal, color: '#C4A477' },
+      { label: 'Presencial no Studio', value: presencialTotal, color: '#594943' },
+    ];
+  }, [validRevenueApts]);
+
+  const topClients = useMemo(() => {
+    const map = new Map<string, { name: string; visits: number; total: number }>();
+    validRevenueApts.forEach((a) => {
+      const key = a.clientPhone || a.clientName;
+      const cur = map.get(key) || { name: a.clientName, visits: 0, total: 0 };
+      cur.visits += 1;
+      cur.total += a.totalPrice;
+      map.set(key, cur);
+    });
+    return Array.from(map.values()).sort((a, b) => b.total - a.total).slice(0, 6);
   }, [validRevenueApts]);
 
   return (
@@ -186,6 +212,51 @@ export const AdminReportsTab: React.FC<{ appointments: Appointment[] }> = ({ app
               ? `${Math.round((cancelledApts.length / filtered.length) * 100)}% do período`
               : 'Sem registros'}
           </div>
+        </div>
+      </div>
+
+      {/* Gráficos de Rosca: Forma de Pagamento + Ranking de Clientes VIP */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <LuxuryDonutChart
+          title="Faturamento por Forma de Pagamento"
+          subtitle="Comparativo entre reservas Pix e pagamento presencial"
+          centerLabel="Pagamentos"
+          slices={byPaymentMethodSlices}
+        />
+
+        <div className="bg-white rounded-3xl border border-[#E8D6CB] p-5 sm:p-6 space-y-3 shadow-2xs">
+          <div>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-[#C4A477] block">
+              Fidelidade & LTV
+            </span>
+            <h2 className="font-editorial text-xl font-semibold text-[#594943]">
+              Top Clientes VIP do Período
+            </h2>
+          </div>
+          {topClients.length === 0 ? (
+            <p className="text-xs text-[#95847C] py-6 text-center">
+              Nenhuma cliente com atendimento confirmado neste período.
+            </p>
+          ) : (
+            <div className="divide-y divide-[#E8D6CB]/70">
+              {topClients.map((c, idx) => (
+                <div key={idx} className="py-2.5 flex items-center justify-between gap-3 text-sm">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <span className="w-6 h-6 rounded-lg bg-[#594943] text-[#FAF6F1] text-xs font-bold flex items-center justify-center shrink-0">
+                      {idx + 1}
+                    </span>
+                    <div className="min-w-0">
+                      <div className="font-semibold text-[#594943] truncate">{c.name}</div>
+                      <div className="text-[11px] text-[#95847C]">{c.visits} visita(s)</div>
+                    </div>
+                  </div>
+                  <strong className="text-sm text-[#594943] tabular-nums shrink-0">
+                    {formatBRL(c.total)}
+                  </strong>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
