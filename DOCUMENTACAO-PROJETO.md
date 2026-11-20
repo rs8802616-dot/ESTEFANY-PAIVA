@@ -43,3 +43,7 @@ O projeto foi migrado para a arquitetura completa em **React 19 + TypeScript + V
   2. Configuração de `vercel.json` com rewrites SPA para suportar `/`, `/admin`, `/admin.html` e `#/admin` sem erro 404 na Vercel.
   3. Ajuste em `src/App.tsx` para reconhecer tanto `#/admin` quanto `/admin` e `/admin.html` na URL inicial.
   4. Validação completa de TypeScript (`npm run lint`) e build de produção (`npm run build`).
+- **v38**: **Isolamento Total da Área Administrativa em Rota Separada (`/admin`)**:
+  1. Removidos todos os 4 botões/links de acesso ao Painel Admin que apareciam no Portal da Cliente (`src/components/client/ClientPortal.tsx`): menu superior, botão de cadeado mobile, aba "O Estúdio" e rodapé.
+  2. Clientes acessando a raiz (`/`) veem exclusivamente o Portal de Agendamento, sem nenhuma referência à área administrativa.
+  3. O Painel Administrativo é acessado exclusivamente pela rota dedicada **`/admin`** (também compatível com `/admin.html` e `#/admin`), e o botão de visualizar o site abre `/` em uma nova aba isolada.

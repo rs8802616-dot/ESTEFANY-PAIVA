@@ -6,7 +6,6 @@ import {
   Check,
   Clock,
   Instagram,
-  Lock,
   MapPin,
   MessageCircle,
   Plus,
@@ -44,7 +43,6 @@ interface ClientPortalProps {
   clientAppointments: Appointment[];
   onAppointmentCreated: (apt: Appointment) => void;
   onAppointmentUpdated: (apt: Appointment) => void;
-  onOpenAdmin: () => void;
 }
 
 type ClientTab = 'catalog' | 'appointments' | 'studio';
@@ -60,7 +58,6 @@ export const ClientPortal: React.FC<ClientPortalProps> = ({
   clientAppointments,
   onAppointmentCreated,
   onAppointmentUpdated,
-  onOpenAdmin,
 }) => {
   const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState<ClientTab>('catalog');
@@ -183,13 +180,6 @@ export const ClientPortal: React.FC<ClientPortalProps> = ({
             >
               O Estúdio
             </button>
-            <button
-              type="button"
-              onClick={onOpenAdmin}
-              className="whitespace-nowrap shrink-0 transition-colors hover:text-[#350B19]"
-            >
-              Painel Admin
-            </button>
           </nav>
 
           {/* Zone 3: Single primary action */}
@@ -256,15 +246,6 @@ export const ClientPortal: React.FC<ClientPortalProps> = ({
             </a>
 
             <PWAInstallButton />
-
-            <button
-              type="button"
-              onClick={onOpenAdmin}
-              aria-label="Acessar Painel Administrativo"
-              className="md:hidden min-h-[40px] min-w-[40px] inline-flex items-center justify-center rounded-xl border border-[#EBDCE0] bg-white text-[#350B19]"
-            >
-              <Lock className="w-4 h-4" />
-            </button>
           </div>
         </section>
 
@@ -612,15 +593,6 @@ export const ClientPortal: React.FC<ClientPortalProps> = ({
               </a>
 
               <PWAInstallButton />
-
-              <button
-                type="button"
-                onClick={onOpenAdmin}
-                className="min-h-[46px] inline-flex items-center justify-center gap-2 rounded-xl border border-[#EBDCE0] bg-white px-4 py-2.5 text-sm font-medium text-[#350B19] hover:border-[#D83F79] transition-colors"
-              >
-                <Lock className="w-4 h-4 text-[#D83F79]" />
-                <span>Área da Profissional</span>
-              </button>
             </div>
           </section>
         )}
@@ -632,13 +604,7 @@ export const ClientPortal: React.FC<ClientPortalProps> = ({
           <span>
             {settings.studioName} · {settings.address}
           </span>
-          <button
-            type="button"
-            onClick={onOpenAdmin}
-            className="hover:text-[#350B19] transition-colors"
-          >
-            Acesso Administrativo
-          </button>
+          <span>© {new Date().getFullYear()} {settings.studioName}</span>
         </div>
       </footer>
 

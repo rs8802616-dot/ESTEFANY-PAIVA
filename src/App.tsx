@@ -55,11 +55,17 @@ function SalonAppShell() {
   const [localBookings, setLocalBookings] = useState<Appointment[]>(() => loadLocalBookings());
 
   useEffect(() => {
-    const handleHash = () => {
-      setMode(window.location.hash.includes('admin') ? 'admin' : 'client');
+    const syncRoute = () => {
+      const isAdminRoute =
+        window.location.pathname.includes('admin') || window.location.hash.includes('admin');
+      setMode(isAdminRoute ? 'admin' : 'client');
     };
-    window.addEventListener('hashchange', handleHash);
-    return () => window.removeEventListener('hashchange', handleHash);
+    window.addEventListener('hashchange', syncRoute);
+    window.addEventListener('popstate', syncRoute);
+    return () => {
+      window.removeEventListener('hashchange', syncRoute);
+      window.removeEventListener('popstate', syncRoute);
+    };
   }, []);
 
   useEffect(() => {
@@ -116,18 +122,8 @@ function SalonAppShell() {
     setLocalBookings(updated);
   }, []);
 
-  const openAdmin = () => {
-    window.location.hash = '#/admin';
-    setMode('admin');
-  };
-
   const exitAdmin = () => {
-    if (window.location.pathname.includes('admin')) {
-      window.history.replaceState({}, '', '/');
-    } else {
-      window.location.hash = '';
-    }
-    setMode('client');
+    window.open('/', '_blank', 'noopener,noreferrer');
   };
 
   return (
@@ -151,7 +147,6 @@ function SalonAppShell() {
           clientAppointments={clientAppointments}
           onAppointmentCreated={handleUpsertClientBooking}
           onAppointmentUpdated={handleUpsertClientBooking}
-          onOpenAdmin={openAdmin}
         />
       )}
     </>
