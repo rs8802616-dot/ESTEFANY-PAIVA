@@ -57,3 +57,4 @@ O projeto foi reconstruído do zero com arquitetura modular limpa em **ES Module
   4. **Hero Banner Full-Bleed**: Banner promocional redesenhado com imagem em tela cheia + gradiente vinho elegante, sem textos espremidos em telas de 360px.
   5. **Sidebar Fixa Estilo iPadOS no Painel Admin (Tablet `>= 768px`)**: Em tablets e PCs, o painel administrativo agora possui barra lateral fixa elegante com ícones + KPIs com ícones destacados.
   6. **Manifesto PWA Ajustado**: `theme_color` alinhado ao vinho oficial `#350B19` e `orientation: "any"` para uso fluido em celular e tablet. Cache atualizado para `estefany-nails-v36-native-mobile-tablet-app`.
+- **PRD Oficial**: Criado o documento completo de produto em `PRD-ESTEFANY-PAIVA-NAILS.md` detalhando personas, arquitetura modular, fluxos do cliente e do admin, modelo de dados Firestore, regras de negócio e roadmap.
