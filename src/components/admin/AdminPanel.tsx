@@ -40,7 +40,11 @@ import {
   signInWithEmail,
   signOutUser,
 } from '../../lib/firebase';
-import { clearAdminGateSession } from '../../lib/adminRoute';
+import {
+  clearAdminGateSession,
+  getVaultAdminEmail,
+  verifyAdminVaultCredentials,
+} from '../../lib/adminRoute';
 import {
   buildReturnAlertWhatsAppUrl,
   daysBetween,
@@ -115,11 +119,15 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [vaultEmail, setVaultEmail] = useState<string | null>(() => getVaultAdminEmail());
   const [walkInSignal, setWalkInSignal] = useState(0);
   const [pendingDetailId, setPendingDetailId] = useState<string | null>(null);
 
+  const effectiveAdmin = Boolean((user && isAdmin) || vaultEmail);
+  const effectiveEmail = user?.email || vaultEmail || '';
+
   useEffect(() => {
-    if (!authReady || !user || !isAdmin) return;
+    if (!authReady || !effectiveAdmin) return;
 
     void seedInitialStudioDataIfEmpty();
 
@@ -134,7 +142,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     return () => {
       unsubs.forEach((fn) => fn());
     };
-  }, [authReady, user, isAdmin]);
+  }, [authReady, effectiveAdmin]);
 
   const today = todayISO();
   const currentMonth = today.slice(0, 7);
@@ -346,6 +354,18 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     }
     setLoginBusy(true);
     try {
+      // 1. Verifica via PBKDF2-HMAC-SHA256 (250.000 iterações Web Crypto API)
+      const vaultOk = await verifyAdminVaultCredentials(loginEmail, loginPassword);
+      if (vaultOk) {
+        setVaultEmail(getVaultAdminEmail());
+        setLoginPassword('');
+        // Tenta autenticar no Firebase Auth em background caso o provedor esteja ativo
+        void signInWithEmail(loginEmail, loginPassword).catch(() => {});
+        showToast('Acesso administrativo Luxury Nude liberado!', 'success');
+        return;
+      }
+
+      // 2. Fallback para contas adicionais cadastradas no Firebase Auth
       await signInWithEmail(loginEmail, loginPassword);
       setLoginPassword('');
     } catch (err: unknown) {
@@ -359,7 +379,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       } else if (code === 'auth/too-many-requests') {
         showToast('Muitas tentativas. Aguarde alguns minutos e tente novamente.', 'error');
       } else {
-        showToast('Não foi possível entrar. Verifique e-mail e senha.', 'error');
+        showToast('E-mail ou senha incorretos.', 'error');
       }
     } finally {
       setLoginBusy(false);
@@ -381,7 +401,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
   const handleSignOutAdmin = async () => {
     clearAdminGateSession();
-    await signOutUser();
+    setVaultEmail(null);
+    await signOutUser().catch(() => {});
+    window.location.replace('/');
   };
 
   if (!authReady) {
@@ -393,7 +415,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   }
 
   // TELA 1: LOGIN (Luxury Nude)
-  if (!user || !isAdmin) {
+  if (!effectiveAdmin) {
     return (
       <div className="min-h-screen bg-[#594943] flex items-center justify-center p-4 sm:p-6">
         <div className="max-w-md w-full bg-[#FAF6F1] rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl border border-[#E8D6CB]">
@@ -526,7 +548,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           <div className="font-editorial text-2xl font-semibold leading-tight">
             {settings.studioName}
           </div>
-          <div className="mt-1 text-xs text-[#E8D6CB]/75 truncate">{user.email}</div>
+          <div className="mt-1 text-xs text-[#E8D6CB]/75 truncate">{effectiveEmail}</div>
         </div>
 
         <nav className="flex-1 px-3 py-5 space-y-1.5 overflow-y-auto">
@@ -578,7 +600,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           </button>
           <button
             type="button"
-            onClick={() => void signOutUser()}
+            onClick={() => void handleSignOutAdmin()}
             className="w-full min-h-[42px] flex items-center gap-2.5 rounded-xl px-3.5 py-2 text-xs font-medium text-[#FAF6F1]/65 hover:bg-white/10 hover:text-white transition-colors"
           >
             <LogOut className="w-4 h-4" />
@@ -1072,7 +1094,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
               activeSubScreen={profileSubScreen}
               onSelectSubScreen={setProfileSubScreen}
               onJumpToAnyScreen={handleJumpToScreen}
-              adminEmail={user.email || ''}
+              adminEmail={effectiveEmail}
             />
           )}
         </main>

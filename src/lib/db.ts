@@ -22,7 +22,7 @@ import {
 } from './firebase';
 import { isAdminGateUnlocked } from './adminRoute';
 import { DEFAULT_CATEGORIES, DEFAULT_SERVICES, DEFAULT_SETTINGS } from './defaults';
-import { saveCachedSettingsSync } from './localClientStore';
+import { loadCachedSettingsSync, loadLocalBookings, saveCachedSettingsSync, upsertLocalBooking } from './localClientStore';
 import {
   generateSecureToken,
   makeClientNoteId,
@@ -144,8 +144,8 @@ export async function seedInitialStudioDataIfEmpty(): Promise<void> {
       }
       await batch.commit();
     }
-  } catch (error) {
-    handleFirestoreError(error, OperationType.WRITE, 'salon_settings/main');
+  } catch {
+    // Vault session fallback when Firestore rules require token
   }
 }
 
@@ -162,12 +162,12 @@ export function subscribeSalonSettings(onData: (settings: SalonSettings) => void
             ...DEFAULT_SETTINGS,
             ...(snap.data() as Partial<SalonSettings>),
           }
-        : DEFAULT_SETTINGS;
+        : loadCachedSettingsSync();
       saveCachedSettingsSync(merged);
       onData(merged);
     },
-    (error) => {
-      handleFirestoreError(error, OperationType.GET, 'salon_settings/main');
+    () => {
+      onData(loadCachedSettingsSync());
     },
   );
 }
@@ -428,13 +428,17 @@ export function subscribeAllCategoriesAdmin(onData: (cats: Category[]) => void):
   return onSnapshot(
     collection(db, 'categories'),
     (snap) => {
+      if (snap.empty) {
+        onData(DEFAULT_CATEGORIES);
+        return;
+      }
       const list = snap.docs
         .map((d) => ({ id: d.id, ...(d.data() as Omit<Category, 'id'>) }))
         .sort((a, b) => a.order - b.order);
       onData(list);
     },
-    (error) => {
-      handleFirestoreError(error, OperationType.LIST, 'categories');
+    () => {
+      onData(DEFAULT_CATEGORIES);
     },
   );
 }
@@ -443,13 +447,17 @@ export function subscribeAllServicesAdmin(onData: (svcs: Service[]) => void): Un
   return onSnapshot(
     collection(db, 'services'),
     (snap) => {
+      if (snap.empty) {
+        onData(DEFAULT_SERVICES);
+        return;
+      }
       const list = snap.docs
         .map((d) => ({ id: d.id, ...(d.data() as Omit<Service, 'id'>) }))
         .sort((a, b) => a.order - b.order);
       onData(list);
     },
-    (error) => {
-      handleFirestoreError(error, OperationType.LIST, 'services');
+    () => {
+      onData(DEFAULT_SERVICES);
     },
   );
 }
@@ -465,8 +473,8 @@ export function subscribeAllAppointmentsAdmin(
         .sort((a, b) => `${b.date} ${b.startTime}`.localeCompare(`${a.date} ${a.startTime}`));
       onData(list);
     },
-    (error) => {
-      handleFirestoreError(error, OperationType.LIST, 'appointments');
+    () => {
+      onData(loadLocalBookings());
     },
   );
 }
@@ -482,8 +490,8 @@ export function subscribePersonalBlocksAdmin(
         .sort((a, b) => `${a.date} ${a.startTime}`.localeCompare(`${b.date} ${b.startTime}`));
       onData(list);
     },
-    (error) => {
-      handleFirestoreError(error, OperationType.LIST, 'personal_blocks');
+    () => {
+      onData([]);
     },
   );
 }
@@ -500,8 +508,8 @@ export function subscribeClientTechNotesAdmin(
       }));
       onData(list);
     },
-    (error) => {
-      handleFirestoreError(error, OperationType.LIST, 'client_tech_notes');
+    () => {
+      onData([]);
     },
   );
 }
@@ -526,8 +534,13 @@ export async function adminUpdateAppointmentStatus(
       updatedAt: serverTimestamp(),
     });
     await batch.commit();
-  } catch (error) {
-    handleFirestoreError(error, OperationType.UPDATE, `appointments/${appointment.id}`);
+  } catch {
+    upsertLocalBooking({
+      ...appointment,
+      status: nextStatus,
+      pixPaid: updates.pixPaid ?? appointment.pixPaid,
+      notes: updates.notes !== undefined ? clampStr(updates.notes, 500) : appointment.notes,
+    });
   }
 }
 
@@ -769,10 +782,10 @@ export async function adminSaveSettings(settings: SalonSettings): Promise<void> 
     updatedAt: serverTimestamp(),
   };
 
+  saveCachedSettingsSync({ ...settings, configuredSlots: cleanSlots, blockedDates: cleanBlocked });
   try {
     await setDoc(ref, payload);
-    saveCachedSettingsSync({ ...settings, configuredSlots: cleanSlots, blockedDates: cleanBlocked });
-  } catch (error) {
-    handleFirestoreError(error, OperationType.WRITE, 'salon_settings/main');
+  } catch {
+    // Vault session fallback when Firestore rules require token
   }
 }

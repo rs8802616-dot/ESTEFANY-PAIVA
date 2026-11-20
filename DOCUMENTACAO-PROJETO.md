@@ -78,3 +78,12 @@ O projeto foi migrado para a arquitetura completa em **React 19 + TypeScript + V
   - **12–16 (Clientes & Serviços)**: `12. Lista de clientes`, `13. Cadastro de clientes`, `14. Perfil da cliente`, `15. Catálogo de serviços`, `16. Cadastro de serviços`.
   - **17–24 (Módulo Financeiro em `src/components/admin/AdminFinanceSuite.tsx`)**: `17. Resumo financeiro`, `18. Receitas`, `19. Despesas`, `20. Fluxo de caixa`, `21. Contas a pagar e receber`, `22. Fechamento mensal`, `23. Relatórios gerais`, `24. Relatórios de desempenho`.
   - **25–33 (Módulo Perfil, Galeria & Configurações em `src/components/admin/AdminProfileSuite.tsx`)**: `25. Galeria`, `26. Adicionar fotografia`, `27. Central de comunicação`, `28. Perfil`, `29. Horários de funcionamento`, `30. Configurações de agendamento`, `31. Personalização da página pública`, `32. Segurança`, `33. Ajuda e suporte` (com Mapa Interativo 1-clique para todas as 33 telas).
+
+
+### v42 — Bloqueio Estrito da Rota sem Token + Cofre Criptográfico PBKDF2-HMAC-SHA256 (250.000 iterações) + Atualização Imediata do Service Worker
+- **Por que o navegador ainda abria sem o token antes e como foi resolvido**:
+  1. Na versão anterior, ao abrir `/painel?k=...` uma vez, o `sessionStorage` marcava a aba como desbloqueada mesmo antes do login, permitindo acessar `/painel` sem `?k=...` na mesma aba; além disso, o Service Worker antigo do PWA permanecia em estado `waiting` no Chrome até fechar todas as abas.
+  2. Agora, em `src/lib/adminRoute.ts`, `/admin`, `#/admin` e `/painel` (sem `?k=<TOKEN>`) são **100% bloqueados e redirecionam imediatamente para `/`** sempre que a administradora não estiver autenticada com login e senha.
+  3. Em `vite.config.ts` e `src/main.tsx`, foram ativados `skipWaiting: true`, `clientsClaim: true` e `cleanupOutdatedCaches: true` (`cacheId: 'estefany-nails-v42-strict-token-vault'`) para forçar a atualização imediata do PWA no navegador.
+- **Autenticação Bancária PBKDF2-HMAC-SHA256 (250.000 iterações)**:
+  - Implementada em `src/lib/adminRoute.ts` via Web Crypto API (`crypto.subtle.deriveBits` com `PBKDF2`, `SHA-256`, `250000` iterações e salt criptográfico), funcionando imediatamente mesmo quando o provedor `PASSWORD_LOGIN_DISABLED` do Firebase Console ainda não foi habilitado, sem armazenar nenhum login, senha ou token em texto puro no código ou no Git.

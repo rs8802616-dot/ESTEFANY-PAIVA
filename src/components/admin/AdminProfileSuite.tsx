@@ -11,6 +11,7 @@ import { useToast } from '../Toast';
 import { LuxuryStateView } from '../ui/LuxuryDesignSystem';
 import { MANDATORY_SCREENS_33 } from '../../theme/luxuryNudeTheme';
 import { resetAdminPassword, signOutUser } from '../../lib/firebase';
+import { clearAdminGateSession } from '../../lib/adminRoute';
 
 export type ProfileScreenId = 25 | 26 | 27 | 28 | 29 | 30 | 31 | 32 | 33;
 
@@ -954,7 +955,11 @@ export const AdminProfileSuite: React.FC<Props> = ({
               )}
               <button
                 type="button"
-                onClick={() => void signOutUser()}
+                onClick={async () => {
+                  clearAdminGateSession();
+                  await signOutUser().catch(() => {});
+                  window.location.replace('/');
+                }}
                 className="px-4 py-2 rounded-xl bg-[#B45353] text-white text-xs font-semibold cursor-pointer"
               >
                 Encerrar Sessão
