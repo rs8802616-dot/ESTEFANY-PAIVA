@@ -88,7 +88,7 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
     }
     setSaving(true);
     try {
-      await adminSaveService({
+      const synced = await adminSaveService({
         id: editingSvc.id,
         name: editingSvc.name.trim(),
         categoryId: editingSvc.categoryId,
@@ -102,7 +102,19 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
         maintenanceDays:
           editingSvc.maintenanceDays !== undefined ? Number(editingSvc.maintenanceDays) : 21,
       });
-      showToast(editingSvc.id ? 'Procedimento atualizado.' : 'Procedimento criado.');
+      if (synced) {
+        showToast(
+          editingSvc.id
+            ? 'Procedimento atualizado para todas as clientes!'
+            : 'Procedimento criado e sincronizado!',
+          'success',
+        );
+      } else {
+        showToast(
+          'Salvo só neste aparelho! Clique em "Conectar Google e Sincronizar" no topo para atualizar nos outros aparelhos.',
+          'info',
+        );
+      }
       setEditingSvc(null);
     } catch {
       showToast('Erro ao salvar procedimento.', 'error');

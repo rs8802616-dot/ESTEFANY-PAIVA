@@ -139,6 +139,7 @@ export const BookingSheet: React.FC<BookingSheetProps> = ({
     setAuthLoading(true);
     try {
       const signedUser = await signInWithGoogle();
+      if (!signedUser) return;
       if (signedUser.displayName && !clientName) {
         setClientName(signedUser.displayName);
       }

@@ -1093,7 +1093,7 @@ export async function adminSaveService(input: {
   active: boolean;
   order: number;
   maintenanceDays?: number;
-}): Promise<void> {
+}): Promise<boolean> {
   const isNew = !input.id;
   const svcId = input.id || makeSafeDocId('svc');
   const cleanSvc: Service = {
@@ -1147,8 +1147,10 @@ export async function adminSaveService(input: {
       }, { merge: true });
     }
     clearServiceDirty(svcId);
+    return true;
   } catch {
     // Saved in local reactive store (dirty flag keeps local override safe)
+    return false;
   }
 }
 
@@ -1206,7 +1208,7 @@ export async function adminSaveClientTechNote(input: {
   }
 }
 
-export async function adminSaveSettings(settings: SalonSettings): Promise<void> {
+export async function adminSaveSettings(settings: SalonSettings): Promise<boolean> {
   const ref = doc(db, 'salon_settings', 'main');
   const cleanSlots = Array.from(
     new Set(
@@ -1277,8 +1279,10 @@ export async function adminSaveSettings(settings: SalonSettings): Promise<void> 
       updatedAt: serverTimestamp(),
     });
     setSettingsDirtyLocal(false);
+    return true;
   } catch {
     // Already saved and broadcast in local reactive store
+    return false;
   }
 }
 

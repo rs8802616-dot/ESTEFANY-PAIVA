@@ -47,7 +47,7 @@ export default defineConfig(() => {
           ],
         },
         workbox: {
-          cacheId: 'estefany-nails-v56-cloud-sync-and-overflow-fix',
+          cacheId: 'estefany-nails-v57-sync-feedback-and-google-redirect',
           skipWaiting: true,
           clientsClaim: true,
           cleanupOutdatedCaches: true,

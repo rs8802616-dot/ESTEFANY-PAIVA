@@ -842,12 +842,26 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 type="button"
                 onClick={() => {
                   void signInWithGoogle()
-                    .then(async () => {
-                      await syncPendingLocalChangesToCloud();
-                      showToast('Nuvem conectada e alterações enviadas para todos os aparelhos!', 'success');
+                    .then(async (u) => {
+                      if (!u) return;
+                      const ok = await syncPendingLocalChangesToCloud();
+                      showToast(
+                        ok
+                          ? 'Nuvem conectada e todas as fotos/alterações sincronizadas!'
+                          : 'Google conectado, mas algumas alterações ainda não subiram.',
+                        ok ? 'success' : 'info',
+                      );
                     })
-                    .catch(() => {
-                      showToast('Não foi possível conectar com o Google agora.', 'error');
+                    .catch((err: unknown) => {
+                      const code = (err as { code?: string })?.code || '';
+                      if (code === 'auth/unauthorized-domain') {
+                        showToast(
+                          'Domínio estefany-paiva-nails.vercel.app precisa ser liberado em Domínios Autorizados no Firebase Auth.',
+                          'error',
+                        );
+                      } else {
+                        showToast(`Erro ao conectar Google (${code || 'tente novamente'}).`, 'error');
+                      }
                     });
                 }}
                 className="min-h-[42px] px-4 py-2 rounded-xl bg-[#594943] text-white text-xs font-semibold hover:bg-[#433631] transition-colors shrink-0 cursor-pointer"

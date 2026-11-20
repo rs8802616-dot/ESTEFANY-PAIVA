@@ -247,3 +247,12 @@ O projeto foi migrado para a arquitetura completa em **React 19 + TypeScript + V
   - Adicionado `overflow-x: hidden; max-width: 100%;` global em `html, body` e nos containers principais do Portal da Cliente e do Painel Admin.
   - Ajustada a barra superior do Admin para `hidden xl:flex` (e barra inferior `xl:hidden`), impedindo que a barra de 5 abas estoure a largura em tablets horizontais (`1024px`).
   - Cache do Workbox PWA elevado para `estefany-nails-v56-cloud-sync-and-overflow-fix`.
+
+
+### v57 — Feedback Transparente de Sincronização na Nuvem + Fallback `signInWithRedirect` para Popups Bloqueados
+- **Retorno de Sincronização Real (`db.ts`, `AdminCatalogTab.tsx`, `AdminProfileSuite.tsx`)**:
+  - `adminSaveSettings` e `adminSaveService` agora retornam `boolean` indicando se a gravação foi confirmada no Cloud Firestore (`true`) ou apenas salva localmente (`false`).
+  - Quando a nuvem estiver desconectada, o toast informa claramente para clicar em **"Conectar Google e Sincronizar"** no topo do painel.
+- **Fallback Automático no Login Google (`firebase.ts` e `AdminPanel.tsx`)**:
+  - Se o navegador/tablet bloquear o popup do Google (`auth/popup-blocked`), `signInWithGoogle` usa automaticamente `signInWithRedirect`, além de exibir o código exato caso falte domínio autorizado (`auth/unauthorized-domain`).
+  - Cache do Workbox PWA elevado para `estefany-nails-v57-sync-feedback-and-google-redirect`.

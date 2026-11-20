@@ -12,7 +12,7 @@ if ('serviceWorker' in navigator) {
   });
 
   // Limpa qualquer Service Worker antigo (v38/v39/v40) que ainda estivesse preso no cache do navegador
-  const SW_MIGRATION_KEY = 'epn_sw_v56_cloud_sync_and_overflow_fix';
+  const SW_MIGRATION_KEY = 'epn_sw_v57_sync_feedback_and_google_redirect';
   if (!localStorage.getItem(SW_MIGRATION_KEY)) {
     localStorage.setItem(SW_MIGRATION_KEY, '1');
     void navigator.serviceWorker.getRegistrations().then((regs) => {
