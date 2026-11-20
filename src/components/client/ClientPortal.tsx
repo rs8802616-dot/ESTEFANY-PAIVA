@@ -649,7 +649,7 @@ export const ClientPortal: React.FC<ClientPortalProps> = ({
 
       {/* Barra fixa de resumo do combo no celular */}
       {comboServices.length > 0 && (
-        <div className="md:hidden fixed bottom-20 left-3 right-3 z-40">
+        <div className="md:hidden fixed bottom-16 left-3 right-3 z-40">
           <div className="rounded-2xl bg-white border border-[#C4A477] shadow-lg px-4 py-2.5 flex items-center justify-between gap-3">
             <div className="min-w-0">
               <div className="text-xs font-semibold text-[#594943] truncate">
@@ -670,31 +670,31 @@ export const ClientPortal: React.FC<ClientPortalProps> = ({
         </div>
       )}
 
-      {/* Mobile Floating Glassmorphic Bottom Tab Bar (v36) */}
+      {/* Mobile Docked Bottom Tab Bar */}
       <nav
         aria-label="Navegação principal"
-        className="md:hidden fixed bottom-3 left-3 right-3 z-50 mb-safe"
+        className="md:hidden fixed bottom-0 inset-x-0 z-50 glass-nav border-t border-white/15 pb-[env(safe-area-inset-bottom)]"
       >
-        <div className="glass-nav rounded-2xl border border-white/15 shadow-xl px-2 py-1.5 grid grid-cols-4 items-center">
+        <div className="px-2 py-1 grid grid-cols-4 items-center">
           <button
             type="button"
             onClick={() => setActiveTab('catalog')}
-            className={`min-h-[48px] flex flex-col items-center justify-center gap-0.5 rounded-xl transition-colors ${
+            className={`min-h-[42px] flex flex-col items-center justify-center gap-0.5 rounded-xl transition-colors ${
               activeTab === 'catalog' ? 'text-[#C4A477] bg-white/10' : 'text-[#FAF6F1]/75'
             }`}
           >
-            <LayoutGrid className="w-5 h-5" />
+            <LayoutGrid className="w-4 h-4" />
             <span className="text-[10px] font-medium">Catálogo</span>
           </button>
 
           <button
             type="button"
             onClick={() => setBookingOpen(true)}
-            className={`min-h-[48px] relative flex flex-col items-center justify-center gap-0.5 rounded-xl transition-colors ${
+            className={`min-h-[42px] relative flex flex-col items-center justify-center gap-0.5 rounded-xl transition-colors ${
               comboServices.length > 0 ? 'text-white bg-[#C4A477]' : 'text-[#FAF6F1]/75'
             }`}
           >
-            <ShoppingBag className="w-5 h-5" />
+            <ShoppingBag className="w-4 h-4" />
             <span className="text-[10px] font-medium tabular-nums">
               {comboServices.length > 0 ? `Combo (${comboServices.length})` : 'Agendar'}
             </span>
@@ -703,22 +703,22 @@ export const ClientPortal: React.FC<ClientPortalProps> = ({
           <button
             type="button"
             onClick={() => setActiveTab('appointments')}
-            className={`min-h-[48px] flex flex-col items-center justify-center gap-0.5 rounded-xl transition-colors ${
+            className={`min-h-[42px] flex flex-col items-center justify-center gap-0.5 rounded-xl transition-colors ${
               activeTab === 'appointments' ? 'text-[#C4A477] bg-white/10' : 'text-[#FAF6F1]/75'
             }`}
           >
-            <Calendar className="w-5 h-5" />
+            <Calendar className="w-4 h-4" />
             <span className="text-[10px] font-medium">Horários</span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab('studio')}
-            className={`min-h-[48px] flex flex-col items-center justify-center gap-0.5 rounded-xl transition-colors ${
+            className={`min-h-[42px] flex flex-col items-center justify-center gap-0.5 rounded-xl transition-colors ${
               activeTab === 'studio' ? 'text-[#C4A477] bg-white/10' : 'text-[#FAF6F1]/75'
             }`}
           >
-            <Store className="w-5 h-5" />
+            <Store className="w-4 h-4" />
             <span className="text-[10px] font-medium">Estúdio</span>
           </button>
         </div>

@@ -510,6 +510,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   type="email"
                   required
                   autoComplete="username"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck={false}
                   value={loginEmail}
                   onChange={(e) => setLoginEmail(e.target.value)}
                   placeholder="seu@email.com"
@@ -1231,12 +1234,12 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
         </main>
       </div>
 
-      {/* Mobile & Tablet Floating Glassmorphic Bottom Navigation — 5 Official Tabs */}
+      {/* Mobile & Tablet Docked Bottom Navigation — 5 Official Tabs */}
       <nav
         aria-label="Menu inferior principal"
-        className="xl:hidden fixed bottom-3 left-3 right-3 z-40 mb-safe no-print"
+        className="xl:hidden fixed bottom-0 inset-x-0 z-40 glass-nav border-t border-white/15 pb-[env(safe-area-inset-bottom)] no-print"
       >
-        <div className="glass-nav max-w-xl mx-auto rounded-2xl border border-white/15 shadow-xl px-1.5 py-1.5 grid grid-cols-5 items-center">
+        <div className="max-w-xl mx-auto px-2 py-1 grid grid-cols-5 items-center">
           {NAV_ITEMS.map((item) => {
             const Icon = item.icon;
             const active = activeTab === item.id;
@@ -1245,7 +1248,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 key={item.id}
                 type="button"
                 onClick={() => setActiveTab(item.id)}
-                className={`min-h-[46px] flex flex-col items-center justify-center gap-0.5 rounded-xl transition-colors ${
+                className={`min-h-[42px] flex flex-col items-center justify-center gap-0.5 rounded-xl transition-colors ${
                   active ? 'text-[#C4A477] bg-white/10 font-semibold' : 'text-[#FAF6F1]/75'
                 }`}
               >

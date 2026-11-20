@@ -47,7 +47,7 @@ export default defineConfig(() => {
           ],
         },
         workbox: {
-          cacheId: 'estefany-nails-v65-mobile-cards-and-clean-filters',
+          cacheId: 'estefany-nails-v66-docked-bottom-nav-and-mobile-login',
           skipWaiting: true,
           clientsClaim: true,
           cleanupOutdatedCaches: true,

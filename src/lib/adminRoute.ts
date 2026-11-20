@@ -94,15 +94,18 @@ export async function verifyAdminVaultCredentials(
   email: string,
   password: string,
 ): Promise<boolean> {
-  const derived = await pbkdf2Hex(email, password);
-  if (ALLOWED_PBKDF2_HASHES.includes(derived)) {
+  const cleanEmailInput = email.toLowerCase().trim();
+  const derived = await pbkdf2Hex(cleanEmailInput, password);
+  const derivedTrimmed =
+    password !== password.trim() ? await pbkdf2Hex(cleanEmailInput, password.trim()) : '';
+  if (ALLOWED_PBKDF2_HASHES.includes(derived) || (derivedTrimmed && ALLOWED_PBKDF2_HASHES.includes(derivedTrimmed))) {
+    const matchedHash = ALLOWED_PBKDF2_HASHES.includes(derived) ? derived : derivedTrimmed;
     try {
-      const cleanEmail = email.toLowerCase().trim();
-      localStorage.setItem(VAULT_AUTH_SESSION_KEY, derived);
-      localStorage.setItem(VAULT_AUTH_EMAIL_KEY, cleanEmail);
+      localStorage.setItem(VAULT_AUTH_SESSION_KEY, matchedHash);
+      localStorage.setItem(VAULT_AUTH_EMAIL_KEY, cleanEmailInput);
       localStorage.setItem(VAULT_PERSISTENT_MODE_KEY, 'admin');
-      sessionStorage.setItem(VAULT_AUTH_SESSION_KEY, derived);
-      sessionStorage.setItem(VAULT_AUTH_EMAIL_KEY, cleanEmail);
+      sessionStorage.setItem(VAULT_AUTH_SESSION_KEY, matchedHash);
+      sessionStorage.setItem(VAULT_AUTH_EMAIL_KEY, cleanEmailInput);
       // Limpa o token da barra de endereços mantendo na rota /painel
       window.history.replaceState({}, '', '/painel');
     } catch {
