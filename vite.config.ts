@@ -47,7 +47,7 @@ export default defineConfig(() => {
           ],
         },
         workbox: {
-          cacheId: 'estefany-nails-v73-splash-capa-abertura',
+          cacheId: 'estefany-nails-v74-restore-hero-cover',
           skipWaiting: true,
           clientsClaim: true,
           cleanupOutdatedCaches: true,

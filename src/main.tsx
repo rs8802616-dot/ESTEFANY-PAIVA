@@ -12,11 +12,20 @@ if ('serviceWorker' in navigator) {
   });
 
   // Limpa qualquer Service Worker antigo (v38/v39/v40) que ainda estivesse preso no cache do navegador
-  const SW_MIGRATION_KEY = 'epn_sw_v73_splash_capa_abertura';
+  const SW_MIGRATION_KEY = 'epn_sw_v74_restore_hero_cover';
   if (!localStorage.getItem(SW_MIGRATION_KEY)) {
     localStorage.setItem(SW_MIGRATION_KEY, '1');
-    localStorage.removeItem('ep_nails_guest_bookings_v36');
-    localStorage.removeItem('ep_nails_deleted_apt_ids_v46');
+    try {
+      const raw = localStorage.getItem('ep_nails_settings_cache_v36');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        parsed.heroImageUrl = '/src/assets/images/hero_nail_studio_1795135079713.jpg';
+        localStorage.setItem('ep_nails_settings_cache_v36', JSON.stringify(parsed));
+      }
+      localStorage.removeItem('ep_nails_settings_dirty_v55');
+    } catch {
+      // ignore
+    }
     void navigator.serviceWorker.getRegistrations().then((regs) => {
       regs.forEach((r) => void r.update());
     });
