@@ -68,13 +68,13 @@ export const PWAInstallButton: React.FC<{ variant?: 'light' | 'dark' }> = ({
 
   const baseClass =
     variant === 'dark'
-      ? 'min-h-[40px] inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-3.5 py-2 text-xs font-medium text-[#FAF4F5] hover:bg-white/20 transition-colors whitespace-nowrap shrink-0'
-      : 'min-h-[40px] inline-flex items-center gap-2 rounded-xl border border-[#EBDCE0] bg-white px-3.5 py-2 text-xs font-medium text-[#350B19] hover:border-[#D83F79] transition-colors whitespace-nowrap shrink-0';
+      ? 'min-h-[40px] inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-3.5 py-2 text-xs font-medium text-[#FAF6F1] hover:bg-white/20 transition-colors whitespace-nowrap shrink-0'
+      : 'min-h-[40px] inline-flex items-center gap-2 rounded-xl border border-[#E8D6CB] bg-white px-3.5 py-2 text-xs font-medium text-[#594943] hover:border-[#C4A477] transition-colors whitespace-nowrap shrink-0';
 
   if (isInstallable) {
     return (
       <button type="button" onClick={install} className={baseClass}>
-        <Download className="w-3.5 h-3.5 text-[#D83F79]" />
+        <Download className="w-3.5 h-3.5 text-[#C4A477]" />
         <span>Instalar App</span>
       </button>
     );
@@ -84,7 +84,7 @@ export const PWAInstallButton: React.FC<{ variant?: 'light' | 'dark' }> = ({
     return (
       <>
         <button type="button" onClick={() => setShowIOSGuide(true)} className={baseClass}>
-          <Share className="w-3.5 h-3.5 text-[#D83F79]" />
+          <Share className="w-3.5 h-3.5 text-[#C4A477]" />
           <span>Instalar no iOS</span>
         </button>
         <BottomSheet
@@ -93,21 +93,21 @@ export const PWAInstallButton: React.FC<{ variant?: 'light' | 'dark' }> = ({
           title="Instalar no iPhone ou iPad"
           subtitle="Acesse o aplicativo direto da sua Tela de Início."
         >
-          <ol className="space-y-3 text-sm text-[#2A0E17] leading-relaxed">
+          <ol className="space-y-3 text-sm text-[#594943] leading-relaxed">
             <li className="flex gap-3">
-              <span className="font-mono text-xs font-semibold text-[#D83F79] pt-0.5">01</span>
+              <span className="font-mono text-xs font-semibold text-[#C4A477] pt-0.5">01</span>
               <span>
                 Toque no botão <strong>Compartilhar</strong> na barra do Safari.
               </span>
             </li>
             <li className="flex gap-3">
-              <span className="font-mono text-xs font-semibold text-[#D83F79] pt-0.5">02</span>
+              <span className="font-mono text-xs font-semibold text-[#C4A477] pt-0.5">02</span>
               <span>
                 Role as opções e toque em <strong>Adicionar à Tela de Início</strong>.
               </span>
             </li>
             <li className="flex gap-3">
-              <span className="font-mono text-xs font-semibold text-[#D83F79] pt-0.5">03</span>
+              <span className="font-mono text-xs font-semibold text-[#C4A477] pt-0.5">03</span>
               <span>
                 Confirme tocando em <strong>Adicionar</strong> para abrir em tela cheia.
               </span>
@@ -140,8 +140,8 @@ export const OfflineIndicator: React.FC = () => {
   if (isOnline) return null;
 
   return (
-    <div className="fixed top-3 left-1/2 -translate-x-1/2 z-[85] flex items-center gap-2 rounded-xl bg-[#350B19] text-[#FAF4F5] px-4 py-2 text-xs font-medium shadow-lg border border-[#D83F79]/40 no-print">
-      <WifiOff className="w-3.5 h-3.5 text-[#D83F79]" />
+    <div className="fixed top-3 left-1/2 -translate-x-1/2 z-[85] flex items-center gap-2 rounded-xl bg-[#594943] text-[#FAF6F1] px-4 py-2 text-xs font-medium shadow-lg border border-[#C4A477]/40 no-print">
+      <WifiOff className="w-3.5 h-3.5 text-[#C4A477]" />
       <span>Modo offline — exibindo dados em cache</span>
     </div>
   );

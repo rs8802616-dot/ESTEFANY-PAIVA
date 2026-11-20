@@ -113,24 +113,24 @@ export const CalendarPicker: React.FC<CalendarPickerProps> = ({
   return (
     <div className="space-y-5">
       {/* 7-Column Calendar Card */}
-      <div className="bg-white rounded-2xl border border-[#EBDCE0] p-4">
+      <div className="bg-white rounded-2xl border border-[#E8D6CB] p-4">
         <div className="flex items-center justify-between mb-3">
           <button
             type="button"
             onClick={prevMonth}
             aria-label="Mês anterior"
-            className="min-h-[40px] min-w-[40px] flex items-center justify-center rounded-xl text-[#350B19] hover:bg-[#FAF4F5] transition-colors"
+            className="min-h-[40px] min-w-[40px] flex items-center justify-center rounded-xl text-[#594943] hover:bg-[#FAF6F1] transition-colors"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
-          <span className="text-sm font-semibold text-[#350B19]">
+          <span className="text-sm font-semibold text-[#594943]">
             {MONTH_NAMES[viewMonth]} {viewYear}
           </span>
           <button
             type="button"
             onClick={nextMonth}
             aria-label="Próximo mês"
-            className="min-h-[40px] min-w-[40px] flex items-center justify-center rounded-xl text-[#350B19] hover:bg-[#FAF4F5] transition-colors"
+            className="min-h-[40px] min-w-[40px] flex items-center justify-center rounded-xl text-[#594943] hover:bg-[#FAF6F1] transition-colors"
           >
             <ChevronRight className="w-5 h-5" />
           </button>
@@ -138,7 +138,7 @@ export const CalendarPicker: React.FC<CalendarPickerProps> = ({
 
         <div className="grid grid-cols-7 gap-1 text-center mb-1.5">
           {WEEKDAYS.map((wd) => (
-            <div key={wd} className="text-[11px] font-medium text-[#6E4F59] py-1">
+            <div key={wd} className="text-[11px] font-medium text-[#95847C] py-1">
               {wd}
             </div>
           ))}
@@ -161,12 +161,12 @@ export const CalendarPicker: React.FC<CalendarPickerProps> = ({
                 }}
                 className={`min-h-[42px] rounded-xl text-sm tabular-nums font-medium transition-colors flex flex-col items-center justify-center ${
                   isSelected
-                    ? 'bg-[#350B19] text-white shadow-sm'
+                    ? 'bg-[#594943] text-white shadow-sm'
                     : cell.disabled
-                      ? 'text-[#6E4F59]/30 cursor-not-allowed'
+                      ? 'text-[#95847C]/30 cursor-not-allowed'
                       : isToday
-                        ? 'bg-[#F7E2EA] text-[#350B19] font-semibold hover:bg-[#D83F79]/20'
-                        : 'text-[#2A0E17] hover:bg-[#FAF4F5]'
+                        ? 'bg-[#F2EAE4] text-[#594943] font-semibold hover:bg-[#C4A477]/20'
+                        : 'text-[#594943] hover:bg-[#FAF6F1]'
                 }`}
               >
                 <span>{cell.day}</span>
@@ -177,31 +177,31 @@ export const CalendarPicker: React.FC<CalendarPickerProps> = ({
       </div>
 
       {/* Duration-Aware Time Slots */}
-      <div className="bg-white rounded-2xl border border-[#EBDCE0] p-4">
+      <div className="bg-white rounded-2xl border border-[#E8D6CB] p-4">
         <div className="flex items-center justify-between gap-2 mb-3">
-          <div className="flex items-center gap-2 text-sm font-semibold text-[#350B19]">
-            <Clock className="w-4 h-4 text-[#D83F79]" />
+          <div className="flex items-center gap-2 text-sm font-semibold text-[#594943]">
+            <Clock className="w-4 h-4 text-[#C4A477]" />
             <span>Horários disponíveis</span>
           </div>
-          <span className="text-xs text-[#6E4F59] tabular-nums">
+          <span className="text-xs text-[#95847C] tabular-nums">
             Duração {formatDuration(durationMinutes)} · {availableCount} livres
           </span>
         </div>
 
         {!selectedDate ? (
-          <p className="text-sm text-[#6E4F59] py-4 text-center">
+          <p className="text-sm text-[#95847C] py-4 text-center">
             Selecione uma data no calendário acima.
           </p>
         ) : isSelectedBlocked ? (
-          <p className="text-sm text-[#6E4F59] py-4 text-center">
+          <p className="text-sm text-[#95847C] py-4 text-center">
             Data marcada como folga na agenda do estúdio. Escolha outro dia disponível.
           </p>
         ) : timeSlots.length === 0 ? (
-          <p className="text-sm text-[#6E4F59] py-4 text-center">
+          <p className="text-sm text-[#95847C] py-4 text-center">
             O estúdio não atende neste dia da semana. Escolha outra data.
           </p>
         ) : availableCount === 0 ? (
-          <p className="text-sm text-[#6E4F59] py-4 text-center">
+          <p className="text-sm text-[#95847C] py-4 text-center">
             Sem horários livres compatíveis com {formatDuration(durationMinutes)} nesta data.
           </p>
         ) : (
@@ -217,10 +217,10 @@ export const CalendarPicker: React.FC<CalendarPickerProps> = ({
                   title={slot.available ? `${slot.startTime} até ${slot.endTime}` : slot.reason}
                   className={`min-h-[44px] rounded-xl px-2 py-2 text-sm font-medium tabular-nums transition-colors border ${
                     isChosen
-                      ? 'bg-[#D83F79] text-white border-[#D83F79] shadow-sm'
+                      ? 'bg-[#C4A477] text-white border-[#C4A477] shadow-sm'
                       : slot.available
-                        ? 'bg-[#FAF4F5] text-[#350B19] border-[#EBDCE0] hover:border-[#D83F79] hover:bg-white'
-                        : 'bg-[#FAF4F5]/60 text-[#6E4F59]/35 border-transparent line-through cursor-not-allowed'
+                        ? 'bg-[#FAF6F1] text-[#594943] border-[#E8D6CB] hover:border-[#C4A477] hover:bg-white'
+                        : 'bg-[#FAF6F1]/60 text-[#95847C]/35 border-transparent line-through cursor-not-allowed'
                   }`}
                 >
                   {slot.startTime}

@@ -102,26 +102,26 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({ categories, se
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="font-editorial text-3xl font-semibold text-[#350B19]">
+          <h1 className="font-editorial text-3xl font-semibold text-[#594943]">
             Serviços & Categorias
           </h1>
-          <p className="text-sm text-[#6E4F59]">
+          <p className="text-sm text-[#95847C]">
             Atualize valores, durações e fotos exibidas em tempo real no Portal da Cliente.
           </p>
         </div>
         <button
           type="button"
           onClick={openNewService}
-          className="min-h-[42px] inline-flex items-center gap-2 rounded-xl bg-[#350B19] px-4 py-2 text-xs sm:text-sm font-semibold text-white hover:bg-[#4F172A] transition-colors whitespace-nowrap"
+          className="min-h-[42px] inline-flex items-center gap-2 rounded-xl bg-[#594943] px-4 py-2 text-xs sm:text-sm font-semibold text-white hover:bg-[#433631] transition-colors whitespace-nowrap"
         >
-          <Plus className="w-4 h-4 text-[#D83F79]" />
+          <Plus className="w-4 h-4 text-[#C4A477]" />
           <span>Novo Procedimento</span>
         </button>
       </div>
 
       {/* Categories Bar */}
-      <section className="bg-white rounded-2xl border border-[#EBDCE0] p-5 space-y-4">
-        <h2 className="font-editorial text-2xl font-semibold text-[#350B19]">Categorias</h2>
+      <section className="bg-white rounded-2xl border border-[#E8D6CB] p-5 space-y-4">
+        <h2 className="font-editorial text-2xl font-semibold text-[#594943]">Categorias</h2>
 
         <form onSubmit={handleAddCategory} className="flex flex-col sm:flex-row gap-2.5">
           <input
@@ -130,21 +130,21 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({ categories, se
             value={catName}
             onChange={(e) => setCatName(e.target.value)}
             placeholder="Ex.: Nail Art Editorial"
-            className="flex-1 min-h-[42px] rounded-xl border border-[#EBDCE0] bg-[#FAF4F5]/70 px-3.5 text-sm focus:border-[#D83F79] focus:bg-white focus:outline-none"
+            className="flex-1 min-h-[42px] rounded-xl border border-[#E8D6CB] bg-[#FAF6F1]/70 px-3.5 text-sm focus:border-[#C4A477] focus:bg-white focus:outline-none"
           />
           <button
             type="submit"
             disabled={saving || !catName.trim()}
-            className="min-h-[42px] rounded-xl bg-[#350B19] px-5 text-xs font-semibold text-white hover:bg-[#4F172A] disabled:opacity-45"
+            className="min-h-[42px] rounded-xl bg-[#594943] px-5 text-xs font-semibold text-white hover:bg-[#433631] disabled:opacity-45"
           >
             Adicionar categoria
           </button>
         </form>
 
-        <div className="divide-y divide-[#EBDCE0]">
+        <div className="divide-y divide-[#E8D6CB]">
           {categories.map((cat) => (
             <div key={cat.id} className="py-2.5 flex items-center justify-between gap-3">
-              <div className="text-sm font-medium text-[#350B19]">{cat.name}</div>
+              <div className="text-sm font-medium text-[#594943]">{cat.name}</div>
               <button
                 type="button"
                 onClick={() => {
@@ -153,7 +153,7 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({ categories, se
                     .catch(() => showToast('Erro ao remover categoria.', 'error'));
                 }}
                 aria-label={`Excluir categoria ${cat.name}`}
-                className="min-h-[38px] min-w-[38px] flex items-center justify-center rounded-xl text-[#6E4F59] hover:text-[#D83F79]"
+                className="min-h-[38px] min-w-[38px] flex items-center justify-center rounded-xl text-[#95847C] hover:text-[#C4A477]"
               >
                 <Trash2 className="w-4 h-4" />
               </button>
@@ -167,30 +167,30 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({ categories, se
         {services.map((svc) => (
           <article
             key={svc.id}
-            className="bg-white rounded-2xl border border-[#EBDCE0] overflow-hidden flex flex-col"
+            className="bg-white rounded-2xl border border-[#E8D6CB] overflow-hidden flex flex-col"
           >
-            <div className="aspect-[4/3] bg-[#FAF4F5] overflow-hidden">
+            <div className="aspect-[4/3] bg-[#FAF6F1] overflow-hidden">
               <SafeImage src={svc.imageUrl} alt={svc.name} className="w-full h-full object-cover" />
             </div>
             <div className="p-4 flex-1 flex flex-col justify-between gap-3">
               <div className="space-y-1">
-                <div className="flex items-center justify-between text-xs text-[#6E4F59] tabular-nums">
+                <div className="flex items-center justify-between text-xs text-[#95847C] tabular-nums">
                   <span>{formatDuration(svc.durationMinutes)}</span>
                   <span>{svc.active ? 'Ativo no catálogo' : 'Oculto'}</span>
                 </div>
-                <h3 className="text-base font-semibold text-[#350B19]">{svc.name}</h3>
-                <p className="text-xs text-[#6E4F59] line-clamp-2">{svc.description}</p>
+                <h3 className="text-base font-semibold text-[#594943]">{svc.name}</h3>
+                <p className="text-xs text-[#95847C] line-clamp-2">{svc.description}</p>
               </div>
 
-              <div className="pt-3 border-t border-[#EBDCE0] flex items-center justify-between gap-2">
-                <span className="text-base font-semibold text-[#350B19] tabular-nums">
+              <div className="pt-3 border-t border-[#E8D6CB] flex items-center justify-between gap-2">
+                <span className="text-base font-semibold text-[#594943] tabular-nums">
                   {formatBRL(svc.price)}
                 </span>
                 <div className="flex items-center gap-1.5">
                   <button
                     type="button"
                     onClick={() => setEditingSvc({ ...svc })}
-                    className="min-h-[38px] inline-flex items-center gap-1.5 rounded-xl border border-[#EBDCE0] px-3 py-1.5 text-xs font-medium text-[#350B19] hover:border-[#D83F79]"
+                    className="min-h-[38px] inline-flex items-center gap-1.5 rounded-xl border border-[#E8D6CB] px-3 py-1.5 text-xs font-medium text-[#594943] hover:border-[#C4A477]"
                   >
                     <Pencil className="w-3.5 h-3.5" />
                     <span>Editar</span>
@@ -203,7 +203,7 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({ categories, se
                         .catch(() => showToast('Erro ao remover procedimento.', 'error'));
                     }}
                     aria-label={`Excluir ${svc.name}`}
-                    className="min-h-[38px] min-w-[38px] flex items-center justify-center rounded-xl border border-[#EBDCE0] text-[#6E4F59] hover:text-red-700"
+                    className="min-h-[38px] min-w-[38px] flex items-center justify-center rounded-xl border border-[#E8D6CB] text-[#95847C] hover:text-red-700"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
@@ -224,7 +224,7 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({ categories, se
         {editingSvc && (
           <form onSubmit={handleSaveService} className="space-y-4">
             <div>
-              <label htmlFor="svc-name" className="block text-xs font-medium text-[#6E4F59] mb-1">
+              <label htmlFor="svc-name" className="block text-xs font-medium text-[#95847C] mb-1">
                 Nome do procedimento
               </label>
               <input
@@ -234,20 +234,20 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({ categories, se
                 maxLength={100}
                 value={editingSvc.name || ''}
                 onChange={(e) => setEditingSvc({ ...editingSvc, name: e.target.value })}
-                className="w-full min-h-[44px] rounded-xl border border-[#EBDCE0] bg-white px-3.5 text-sm"
+                className="w-full min-h-[44px] rounded-xl border border-[#E8D6CB] bg-white px-3.5 text-sm"
               />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
-                <label htmlFor="svc-cat" className="block text-xs font-medium text-[#6E4F59] mb-1">
+                <label htmlFor="svc-cat" className="block text-xs font-medium text-[#95847C] mb-1">
                   Categoria
                 </label>
                 <select
                   id="svc-cat"
                   value={editingSvc.categoryId || ''}
                   onChange={(e) => setEditingSvc({ ...editingSvc, categoryId: e.target.value })}
-                  className="w-full min-h-[44px] rounded-xl border border-[#EBDCE0] bg-white px-3 text-sm"
+                  className="w-full min-h-[44px] rounded-xl border border-[#E8D6CB] bg-white px-3 text-sm"
                 >
                   {categories.map((c) => (
                     <option key={c.id} value={c.id}>
@@ -257,7 +257,7 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({ categories, se
                 </select>
               </div>
               <div>
-                <label htmlFor="svc-price" className="block text-xs font-medium text-[#6E4F59] mb-1">
+                <label htmlFor="svc-price" className="block text-xs font-medium text-[#95847C] mb-1">
                   Preço (R$)
                 </label>
                 <input
@@ -269,11 +269,11 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({ categories, se
                   required
                   value={editingSvc.price ?? 0}
                   onChange={(e) => setEditingSvc({ ...editingSvc, price: Number(e.target.value) })}
-                  className="w-full min-h-[44px] rounded-xl border border-[#EBDCE0] bg-white px-3.5 text-sm tabular-nums"
+                  className="w-full min-h-[44px] rounded-xl border border-[#E8D6CB] bg-white px-3.5 text-sm tabular-nums"
                 />
               </div>
               <div>
-                <label htmlFor="svc-dur" className="block text-xs font-medium text-[#6E4F59] mb-1">
+                <label htmlFor="svc-dur" className="block text-xs font-medium text-[#95847C] mb-1">
                   Duração (min)
                 </label>
                 <input
@@ -287,13 +287,13 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({ categories, se
                   onChange={(e) =>
                     setEditingSvc({ ...editingSvc, durationMinutes: Number(e.target.value) })
                   }
-                  className="w-full min-h-[44px] rounded-xl border border-[#EBDCE0] bg-white px-3.5 text-sm tabular-nums"
+                  className="w-full min-h-[44px] rounded-xl border border-[#E8D6CB] bg-white px-3.5 text-sm tabular-nums"
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="svc-desc" className="block text-xs font-medium text-[#6E4F59] mb-1">
+              <label htmlFor="svc-desc" className="block text-xs font-medium text-[#95847C] mb-1">
                 Descrição
               </label>
               <textarea
@@ -302,12 +302,12 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({ categories, se
                 maxLength={400}
                 value={editingSvc.description || ''}
                 onChange={(e) => setEditingSvc({ ...editingSvc, description: e.target.value })}
-                className="w-full rounded-xl border border-[#EBDCE0] bg-white p-3 text-sm resize-none"
+                className="w-full rounded-xl border border-[#E8D6CB] bg-white p-3 text-sm resize-none"
               />
             </div>
 
             <div className="space-y-2">
-              <div className="text-xs font-medium text-[#6E4F59]">Fotografia do procedimento</div>
+              <div className="text-xs font-medium text-[#95847C]">Fotografia do procedimento</div>
               <div className="grid grid-cols-5 gap-2">
                 {STUDIO_IMAGE_PRESETS.map((preset) => (
                   <button
@@ -317,7 +317,7 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({ categories, se
                     title={preset.label}
                     className={`aspect-square rounded-xl overflow-hidden border-2 transition-all ${
                       editingSvc.imageUrl === preset.url
-                        ? 'border-[#D83F79]'
+                        ? 'border-[#C4A477]'
                         : 'border-transparent opacity-75 hover:opacity-100'
                     }`}
                   >
@@ -325,8 +325,8 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({ categories, se
                   </button>
                 ))}
               </div>
-              <label className="min-h-[42px] inline-flex items-center gap-2 rounded-xl border border-[#EBDCE0] bg-white px-4 py-2 text-xs font-medium text-[#350B19] hover:border-[#D83F79] cursor-pointer">
-                <Upload className="w-3.5 h-3.5 text-[#D83F79]" />
+              <label className="min-h-[42px] inline-flex items-center gap-2 rounded-xl border border-[#E8D6CB] bg-white px-4 py-2 text-xs font-medium text-[#594943] hover:border-[#C4A477] cursor-pointer">
+                <Upload className="w-3.5 h-3.5 text-[#C4A477]" />
                 <span>Ou enviar foto do dispositivo (comprimida)</span>
                 <input
                   type="file"
@@ -338,21 +338,21 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({ categories, se
             </div>
 
             <div className="flex items-center gap-6">
-              <label className="flex items-center gap-2 text-sm text-[#350B19]">
+              <label className="flex items-center gap-2 text-sm text-[#594943]">
                 <input
                   type="checkbox"
                   checked={editingSvc.active !== false}
                   onChange={(e) => setEditingSvc({ ...editingSvc, active: e.target.checked })}
-                  className="w-4 h-4 accent-[#D83F79]"
+                  className="w-4 h-4 accent-[#C4A477]"
                 />
                 <span>Visível no catálogo</span>
               </label>
-              <label className="flex items-center gap-2 text-sm text-[#350B19]">
+              <label className="flex items-center gap-2 text-sm text-[#594943]">
                 <input
                   type="checkbox"
                   checked={Boolean(editingSvc.featured)}
                   onChange={(e) => setEditingSvc({ ...editingSvc, featured: e.target.checked })}
-                  className="w-4 h-4 accent-[#D83F79]"
+                  className="w-4 h-4 accent-[#C4A477]"
                 />
                 <span>Destaque</span>
               </label>
@@ -361,7 +361,7 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({ categories, se
             <button
               type="submit"
               disabled={saving}
-              className="w-full min-h-[46px] rounded-xl bg-[#350B19] text-white text-sm font-semibold hover:bg-[#4F172A] disabled:opacity-50"
+              className="w-full min-h-[46px] rounded-xl bg-[#594943] text-white text-sm font-semibold hover:bg-[#433631] disabled:opacity-50"
             >
               {saving ? 'Salvando...' : 'Salvar procedimento'}
             </button>

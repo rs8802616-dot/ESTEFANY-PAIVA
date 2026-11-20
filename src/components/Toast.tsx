@@ -49,18 +49,18 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             key={t.id}
             className={`pointer-events-auto flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium shadow-lg border transition-all ${
               t.tone === 'error'
-                ? 'bg-[#350B19] text-white border-[#D83F79]/40'
+                ? 'bg-[#594943] text-white border-[#C4A477]/40'
                 : t.tone === 'info'
-                  ? 'bg-white text-[#350B19] border-[#EBDCE0]'
-                  : 'bg-[#350B19] text-[#FAF4F5] border-[#4F172A]'
+                  ? 'bg-white text-[#594943] border-[#E8D6CB]'
+                  : 'bg-[#594943] text-[#FAF6F1] border-[#433631]'
             }`}
           >
             {t.tone === 'error' ? (
-              <AlertCircle className="w-4 h-4 text-[#D83F79] shrink-0" />
+              <AlertCircle className="w-4 h-4 text-[#C4A477] shrink-0" />
             ) : t.tone === 'info' ? (
-              <Info className="w-4 h-4 text-[#D83F79] shrink-0" />
+              <Info className="w-4 h-4 text-[#C4A477] shrink-0" />
             ) : (
-              <Check className="w-4 h-4 text-[#D83F79] shrink-0" />
+              <Check className="w-4 h-4 text-[#C4A477] shrink-0" />
             )}
             <span className="flex-1 leading-snug">{t.message}</span>
             <button

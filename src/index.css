@@ -1,33 +1,43 @@
 @import "tailwindcss";
 
 @theme {
-  --color-marsala: #350B19;
-  --color-marsala-soft: #4F172A;
-  --color-marsala-deep: #240610;
-  --color-rose-brand: #D83F79;
-  --color-rose-hover: #BD2D65;
-  --color-rose-tint: #F7E2EA;
-  --color-cream: #FAF4F5;
-  --color-cream-surface: #FFFFFF;
-  --color-cream-border: #EBDCE0;
-  --color-ink: #2A0E17;
-  --color-ink-muted: #6E4F59;
+  /* Paleta Oficial Luxury Nude */
+  --color-nude: #E8D6CB;
+  --color-rose: #BE9293;
+  --color-gold: #C4A477;
+  --color-creme: #FAF6F1;
+  --color-branco: #FFFFFF;
+  --color-marrom: #594943;
+  --color-texto-sec: #95847C;
+  --color-fundo-suave: #F2EAE4;
 
-  --font-display: "Cormorant Garamond", Georgia, serif;
-  --font-sans: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  /* Mapeamento unificado para todos os componentes */
+  --color-marsala: #594943;
+  --color-marsala-soft: #6D5A53;
+  --color-marsala-deep: #433631;
+  --color-rose-brand: #BE9293;
+  --color-rose-hover: #A87C7D;
+  --color-rose-tint: #F2EAE4;
+  --color-cream: #FAF6F1;
+  --color-cream-surface: #FFFFFF;
+  --color-cream-border: #E8D6CB;
+  --color-ink: #594943;
+  --color-ink-muted: #95847C;
+
+  --font-display: "Playfair Display", Georgia, serif;
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 @layer base {
   html {
     font-family: var(--font-sans);
-    background-color: var(--color-cream);
-    color: var(--color-ink);
+    background-color: var(--color-creme);
+    color: var(--color-marrom);
     scroll-behavior: smooth;
     -webkit-tap-highlight-color: transparent;
   }
 
-  h1, h2, .font-editorial {
+  h1, h2, h3, .font-editorial {
     font-family: var(--font-display);
     text-wrap: balance;
   }
@@ -38,7 +48,7 @@
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-rose-brand);
+    outline: 2px solid var(--color-gold);
     outline-offset: 2px;
   }
 }
@@ -55,9 +65,9 @@
   margin-bottom: max(0.75rem, env(safe-area-inset-bottom));
 }
 
-/* Native glassmorphic tab bar & sheet transitions */
+/* Barra inferior flutuante Luxury Nude */
 .glass-nav {
-  background: rgba(53, 11, 25, 0.9);
+  background: rgba(89, 73, 67, 0.94);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
 }
@@ -100,7 +110,6 @@
   }
 }
 
-/* Clean PDF Print Layout for Admin Reports */
 @media print {
   .no-print {
     display: none;

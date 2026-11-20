@@ -18,8 +18,8 @@ export default defineConfig(() => {
           name: 'Estefany Paiva Nails',
           short_name: 'E.P. Nails',
           description: 'Portal de agendamentos online e painel administrativo profissional do estúdio Estefany Paiva Nails.',
-          theme_color: '#350B19',
-          background_color: '#FAF4F5',
+          theme_color: '#594943',
+          background_color: '#FAF6F1',
           display: 'standalone',
           orientation: 'any',
           start_url: '/',
@@ -47,7 +47,7 @@ export default defineConfig(() => {
           ],
         },
         workbox: {
-          cacheId: 'estefany-nails-v40-token-gate-locked',
+          cacheId: 'estefany-nails-v41-luxury-nude-33-screens',
           maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
           globPatterns: ['**/*.{js,css,html,ico,png,svg,jpg,woff,woff2}'],
           runtimeCaching: [

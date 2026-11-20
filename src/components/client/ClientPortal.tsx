@@ -132,27 +132,27 @@ export const ClientPortal: React.FC<ClientPortalProps> = ({
   }, [settings.workDays]);
 
   return (
-    <div className="min-h-screen bg-[#FAF4F5] text-[#2A0E17] pb-24 md:pb-16">
+    <div className="min-h-screen bg-[#FAF6F1] text-[#594943] pb-24 md:pb-16">
       {/* Desktop & Tablet Top Bar Contract (3 zones separated by gap-8) */}
-      <header className="hidden md:block sticky top-0 z-40 bg-[#FAF4F5]/90 backdrop-blur-md border-b border-[#EBDCE0]">
+      <header className="hidden md:block sticky top-0 z-40 bg-[#FAF6F1]/90 backdrop-blur-md border-b border-[#E8D6CB]">
         <div className="max-w-7xl mx-auto px-6 lg:px-8 h-16 flex items-center justify-between gap-8">
           {/* Zone 1: Single wordmark */}
           <button
             type="button"
             onClick={() => setActiveTab('catalog')}
-            className="font-editorial text-2xl font-semibold tracking-tight text-[#350B19] whitespace-nowrap shrink-0"
+            className="font-editorial text-2xl font-semibold tracking-tight text-[#594943] whitespace-nowrap shrink-0"
           >
             {settings.studioName}
           </button>
 
           {/* Zone 2: 4 clean single-line text nav links */}
-          <nav className="flex items-center gap-7 text-sm font-medium text-[#6E4F59]">
+          <nav className="flex items-center gap-7 text-sm font-medium text-[#95847C]">
             <button
               type="button"
               onClick={() => setActiveTab('catalog')}
-              className={`whitespace-nowrap shrink-0 transition-colors hover:text-[#350B19] ${
+              className={`whitespace-nowrap shrink-0 transition-colors hover:text-[#594943] ${
                 activeTab === 'catalog'
-                  ? 'text-[#350B19] underline underline-offset-8 decoration-[#D83F79] decoration-2'
+                  ? 'text-[#594943] underline underline-offset-8 decoration-[#C4A477] decoration-2'
                   : ''
               }`}
             >
@@ -161,9 +161,9 @@ export const ClientPortal: React.FC<ClientPortalProps> = ({
             <button
               type="button"
               onClick={() => setActiveTab('appointments')}
-              className={`whitespace-nowrap shrink-0 transition-colors hover:text-[#350B19] ${
+              className={`whitespace-nowrap shrink-0 transition-colors hover:text-[#594943] ${
                 activeTab === 'appointments'
-                  ? 'text-[#350B19] underline underline-offset-8 decoration-[#D83F79] decoration-2'
+                  ? 'text-[#594943] underline underline-offset-8 decoration-[#C4A477] decoration-2'
                   : ''
               }`}
             >
@@ -172,9 +172,9 @@ export const ClientPortal: React.FC<ClientPortalProps> = ({
             <button
               type="button"
               onClick={() => setActiveTab('studio')}
-              className={`whitespace-nowrap shrink-0 transition-colors hover:text-[#350B19] ${
+              className={`whitespace-nowrap shrink-0 transition-colors hover:text-[#594943] ${
                 activeTab === 'studio'
-                  ? 'text-[#350B19] underline underline-offset-8 decoration-[#D83F79] decoration-2'
+                  ? 'text-[#594943] underline underline-offset-8 decoration-[#C4A477] decoration-2'
                   : ''
               }`}
             >
@@ -187,9 +187,9 @@ export const ClientPortal: React.FC<ClientPortalProps> = ({
             <button
               type="button"
               onClick={() => setBookingOpen(true)}
-              className="min-h-[40px] inline-flex items-center gap-2 rounded-xl bg-[#350B19] px-4 py-2 text-xs font-semibold text-white hover:bg-[#4F172A] transition-colors whitespace-nowrap shrink-0"
+              className="min-h-[40px] inline-flex items-center gap-2 rounded-xl bg-[#594943] px-4 py-2 text-xs font-semibold text-white hover:bg-[#433631] transition-colors whitespace-nowrap shrink-0"
             >
-              <ShoppingBag className="w-3.5 h-3.5 text-[#D83F79]" />
+              <ShoppingBag className="w-3.5 h-3.5 text-[#C4A477]" />
               <span>
                 {comboServices.length > 0
                   ? `Agendar Combo (${comboServices.length})`
@@ -201,23 +201,23 @@ export const ClientPortal: React.FC<ClientPortalProps> = ({
       </header>
 
       {/* Mobile Compact App Bar (< md) */}
-      <header className="md:hidden sticky top-0 z-40 bg-[#FAF4F5]/95 backdrop-blur-md border-b border-[#EBDCE0] px-4 py-3 flex items-center justify-between gap-3">
+      <header className="md:hidden sticky top-0 z-40 bg-[#FAF6F1]/95 backdrop-blur-md border-b border-[#E8D6CB] px-4 py-3 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-9 h-9 rounded-full overflow-hidden border border-[#D83F79]/40 bg-[#350B19] shrink-0">
+          <div className="w-9 h-9 rounded-full overflow-hidden border border-[#C4A477]/40 bg-[#594943] shrink-0">
             <SafeImage
               src={settings.avatarImage}
               alt={settings.studioName}
               className="w-full h-full object-cover"
             />
           </div>
-          <span className="font-editorial text-lg font-semibold text-[#350B19] truncate">
+          <span className="font-editorial text-lg font-semibold text-[#594943] truncate">
             {settings.studioName}
           </span>
         </div>
         <button
           type="button"
           onClick={() => setBookingOpen(true)}
-          className="min-h-[36px] inline-flex items-center gap-1.5 rounded-xl bg-[#350B19] px-3.5 py-1.5 text-xs font-semibold text-white shrink-0"
+          className="min-h-[36px] inline-flex items-center gap-1.5 rounded-xl bg-[#594943] px-3.5 py-1.5 text-xs font-semibold text-white shrink-0"
         >
           <span>{comboServices.length > 0 ? `Combo (${comboServices.length})` : 'Agendar'}</span>
         </button>
@@ -230,18 +230,18 @@ export const ClientPortal: React.FC<ClientPortalProps> = ({
         {nextUpcomingAppointment && activeTab === 'catalog' && (
           <section
             aria-label="Próximo agendamento"
-            className="bg-white rounded-2xl border border-[#D83F79]/40 px-4 sm:px-5 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+            className="bg-white rounded-2xl border border-[#C4A477]/40 px-4 sm:px-5 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
           >
             <div className="flex items-center gap-3 min-w-0">
-              <div className="w-10 h-10 rounded-xl bg-[#F7E2EA] text-[#D83F79] flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-[#F2EAE4] text-[#C4A477] flex items-center justify-center shrink-0">
                 <CalendarClock className="w-5 h-5" />
               </div>
               <div className="min-w-0">
-                <div className="text-xs font-medium text-[#D83F79] tabular-nums">
+                <div className="text-xs font-medium text-[#C4A477] tabular-nums">
                   Próximo agendamento · {formatDateLongBR(nextUpcomingAppointment.date)} às{' '}
                   {nextUpcomingAppointment.startTime}
                 </div>
-                <div className="text-sm font-semibold text-[#350B19] truncate">
+                <div className="text-sm font-semibold text-[#594943] truncate">
                   {nextUpcomingAppointment.serviceNames.join(' + ')}
                 </div>
               </div>
@@ -250,7 +250,7 @@ export const ClientPortal: React.FC<ClientPortalProps> = ({
             <button
               type="button"
               onClick={() => setActiveTab('appointments')}
-              className="min-h-[40px] rounded-xl bg-[#350B19] px-4 py-2 text-xs font-semibold text-white hover:bg-[#4F172A] transition-colors whitespace-nowrap shrink-0"
+              className="min-h-[40px] rounded-xl bg-[#594943] px-4 py-2 text-xs font-semibold text-white hover:bg-[#433631] transition-colors whitespace-nowrap shrink-0"
             >
               Ver / Remarcar
             </button>
@@ -260,13 +260,13 @@ export const ClientPortal: React.FC<ClientPortalProps> = ({
         {activeTab === 'catalog' && (
           <>
             {/* Clean Luxury Hero Banner */}
-            <section className="relative overflow-hidden rounded-3xl bg-[#350B19] min-h-[190px] sm:min-h-[260px] lg:min-h-[300px] flex items-end">
+            <section className="relative overflow-hidden rounded-3xl bg-[#594943] min-h-[190px] sm:min-h-[260px] lg:min-h-[300px] flex items-end">
               <SafeImage
                 src={settings.heroImageUrl}
                 alt={settings.studioName}
                 className="absolute inset-0 w-full h-full object-cover object-center"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#240610]/90 via-[#350B19]/45 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#433631]/90 via-[#594943]/45 to-transparent" />
 
               <div className="relative z-10 w-full p-5 sm:p-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
                 <h1 className="font-editorial text-2xl sm:text-4xl font-semibold text-white leading-tight max-w-lg">
@@ -275,7 +275,7 @@ export const ClientPortal: React.FC<ClientPortalProps> = ({
                 <button
                   type="button"
                   onClick={() => setBookingOpen(true)}
-                  className="min-h-[44px] inline-flex items-center justify-center rounded-xl bg-[#D83F79] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#BD2D65] transition-colors whitespace-nowrap shrink-0 self-start sm:self-end"
+                  className="min-h-[44px] inline-flex items-center justify-center rounded-xl bg-[#C4A477] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#BE9293] transition-colors whitespace-nowrap shrink-0 self-start sm:self-end"
                 >
                   Agendar Horário
                 </button>
@@ -285,19 +285,19 @@ export const ClientPortal: React.FC<ClientPortalProps> = ({
             {/* Catalog Section */}
             <section id="catalogo" className="space-y-4 scroll-mt-20">
               <div className="flex items-center justify-between gap-3">
-                <h2 className="font-editorial text-2xl sm:text-3xl font-semibold text-[#350B19]">
+                <h2 className="font-editorial text-2xl sm:text-3xl font-semibold text-[#594943]">
                   Procedimentos
                 </h2>
 
                 <div className="relative w-44 sm:w-64">
-                  <Search className="w-4 h-4 text-[#6E4F59] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <Search className="w-4 h-4 text-[#95847C] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                   <input
                     type="search"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     placeholder="Buscar..."
                     aria-label="Buscar procedimento"
-                    className="w-full min-h-[38px] rounded-xl border border-[#EBDCE0] bg-white pl-9 pr-3 text-xs sm:text-sm text-[#2A0E17] placeholder:text-[#6E4F59]/70 focus:border-[#D83F79] focus:outline-none"
+                    className="w-full min-h-[38px] rounded-xl border border-[#E8D6CB] bg-white pl-9 pr-3 text-xs sm:text-sm text-[#594943] placeholder:text-[#95847C]/70 focus:border-[#C4A477] focus:outline-none"
                   />
                 </div>
               </div>
@@ -315,8 +315,8 @@ export const ClientPortal: React.FC<ClientPortalProps> = ({
                   onClick={() => setSelectedCategory('all')}
                   className={`min-h-[40px] rounded-xl px-4 py-2 text-xs sm:text-sm font-medium whitespace-nowrap shrink-0 transition-colors ${
                     selectedCategory === 'all'
-                      ? 'bg-[#350B19] text-white'
-                      : 'bg-white text-[#6E4F59] border border-[#EBDCE0] hover:text-[#350B19]'
+                      ? 'bg-[#594943] text-white'
+                      : 'bg-white text-[#95847C] border border-[#E8D6CB] hover:text-[#594943]'
                   }`}
                 >
                   Todos
@@ -330,8 +330,8 @@ export const ClientPortal: React.FC<ClientPortalProps> = ({
                     onClick={() => setSelectedCategory(cat.id)}
                     className={`min-h-[40px] rounded-xl px-4 py-2 text-xs sm:text-sm font-medium whitespace-nowrap shrink-0 transition-colors ${
                       selectedCategory === cat.id
-                        ? 'bg-[#350B19] text-white'
-                        : 'bg-white text-[#6E4F59] border border-[#EBDCE0] hover:text-[#350B19]'
+                        ? 'bg-[#594943] text-white'
+                        : 'bg-white text-[#95847C] border border-[#E8D6CB] hover:text-[#594943]'
                     }`}
                   >
                     {cat.name}
@@ -341,9 +341,9 @@ export const ClientPortal: React.FC<ClientPortalProps> = ({
 
               {/* Active Combo Inline Banner */}
               {comboServices.length > 0 && (
-                <div className="bg-[#350B19] text-[#FAF4F5] rounded-2xl px-5 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="bg-[#594943] text-[#FAF6F1] rounded-2xl px-5 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="space-y-0.5 min-w-0">
-                    <div className="text-xs text-[#F7E2EA]/80 tabular-nums">
+                    <div className="text-xs text-[#F2EAE4]/80 tabular-nums">
                       Combo selecionado · {comboServices.length}{' '}
                       {comboServices.length === 1 ? 'serviço' : 'serviços'} ·{' '}
                       {formatDuration(comboDuration)}
@@ -359,7 +359,7 @@ export const ClientPortal: React.FC<ClientPortalProps> = ({
                     <button
                       type="button"
                       onClick={() => setBookingOpen(true)}
-                      className="min-h-[42px] rounded-xl bg-[#D83F79] px-5 py-2 text-xs sm:text-sm font-semibold text-white hover:bg-[#BD2D65] transition-colors whitespace-nowrap"
+                      className="min-h-[42px] rounded-xl bg-[#C4A477] px-5 py-2 text-xs sm:text-sm font-semibold text-white hover:bg-[#BE9293] transition-colors whitespace-nowrap"
                     >
                       Escolher horário
                     </button>
@@ -369,8 +369,8 @@ export const ClientPortal: React.FC<ClientPortalProps> = ({
 
               {/* Services List: Horizontal Compact Cards on Mobile & 2-3 Col Luxury Grid on Tablet/Desktop */}
               {filteredServices.length === 0 ? (
-                <div className="bg-white rounded-3xl border border-[#EBDCE0] p-10 text-center">
-                  <p className="text-sm text-[#6E4F59]">
+                <div className="bg-white rounded-3xl border border-[#E8D6CB] p-10 text-center">
+                  <p className="text-sm text-[#95847C]">
                     Nenhum procedimento encontrado para esse filtro.
                   </p>
                   <button
@@ -379,7 +379,7 @@ export const ClientPortal: React.FC<ClientPortalProps> = ({
                       setSelectedCategory('all');
                       setSearchTerm('');
                     }}
-                    className="mt-4 min-h-[42px] rounded-xl border border-[#EBDCE0] px-4 py-2 text-xs font-medium text-[#350B19]"
+                    className="mt-4 min-h-[42px] rounded-xl border border-[#E8D6CB] px-4 py-2 text-xs font-medium text-[#594943]"
                   >
                     Limpar filtros
                   </button>
@@ -394,13 +394,13 @@ export const ClientPortal: React.FC<ClientPortalProps> = ({
                         key={svc.id}
                         className={`bg-white rounded-2xl border transition-all overflow-hidden flex flex-row sm:flex-col ${
                           inCombo
-                            ? 'border-[#D83F79] ring-1 ring-[#D83F79]/25'
-                            : 'border-[#EBDCE0] hover:border-[#350B19]/25'
+                            ? 'border-[#C4A477] ring-1 ring-[#C4A477]/25'
+                            : 'border-[#E8D6CB] hover:border-[#594943]/25'
                         }`}
                       >
                         <div
                           onClick={() => quickBookService(svc)}
-                          className="w-24 sm:w-full sm:aspect-[16/10] shrink-0 overflow-hidden bg-[#FAF4F5] cursor-pointer"
+                          className="w-24 sm:w-full sm:aspect-[16/10] shrink-0 overflow-hidden bg-[#FAF6F1] cursor-pointer"
                         >
                           <SafeImage
                             src={svc.imageUrl}
@@ -411,16 +411,16 @@ export const ClientPortal: React.FC<ClientPortalProps> = ({
 
                         <div className="flex-1 p-3 sm:p-4 flex flex-col justify-between gap-2 min-w-0">
                           <div className="min-w-0">
-                            <h3 className="text-sm sm:text-base font-semibold text-[#350B19] leading-snug line-clamp-2">
+                            <h3 className="text-sm sm:text-base font-semibold text-[#594943] leading-snug line-clamp-2">
                               {svc.name}
                             </h3>
-                            <span className="mt-0.5 inline-block text-[11px] sm:text-xs text-[#6E4F59] tabular-nums">
+                            <span className="mt-0.5 inline-block text-[11px] sm:text-xs text-[#95847C] tabular-nums">
                               {formatDuration(svc.durationMinutes)}
                             </span>
                           </div>
 
-                          <div className="flex items-center justify-between gap-2 pt-1 sm:pt-2.5 sm:border-t sm:border-[#EBDCE0]/70">
-                            <span className="text-sm sm:text-base font-bold text-[#350B19] tabular-nums">
+                          <div className="flex items-center justify-between gap-2 pt-1 sm:pt-2.5 sm:border-t sm:border-[#E8D6CB]/70">
+                            <span className="text-sm sm:text-base font-bold text-[#594943] tabular-nums">
                               {formatBRL(svc.price)}
                             </span>
 
@@ -436,12 +436,12 @@ export const ClientPortal: React.FC<ClientPortalProps> = ({
                                 title={inCombo ? 'No combo' : 'Adicionar ao combo'}
                                 className={`min-h-[36px] min-w-[36px] inline-flex items-center justify-center rounded-xl text-xs font-medium transition-colors border ${
                                   inCombo
-                                    ? 'bg-[#F7E2EA] border-[#D83F79] text-[#350B19]'
-                                    : 'bg-white border-[#EBDCE0] text-[#350B19] hover:border-[#D83F79]'
+                                    ? 'bg-[#F2EAE4] border-[#C4A477] text-[#594943]'
+                                    : 'bg-white border-[#E8D6CB] text-[#594943] hover:border-[#C4A477]'
                                 }`}
                               >
                                 {inCombo ? (
-                                  <Check className="w-3.5 h-3.5 text-[#D83F79]" />
+                                  <Check className="w-3.5 h-3.5 text-[#C4A477]" />
                                 ) : (
                                   <Plus className="w-3.5 h-3.5" />
                                 )}
@@ -450,7 +450,7 @@ export const ClientPortal: React.FC<ClientPortalProps> = ({
                               <button
                                 type="button"
                                 onClick={() => quickBookService(svc)}
-                                className="min-h-[36px] rounded-xl bg-[#350B19] px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-[#4F172A] transition-colors whitespace-nowrap"
+                                className="min-h-[36px] rounded-xl bg-[#594943] px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-[#433631] transition-colors whitespace-nowrap"
                               >
                                 Agendar
                               </button>
@@ -479,48 +479,48 @@ export const ClientPortal: React.FC<ClientPortalProps> = ({
         {activeTab === 'studio' && (
           <section className="max-w-3xl mx-auto space-y-6">
             <div>
-              <h2 className="font-editorial text-3xl sm:text-4xl font-semibold text-[#350B19]">
+              <h2 className="font-editorial text-3xl sm:text-4xl font-semibold text-[#594943]">
                 Sobre {settings.ownerName || settings.studioName}
               </h2>
-              <p className="mt-1 text-sm text-[#6E4F59]">{settings.bio || settings.tagline}</p>
+              <p className="mt-1 text-sm text-[#95847C]">{settings.bio || settings.tagline}</p>
             </div>
 
-            <div className="bg-white rounded-3xl border border-[#EBDCE0] divide-y divide-[#EBDCE0]">
+            <div className="bg-white rounded-3xl border border-[#E8D6CB] divide-y divide-[#E8D6CB]">
               <div className="p-5 flex items-start gap-4">
-                <Clock className="w-5 h-5 text-[#D83F79] mt-0.5 shrink-0" />
+                <Clock className="w-5 h-5 text-[#C4A477] mt-0.5 shrink-0" />
                 <div>
-                  <div className="text-sm font-semibold text-[#350B19]">
+                  <div className="text-sm font-semibold text-[#594943]">
                     Horário de funcionamento
                   </div>
-                  <div className="mt-0.5 text-sm text-[#6E4F59] tabular-nums">
+                  <div className="mt-0.5 text-sm text-[#95847C] tabular-nums">
                     {workDaysLabel} · {settings.openTime} às {settings.closeTime}
                   </div>
                 </div>
               </div>
 
               <div className="p-5 flex items-start gap-4">
-                <MapPin className="w-5 h-5 text-[#D83F79] mt-0.5 shrink-0" />
+                <MapPin className="w-5 h-5 text-[#C4A477] mt-0.5 shrink-0" />
                 <div>
-                  <div className="text-sm font-semibold text-[#350B19]">Endereço</div>
-                  <div className="mt-0.5 text-sm text-[#6E4F59]">{settings.address}</div>
+                  <div className="text-sm font-semibold text-[#594943]">Endereço</div>
+                  <div className="mt-0.5 text-sm text-[#95847C]">{settings.address}</div>
                 </div>
               </div>
 
               <div className="p-5 flex items-start gap-4">
-                <Instagram className="w-5 h-5 text-[#D83F79] mt-0.5 shrink-0" />
+                <Instagram className="w-5 h-5 text-[#C4A477] mt-0.5 shrink-0" />
                 <div>
-                  <div className="text-sm font-semibold text-[#350B19]">Instagram oficial</div>
-                  <div className="mt-0.5 text-sm text-[#6E4F59]">{settings.instagram}</div>
+                  <div className="text-sm font-semibold text-[#594943]">Instagram oficial</div>
+                  <div className="mt-0.5 text-sm text-[#95847C]">{settings.instagram}</div>
                 </div>
               </div>
 
               <div className="p-5 flex items-start gap-4">
-                <Sparkles className="w-5 h-5 text-[#D83F79] mt-0.5 shrink-0" />
+                <Sparkles className="w-5 h-5 text-[#C4A477] mt-0.5 shrink-0" />
                 <div>
-                  <div className="text-sm font-semibold text-[#350B19]">
+                  <div className="text-sm font-semibold text-[#594943]">
                     Política de reserva, remarcação e manutenção
                   </div>
-                  <div className="mt-0.5 text-sm text-[#6E4F59] leading-relaxed">
+                  <div className="mt-0.5 text-sm text-[#95847C] leading-relaxed">
                     {settings.depositPercent > 0 && settings.depositPercent < 100
                       ? `Para agendamentos via Pix, o sinal é de ${settings.depositPercent}% do valor total. `
                       : ''}
@@ -538,9 +538,9 @@ export const ClientPortal: React.FC<ClientPortalProps> = ({
                 )}
                 target="_blank"
                 rel="noreferrer"
-                className="min-h-[46px] inline-flex items-center justify-center gap-2 rounded-xl bg-[#350B19] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#4F172A] transition-colors"
+                className="min-h-[46px] inline-flex items-center justify-center gap-2 rounded-xl bg-[#594943] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#433631] transition-colors"
               >
-                <MessageCircle className="w-4 h-4 text-[#D83F79]" />
+                <MessageCircle className="w-4 h-4 text-[#C4A477]" />
                 <span>Falar no WhatsApp</span>
               </a>
 
@@ -551,7 +551,7 @@ export const ClientPortal: React.FC<ClientPortalProps> = ({
       </main>
 
       {/* Quiet Desktop Footer */}
-      <footer className="hidden md:block max-w-7xl mx-auto px-6 lg:px-8 mt-16 pt-8 border-t border-[#EBDCE0] text-xs text-[#6E4F59]">
+      <footer className="hidden md:block max-w-7xl mx-auto px-6 lg:px-8 mt-16 pt-8 border-t border-[#E8D6CB] text-xs text-[#95847C]">
         <div className="flex items-center justify-between gap-4">
           <span>
             {settings.studioName} · {settings.address}
@@ -570,7 +570,7 @@ export const ClientPortal: React.FC<ClientPortalProps> = ({
             type="button"
             onClick={() => setActiveTab('catalog')}
             className={`min-h-[48px] flex flex-col items-center justify-center gap-0.5 rounded-xl transition-colors ${
-              activeTab === 'catalog' ? 'text-[#D83F79] bg-white/10' : 'text-[#FAF4F5]/75'
+              activeTab === 'catalog' ? 'text-[#C4A477] bg-white/10' : 'text-[#FAF6F1]/75'
             }`}
           >
             <Sparkles className="w-5 h-5" />
@@ -581,7 +581,7 @@ export const ClientPortal: React.FC<ClientPortalProps> = ({
             type="button"
             onClick={() => setBookingOpen(true)}
             className={`min-h-[48px] relative flex flex-col items-center justify-center gap-0.5 rounded-xl transition-colors ${
-              comboServices.length > 0 ? 'text-white bg-[#D83F79]' : 'text-[#FAF4F5]/75'
+              comboServices.length > 0 ? 'text-white bg-[#C4A477]' : 'text-[#FAF6F1]/75'
             }`}
           >
             <ShoppingBag className="w-5 h-5" />
@@ -594,7 +594,7 @@ export const ClientPortal: React.FC<ClientPortalProps> = ({
             type="button"
             onClick={() => setActiveTab('appointments')}
             className={`min-h-[48px] flex flex-col items-center justify-center gap-0.5 rounded-xl transition-colors ${
-              activeTab === 'appointments' ? 'text-[#D83F79] bg-white/10' : 'text-[#FAF4F5]/75'
+              activeTab === 'appointments' ? 'text-[#C4A477] bg-white/10' : 'text-[#FAF6F1]/75'
             }`}
           >
             <Calendar className="w-5 h-5" />
@@ -605,7 +605,7 @@ export const ClientPortal: React.FC<ClientPortalProps> = ({
             type="button"
             onClick={() => setActiveTab('studio')}
             className={`min-h-[48px] flex flex-col items-center justify-center gap-0.5 rounded-xl transition-colors ${
-              activeTab === 'studio' ? 'text-[#D83F79] bg-white/10' : 'text-[#FAF4F5]/75'
+              activeTab === 'studio' ? 'text-[#C4A477] bg-white/10' : 'text-[#FAF6F1]/75'
             }`}
           >
             <Store className="w-5 h-5" />

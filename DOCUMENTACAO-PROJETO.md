@@ -55,3 +55,26 @@ O projeto foi migrado para a arquitetura completa em **React 19 + TypeScript + V
   1. Em `src/lib/adminRoute.ts`, as rotas óbvias `/admin` e `#/admin` agora são **100% bloqueadas** e redirecionam imediatamente para `/` (Portal da Cliente).
   2. Removido o fallback que liberava a tela caso a variável de ambiente não estivesse preenchida na Vercel: a validação do hash irreversível `SHA-256` agora é **sempre exigida**, liberando a tela de login exclusivamente pelo link com token `/painel?k=<SEU_TOKEN>`.
   3. Cache do Workbox PWA elevado para `estefany-nails-v40-token-gate-locked`.
+
+
+### v41 — Design System Luxury Nude, Biblioteca de Componentes e 33 Telas Obrigatórias (React / React Native / Expo + TypeScript)
+- **Paleta Oficial Luxury Nude Aplicada em 100% do Sistema**:
+  - Nude: `#E8D6CB`
+  - Rosé: `#BE9293`
+  - Dourado: `#C4A477`
+  - Creme: `#FAF6F1`
+  - Branco: `#FFFFFF`
+  - Marrom: `#594943`
+  - Texto secundário: `#95847C`
+  - Fundo suave: `#F2EAE4`
+- **Tipografia Oficial**: `Playfair Display` (títulos editoriais) e `Inter` (textos, botões, formulários e indicadores).
+- **Arquitetura de Tokens & Componentes Reutilizáveis**:
+  - `src/theme/luxuryNudeTheme.ts`: Tokens tipados (`LUXURY_NUDE_PALETTE`, `LUXURY_TYPOGRAPHY`, `MANDATORY_SCREENS_33`) prontos para Web e React Native / Expo + TypeScript.
+  - `src/components/ui/LuxuryDesignSystem.tsx`: Componentes reutilizáveis (`LuxuryStateView` com estados de carregamento, sucesso, erro e ausência de dados; `LuxuryKpiCard`; `LuxuryBarChart`).
+- **Menu Inferior Oficial de 5 Itens**: `Início`, `Agenda`, `Clientes`, `Financeiro` e `Perfil`.
+- **33 Telas Obrigatórias Implementadas e Navegáveis**:
+  - **1–6**: `1. Login`, `2. Abertura`, `3. Dashboard`, `4. Calendário`, `5. Novo agendamento`, `6. Detalhes do agendamento`.
+  - **7–11 (Público)**: `7. Página pública`, `8. Escolha de serviços`, `9. Escolha de data e horário`, `10. Dados da cliente`, `11. Confirmação`.
+  - **12–16 (Clientes & Serviços)**: `12. Lista de clientes`, `13. Cadastro de clientes`, `14. Perfil da cliente`, `15. Catálogo de serviços`, `16. Cadastro de serviços`.
+  - **17–24 (Módulo Financeiro em `src/components/admin/AdminFinanceSuite.tsx`)**: `17. Resumo financeiro`, `18. Receitas`, `19. Despesas`, `20. Fluxo de caixa`, `21. Contas a pagar e receber`, `22. Fechamento mensal`, `23. Relatórios gerais`, `24. Relatórios de desempenho`.
+  - **25–33 (Módulo Perfil, Galeria & Configurações em `src/components/admin/AdminProfileSuite.tsx`)**: `25. Galeria`, `26. Adicionar fotografia`, `27. Central de comunicação`, `28. Perfil`, `29. Horários de funcionamento`, `30. Configurações de agendamento`, `31. Personalização da página pública`, `32. Segurança`, `33. Ajuda e suporte` (com Mapa Interativo 1-clique para todas as 33 telas).

@@ -44,31 +44,31 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
     >
       <div
         onClick={onClose}
-        className="sheet-backdrop fixed inset-0 bg-[#240610]/55 backdrop-blur-sm"
+        className="sheet-backdrop fixed inset-0 bg-[#433631]/55 backdrop-blur-sm"
       />
       <div
-        className={`sheet-panel relative z-10 w-full ${maxWidthClass} max-h-[92dvh] sm:max-h-[88dvh] flex flex-col bg-[#FAF4F5] rounded-t-[28px] sm:rounded-3xl border border-[#EBDCE0] shadow-2xl overflow-hidden`}
+        className={`sheet-panel relative z-10 w-full ${maxWidthClass} max-h-[92dvh] sm:max-h-[88dvh] flex flex-col bg-[#FAF6F1] rounded-t-[28px] sm:rounded-3xl border border-[#E8D6CB] shadow-2xl overflow-hidden`}
       >
         {/* Native Mobile Drag Handle */}
         <div className="sm:hidden pt-3 pb-1 flex justify-center shrink-0">
-          <div className="w-11 h-1.5 rounded-full bg-[#350B19]/20" />
+          <div className="w-11 h-1.5 rounded-full bg-[#594943]/20" />
         </div>
 
         {/* Sheet Header */}
-        <div className="flex items-start justify-between gap-4 px-5 sm:px-6 pt-3 sm:pt-5 pb-4 border-b border-[#EBDCE0] bg-white shrink-0">
+        <div className="flex items-start justify-between gap-4 px-5 sm:px-6 pt-3 sm:pt-5 pb-4 border-b border-[#E8D6CB] bg-white shrink-0">
           <div className="min-w-0">
-            <h2 className="font-editorial text-2xl sm:text-[26px] font-semibold text-[#350B19] leading-tight">
+            <h2 className="font-editorial text-2xl sm:text-[26px] font-semibold text-[#594943] leading-tight">
               {title}
             </h2>
             {subtitle && (
-              <p className="mt-0.5 text-xs sm:text-sm text-[#6E4F59] leading-snug">{subtitle}</p>
+              <p className="mt-0.5 text-xs sm:text-sm text-[#95847C] leading-snug">{subtitle}</p>
             )}
           </div>
           <button
             type="button"
             onClick={onClose}
             aria-label="Fechar janela"
-            className="min-h-[44px] min-w-[44px] -mr-2 -mt-1 flex items-center justify-center rounded-full text-[#6E4F59] hover:text-[#350B19] hover:bg-[#FAF4F5] transition-colors shrink-0"
+            className="min-h-[44px] min-w-[44px] -mr-2 -mt-1 flex items-center justify-center rounded-full text-[#95847C] hover:text-[#594943] hover:bg-[#FAF6F1] transition-colors shrink-0"
           >
             <X className="w-5 h-5" />
           </button>
@@ -81,7 +81,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
 
         {/* Optional Pinned Footer */}
         {footer && (
-          <div className="px-5 sm:px-6 pt-3.5 pb-safe sm:pb-5 bg-white border-t border-[#EBDCE0] shrink-0">
+          <div className="px-5 sm:px-6 pt-3.5 pb-safe sm:pb-5 bg-white border-t border-[#E8D6CB] shrink-0">
             {footer}
           </div>
         )}

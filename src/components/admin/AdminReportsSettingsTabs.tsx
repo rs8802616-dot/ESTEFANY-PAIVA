@@ -95,10 +95,10 @@ export const AdminReportsTab: React.FC<{ appointments: Appointment[] }> = ({ app
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 no-print">
         <div>
-          <h1 className="font-editorial text-3xl font-semibold text-[#350B19]">
+          <h1 className="font-editorial text-3xl font-semibold text-[#594943]">
             Relatórios Financeiros
           </h1>
-          <p className="text-sm text-[#6E4F59]">
+          <p className="text-sm text-[#95847C]">
             Indicadores 100% reais calculados sobre os agendamentos registrados no Firestore.
           </p>
         </div>
@@ -109,25 +109,25 @@ export const AdminReportsTab: React.FC<{ appointments: Appointment[] }> = ({ app
             onClick={() =>
               downloadCSVReport(filtered, `estefany-nails-relatorio-${period}-${today}.csv`)
             }
-            className="min-h-[44px] inline-flex items-center gap-2 rounded-xl border border-[#EBDCE0] bg-white px-4 py-2 text-xs sm:text-sm font-medium text-[#350B19] hover:border-[#D83F79]"
+            className="min-h-[44px] inline-flex items-center gap-2 rounded-xl border border-[#E8D6CB] bg-white px-4 py-2 text-xs sm:text-sm font-medium text-[#594943] hover:border-[#C4A477]"
           >
-            <Download className="w-4 h-4 text-[#D83F79]" />
+            <Download className="w-4 h-4 text-[#C4A477]" />
             <span>Exportar CSV</span>
           </button>
 
           <button
             type="button"
             onClick={() => window.print()}
-            className="min-h-[44px] inline-flex items-center gap-2 rounded-xl bg-[#350B19] px-4 py-2 text-xs sm:text-sm font-semibold text-white hover:bg-[#4F172A]"
+            className="min-h-[44px] inline-flex items-center gap-2 rounded-xl bg-[#594943] px-4 py-2 text-xs sm:text-sm font-semibold text-white hover:bg-[#433631]"
           >
-            <Printer className="w-4 h-4 text-[#D83F79]" />
+            <Printer className="w-4 h-4 text-[#C4A477]" />
             <span>Imprimir / PDF</span>
           </button>
         </div>
       </div>
 
       {/* Period Filter (PRD v36: 7 dias, 30 dias, 6 meses, Todo o período) */}
-      <div className="inline-flex flex-wrap items-center gap-1 p-1 rounded-xl bg-white border border-[#EBDCE0] no-print">
+      <div className="inline-flex flex-wrap items-center gap-1 p-1 rounded-xl bg-white border border-[#E8D6CB] no-print">
         {(
           [
             { id: '7d', label: '7 dias' },
@@ -142,8 +142,8 @@ export const AdminReportsTab: React.FC<{ appointments: Appointment[] }> = ({ app
             onClick={() => setPeriod(item.id)}
             className={`min-h-[38px] rounded-lg px-3.5 text-xs font-medium transition-colors ${
               period === item.id
-                ? 'bg-[#350B19] text-white'
-                : 'text-[#6E4F59] hover:text-[#350B19]'
+                ? 'bg-[#594943] text-white'
+                : 'text-[#95847C] hover:text-[#594943]'
             }`}
           >
             {item.label}
@@ -153,35 +153,35 @@ export const AdminReportsTab: React.FC<{ appointments: Appointment[] }> = ({ app
 
       {/* KPI Strip (PRD v36: Faturamento, Atendimentos, Ticket Médio, Cancelados) */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white rounded-2xl border border-[#EBDCE0] p-4">
-          <div className="text-xs text-[#6E4F59]">Faturamento</div>
-          <div className="mt-1 text-2xl font-semibold text-[#350B19] tabular-nums">
+        <div className="bg-white rounded-2xl border border-[#E8D6CB] p-4">
+          <div className="text-xs text-[#95847C]">Faturamento</div>
+          <div className="mt-1 text-2xl font-semibold text-[#594943] tabular-nums">
             {formatBRL(totalRevenue)}
           </div>
           <div className="mt-0.5 text-[11px] text-emerald-700 tabular-nums">
             {formatBRL(completedRevenue)} concluído
           </div>
         </div>
-        <div className="bg-white rounded-2xl border border-[#EBDCE0] p-4">
-          <div className="text-xs text-[#6E4F59]">Atendimentos</div>
-          <div className="mt-1 text-2xl font-semibold text-[#350B19] tabular-nums">
+        <div className="bg-white rounded-2xl border border-[#E8D6CB] p-4">
+          <div className="text-xs text-[#95847C]">Atendimentos</div>
+          <div className="mt-1 text-2xl font-semibold text-[#594943] tabular-nums">
             {validRevenueApts.length}
           </div>
-          <div className="mt-0.5 text-[11px] text-[#6E4F59]">Confirmados e concluídos</div>
+          <div className="mt-0.5 text-[11px] text-[#95847C]">Confirmados e concluídos</div>
         </div>
-        <div className="bg-white rounded-2xl border border-[#EBDCE0] p-4">
-          <div className="text-xs text-[#6E4F59]">Ticket Médio</div>
-          <div className="mt-1 text-2xl font-semibold text-[#350B19] tabular-nums">
+        <div className="bg-white rounded-2xl border border-[#E8D6CB] p-4">
+          <div className="text-xs text-[#95847C]">Ticket Médio</div>
+          <div className="mt-1 text-2xl font-semibold text-[#594943] tabular-nums">
             {formatBRL(avgTicket)}
           </div>
-          <div className="mt-0.5 text-[11px] text-[#6E4F59]">Média por reserva válida</div>
+          <div className="mt-0.5 text-[11px] text-[#95847C]">Média por reserva válida</div>
         </div>
-        <div className="bg-white rounded-2xl border border-[#EBDCE0] p-4">
-          <div className="text-xs text-[#6E4F59]">Cancelados</div>
-          <div className="mt-1 text-2xl font-semibold text-[#D83F79] tabular-nums">
+        <div className="bg-white rounded-2xl border border-[#E8D6CB] p-4">
+          <div className="text-xs text-[#95847C]">Cancelados</div>
+          <div className="mt-1 text-2xl font-semibold text-[#C4A477] tabular-nums">
             {cancelledApts.length}
           </div>
-          <div className="mt-0.5 text-[11px] text-[#6E4F59]">
+          <div className="mt-0.5 text-[11px] text-[#95847C]">
             {filtered.length > 0
               ? `${Math.round((cancelledApts.length / filtered.length) * 100)}% do período`
               : 'Sem registros'}
@@ -191,20 +191,20 @@ export const AdminReportsTab: React.FC<{ appointments: Appointment[] }> = ({ app
 
       {/* Procedure Ranking */}
       {byService.length > 0 && (
-        <div className="bg-white rounded-2xl border border-[#EBDCE0] p-5 space-y-3">
-          <h2 className="font-editorial text-2xl font-semibold text-[#350B19]">
+        <div className="bg-white rounded-2xl border border-[#E8D6CB] p-5 space-y-3">
+          <h2 className="font-editorial text-2xl font-semibold text-[#594943]">
             Ranking de Procedimentos
           </h2>
-          <div className="divide-y divide-[#EBDCE0]">
+          <div className="divide-y divide-[#E8D6CB]">
             {byService.map(([name, stat], idx) => (
               <div key={name} className="py-2.5 flex items-center justify-between gap-3 text-sm">
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <span className="font-mono text-xs font-semibold text-[#D83F79] w-5 shrink-0 tabular-nums">
+                  <span className="font-mono text-xs font-semibold text-[#C4A477] w-5 shrink-0 tabular-nums">
                     {idx + 1}.
                   </span>
-                  <span className="text-[#2A0E17] truncate">{name}</span>
+                  <span className="text-[#594943] truncate">{name}</span>
                 </div>
-                <span className="font-mono text-xs font-semibold text-[#350B19] tabular-nums shrink-0">
+                <span className="font-mono text-xs font-semibold text-[#594943] tabular-nums shrink-0">
                   {stat.count} {stat.count === 1 ? 'atendimento' : 'atendimentos'}
                 </span>
               </div>
@@ -214,10 +214,10 @@ export const AdminReportsTab: React.FC<{ appointments: Appointment[] }> = ({ app
       )}
 
       {/* Detailed Ledger Table */}
-      <div className="bg-white rounded-2xl border border-[#EBDCE0] overflow-x-auto">
+      <div className="bg-white rounded-2xl border border-[#E8D6CB] overflow-x-auto">
         <table className="w-full text-left text-xs sm:text-sm">
           <thead>
-            <tr className="border-b border-[#EBDCE0] text-[#6E4F59]">
+            <tr className="border-b border-[#E8D6CB] text-[#95847C]">
               <th className="py-3 px-4 font-medium">Data</th>
               <th className="py-3 px-4 font-medium">Cliente</th>
               <th className="py-3 px-4 font-medium">Procedimentos</th>
@@ -225,21 +225,21 @@ export const AdminReportsTab: React.FC<{ appointments: Appointment[] }> = ({ app
               <th className="py-3 px-4 font-medium text-right">Valor</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[#EBDCE0]">
+          <tbody className="divide-y divide-[#E8D6CB]">
             {filtered.length === 0 ? (
               <tr>
-                <td colSpan={5} className="py-8 text-center text-[#6E4F59]">
+                <td colSpan={5} className="py-8 text-center text-[#95847C]">
                   Sem registros neste período.
                 </td>
               </tr>
             ) : (
               filtered.map((a) => (
-                <tr key={a.id} className="hover:bg-[#FAF4F5]/50">
+                <tr key={a.id} className="hover:bg-[#FAF6F1]/50">
                   <td className="py-3 px-4 tabular-nums whitespace-nowrap">
                     {formatDateBR(a.date)} {a.startTime}
                   </td>
-                  <td className="py-3 px-4 font-medium text-[#350B19]">{a.clientName}</td>
-                  <td className="py-3 px-4 text-[#6E4F59]">{a.serviceNames.join(' + ')}</td>
+                  <td className="py-3 px-4 font-medium text-[#594943]">{a.clientName}</td>
+                  <td className="py-3 px-4 text-[#95847C]">{a.serviceNames.join(' + ')}</td>
                   <td className="py-3 px-4 whitespace-nowrap">{statusLabelPT(a.status)}</td>
                   <td className="py-3 px-4 text-right font-semibold tabular-nums whitespace-nowrap">
                     {formatBRL(a.totalPrice)}
@@ -365,22 +365,22 @@ export const AdminSettingsTab: React.FC<{ settings: SalonSettings }> = ({ settin
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-3xl">
       <div>
-        <h1 className="font-editorial text-3xl font-semibold text-[#350B19]">
+        <h1 className="font-editorial text-3xl font-semibold text-[#594943]">
           Ajustes do Estúdio
         </h1>
-        <p className="text-sm text-[#6E4F59]">
+        <p className="text-sm text-[#95847C]">
           Perfil profissional, fotos, chave Pix, meta mensal, regra de remarcação, grade de horários e dias de folga.
         </p>
       </div>
 
       {/* Identity & Professional Bio */}
-      <div className="bg-white rounded-2xl border border-[#EBDCE0] p-5 space-y-4">
-        <h2 className="font-editorial text-2xl font-semibold text-[#350B19]">
+      <div className="bg-white rounded-2xl border border-[#E8D6CB] p-5 space-y-4">
+        <h2 className="font-editorial text-2xl font-semibold text-[#594943]">
           Identidade & Perfil Profissional
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label htmlFor="st-name" className="block text-xs font-medium text-[#6E4F59] mb-1">
+            <label htmlFor="st-name" className="block text-xs font-medium text-[#95847C] mb-1">
               Nome do estúdio
             </label>
             <input
@@ -390,11 +390,11 @@ export const AdminSettingsTab: React.FC<{ settings: SalonSettings }> = ({ settin
               maxLength={80}
               value={form.studioName}
               onChange={(e) => setForm({ ...form, studioName: e.target.value })}
-              className="w-full min-h-[44px] rounded-xl border border-[#EBDCE0] bg-[#FAF4F5]/50 px-3.5 text-sm"
+              className="w-full min-h-[44px] rounded-xl border border-[#E8D6CB] bg-[#FAF6F1]/50 px-3.5 text-sm"
             />
           </div>
           <div>
-            <label htmlFor="st-owner" className="block text-xs font-medium text-[#6E4F59] mb-1">
+            <label htmlFor="st-owner" className="block text-xs font-medium text-[#95847C] mb-1">
               Nome da profissional
             </label>
             <input
@@ -403,11 +403,11 @@ export const AdminSettingsTab: React.FC<{ settings: SalonSettings }> = ({ settin
               maxLength={80}
               value={form.ownerName}
               onChange={(e) => setForm({ ...form, ownerName: e.target.value })}
-              className="w-full min-h-[44px] rounded-xl border border-[#EBDCE0] bg-[#FAF4F5]/50 px-3.5 text-sm"
+              className="w-full min-h-[44px] rounded-xl border border-[#E8D6CB] bg-[#FAF6F1]/50 px-3.5 text-sm"
             />
           </div>
           <div>
-            <label htmlFor="st-ig" className="block text-xs font-medium text-[#6E4F59] mb-1">
+            <label htmlFor="st-ig" className="block text-xs font-medium text-[#95847C] mb-1">
               Instagram
             </label>
             <input
@@ -416,11 +416,11 @@ export const AdminSettingsTab: React.FC<{ settings: SalonSettings }> = ({ settin
               maxLength={60}
               value={form.instagram}
               onChange={(e) => setForm({ ...form, instagram: e.target.value })}
-              className="w-full min-h-[44px] rounded-xl border border-[#EBDCE0] bg-[#FAF4F5]/50 px-3.5 text-sm"
+              className="w-full min-h-[44px] rounded-xl border border-[#E8D6CB] bg-[#FAF6F1]/50 px-3.5 text-sm"
             />
           </div>
           <div>
-            <label htmlFor="st-wa" className="block text-xs font-medium text-[#6E4F59] mb-1">
+            <label htmlFor="st-wa" className="block text-xs font-medium text-[#95847C] mb-1">
               WhatsApp (DDI 55 + DDD)
             </label>
             <input
@@ -429,13 +429,13 @@ export const AdminSettingsTab: React.FC<{ settings: SalonSettings }> = ({ settin
               maxLength={30}
               value={form.whatsapp}
               onChange={(e) => setForm({ ...form, whatsapp: e.target.value })}
-              className="w-full min-h-[44px] rounded-xl border border-[#EBDCE0] bg-[#FAF4F5]/50 px-3.5 text-sm tabular-nums"
+              className="w-full min-h-[44px] rounded-xl border border-[#E8D6CB] bg-[#FAF6F1]/50 px-3.5 text-sm tabular-nums"
             />
           </div>
         </div>
 
         <div>
-          <label htmlFor="st-bio" className="block text-xs font-medium text-[#6E4F59] mb-1">
+          <label htmlFor="st-bio" className="block text-xs font-medium text-[#95847C] mb-1">
             Bio curta do topo do Portal da Cliente
           </label>
           <textarea
@@ -444,12 +444,12 @@ export const AdminSettingsTab: React.FC<{ settings: SalonSettings }> = ({ settin
             maxLength={260}
             value={form.bio}
             onChange={(e) => setForm({ ...form, bio: e.target.value })}
-            className="w-full rounded-xl border border-[#EBDCE0] bg-[#FAF4F5]/50 p-3 text-sm"
+            className="w-full rounded-xl border border-[#E8D6CB] bg-[#FAF6F1]/50 p-3 text-sm"
           />
         </div>
 
         <div>
-          <label htmlFor="st-addr" className="block text-xs font-medium text-[#6E4F59] mb-1">
+          <label htmlFor="st-addr" className="block text-xs font-medium text-[#95847C] mb-1">
             Endereço completo
           </label>
           <input
@@ -458,12 +458,12 @@ export const AdminSettingsTab: React.FC<{ settings: SalonSettings }> = ({ settin
             maxLength={200}
             value={form.address}
             onChange={(e) => setForm({ ...form, address: e.target.value })}
-            className="w-full min-h-[44px] rounded-xl border border-[#EBDCE0] bg-[#FAF4F5]/50 px-3.5 text-sm"
+            className="w-full min-h-[44px] rounded-xl border border-[#E8D6CB] bg-[#FAF6F1]/50 px-3.5 text-sm"
           />
         </div>
 
         <div>
-          <label htmlFor="st-hero" className="block text-xs font-medium text-[#6E4F59] mb-1">
+          <label htmlFor="st-hero" className="block text-xs font-medium text-[#95847C] mb-1">
             Título editorial da capa
           </label>
           <input
@@ -472,23 +472,23 @@ export const AdminSettingsTab: React.FC<{ settings: SalonSettings }> = ({ settin
             maxLength={120}
             value={form.heroTitle}
             onChange={(e) => setForm({ ...form, heroTitle: e.target.value })}
-            className="w-full min-h-[44px] rounded-xl border border-[#EBDCE0] bg-[#FAF4F5]/50 px-3.5 text-sm"
+            className="w-full min-h-[44px] rounded-xl border border-[#E8D6CB] bg-[#FAF6F1]/50 px-3.5 text-sm"
           />
         </div>
       </div>
 
       {/* Profile Photo & Hero Banner Photo (PRD v36) */}
-      <div className="bg-white rounded-2xl border border-[#EBDCE0] p-5 space-y-5">
-        <h2 className="font-editorial text-2xl font-semibold text-[#350B19]">
+      <div className="bg-white rounded-2xl border border-[#E8D6CB] p-5 space-y-5">
+        <h2 className="font-editorial text-2xl font-semibold text-[#594943]">
           Fotos do Estúdio (Perfil & Capa)
         </h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           {/* Avatar */}
           <div className="space-y-3">
-            <div className="text-xs font-medium text-[#6E4F59]">Foto de Perfil (Avatar)</div>
+            <div className="text-xs font-medium text-[#95847C]">Foto de Perfil (Avatar)</div>
             <div className="flex items-center gap-4">
-              <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-[#D83F79]/40 bg-[#FAF4F5] shrink-0">
+              <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-[#C4A477]/40 bg-[#FAF6F1] shrink-0">
                 <SafeImage
                   src={form.avatarImage}
                   alt="Prévia do perfil"
@@ -506,9 +506,9 @@ export const AdminSettingsTab: React.FC<{ settings: SalonSettings }> = ({ settin
                 <button
                   type="button"
                   onClick={() => avatarInputRef.current?.click()}
-                  className="min-h-[40px] inline-flex items-center gap-2 rounded-xl bg-[#350B19] px-3.5 text-xs font-semibold text-white hover:bg-[#4F172A]"
+                  className="min-h-[40px] inline-flex items-center gap-2 rounded-xl bg-[#594943] px-3.5 text-xs font-semibold text-white hover:bg-[#433631]"
                 >
-                  <ImagePlus className="w-3.5 h-3.5 text-[#D83F79]" />
+                  <ImagePlus className="w-3.5 h-3.5 text-[#C4A477]" />
                   <span>Enviar foto</span>
                 </button>
                 <div className="flex flex-wrap gap-1.5">
@@ -517,7 +517,7 @@ export const AdminSettingsTab: React.FC<{ settings: SalonSettings }> = ({ settin
                     onClick={() =>
                       setForm((prev) => ({ ...prev, avatarImage: STUDIO_IMAGES.ownerPortrait }))
                     }
-                    className="text-[11px] font-medium text-[#6E4F59] hover:text-[#D83F79] underline"
+                    className="text-[11px] font-medium text-[#95847C] hover:text-[#C4A477] underline"
                   >
                     Usar retrato padrão
                   </button>
@@ -528,8 +528,8 @@ export const AdminSettingsTab: React.FC<{ settings: SalonSettings }> = ({ settin
 
           {/* Banner */}
           <div className="space-y-3">
-            <div className="text-xs font-medium text-[#6E4F59]">Banner Principal do Portal</div>
-            <div className="aspect-video w-full rounded-xl overflow-hidden border border-[#EBDCE0] bg-[#FAF4F5]">
+            <div className="text-xs font-medium text-[#95847C]">Banner Principal do Portal</div>
+            <div className="aspect-video w-full rounded-xl overflow-hidden border border-[#E8D6CB] bg-[#FAF6F1]">
               <SafeImage
                 src={form.heroImageUrl}
                 alt="Prévia do banner"
@@ -547,9 +547,9 @@ export const AdminSettingsTab: React.FC<{ settings: SalonSettings }> = ({ settin
               <button
                 type="button"
                 onClick={() => heroInputRef.current?.click()}
-                className="min-h-[40px] inline-flex items-center gap-2 rounded-xl bg-[#350B19] px-3.5 text-xs font-semibold text-white hover:bg-[#4F172A]"
+                className="min-h-[40px] inline-flex items-center gap-2 rounded-xl bg-[#594943] px-3.5 text-xs font-semibold text-white hover:bg-[#433631]"
               >
-                <ImagePlus className="w-3.5 h-3.5 text-[#D83F79]" />
+                <ImagePlus className="w-3.5 h-3.5 text-[#C4A477]" />
                 <span>Enviar banner</span>
               </button>
               <select
@@ -564,7 +564,7 @@ export const AdminSettingsTab: React.FC<{ settings: SalonSettings }> = ({ settin
                     setForm((prev) => ({ ...prev, heroImageUrl: e.target.value }));
                   }
                 }}
-                className="min-h-[40px] rounded-xl border border-[#EBDCE0] bg-[#FAF4F5] px-2.5 text-xs text-[#350B19]"
+                className="min-h-[40px] rounded-xl border border-[#E8D6CB] bg-[#FAF6F1] px-2.5 text-xs text-[#594943]"
               >
                 <option value="">Galeria do estúdio...</option>
                 {STUDIO_IMAGE_PRESETS.map((preset) => (
@@ -579,13 +579,13 @@ export const AdminSettingsTab: React.FC<{ settings: SalonSettings }> = ({ settin
       </div>
 
       {/* Pix, Financial Goal & Reschedule Policy */}
-      <div className="bg-white rounded-2xl border border-[#EBDCE0] p-5 space-y-4">
-        <h2 className="font-editorial text-2xl font-semibold text-[#350B19]">
+      <div className="bg-white rounded-2xl border border-[#E8D6CB] p-5 space-y-4">
+        <h2 className="font-editorial text-2xl font-semibold text-[#594943]">
           Pix, Meta Mensal & Remarcação
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label htmlFor="st-pixkey" className="block text-xs font-medium text-[#6E4F59] mb-1">
+            <label htmlFor="st-pixkey" className="block text-xs font-medium text-[#95847C] mb-1">
               Chave Pix (CPF, CNPJ, E-mail, Celular ou Aleatória)
             </label>
             <input
@@ -594,11 +594,11 @@ export const AdminSettingsTab: React.FC<{ settings: SalonSettings }> = ({ settin
               maxLength={120}
               value={form.pixKey}
               onChange={(e) => setForm({ ...form, pixKey: e.target.value })}
-              className="w-full min-h-[44px] rounded-xl border border-[#EBDCE0] bg-[#FAF4F5]/50 px-3.5 text-sm font-mono"
+              className="w-full min-h-[44px] rounded-xl border border-[#E8D6CB] bg-[#FAF6F1]/50 px-3.5 text-sm font-mono"
             />
           </div>
           <div>
-            <label htmlFor="st-pixname" className="block text-xs font-medium text-[#6E4F59] mb-1">
+            <label htmlFor="st-pixname" className="block text-xs font-medium text-[#95847C] mb-1">
               Nome do recebedor (sem acentos)
             </label>
             <input
@@ -607,11 +607,11 @@ export const AdminSettingsTab: React.FC<{ settings: SalonSettings }> = ({ settin
               maxLength={80}
               value={form.pixName}
               onChange={(e) => setForm({ ...form, pixName: e.target.value })}
-              className="w-full min-h-[44px] rounded-xl border border-[#EBDCE0] bg-[#FAF4F5]/50 px-3.5 text-sm"
+              className="w-full min-h-[44px] rounded-xl border border-[#E8D6CB] bg-[#FAF6F1]/50 px-3.5 text-sm"
             />
           </div>
           <div>
-            <label htmlFor="st-pixcity" className="block text-xs font-medium text-[#6E4F59] mb-1">
+            <label htmlFor="st-pixcity" className="block text-xs font-medium text-[#95847C] mb-1">
               Cidade Pix
             </label>
             <input
@@ -620,11 +620,11 @@ export const AdminSettingsTab: React.FC<{ settings: SalonSettings }> = ({ settin
               maxLength={60}
               value={form.pixCity}
               onChange={(e) => setForm({ ...form, pixCity: e.target.value })}
-              className="w-full min-h-[44px] rounded-xl border border-[#EBDCE0] bg-[#FAF4F5]/50 px-3.5 text-sm"
+              className="w-full min-h-[44px] rounded-xl border border-[#E8D6CB] bg-[#FAF6F1]/50 px-3.5 text-sm"
             />
           </div>
           <div>
-            <label htmlFor="st-deposit" className="block text-xs font-medium text-[#6E4F59] mb-1">
+            <label htmlFor="st-deposit" className="block text-xs font-medium text-[#95847C] mb-1">
               Sinal Pix (%) — 100 para valor integral
             </label>
             <input
@@ -634,11 +634,11 @@ export const AdminSettingsTab: React.FC<{ settings: SalonSettings }> = ({ settin
               max={100}
               value={form.depositPercent}
               onChange={(e) => setForm({ ...form, depositPercent: Number(e.target.value) })}
-              className="w-full min-h-[44px] rounded-xl border border-[#EBDCE0] bg-[#FAF4F5]/50 px-3.5 text-sm tabular-nums"
+              className="w-full min-h-[44px] rounded-xl border border-[#E8D6CB] bg-[#FAF6F1]/50 px-3.5 text-sm tabular-nums"
             />
           </div>
           <div>
-            <label htmlFor="st-goal" className="block text-xs font-medium text-[#6E4F59] mb-1">
+            <label htmlFor="st-goal" className="block text-xs font-medium text-[#95847C] mb-1">
               Meta mensal de faturamento (R$)
             </label>
             <input
@@ -649,11 +649,11 @@ export const AdminSettingsTab: React.FC<{ settings: SalonSettings }> = ({ settin
               step={100}
               value={form.monthlyGoal}
               onChange={(e) => setForm({ ...form, monthlyGoal: Number(e.target.value) })}
-              className="w-full min-h-[44px] rounded-xl border border-[#EBDCE0] bg-[#FAF4F5]/50 px-3.5 text-sm tabular-nums"
+              className="w-full min-h-[44px] rounded-xl border border-[#E8D6CB] bg-[#FAF6F1]/50 px-3.5 text-sm tabular-nums"
             />
           </div>
           <div>
-            <label htmlFor="st-resched" className="block text-xs font-medium text-[#6E4F59] mb-1">
+            <label htmlFor="st-resched" className="block text-xs font-medium text-[#95847C] mb-1">
               Antecedência mínima para remarcação (horas)
             </label>
             <input
@@ -663,21 +663,21 @@ export const AdminSettingsTab: React.FC<{ settings: SalonSettings }> = ({ settin
               max={168}
               value={form.rescheduleMinHours}
               onChange={(e) => setForm({ ...form, rescheduleMinHours: Number(e.target.value) })}
-              className="w-full min-h-[44px] rounded-xl border border-[#EBDCE0] bg-[#FAF4F5]/50 px-3.5 text-sm tabular-nums"
+              className="w-full min-h-[44px] rounded-xl border border-[#E8D6CB] bg-[#FAF6F1]/50 px-3.5 text-sm tabular-nums"
             />
           </div>
         </div>
       </div>
 
       {/* Working Hours, Configured Slots Grid & Blocked Dates (Folgas) */}
-      <div className="bg-white rounded-2xl border border-[#EBDCE0] p-5 space-y-5">
-        <h2 className="font-editorial text-2xl font-semibold text-[#350B19]">
+      <div className="bg-white rounded-2xl border border-[#E8D6CB] p-5 space-y-5">
+        <h2 className="font-editorial text-2xl font-semibold text-[#594943]">
           Expediente, Grade de Horários & Folgas
         </h2>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <div>
-            <label htmlFor="st-open" className="block text-xs font-medium text-[#6E4F59] mb-1">
+            <label htmlFor="st-open" className="block text-xs font-medium text-[#95847C] mb-1">
               Abertura
             </label>
             <input
@@ -685,11 +685,11 @@ export const AdminSettingsTab: React.FC<{ settings: SalonSettings }> = ({ settin
               type="time"
               value={form.openTime}
               onChange={(e) => setForm({ ...form, openTime: e.target.value })}
-              className="w-full min-h-[44px] rounded-xl border border-[#EBDCE0] bg-[#FAF4F5]/50 px-3 text-sm tabular-nums"
+              className="w-full min-h-[44px] rounded-xl border border-[#E8D6CB] bg-[#FAF6F1]/50 px-3 text-sm tabular-nums"
             />
           </div>
           <div>
-            <label htmlFor="st-close" className="block text-xs font-medium text-[#6E4F59] mb-1">
+            <label htmlFor="st-close" className="block text-xs font-medium text-[#95847C] mb-1">
               Fechamento
             </label>
             <input
@@ -697,18 +697,18 @@ export const AdminSettingsTab: React.FC<{ settings: SalonSettings }> = ({ settin
               type="time"
               value={form.closeTime}
               onChange={(e) => setForm({ ...form, closeTime: e.target.value })}
-              className="w-full min-h-[44px] rounded-xl border border-[#EBDCE0] bg-[#FAF4F5]/50 px-3 text-sm tabular-nums"
+              className="w-full min-h-[44px] rounded-xl border border-[#E8D6CB] bg-[#FAF6F1]/50 px-3 text-sm tabular-nums"
             />
           </div>
           <div>
-            <label htmlFor="st-step" className="block text-xs font-medium text-[#6E4F59] mb-1">
+            <label htmlFor="st-step" className="block text-xs font-medium text-[#95847C] mb-1">
               Intervalo (min)
             </label>
             <select
               id="st-step"
               value={form.slotIntervalMinutes}
               onChange={(e) => setForm({ ...form, slotIntervalMinutes: Number(e.target.value) })}
-              className="w-full min-h-[44px] rounded-xl border border-[#EBDCE0] bg-[#FAF4F5]/50 px-3 text-sm tabular-nums"
+              className="w-full min-h-[44px] rounded-xl border border-[#E8D6CB] bg-[#FAF6F1]/50 px-3 text-sm tabular-nums"
             >
               <option value={15}>15 min</option>
               <option value={30}>30 min</option>
@@ -716,7 +716,7 @@ export const AdminSettingsTab: React.FC<{ settings: SalonSettings }> = ({ settin
             </select>
           </div>
           <div>
-            <label htmlFor="st-ret" className="block text-xs font-medium text-[#6E4F59] mb-1">
+            <label htmlFor="st-ret" className="block text-xs font-medium text-[#95847C] mb-1">
               Alerta retorno (dias)
             </label>
             <input
@@ -726,14 +726,14 @@ export const AdminSettingsTab: React.FC<{ settings: SalonSettings }> = ({ settin
               max={90}
               value={form.returnAlertDays}
               onChange={(e) => setForm({ ...form, returnAlertDays: Number(e.target.value) })}
-              className="w-full min-h-[44px] rounded-xl border border-[#EBDCE0] bg-[#FAF4F5]/50 px-3 text-sm tabular-nums"
+              className="w-full min-h-[44px] rounded-xl border border-[#E8D6CB] bg-[#FAF6F1]/50 px-3 text-sm tabular-nums"
             />
           </div>
         </div>
 
         {/* Workdays */}
         <div>
-          <div className="text-xs font-medium text-[#6E4F59] mb-2">Dias de atendimento</div>
+          <div className="text-xs font-medium text-[#95847C] mb-2">Dias de atendimento</div>
           <div className="flex flex-wrap gap-2">
             {WEEKDAY_OPTS.map((wd) => {
               const active = form.workDays.includes(wd.day);
@@ -744,8 +744,8 @@ export const AdminSettingsTab: React.FC<{ settings: SalonSettings }> = ({ settin
                   onClick={() => toggleWorkDay(wd.day)}
                   className={`min-h-[42px] min-w-[50px] rounded-xl px-3 text-xs font-semibold transition-colors border ${
                     active
-                      ? 'bg-[#350B19] text-white border-[#350B19]'
-                      : 'bg-white text-[#6E4F59] border-[#EBDCE0]'
+                      ? 'bg-[#594943] text-white border-[#594943]'
+                      : 'bg-white text-[#95847C] border-[#E8D6CB]'
                   }`}
                 >
                   {wd.label}
@@ -756,23 +756,23 @@ export const AdminSettingsTab: React.FC<{ settings: SalonSettings }> = ({ settin
         </div>
 
         {/* Explicit Configured Slots Manager (PRD v36) */}
-        <div className="pt-4 border-t border-[#EBDCE0] space-y-3">
+        <div className="pt-4 border-t border-[#E8D6CB] space-y-3">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
-              <div className="text-xs font-semibold text-[#350B19] flex items-center gap-1.5">
-                <Clock className="w-3.5 h-3.5 text-[#D83F79]" />
+              <div className="text-xs font-semibold text-[#594943] flex items-center gap-1.5">
+                <Clock className="w-3.5 h-3.5 text-[#C4A477]" />
                 <span>Grade de Horários Liberados ({form.configuredSlots?.length || 0})</span>
               </div>
-              <p className="text-[11px] text-[#6E4F59]">
+              <p className="text-[11px] text-[#95847C]">
                 Defina exatamente quais horários de início aparecem no Portal da Cliente (ex.: pule o almoço).
               </p>
             </div>
             <button
               type="button"
               onClick={handleRegenerateSlotsFromHours}
-              className="min-h-[38px] inline-flex items-center gap-1.5 rounded-xl border border-[#EBDCE0] bg-[#FAF4F5] px-3 text-xs font-medium text-[#350B19] hover:border-[#D83F79] shrink-0"
+              className="min-h-[38px] inline-flex items-center gap-1.5 rounded-xl border border-[#E8D6CB] bg-[#FAF6F1] px-3 text-xs font-medium text-[#594943] hover:border-[#C4A477] shrink-0"
             >
-              <RefreshCw className="w-3.5 h-3.5 text-[#D83F79]" />
+              <RefreshCw className="w-3.5 h-3.5 text-[#C4A477]" />
               <span>Gerar do expediente</span>
             </button>
           </div>
@@ -783,12 +783,12 @@ export const AdminSettingsTab: React.FC<{ settings: SalonSettings }> = ({ settin
               aria-label="Novo horário na grade"
               value={newSlotTime}
               onChange={(e) => setNewSlotTime(e.target.value)}
-              className="min-h-[42px] rounded-xl border border-[#EBDCE0] bg-[#FAF4F5]/50 px-3 text-sm tabular-nums"
+              className="min-h-[42px] rounded-xl border border-[#E8D6CB] bg-[#FAF6F1]/50 px-3 text-sm tabular-nums"
             />
             <button
               type="button"
               onClick={handleAddConfiguredSlot}
-              className="min-h-[42px] inline-flex items-center gap-1.5 rounded-xl bg-[#350B19] px-3.5 text-xs font-semibold text-white hover:bg-[#4F172A]"
+              className="min-h-[42px] inline-flex items-center gap-1.5 rounded-xl bg-[#594943] px-3.5 text-xs font-semibold text-white hover:bg-[#433631]"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Adicionar horário</span>
@@ -799,14 +799,14 @@ export const AdminSettingsTab: React.FC<{ settings: SalonSettings }> = ({ settin
             {(form.configuredSlots || []).map((slot) => (
               <span
                 key={slot}
-                className="inline-flex items-center gap-1.5 rounded-xl border border-[#EBDCE0] bg-[#FAF4F5] pl-3 pr-1.5 py-1.5 text-xs font-semibold text-[#350B19] tabular-nums"
+                className="inline-flex items-center gap-1.5 rounded-xl border border-[#E8D6CB] bg-[#FAF6F1] pl-3 pr-1.5 py-1.5 text-xs font-semibold text-[#594943] tabular-nums"
               >
                 <span>{slot}</span>
                 <button
                   type="button"
                   onClick={() => handleRemoveConfiguredSlot(slot)}
                   aria-label={`Remover horário ${slot}`}
-                  className="w-6 h-6 rounded-lg flex items-center justify-center text-[#6E4F59] hover:text-[#D83F79] hover:bg-white"
+                  className="w-6 h-6 rounded-lg flex items-center justify-center text-[#95847C] hover:text-[#C4A477] hover:bg-white"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
@@ -816,13 +816,13 @@ export const AdminSettingsTab: React.FC<{ settings: SalonSettings }> = ({ settin
         </div>
 
         {/* Blocked Dates / Folgas Manager (PRD v36) */}
-        <div className="pt-4 border-t border-[#EBDCE0] space-y-3">
+        <div className="pt-4 border-t border-[#E8D6CB] space-y-3">
           <div>
-            <div className="text-xs font-semibold text-[#350B19] flex items-center gap-1.5">
-              <CalendarOff className="w-3.5 h-3.5 text-[#D83F79]" />
+            <div className="text-xs font-semibold text-[#594943] flex items-center gap-1.5">
+              <CalendarOff className="w-3.5 h-3.5 text-[#C4A477]" />
               <span>Dias de Folga & Feriados ({form.blockedDates?.length || 0})</span>
             </div>
-            <p className="text-[11px] text-[#6E4F59]">
+            <p className="text-[11px] text-[#95847C]">
               Datas cadastradas aqui ficam indisponíveis no calendário das clientes.
             </p>
           </div>
@@ -833,13 +833,13 @@ export const AdminSettingsTab: React.FC<{ settings: SalonSettings }> = ({ settin
               aria-label="Adicionar data de folga"
               value={newBlockedDate}
               onChange={(e) => setNewBlockedDate(e.target.value)}
-              className="min-h-[42px] rounded-xl border border-[#EBDCE0] bg-[#FAF4F5]/50 px-3 text-sm tabular-nums"
+              className="min-h-[42px] rounded-xl border border-[#E8D6CB] bg-[#FAF6F1]/50 px-3 text-sm tabular-nums"
             />
             <button
               type="button"
               onClick={handleAddBlockedDate}
               disabled={!newBlockedDate}
-              className="min-h-[42px] inline-flex items-center gap-1.5 rounded-xl bg-[#350B19] px-3.5 text-xs font-semibold text-white hover:bg-[#4F172A] disabled:opacity-40"
+              className="min-h-[42px] inline-flex items-center gap-1.5 rounded-xl bg-[#594943] px-3.5 text-xs font-semibold text-white hover:bg-[#433631] disabled:opacity-40"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Bloquear data</span>
@@ -847,20 +847,20 @@ export const AdminSettingsTab: React.FC<{ settings: SalonSettings }> = ({ settin
           </div>
 
           {(form.blockedDates || []).length === 0 ? (
-            <p className="text-xs text-[#6E4F59]">Nenhuma data de folga cadastrada.</p>
+            <p className="text-xs text-[#95847C]">Nenhuma data de folga cadastrada.</p>
           ) : (
             <div className="flex flex-wrap gap-2">
               {(form.blockedDates || []).map((dateISO) => (
                 <span
                   key={dateISO}
-                  className="inline-flex items-center gap-1.5 rounded-xl border border-[#D83F79]/30 bg-[#F7E2EA]/50 pl-3 pr-1.5 py-1.5 text-xs font-semibold text-[#350B19] tabular-nums"
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-[#C4A477]/30 bg-[#F2EAE4]/50 pl-3 pr-1.5 py-1.5 text-xs font-semibold text-[#594943] tabular-nums"
                 >
                   <span>{formatDateBR(dateISO)}</span>
                   <button
                     type="button"
                     onClick={() => handleRemoveBlockedDate(dateISO)}
                     aria-label={`Desbloquear ${formatDateBR(dateISO)}`}
-                    className="w-6 h-6 rounded-lg flex items-center justify-center text-[#6E4F59] hover:text-[#D83F79] hover:bg-white"
+                    className="w-6 h-6 rounded-lg flex items-center justify-center text-[#95847C] hover:text-[#C4A477] hover:bg-white"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
@@ -874,7 +874,7 @@ export const AdminSettingsTab: React.FC<{ settings: SalonSettings }> = ({ settin
       <button
         type="submit"
         disabled={saving}
-        className="min-h-[48px] inline-flex items-center gap-2 rounded-xl bg-[#D83F79] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#BD2D65] disabled:opacity-50"
+        className="min-h-[48px] inline-flex items-center gap-2 rounded-xl bg-[#C4A477] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#BE9293] disabled:opacity-50"
       >
         <Save className="w-4 h-4" />
         <span>{saving ? 'Salvando alterações...' : 'Salvar ajustes do estúdio'}</span>

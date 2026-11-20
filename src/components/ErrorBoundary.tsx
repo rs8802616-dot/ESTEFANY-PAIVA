@@ -38,16 +38,16 @@ export class ErrorBoundary extends React.Component<{ children: React.ReactNode }
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen bg-[#FAF4F5] flex items-center justify-center p-6">
-          <div className="max-w-md w-full bg-white border border-[#EBDCE0] rounded-3xl p-8 text-center">
-            <h1 className="font-editorial text-3xl font-semibold text-[#350B19]">
+        <div className="min-h-screen bg-[#FAF6F1] flex items-center justify-center p-6">
+          <div className="max-w-md w-full bg-white border border-[#E8D6CB] rounded-3xl p-8 text-center">
+            <h1 className="font-editorial text-3xl font-semibold text-[#594943]">
               Algo saiu do previsto
             </h1>
-            <p className="mt-3 text-sm text-[#6E4F59] leading-relaxed">{this.state.message}</p>
+            <p className="mt-3 text-sm text-[#95847C] leading-relaxed">{this.state.message}</p>
             <button
               type="button"
               onClick={() => window.location.reload()}
-              className="mt-6 w-full min-h-[44px] rounded-xl bg-[#350B19] text-white text-sm font-medium px-5 py-2.5 hover:bg-[#4F172A] transition-colors"
+              className="mt-6 w-full min-h-[44px] rounded-xl bg-[#594943] text-white text-sm font-medium px-5 py-2.5 hover:bg-[#433631] transition-colors"
             >
               Recarregar aplicativo
             </button>

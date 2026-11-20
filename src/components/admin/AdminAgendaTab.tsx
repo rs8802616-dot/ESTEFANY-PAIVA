@@ -199,8 +199,8 @@ export const AdminAgendaTab: React.FC<AdminAgendaTabProps> = ({
       {/* Header Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="font-editorial text-3xl font-semibold text-[#350B19]">Agenda</h1>
-          <p className="text-sm text-[#6E4F59]">
+          <h1 className="font-editorial text-3xl font-semibold text-[#594943]">Agenda</h1>
+          <p className="text-sm text-[#95847C]">
             Toque em qualquer atendimento para ver detalhes, atualizar status e disparar mensagens de 1 clique.
           </p>
         </div>
@@ -209,25 +209,25 @@ export const AdminAgendaTab: React.FC<AdminAgendaTabProps> = ({
           <button
             type="button"
             onClick={() => setBlockSheetOpen(true)}
-            className="min-h-[44px] inline-flex items-center gap-2 rounded-xl border border-[#EBDCE0] bg-white px-4 py-2 text-xs sm:text-sm font-medium text-[#350B19] hover:border-[#D83F79] transition-colors whitespace-nowrap"
+            className="min-h-[44px] inline-flex items-center gap-2 rounded-xl border border-[#E8D6CB] bg-white px-4 py-2 text-xs sm:text-sm font-medium text-[#594943] hover:border-[#C4A477] transition-colors whitespace-nowrap"
           >
-            <Ban className="w-4 h-4 text-[#D83F79]" />
+            <Ban className="w-4 h-4 text-[#C4A477]" />
             <span>Bloquear Horário</span>
           </button>
 
           <button
             type="button"
             onClick={() => setWalkInOpen(true)}
-            className="min-h-[44px] inline-flex items-center gap-2 rounded-xl bg-[#350B19] px-4 py-2 text-xs sm:text-sm font-semibold text-white hover:bg-[#4F172A] transition-colors whitespace-nowrap"
+            className="min-h-[44px] inline-flex items-center gap-2 rounded-xl bg-[#594943] px-4 py-2 text-xs sm:text-sm font-semibold text-white hover:bg-[#433631] transition-colors whitespace-nowrap"
           >
-            <CalendarPlus className="w-4 h-4 text-[#D83F79]" />
+            <CalendarPlus className="w-4 h-4 text-[#C4A477]" />
             <span>Novo Horário</span>
           </button>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white rounded-2xl border border-[#EBDCE0] p-3.5">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white rounded-2xl border border-[#E8D6CB] p-3.5">
         <div className="flex items-center gap-1.5 overflow-x-auto">
           {(['all', 'pending', 'confirmed', 'completed', 'cancelled'] as const).map((st) => (
             <button
@@ -236,8 +236,8 @@ export const AdminAgendaTab: React.FC<AdminAgendaTabProps> = ({
               onClick={() => setStatusFilter(st)}
               className={`min-h-[40px] rounded-xl px-3.5 py-1.5 text-xs font-medium whitespace-nowrap shrink-0 transition-colors ${
                 statusFilter === st
-                  ? 'bg-[#350B19] text-white'
-                  : 'text-[#6E4F59] hover:bg-[#FAF4F5] hover:text-[#350B19]'
+                  ? 'bg-[#594943] text-white'
+                  : 'text-[#95847C] hover:bg-[#FAF6F1] hover:text-[#594943]'
               }`}
             >
               {st === 'all' ? 'Todos' : statusLabelPT(st)}
@@ -251,13 +251,13 @@ export const AdminAgendaTab: React.FC<AdminAgendaTabProps> = ({
             value={dateFilter}
             onChange={(e) => setDateFilter(e.target.value)}
             aria-label="Filtrar por data"
-            className="min-h-[40px] rounded-xl border border-[#EBDCE0] bg-[#FAF4F5] px-3 text-xs text-[#350B19] tabular-nums focus:border-[#D83F79] focus:outline-none"
+            className="min-h-[40px] rounded-xl border border-[#E8D6CB] bg-[#FAF6F1] px-3 text-xs text-[#594943] tabular-nums focus:border-[#C4A477] focus:outline-none"
           />
           {dateFilter && (
             <button
               type="button"
               onClick={() => setDateFilter('')}
-              className="min-h-[40px] text-xs text-[#D83F79] font-semibold px-2"
+              className="min-h-[40px] text-xs text-[#C4A477] font-semibold px-2"
             >
               Limpar
             </button>
@@ -267,8 +267,8 @@ export const AdminAgendaTab: React.FC<AdminAgendaTabProps> = ({
 
       {/* Appointments List */}
       {filteredAppointments.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-[#EBDCE0] p-10 text-center">
-          <p className="text-sm text-[#6E4F59]">
+        <div className="bg-white rounded-2xl border border-[#E8D6CB] p-10 text-center">
+          <p className="text-sm text-[#95847C]">
             Nenhum agendamento encontrado para os filtros selecionados.
           </p>
         </div>
@@ -277,16 +277,16 @@ export const AdminAgendaTab: React.FC<AdminAgendaTabProps> = ({
           {filteredAppointments.map((apt) => (
             <article
               key={apt.id}
-              className="bg-white rounded-2xl border border-[#EBDCE0] hover:border-[#D83F79]/60 transition-colors overflow-hidden"
+              className="bg-white rounded-2xl border border-[#E8D6CB] hover:border-[#C4A477]/60 transition-colors overflow-hidden"
             >
               <button
                 type="button"
                 onClick={() => setDetailAppointmentId(apt.id)}
-                className="w-full text-left p-4 sm:p-5 flex flex-col sm:flex-row sm:items-start justify-between gap-3 hover:bg-[#FAF4F5]/40 transition-colors"
+                className="w-full text-left p-4 sm:p-5 flex flex-col sm:flex-row sm:items-start justify-between gap-3 hover:bg-[#FAF6F1]/40 transition-colors"
               >
                 <div className="space-y-1 min-w-0">
-                  <div className="flex flex-wrap items-center gap-x-2 text-xs text-[#6E4F59] tabular-nums">
-                    <span className="font-semibold text-[#350B19]">
+                  <div className="flex flex-wrap items-center gap-x-2 text-xs text-[#95847C] tabular-nums">
+                    <span className="font-semibold text-[#594943]">
                       {formatDateBR(apt.date)} · {apt.startTime}–{apt.endTime}
                     </span>
                     <span aria-hidden="true">·</span>
@@ -297,35 +297,35 @@ export const AdminAgendaTab: React.FC<AdminAgendaTabProps> = ({
                         apt.status === 'confirmed'
                           ? 'text-emerald-700'
                           : apt.status === 'completed'
-                            ? 'text-[#350B19]'
+                            ? 'text-[#594943]'
                             : apt.status === 'cancelled'
-                              ? 'text-[#6E4F59]'
-                              : 'text-[#D83F79]'
+                              ? 'text-[#95847C]'
+                              : 'text-[#C4A477]'
                       }`}
                     >
                       {statusLabelPT(apt.status)}
                     </span>
                   </div>
 
-                  <h3 className="text-base font-semibold text-[#350B19] flex items-center gap-2">
+                  <h3 className="text-base font-semibold text-[#594943] flex items-center gap-2">
                     <span className="truncate">{apt.clientName}</span>
-                    <span className="text-xs font-normal text-[#6E4F59] tabular-nums shrink-0">
+                    <span className="text-xs font-normal text-[#95847C] tabular-nums shrink-0">
                       {apt.clientPhone}
                     </span>
                   </h3>
 
-                  <p className="text-sm text-[#2A0E17]">{apt.serviceNames.join(' + ')}</p>
+                  <p className="text-sm text-[#594943]">{apt.serviceNames.join(' + ')}</p>
 
                   {apt.notes && (
-                    <p className="text-xs text-[#6E4F59] italic line-clamp-1">Obs.: {apt.notes}</p>
+                    <p className="text-xs text-[#95847C] italic line-clamp-1">Obs.: {apt.notes}</p>
                   )}
                 </div>
 
                 <div className="flex sm:flex-col items-center sm:items-end justify-between gap-1 shrink-0">
-                  <span className="text-lg font-semibold text-[#350B19] tabular-nums">
+                  <span className="text-lg font-semibold text-[#594943] tabular-nums">
                     {formatBRL(apt.totalPrice)}
                   </span>
-                  <div className="flex items-center gap-1.5 text-xs text-[#6E4F59]">
+                  <div className="flex items-center gap-1.5 text-xs text-[#95847C]">
                     <span>
                       {apt.paymentMethod === 'pix'
                         ? apt.pixPaid
@@ -333,13 +333,13 @@ export const AdminAgendaTab: React.FC<AdminAgendaTabProps> = ({
                           : 'Pix pendente'
                         : 'Presencial'}
                     </span>
-                    <ChevronRight className="w-4 h-4 text-[#D83F79]" />
+                    <ChevronRight className="w-4 h-4 text-[#C4A477]" />
                   </div>
                 </div>
               </button>
 
               {/* Compact Quick Action Strip */}
-              <div className="px-4 sm:px-5 py-2.5 bg-[#FAF4F5]/60 border-t border-[#EBDCE0] flex flex-wrap items-center gap-2">
+              <div className="px-4 sm:px-5 py-2.5 bg-[#FAF6F1]/60 border-t border-[#E8D6CB] flex flex-wrap items-center gap-2">
                 {apt.status === 'pending' && (
                   <button
                     type="button"
@@ -350,7 +350,7 @@ export const AdminAgendaTab: React.FC<AdminAgendaTabProps> = ({
                         'Agendamento confirmado.',
                       )
                     }
-                    className="min-h-[40px] inline-flex items-center gap-1.5 rounded-xl bg-[#350B19] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#4F172A] transition-colors"
+                    className="min-h-[40px] inline-flex items-center gap-1.5 rounded-xl bg-[#594943] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#433631] transition-colors"
                   >
                     <Check className="w-3.5 h-3.5" />
                     <span>Confirmar</span>
@@ -377,9 +377,9 @@ export const AdminAgendaTab: React.FC<AdminAgendaTabProps> = ({
                 <button
                   type="button"
                   onClick={() => setDetailAppointmentId(apt.id)}
-                  className="min-h-[40px] inline-flex items-center gap-1.5 rounded-xl border border-[#EBDCE0] bg-white px-3 py-1.5 text-xs font-medium text-[#350B19] hover:border-[#D83F79] transition-colors"
+                  className="min-h-[40px] inline-flex items-center gap-1.5 rounded-xl border border-[#E8D6CB] bg-white px-3 py-1.5 text-xs font-medium text-[#594943] hover:border-[#C4A477] transition-colors"
                 >
-                  <MessageCircle className="w-3.5 h-3.5 text-[#D83F79]" />
+                  <MessageCircle className="w-3.5 h-3.5 text-[#C4A477]" />
                   <span>Detalhes & WhatsApp</span>
                 </button>
               </div>
@@ -389,20 +389,20 @@ export const AdminAgendaTab: React.FC<AdminAgendaTabProps> = ({
       )}
 
       {/* Personal Schedule Blocks Section */}
-      <div className="bg-white rounded-2xl border border-[#EBDCE0] p-5 space-y-4">
+      <div className="bg-white rounded-2xl border border-[#E8D6CB] p-5 space-y-4">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <h2 className="font-editorial text-2xl font-semibold text-[#350B19]">
+            <h2 className="font-editorial text-2xl font-semibold text-[#594943]">
               Bloqueios Pessoais da Agenda
             </h2>
-            <p className="text-xs text-[#6E4F59]">
+            <p className="text-xs text-[#95847C]">
               Almoços, cursos ou compromissos que bloqueiam horários específicos em tempo real.
             </p>
           </div>
           <button
             type="button"
             onClick={() => setBlockSheetOpen(true)}
-            className="min-h-[42px] inline-flex items-center gap-1.5 rounded-xl bg-[#FAF4F5] border border-[#EBDCE0] px-3.5 py-1.5 text-xs font-medium text-[#350B19] hover:border-[#D83F79]"
+            className="min-h-[42px] inline-flex items-center gap-1.5 rounded-xl bg-[#FAF6F1] border border-[#E8D6CB] px-3.5 py-1.5 text-xs font-medium text-[#594943] hover:border-[#C4A477]"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>Adicionar</span>
@@ -410,14 +410,14 @@ export const AdminAgendaTab: React.FC<AdminAgendaTabProps> = ({
         </div>
 
         {blocks.length === 0 ? (
-          <p className="text-sm text-[#6E4F59]">Nenhum bloqueio pessoal ativo.</p>
+          <p className="text-sm text-[#95847C]">Nenhum bloqueio pessoal ativo.</p>
         ) : (
-          <div className="divide-y divide-[#EBDCE0]">
+          <div className="divide-y divide-[#E8D6CB]">
             {blocks.map((blk) => (
               <div key={blk.id} className="py-3 flex items-center justify-between gap-3">
                 <div>
-                  <div className="text-sm font-semibold text-[#350B19]">{blk.title}</div>
-                  <div className="text-xs text-[#6E4F59] tabular-nums">
+                  <div className="text-sm font-semibold text-[#594943]">{blk.title}</div>
+                  <div className="text-xs text-[#95847C] tabular-nums">
                     {formatDateBR(blk.date)} ·{' '}
                     {blk.allDay ? 'Dia inteiro' : `${blk.startTime} às ${blk.endTime}`}
                   </div>
@@ -426,7 +426,7 @@ export const AdminAgendaTab: React.FC<AdminAgendaTabProps> = ({
                   type="button"
                   onClick={() => void handleDeleteBlock(blk.id)}
                   aria-label={`Remover bloqueio ${blk.title}`}
-                  className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl text-[#6E4F59] hover:text-[#D83F79] hover:bg-[#FAF4F5]"
+                  className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl text-[#95847C] hover:text-[#C4A477] hover:bg-[#FAF6F1]"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
@@ -450,10 +450,10 @@ export const AdminAgendaTab: React.FC<AdminAgendaTabProps> = ({
         {selectedAppointment && (
           <div className="space-y-5">
             {/* Summary Card */}
-            <div className="rounded-2xl bg-white border border-[#EBDCE0] p-4 space-y-3">
+            <div className="rounded-2xl bg-white border border-[#E8D6CB] p-4 space-y-3">
               <div className="flex items-start justify-between gap-3">
                 <div className="space-y-1">
-                  <div className="text-xs uppercase tracking-wider text-[#6E4F59] font-medium">
+                  <div className="text-xs uppercase tracking-wider text-[#95847C] font-medium">
                     Status atual
                   </div>
                   <div
@@ -461,10 +461,10 @@ export const AdminAgendaTab: React.FC<AdminAgendaTabProps> = ({
                       selectedAppointment.status === 'confirmed'
                         ? 'text-emerald-700'
                         : selectedAppointment.status === 'completed'
-                          ? 'text-[#350B19]'
+                          ? 'text-[#594943]'
                           : selectedAppointment.status === 'cancelled'
-                            ? 'text-[#6E4F59]'
-                            : 'text-[#D83F79]'
+                            ? 'text-[#95847C]'
+                            : 'text-[#C4A477]'
                     }`}
                   >
                     {statusLabelPT(selectedAppointment.status)}
@@ -474,28 +474,28 @@ export const AdminAgendaTab: React.FC<AdminAgendaTabProps> = ({
                 </div>
 
                 <div className="text-right">
-                  <div className="text-xs uppercase tracking-wider text-[#6E4F59] font-medium">
+                  <div className="text-xs uppercase tracking-wider text-[#95847C] font-medium">
                     Valor total
                   </div>
-                  <div className="text-xl font-semibold text-[#350B19] tabular-nums">
+                  <div className="text-xl font-semibold text-[#594943] tabular-nums">
                     {formatBRL(selectedAppointment.totalPrice)}
                   </div>
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-[#EBDCE0] space-y-1.5 text-sm">
-                <div className="flex items-center gap-2 text-[#2A0E17]">
-                  <Phone className="w-4 h-4 text-[#D83F79] shrink-0" />
+              <div className="pt-3 border-t border-[#E8D6CB] space-y-1.5 text-sm">
+                <div className="flex items-center gap-2 text-[#594943]">
+                  <Phone className="w-4 h-4 text-[#C4A477] shrink-0" />
                   <span className="tabular-nums">{selectedAppointment.clientPhone}</span>
                 </div>
-                <div className="flex items-center gap-2 text-[#2A0E17]">
-                  <Clock className="w-4 h-4 text-[#D83F79] shrink-0" />
+                <div className="flex items-center gap-2 text-[#594943]">
+                  <Clock className="w-4 h-4 text-[#C4A477] shrink-0" />
                   <span className="tabular-nums">
                     Duração total: {formatDuration(selectedAppointment.totalDurationMinutes)}
                   </span>
                 </div>
-                <div className="flex items-center gap-2 text-[#2A0E17]">
-                  <QrCode className="w-4 h-4 text-[#D83F79] shrink-0" />
+                <div className="flex items-center gap-2 text-[#594943]">
+                  <QrCode className="w-4 h-4 text-[#C4A477] shrink-0" />
                   <span>
                     {selectedAppointment.paymentMethod === 'pix'
                       ? selectedAppointment.pixPaid
@@ -511,13 +511,13 @@ export const AdminAgendaTab: React.FC<AdminAgendaTabProps> = ({
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-[#EBDCE0]">
-                <div className="text-xs font-medium text-[#6E4F59] mb-1">Procedimentos</div>
-                <div className="text-sm font-medium text-[#350B19]">
+              <div className="pt-3 border-t border-[#E8D6CB]">
+                <div className="text-xs font-medium text-[#95847C] mb-1">Procedimentos</div>
+                <div className="text-sm font-medium text-[#594943]">
                   {selectedAppointment.serviceNames.join(' + ')}
                 </div>
                 {selectedAppointment.notes && (
-                  <p className="mt-2 text-xs text-[#6E4F59] bg-[#FAF4F5] rounded-xl p-2.5">
+                  <p className="mt-2 text-xs text-[#95847C] bg-[#FAF6F1] rounded-xl p-2.5">
                     Obs.: {selectedAppointment.notes}
                   </p>
                 )}
@@ -526,7 +526,7 @@ export const AdminAgendaTab: React.FC<AdminAgendaTabProps> = ({
 
             {/* 1-Click WhatsApp Messages (Lembrete, Enviar Pix, Pós-Atendimento) */}
             <div className="space-y-2.5">
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-[#6E4F59]">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-[#95847C]">
                 Mensagens Prontas de 1 Clique (WhatsApp)
               </h3>
               <div className="grid grid-cols-1 gap-2">
@@ -536,13 +536,13 @@ export const AdminAgendaTab: React.FC<AdminAgendaTabProps> = ({
                     href={buildWhatsAppUrl(selectedAppointment.clientPhone, tpl.text)}
                     target="_blank"
                     rel="noreferrer"
-                    className="min-h-[48px] flex items-center justify-between gap-3 rounded-2xl bg-white border border-[#EBDCE0] px-4 py-3 hover:border-[#D83F79] transition-colors"
+                    className="min-h-[48px] flex items-center justify-between gap-3 rounded-2xl bg-white border border-[#E8D6CB] px-4 py-3 hover:border-[#C4A477] transition-colors"
                   >
                     <div className="min-w-0">
-                      <div className="text-sm font-semibold text-[#350B19]">{tpl.label}</div>
-                      <div className="text-xs text-[#6E4F59] truncate">{tpl.description}</div>
+                      <div className="text-sm font-semibold text-[#594943]">{tpl.label}</div>
+                      <div className="text-xs text-[#95847C] truncate">{tpl.description}</div>
                     </div>
-                    <MessageCircle className="w-4 h-4 text-[#D83F79] shrink-0" />
+                    <MessageCircle className="w-4 h-4 text-[#C4A477] shrink-0" />
                   </a>
                 ))}
               </div>
@@ -550,7 +550,7 @@ export const AdminAgendaTab: React.FC<AdminAgendaTabProps> = ({
 
             {/* Status & Calendar Actions */}
             <div className="space-y-2.5">
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-[#6E4F59]">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-[#95847C]">
                 Ações do Atendimento
               </h3>
 
@@ -565,7 +565,7 @@ export const AdminAgendaTab: React.FC<AdminAgendaTabProps> = ({
                         'Agendamento confirmado.',
                       )
                     }
-                    className="min-h-[46px] inline-flex items-center justify-center gap-2 rounded-xl bg-[#350B19] px-4 text-sm font-semibold text-white hover:bg-[#4F172A] transition-colors"
+                    className="min-h-[46px] inline-flex items-center justify-center gap-2 rounded-xl bg-[#594943] px-4 text-sm font-semibold text-white hover:bg-[#433631] transition-colors"
                   >
                     <Check className="w-4 h-4" />
                     <span>Confirmar horário</span>
@@ -608,7 +608,7 @@ export const AdminAgendaTab: React.FC<AdminAgendaTabProps> = ({
                           'Pagamento Pix marcado como recebido.',
                         )
                       }
-                      className="min-h-[46px] inline-flex items-center justify-center gap-2 rounded-xl bg-[#F7E2EA] px-4 text-sm font-semibold text-[#350B19] hover:bg-[#D83F79] hover:text-white transition-colors"
+                      className="min-h-[46px] inline-flex items-center justify-center gap-2 rounded-xl bg-[#F2EAE4] px-4 text-sm font-semibold text-[#594943] hover:bg-[#C4A477] hover:text-white transition-colors"
                     >
                       <QrCode className="w-4 h-4" />
                       <span>Marcar Pix Pago</span>
@@ -619,9 +619,9 @@ export const AdminAgendaTab: React.FC<AdminAgendaTabProps> = ({
                   href={buildGoogleCalendarUrl(selectedAppointment, settings)}
                   target="_blank"
                   rel="noreferrer"
-                  className="min-h-[46px] inline-flex items-center justify-center gap-2 rounded-xl border border-[#EBDCE0] bg-white px-4 text-sm font-medium text-[#350B19] hover:border-[#D83F79] transition-colors"
+                  className="min-h-[46px] inline-flex items-center justify-center gap-2 rounded-xl border border-[#E8D6CB] bg-white px-4 text-sm font-medium text-[#594943] hover:border-[#C4A477] transition-colors"
                 >
-                  <Calendar className="w-4 h-4 text-[#D83F79]" />
+                  <Calendar className="w-4 h-4 text-[#C4A477]" />
                   <span>Google Agenda</span>
                 </a>
 
@@ -636,7 +636,7 @@ export const AdminAgendaTab: React.FC<AdminAgendaTabProps> = ({
                           'Horário cancelado e liberado.',
                         )
                       }
-                      className="min-h-[46px] inline-flex items-center justify-center gap-2 rounded-xl border border-[#EBDCE0] bg-white px-4 text-sm font-medium text-[#6E4F59] hover:text-[#D83F79] transition-colors"
+                      className="min-h-[46px] inline-flex items-center justify-center gap-2 rounded-xl border border-[#E8D6CB] bg-white px-4 text-sm font-medium text-[#95847C] hover:text-[#C4A477] transition-colors"
                     >
                       <XCircle className="w-4 h-4" />
                       <span>Cancelar horário</span>
@@ -676,7 +676,7 @@ export const AdminAgendaTab: React.FC<AdminAgendaTabProps> = ({
       >
         <form onSubmit={handleCreateBlock} className="space-y-4">
           <div>
-            <label htmlFor="blk-title" className="block text-xs font-medium text-[#6E4F59] mb-1">
+            <label htmlFor="blk-title" className="block text-xs font-medium text-[#95847C] mb-1">
               Motivo do bloqueio
             </label>
             <input
@@ -686,12 +686,12 @@ export const AdminAgendaTab: React.FC<AdminAgendaTabProps> = ({
               maxLength={100}
               value={blkTitle}
               onChange={(e) => setBlkTitle(e.target.value)}
-              className="w-full min-h-[44px] rounded-xl border border-[#EBDCE0] bg-white px-3.5 text-sm"
+              className="w-full min-h-[44px] rounded-xl border border-[#E8D6CB] bg-white px-3.5 text-sm"
             />
           </div>
 
           <div>
-            <label htmlFor="blk-date" className="block text-xs font-medium text-[#6E4F59] mb-1">
+            <label htmlFor="blk-date" className="block text-xs font-medium text-[#95847C] mb-1">
               Data
             </label>
             <input
@@ -700,16 +700,16 @@ export const AdminAgendaTab: React.FC<AdminAgendaTabProps> = ({
               required
               value={blkDate}
               onChange={(e) => setBlkDate(e.target.value)}
-              className="w-full min-h-[44px] rounded-xl border border-[#EBDCE0] bg-white px-3.5 text-sm tabular-nums"
+              className="w-full min-h-[44px] rounded-xl border border-[#E8D6CB] bg-white px-3.5 text-sm tabular-nums"
             />
           </div>
 
-          <label className="flex items-center gap-2.5 text-sm text-[#350B19]">
+          <label className="flex items-center gap-2.5 text-sm text-[#594943]">
             <input
               type="checkbox"
               checked={blkAllDay}
               onChange={(e) => setBlkAllDay(e.target.checked)}
-              className="w-4 h-4 accent-[#D83F79]"
+              className="w-4 h-4 accent-[#C4A477]"
             />
             <span>Bloquear o dia inteiro</span>
           </label>
@@ -717,7 +717,7 @@ export const AdminAgendaTab: React.FC<AdminAgendaTabProps> = ({
           {!blkAllDay && (
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label htmlFor="blk-start" className="block text-xs font-medium text-[#6E4F59] mb-1">
+                <label htmlFor="blk-start" className="block text-xs font-medium text-[#95847C] mb-1">
                   Início
                 </label>
                 <input
@@ -726,11 +726,11 @@ export const AdminAgendaTab: React.FC<AdminAgendaTabProps> = ({
                   required
                   value={blkStart}
                   onChange={(e) => setBlkStart(e.target.value)}
-                  className="w-full min-h-[44px] rounded-xl border border-[#EBDCE0] bg-white px-3.5 text-sm tabular-nums"
+                  className="w-full min-h-[44px] rounded-xl border border-[#E8D6CB] bg-white px-3.5 text-sm tabular-nums"
                 />
               </div>
               <div>
-                <label htmlFor="blk-end" className="block text-xs font-medium text-[#6E4F59] mb-1">
+                <label htmlFor="blk-end" className="block text-xs font-medium text-[#95847C] mb-1">
                   Término
                 </label>
                 <input
@@ -739,7 +739,7 @@ export const AdminAgendaTab: React.FC<AdminAgendaTabProps> = ({
                   required
                   value={blkEnd}
                   onChange={(e) => setBlkEnd(e.target.value)}
-                  className="w-full min-h-[44px] rounded-xl border border-[#EBDCE0] bg-white px-3.5 text-sm tabular-nums"
+                  className="w-full min-h-[44px] rounded-xl border border-[#E8D6CB] bg-white px-3.5 text-sm tabular-nums"
                 />
               </div>
             </div>
@@ -748,7 +748,7 @@ export const AdminAgendaTab: React.FC<AdminAgendaTabProps> = ({
           <button
             type="submit"
             disabled={saving}
-            className="w-full min-h-[46px] rounded-xl bg-[#350B19] text-white text-sm font-semibold hover:bg-[#4F172A] disabled:opacity-50"
+            className="w-full min-h-[46px] rounded-xl bg-[#594943] text-white text-sm font-semibold hover:bg-[#433631] disabled:opacity-50"
           >
             {saving ? 'Salvando bloqueio...' : 'Salvar bloqueio na agenda'}
           </button>
@@ -765,7 +765,7 @@ export const AdminAgendaTab: React.FC<AdminAgendaTabProps> = ({
         <form onSubmit={handleCreateWalkIn} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label htmlFor="wi-name" className="block text-xs font-medium text-[#6E4F59] mb-1">
+              <label htmlFor="wi-name" className="block text-xs font-medium text-[#95847C] mb-1">
                 Nome da cliente
               </label>
               <input
@@ -774,11 +774,11 @@ export const AdminAgendaTab: React.FC<AdminAgendaTabProps> = ({
                 required
                 value={wiName}
                 onChange={(e) => setWiName(e.target.value)}
-                className="w-full min-h-[44px] rounded-xl border border-[#EBDCE0] bg-white px-3.5 text-sm"
+                className="w-full min-h-[44px] rounded-xl border border-[#E8D6CB] bg-white px-3.5 text-sm"
               />
             </div>
             <div>
-              <label htmlFor="wi-phone" className="block text-xs font-medium text-[#6E4F59] mb-1">
+              <label htmlFor="wi-phone" className="block text-xs font-medium text-[#95847C] mb-1">
                 WhatsApp
               </label>
               <input
@@ -788,14 +788,14 @@ export const AdminAgendaTab: React.FC<AdminAgendaTabProps> = ({
                 value={wiPhone}
                 onChange={(e) => setWiPhone(maskPhoneBR(e.target.value))}
                 placeholder="(11) 99999-9999"
-                className="w-full min-h-[44px] rounded-xl border border-[#EBDCE0] bg-white px-3.5 text-sm tabular-nums"
+                className="w-full min-h-[44px] rounded-xl border border-[#E8D6CB] bg-white px-3.5 text-sm tabular-nums"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label htmlFor="wi-date" className="block text-xs font-medium text-[#6E4F59] mb-1">
+              <label htmlFor="wi-date" className="block text-xs font-medium text-[#95847C] mb-1">
                 Data
               </label>
               <input
@@ -804,11 +804,11 @@ export const AdminAgendaTab: React.FC<AdminAgendaTabProps> = ({
                 required
                 value={wiDate}
                 onChange={(e) => setWiDate(e.target.value)}
-                className="w-full min-h-[44px] rounded-xl border border-[#EBDCE0] bg-white px-3.5 text-sm tabular-nums"
+                className="w-full min-h-[44px] rounded-xl border border-[#E8D6CB] bg-white px-3.5 text-sm tabular-nums"
               />
             </div>
             <div>
-              <label htmlFor="wi-start" className="block text-xs font-medium text-[#6E4F59] mb-1">
+              <label htmlFor="wi-start" className="block text-xs font-medium text-[#95847C] mb-1">
                 Horário início
               </label>
               <input
@@ -817,20 +817,20 @@ export const AdminAgendaTab: React.FC<AdminAgendaTabProps> = ({
                 required
                 value={wiStart}
                 onChange={(e) => setWiStart(e.target.value)}
-                className="w-full min-h-[44px] rounded-xl border border-[#EBDCE0] bg-white px-3.5 text-sm tabular-nums"
+                className="w-full min-h-[44px] rounded-xl border border-[#E8D6CB] bg-white px-3.5 text-sm tabular-nums"
               />
             </div>
           </div>
 
           <div>
-            <div className="text-xs font-medium text-[#6E4F59] mb-2">Procedimentos</div>
-            <div className="space-y-1.5 max-h-44 overflow-y-auto bg-white border border-[#EBDCE0] rounded-xl p-2.5">
+            <div className="text-xs font-medium text-[#95847C] mb-2">Procedimentos</div>
+            <div className="space-y-1.5 max-h-44 overflow-y-auto bg-white border border-[#E8D6CB] rounded-xl p-2.5">
               {services.map((svc) => {
                 const checked = wiServiceIds.includes(svc.id);
                 return (
                   <label
                     key={svc.id}
-                    className="flex items-center justify-between gap-2 px-2 py-1.5 rounded-lg hover:bg-[#FAF4F5] text-sm"
+                    className="flex items-center justify-between gap-2 px-2 py-1.5 rounded-lg hover:bg-[#FAF6F1] text-sm"
                   >
                     <span className="flex items-center gap-2 min-w-0">
                       <input
@@ -843,11 +843,11 @@ export const AdminAgendaTab: React.FC<AdminAgendaTabProps> = ({
                               : [...prev, svc.id],
                           )
                         }
-                        className="w-4 h-4 accent-[#D83F79]"
+                        className="w-4 h-4 accent-[#C4A477]"
                       />
                       <span className="truncate">{svc.name}</span>
                     </span>
-                    <span className="text-xs text-[#6E4F59] tabular-nums shrink-0">
+                    <span className="text-xs text-[#95847C] tabular-nums shrink-0">
                       {formatBRL(svc.price)}
                     </span>
                   </label>
@@ -857,7 +857,7 @@ export const AdminAgendaTab: React.FC<AdminAgendaTabProps> = ({
           </div>
 
           <div>
-            <label htmlFor="wi-notes" className="block text-xs font-medium text-[#6E4F59] mb-1">
+            <label htmlFor="wi-notes" className="block text-xs font-medium text-[#95847C] mb-1">
               Observações
             </label>
             <input
@@ -866,14 +866,14 @@ export const AdminAgendaTab: React.FC<AdminAgendaTabProps> = ({
               maxLength={400}
               value={wiNotes}
               onChange={(e) => setWiNotes(e.target.value)}
-              className="w-full min-h-[44px] rounded-xl border border-[#EBDCE0] bg-white px-3.5 text-sm"
+              className="w-full min-h-[44px] rounded-xl border border-[#E8D6CB] bg-white px-3.5 text-sm"
             />
           </div>
 
           <button
             type="submit"
             disabled={saving}
-            className="w-full min-h-[46px] rounded-xl bg-[#D83F79] text-white text-sm font-semibold hover:bg-[#BD2D65] disabled:opacity-50"
+            className="w-full min-h-[46px] rounded-xl bg-[#C4A477] text-white text-sm font-semibold hover:bg-[#BE9293] disabled:opacity-50"
           >
             {saving ? 'Confirmando horário...' : 'Confirmar horário na agenda'}
           </button>
