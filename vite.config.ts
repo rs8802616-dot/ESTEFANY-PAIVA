@@ -47,7 +47,7 @@ export default defineConfig(() => {
           ],
         },
         workbox: {
-          cacheId: 'estefany-nails-v71-inicio-only-calendar',
+          cacheId: 'estefany-nails-v72-fullscreen-calendar-edge-to-edge',
           skipWaiting: true,
           clientsClaim: true,
           cleanupOutdatedCaches: true,

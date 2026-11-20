@@ -767,7 +767,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           </div>
         </header>
 
-        <main className="w-full max-w-[1600px] min-w-0 mx-auto px-3 sm:px-6 lg:px-10 py-5 sm:py-8 space-y-6 overflow-x-hidden">
+        <main
+          className={
+            activeTab === 'inicio'
+              ? 'w-full min-w-0 mx-auto px-2 sm:px-4 py-2 sm:py-3 overflow-x-hidden'
+              : 'w-full max-w-[1600px] min-w-0 mx-auto px-3 sm:px-6 lg:px-10 py-5 sm:py-8 space-y-6 overflow-x-hidden'
+          }
+        >
           {/* Interactive 33-Screen Quick Jumper (Sem scroll interno cortando cards e sem duplicar na Tela 33) */}
           {show33Explorer && !(activeTab === 'perfil' && profileSubScreen === 33) && (
             <section className="bg-white rounded-3xl border border-[#C4A477] p-5 sm:p-6 shadow-lg space-y-4 no-print">

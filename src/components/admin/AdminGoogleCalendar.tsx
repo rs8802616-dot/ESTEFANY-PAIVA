@@ -169,7 +169,7 @@ export const AdminGoogleCalendar: React.FC<AdminGoogleCalendarProps> = ({
   const isMonthClosed = (settings.closedMonths || []).includes(selectedDate.slice(0, 7));
 
   return (
-    <section className="w-full bg-white rounded-3xl border border-[#E8D6CB] overflow-hidden shadow-2xs relative">
+    <section className="w-full min-h-[calc(100dvh-84px)] flex flex-col bg-white rounded-2xl sm:rounded-3xl border border-[#E8D6CB] overflow-hidden shadow-2xs relative">
       {/* Top Date Header + View Switcher */}
       <div className="px-4 sm:px-6 pt-4 pb-3 border-b border-[#E8D6CB]/80 flex flex-wrap items-center justify-between gap-3">
         <div className="min-w-0">
@@ -293,7 +293,7 @@ export const AdminGoogleCalendar: React.FC<AdminGoogleCalendarProps> = ({
           </div>
 
           {/* Full-Screen Hourly Timeline (08:00 - 20:00) with Pastel Cards */}
-          <div className="relative overflow-y-auto min-h-[62dvh] max-h-[76dvh] px-2 sm:px-5 py-3">
+          <div className="relative flex-1 overflow-y-auto min-h-[calc(100dvh-240px)] px-2 sm:px-5 py-3">
             <div
               className="relative"
               style={{ height: `${timelineHours.length * ROW_HEIGHT}px` }}
@@ -407,21 +407,21 @@ export const AdminGoogleCalendar: React.FC<AdminGoogleCalendarProps> = ({
         </>
       ) : (
         /* Month Overview Grid */
-        <div>
+        <div className="flex-1 flex flex-col">
           <div className="grid grid-cols-7 border-b border-[#E8D6CB] bg-[#FAF6F1]/40">
             {WEEKDAYS_SHORT.map((w) => (
               <div
                 key={w}
-                className="py-2 text-center text-[11px] font-semibold text-[#95847C] uppercase"
+                className="py-2.5 text-center text-[11px] sm:text-xs font-semibold text-[#95847C] uppercase"
               >
                 {w}
               </div>
             ))}
           </div>
-          <div className="grid grid-cols-7 divide-x divide-y divide-[#E8D6CB]/70">
+          <div className="flex-1 grid grid-cols-7 auto-rows-fr divide-x divide-y divide-[#E8D6CB]/70">
             {monthCells.map((cell, idx) => {
               if (!cell) {
-                return <div key={`m-empty-${idx}`} className="min-h-[68px] sm:min-h-[92px] bg-[#FAF6F1]/30" />;
+                return <div key={`m-empty-${idx}`} className="min-h-[82px] sm:min-h-[120px] lg:min-h-[140px] bg-[#FAF6F1]/30" />;
               }
               const dayApts = appointmentsByDate.get(cell.dateISO) || [];
               const isToday = cell.dateISO === today;
@@ -434,7 +434,7 @@ export const AdminGoogleCalendar: React.FC<AdminGoogleCalendarProps> = ({
                     setSelectedDate(cell.dateISO);
                     setViewMode('day');
                   }}
-                  className={`min-h-[68px] sm:min-h-[92px] p-1.5 text-left flex flex-col justify-between cursor-pointer ${
+                  className={`min-h-[82px] sm:min-h-[120px] lg:min-h-[140px] p-1.5 sm:p-2 text-left flex flex-col justify-between cursor-pointer ${
                     isSelected ? 'bg-[#F2EAE4]/80' : 'bg-white hover:bg-[#FAF6F1]/60'
                   }`}
                 >
