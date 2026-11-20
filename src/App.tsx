@@ -6,6 +6,7 @@ import { OfflineIndicator } from './components/PWAInstallButton';
 import { ClientPortal } from './components/client/ClientPortal';
 import { AdminPanel } from './components/admin/AdminPanel';
 import { auth } from './lib/firebase';
+import { resolveAdminRouteAccess } from './lib/adminRoute';
 import {
   checkIsAdminUser,
   subscribeActiveAvailabilitySlots,
@@ -30,23 +31,13 @@ import type {
 
 type AppMode = 'client' | 'admin';
 
-function getInitialMode(): AppMode {
-  if (
-    typeof window !== 'undefined' &&
-    (window.location.hash.includes('admin') || window.location.pathname.includes('admin'))
-  ) {
-    return 'admin';
-  }
-  return 'client';
-}
-
 function SalonAppShell() {
-  const [mode, setMode] = useState<AppMode>(getInitialMode);
+  const [mode, setMode] = useState<AppMode>('client');
+  const [routeChecked, setRouteChecked] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [authReady, setAuthReady] = useState(false);
 
-  // Synchronous hydration eliminates avatar/banner flash on startup (PRD v36)
   const [settings, setSettings] = useState<SalonSettings>(() => loadCachedSettingsSync());
   const [categories, setCategories] = useState<Category[]>(DEFAULT_CATEGORIES);
   const [services, setServices] = useState<Service[]>(DEFAULT_SERVICES);
@@ -55,16 +46,23 @@ function SalonAppShell() {
   const [localBookings, setLocalBookings] = useState<Appointment[]>(() => loadLocalBookings());
 
   useEffect(() => {
-    const syncRoute = () => {
-      const isAdminRoute =
-        window.location.pathname.includes('admin') || window.location.hash.includes('admin');
-      setMode(isAdminRoute ? 'admin' : 'client');
+    let active = true;
+    const syncRoute = async () => {
+      const allowedAdmin = await resolveAdminRouteAccess();
+      if (!active) return;
+      setMode(allowedAdmin ? 'admin' : 'client');
+      setRouteChecked(true);
     };
-    window.addEventListener('hashchange', syncRoute);
-    window.addEventListener('popstate', syncRoute);
+    void syncRoute();
+    const onNav = () => {
+      void syncRoute();
+    };
+    window.addEventListener('hashchange', onNav);
+    window.addEventListener('popstate', onNav);
     return () => {
-      window.removeEventListener('hashchange', syncRoute);
-      window.removeEventListener('popstate', syncRoute);
+      active = false;
+      window.removeEventListener('hashchange', onNav);
+      window.removeEventListener('popstate', onNav);
     };
   }, []);
 
@@ -107,7 +105,6 @@ function SalonAppShell() {
     return subscribeClientAppointments(user.uid, setGoogleAppointments);
   }, [authReady, user]);
 
-  // Merge Google Firestore appointments with device-local guest bookings (Firestore wins by id)
   const clientAppointments = useMemo(() => {
     const map = new Map<string, Appointment>();
     localBookings.forEach((apt) => map.set(apt.id, apt));
@@ -125,6 +122,10 @@ function SalonAppShell() {
   const exitAdmin = () => {
     window.open('/', '_blank', 'noopener,noreferrer');
   };
+
+  if (!routeChecked) {
+    return null;
+  }
 
   return (
     <>

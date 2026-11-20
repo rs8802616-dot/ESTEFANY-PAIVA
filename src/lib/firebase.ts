@@ -2,6 +2,9 @@ import { initializeApp } from 'firebase/app';
 import {
   getAuth,
   GoogleAuthProvider,
+  sendEmailVerification,
+  sendPasswordResetEmail,
+  signInWithEmailAndPassword,
   signInWithPopup,
   signOut as firebaseSignOut,
   type User,
@@ -15,7 +18,8 @@ export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
 googleProvider.setCustomParameters({ prompt: 'select_account' });
 
-export const BOOTSTRAPPED_ADMIN_EMAIL = 'rs8802616@gmail.com';
+// E-mail administrativo configurado exclusivamente via variável de ambiente na Vercel (nunca exposto no Git)
+export const BOOTSTRAPPED_ADMIN_EMAIL = (import.meta.env.VITE_ADMIN_EMAIL || '').trim();
 
 export enum OperationType {
   CREATE = 'create',
@@ -67,6 +71,22 @@ export function handleFirestoreError(
   };
   console.error('Firestore Error: ', JSON.stringify(errInfo));
   throw new Error(JSON.stringify(errInfo));
+}
+
+/**
+ * Autenticação segura com E-mail e Senha (criptografia scrypt/PBKDF2 no servidor Firebase + TLS 1.3).
+ */
+export async function signInWithEmail(email: string, password: string): Promise<User> {
+  const result = await signInWithEmailAndPassword(auth, email.trim(), password);
+  return result.user;
+}
+
+export async function resetAdminPassword(email: string): Promise<void> {
+  await sendPasswordResetEmail(auth, email.trim());
+}
+
+export async function resendVerificationEmail(user: User): Promise<void> {
+  await sendEmailVerification(user);
 }
 
 export async function signInWithGoogle(): Promise<User> {

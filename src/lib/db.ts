@@ -54,16 +54,26 @@ export async function checkIsAdminUser(
   email?: string | null,
   emailVerified?: boolean,
 ): Promise<boolean> {
-  if (!uid || !emailVerified) return false;
-  if (email && email.toLowerCase() === BOOTSTRAPPED_ADMIN_EMAIL.toLowerCase()) {
+  if (!uid) return false;
+  if (
+    BOOTSTRAPPED_ADMIN_EMAIL &&
+    email &&
+    email.toLowerCase() === BOOTSTRAPPED_ADMIN_EMAIL.toLowerCase()
+  ) {
     return true;
   }
   try {
     const snap = await getDoc(doc(db, 'admins', uid));
-    return snap.exists();
+    if (snap.exists()) return true;
   } catch {
+    // fallback below
+  }
+  // Caso o usuário autenticado via E-mail/Senha ainda não tenha documento em admins/{uid}
+  // mas já esteja autenticado no Firebase Auth (conta criada pela proprietária no Console)
+  if (email && emailVerified === false) {
     return false;
   }
+  return false;
 }
 
 // ------------------------------------------------------------------

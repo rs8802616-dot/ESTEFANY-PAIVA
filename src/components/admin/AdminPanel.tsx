@@ -6,6 +6,8 @@ import {
   CalendarDays,
   CalendarPlus,
   DollarSign,
+  Eye,
+  EyeOff,
   LayoutDashboard,
   Lock,
   LogOut,
@@ -29,7 +31,13 @@ import {
   subscribeClientTechNotesAdmin,
   subscribePersonalBlocksAdmin,
 } from '../../lib/db';
-import { signInWithGoogle, signOutUser } from '../../lib/firebase';
+import {
+  resendVerificationEmail,
+  resetAdminPassword,
+  signInWithEmail,
+  signOutUser,
+} from '../../lib/firebase';
+import { clearAdminGateSession } from '../../lib/adminRoute';
 import {
   buildReturnAlertWhatsAppUrl,
   daysBetween,
@@ -87,6 +95,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   const [blocks, setBlocks] = useState<PersonalBlock[]>([]);
   const [techNotes, setTechNotes] = useState<ClientTechNote[]>([]);
   const [loginBusy, setLoginBusy] = useState(false);
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [walkInSignal, setWalkInSignal] = useState(0);
   const [pendingDetailId, setPendingDetailId] = useState<string | null>(null);
 
@@ -241,18 +252,49 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     setActiveTab('agenda');
   };
 
-  const handleLogin = async () => {
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!loginEmail.trim() || !loginPassword) {
+      showToast('Informe seu e-mail e sua senha.', 'error');
+      return;
+    }
     setLoginBusy(true);
     try {
-      await signInWithGoogle();
-    } catch {
-      showToast('Não foi possível autenticar com o Google.', 'error');
+      await signInWithEmail(loginEmail, loginPassword);
+      setLoginPassword('');
+    } catch (err: unknown) {
+      const code = (err as { code?: string })?.code || '';
+      if (code === 'auth/invalid-credential' || code === 'auth/wrong-password' || code === 'auth/user-not-found') {
+        showToast('E-mail ou senha incorretos.', 'error');
+      } else if (code === 'auth/too-many-requests') {
+        showToast('Muitas tentativas. Aguarde alguns minutos e tente novamente.', 'error');
+      } else {
+        showToast('Não foi possível entrar. Verifique e-mail e senha.', 'error');
+      }
     } finally {
       setLoginBusy(false);
     }
   };
 
-  // Secure Login Gate (Firebase Auth)
+  const handleResetPassword = async () => {
+    if (!loginEmail.trim()) {
+      showToast('Digite seu e-mail acima para receber o link de redefinição.', 'error');
+      return;
+    }
+    try {
+      await resetAdminPassword(loginEmail);
+      showToast('Link de redefinição enviado para o seu e-mail.', 'success');
+    } catch {
+      showToast('Não foi possível enviar o e-mail de recuperação.', 'error');
+    }
+  };
+
+  const handleSignOutAdmin = async () => {
+    clearAdminGateSession();
+    await signOutUser();
+  };
+
+  // Secure Login Gate (Firebase Auth Email/Password — criptografia scrypt no servidor)
   if (!authReady) {
     return (
       <div className="min-h-screen bg-[#FAF4F5] flex items-center justify-center p-6">
@@ -263,51 +305,118 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
   if (!user || !isAdmin) {
     return (
-      <div className="min-h-screen bg-[#350B19] flex items-center justify-center p-6">
-        <div className="max-w-md w-full bg-[#FAF4F5] rounded-3xl p-8 space-y-6 shadow-2xl">
+      <div className="min-h-screen bg-[#350B19] flex items-center justify-center p-4 sm:p-6">
+        <div className="max-w-md w-full bg-[#FAF4F5] rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl">
           <div className="space-y-2 text-center">
             <div className="w-12 h-12 rounded-2xl bg-[#350B19] text-[#D83F79] flex items-center justify-center mx-auto">
               <Lock className="w-5 h-5" />
             </div>
-            <h1 className="font-editorial text-3xl font-semibold text-[#350B19]">
+            <h1 className="font-editorial text-2xl sm:text-3xl font-semibold text-[#350B19]">
               Painel Administrativo
             </h1>
-            <p className="text-sm text-[#6E4F59] leading-relaxed">
+            <p className="text-xs sm:text-sm text-[#6E4F59] leading-relaxed">
               {user
-                ? `A conta ${user.email} não possui permissão de administradora deste estúdio.`
-                : `Acesso restrito à gestão do ${settings.studioName}. Autentique-se via Firebase Auth com sua conta Google autorizada.`}
+                ? !user.emailVerified
+                  ? `Sua conta (${user.email}) ainda precisa confirmar o e-mail para liberar acesso.`
+                  : `A conta ${user.email} não possui permissão de administradora.`
+                : 'Acesso criptografado com e-mail e senha.'}
             </p>
           </div>
 
-          <div className="space-y-2.5">
-            {!user ? (
+          {!user ? (
+            <form onSubmit={handleLogin} className="space-y-3.5" autoComplete="on">
+              <div>
+                <label className="block text-xs font-semibold text-[#350B19] mb-1.5">
+                  E-mail
+                </label>
+                <input
+                  type="email"
+                  required
+                  autoComplete="username"
+                  value={loginEmail}
+                  onChange={(e) => setLoginEmail(e.target.value)}
+                  placeholder="seu@email.com"
+                  className="w-full min-h-[46px] rounded-xl border border-[#EBDCE0] bg-white px-3.5 text-sm text-[#2A0E17] focus:border-[#D83F79] focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-[#350B19] mb-1.5">
+                  Senha
+                </label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    autoComplete="current-password"
+                    value={loginPassword}
+                    onChange={(e) => setLoginPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full min-h-[46px] rounded-xl border border-[#EBDCE0] bg-white pl-3.5 pr-11 text-sm text-[#2A0E17] focus:border-[#D83F79] focus:outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((v) => !v)}
+                    aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1.5 text-[#6E4F59] hover:text-[#350B19]"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
               <button
-                type="button"
+                type="submit"
                 disabled={loginBusy}
-                onClick={handleLogin}
-                className="w-full min-h-[48px] rounded-xl bg-[#350B19] text-white text-sm font-semibold hover:bg-[#4F172A] transition-colors"
+                className="w-full min-h-[48px] rounded-xl bg-[#350B19] text-white text-sm font-semibold hover:bg-[#4F172A] transition-colors disabled:opacity-60"
               >
-                {loginBusy ? 'Autenticando...' : 'Entrar com Google (Admin)'}
+                {loginBusy ? 'Entrando...' : 'Entrar no Painel'}
               </button>
-            ) : (
+
               <button
                 type="button"
-                onClick={() => void signOutUser()}
+                onClick={handleResetPassword}
+                className="w-full py-1.5 text-xs font-medium text-[#6E4F59] hover:text-[#D83F79] transition-colors"
+              >
+                Esqueci minha senha
+              </button>
+            </form>
+          ) : (
+            <div className="space-y-2.5">
+              {!user.emailVerified && (
+                <button
+                  type="button"
+                  onClick={async () => {
+                    try {
+                      await resendVerificationEmail(user);
+                      showToast('E-mail de confirmação enviado! Verifique sua caixa de entrada.', 'success');
+                    } catch {
+                      showToast('Aguarde um instante antes de reenviar.', 'error');
+                    }
+                  }}
+                  className="w-full min-h-[48px] rounded-xl bg-[#350B19] text-white text-sm font-semibold hover:bg-[#4F172A] transition-colors"
+                >
+                  Enviar e-mail de confirmação
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => void handleSignOutAdmin()}
                 className="w-full min-h-[48px] rounded-xl bg-[#D83F79] text-white text-sm font-semibold hover:bg-[#BD2D65] transition-colors"
               >
-                Trocar conta Google
+                Sair desta conta
               </button>
-            )}
+            </div>
+          )}
 
-            <button
-              type="button"
-              onClick={onExitAdmin}
-              className="w-full min-h-[44px] inline-flex items-center justify-center gap-2 rounded-xl border border-[#EBDCE0] bg-white text-sm font-medium text-[#350B19] hover:border-[#D83F79] transition-colors"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              <span>Voltar ao Portal da Cliente</span>
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={onExitAdmin}
+            className="w-full min-h-[44px] inline-flex items-center justify-center gap-2 rounded-xl border border-[#EBDCE0] bg-white text-sm font-medium text-[#350B19] hover:border-[#D83F79] transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>Ir para o Site da Cliente</span>
+          </button>
         </div>
       </div>
     );

@@ -200,54 +200,31 @@ export const ClientPortal: React.FC<ClientPortalProps> = ({
         </div>
       </header>
 
+      {/* Mobile Compact App Bar (< md) */}
+      <header className="md:hidden sticky top-0 z-40 bg-[#FAF4F5]/95 backdrop-blur-md border-b border-[#EBDCE0] px-4 py-3 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="w-9 h-9 rounded-full overflow-hidden border border-[#D83F79]/40 bg-[#350B19] shrink-0">
+            <SafeImage
+              src={settings.avatarImage}
+              alt={settings.studioName}
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <span className="font-editorial text-lg font-semibold text-[#350B19] truncate">
+            {settings.studioName}
+          </span>
+        </div>
+        <button
+          type="button"
+          onClick={() => setBookingOpen(true)}
+          className="min-h-[36px] inline-flex items-center gap-1.5 rounded-xl bg-[#350B19] px-3.5 py-1.5 text-xs font-semibold text-white shrink-0"
+        >
+          <span>{comboServices.length > 0 ? `Combo (${comboServices.length})` : 'Agendar'}</span>
+        </button>
+      </header>
+
       {/* Main Viewport */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-7 md:space-y-9 pt-4 md:pt-6">
-        {/* Studio Profile Header (Professional Avatar + Studio Name + Bio + Quick Actions, PRD v36) */}
-        <section className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-[#EBDCE0]">
-          <div className="flex items-center gap-4 min-w-0">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden border-2 border-[#D83F79]/35 bg-[#350B19] shrink-0">
-              <SafeImage
-                src={settings.avatarImage}
-                alt={settings.ownerName || settings.studioName}
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <div className="min-w-0">
-              <div className="font-editorial text-2xl sm:text-3xl font-semibold text-[#350B19] leading-tight truncate">
-                {settings.studioName}
-              </div>
-              <p className="mt-0.5 text-xs sm:text-sm text-[#6E4F59] leading-snug line-clamp-2 max-w-xl">
-                {settings.bio || settings.tagline}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2 shrink-0">
-            <button
-              type="button"
-              onClick={() => setActiveTab('appointments')}
-              className="min-h-[40px] inline-flex items-center gap-1.5 rounded-xl border border-[#EBDCE0] bg-white px-3.5 py-2 text-xs font-medium text-[#350B19] hover:border-[#D83F79] transition-colors whitespace-nowrap"
-            >
-              <Calendar className="w-3.5 h-3.5 text-[#D83F79]" />
-              <span>Meus Horários</span>
-            </button>
-
-            <a
-              href={buildWhatsAppUrl(
-                settings.whatsapp,
-                `Olá, ${settings.ownerName}! Gostaria de tirar uma dúvida sobre os procedimentos do ${settings.studioName}.`,
-              )}
-              target="_blank"
-              rel="noreferrer"
-              className="min-h-[40px] inline-flex items-center gap-1.5 rounded-xl border border-[#EBDCE0] bg-white px-3.5 py-2 text-xs font-medium text-[#350B19] hover:border-[#D83F79] transition-colors whitespace-nowrap"
-            >
-              <MessageCircle className="w-3.5 h-3.5 text-[#D83F79]" />
-              <span>WhatsApp</span>
-            </a>
-
-            <PWAInstallButton />
-          </div>
-        </section>
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-5 sm:space-y-7 pt-4 sm:pt-6">
 
         {/* Faixa de Próximo Agendamento (PRD v36) */}
         {nextUpcomingAppointment && activeTab === 'catalog' && (
@@ -282,58 +259,45 @@ export const ClientPortal: React.FC<ClientPortalProps> = ({
 
         {activeTab === 'catalog' && (
           <>
-            {/* Full-Bleed Luxury Hero Banner (v36) */}
-            <section className="relative overflow-hidden rounded-[28px] bg-[#350B19] min-h-[290px] sm:min-h-[360px] lg:min-h-[410px] flex items-end">
+            {/* Clean Luxury Hero Banner */}
+            <section className="relative overflow-hidden rounded-3xl bg-[#350B19] min-h-[190px] sm:min-h-[260px] lg:min-h-[300px] flex items-end">
               <SafeImage
                 src={settings.heroImageUrl}
                 alt={settings.studioName}
                 className="absolute inset-0 w-full h-full object-cover object-center"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#240610]/95 via-[#350B19]/60 to-[#350B19]/15" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#240610]/90 via-[#350B19]/45 to-transparent" />
 
-              <div className="relative z-10 w-full p-6 sm:p-10 lg:p-12 max-w-2xl space-y-3.5">
-                <p className="text-xs sm:text-sm font-medium text-[#F7E2EA]/90 tracking-wide">
-                  {settings.tagline}
-                </p>
-                <h1 className="font-editorial text-3xl sm:text-5xl font-semibold text-white leading-[1.08]">
+              <div className="relative z-10 w-full p-5 sm:p-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+                <h1 className="font-editorial text-2xl sm:text-4xl font-semibold text-white leading-tight max-w-lg">
                   {settings.heroTitle}
                 </h1>
-                <p className="text-sm sm:text-base text-[#FAF4F5]/85 leading-relaxed max-w-xl">
-                  {settings.heroSubtitle}
-                </p>
-                <div className="pt-2 flex flex-wrap items-center gap-3">
-                  <a
-                    href="#catalogo"
-                    className="min-h-[46px] inline-flex items-center justify-center gap-2 rounded-xl bg-[#D83F79] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#BD2D65] transition-colors whitespace-nowrap"
-                  >
-                    <span>Agendar Agora</span>
-                  </a>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => setBookingOpen(true)}
+                  className="min-h-[44px] inline-flex items-center justify-center rounded-xl bg-[#D83F79] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#BD2D65] transition-colors whitespace-nowrap shrink-0 self-start sm:self-end"
+                >
+                  Agendar Horário
+                </button>
               </div>
             </section>
 
             {/* Catalog Section */}
-            <section id="catalogo" className="space-y-6 scroll-mt-20">
-              <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-                <div>
-                  <h2 className="font-editorial text-3xl sm:text-4xl font-semibold text-[#350B19]">
-                    Menu de Procedimentos
-                  </h2>
-                  <p className="mt-1 text-sm text-[#6E4F59]">
-                    Toque em <strong>+ Combo</strong> para combinar procedimentos no mesmo horário — o calendário ajusta a duração automaticamente.
-                  </p>
-                </div>
+            <section id="catalogo" className="space-y-4 scroll-mt-20">
+              <div className="flex items-center justify-between gap-3">
+                <h2 className="font-editorial text-2xl sm:text-3xl font-semibold text-[#350B19]">
+                  Procedimentos
+                </h2>
 
-                {/* Live Search */}
-                <div className="relative w-full md:w-72">
-                  <Search className="w-4 h-4 text-[#6E4F59] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <div className="relative w-44 sm:w-64">
+                  <Search className="w-4 h-4 text-[#6E4F59] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                   <input
                     type="search"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder="Buscar procedimento..."
+                    placeholder="Buscar..."
                     aria-label="Buscar procedimento"
-                    className="w-full min-h-[44px] rounded-xl border border-[#EBDCE0] bg-white pl-10 pr-4 text-sm text-[#2A0E17] placeholder:text-[#6E4F59]/70 focus:border-[#D83F79] focus:outline-none"
+                    className="w-full min-h-[38px] rounded-xl border border-[#EBDCE0] bg-white pl-9 pr-3 text-xs sm:text-sm text-[#2A0E17] placeholder:text-[#6E4F59]/70 focus:border-[#D83F79] focus:outline-none"
                   />
                 </div>
               </div>
@@ -421,10 +385,9 @@ export const ClientPortal: React.FC<ClientPortalProps> = ({
                   </button>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-5">
                   {filteredServices.map((svc) => {
                     const inCombo = comboIds.includes(svc.id);
-                    const catName = categoryMap.get(svc.categoryId) || 'Procedimento';
 
                     return (
                       <article
@@ -435,7 +398,10 @@ export const ClientPortal: React.FC<ClientPortalProps> = ({
                             : 'border-[#EBDCE0] hover:border-[#350B19]/25'
                         }`}
                       >
-                        <div className="w-28 sm:w-full sm:aspect-[4/3] shrink-0 overflow-hidden bg-[#FAF4F5]">
+                        <div
+                          onClick={() => quickBookService(svc)}
+                          className="w-24 sm:w-full sm:aspect-[16/10] shrink-0 overflow-hidden bg-[#FAF4F5] cursor-pointer"
+                        >
                           <SafeImage
                             src={svc.imageUrl}
                             alt={svc.name}
@@ -443,27 +409,18 @@ export const ClientPortal: React.FC<ClientPortalProps> = ({
                           />
                         </div>
 
-                        <div className="flex-1 p-3.5 sm:p-5 flex flex-col justify-between gap-2.5 min-w-0">
-                          <div className="space-y-1">
-                            <div className="flex items-center gap-1.5 text-[11px] sm:text-xs text-[#6E4F59]">
-                              <span className="truncate">{catName}</span>
-                              <span aria-hidden="true">·</span>
-                              <span className="tabular-nums shrink-0">
-                                {formatDuration(svc.durationMinutes)}
-                              </span>
-                            </div>
-
+                        <div className="flex-1 p-3 sm:p-4 flex flex-col justify-between gap-2 min-w-0">
+                          <div className="min-w-0">
                             <h3 className="text-sm sm:text-base font-semibold text-[#350B19] leading-snug line-clamp-2">
                               {svc.name}
                             </h3>
-
-                            <p className="text-xs sm:text-sm text-[#6E4F59] leading-relaxed line-clamp-1 sm:line-clamp-2">
-                              {svc.description}
-                            </p>
+                            <span className="mt-0.5 inline-block text-[11px] sm:text-xs text-[#6E4F59] tabular-nums">
+                              {formatDuration(svc.durationMinutes)}
+                            </span>
                           </div>
 
-                          <div className="flex items-center justify-between gap-2 pt-1 sm:pt-3 sm:border-t sm:border-[#EBDCE0]/70">
-                            <span className="text-base sm:text-lg font-semibold text-[#350B19] tabular-nums">
+                          <div className="flex items-center justify-between gap-2 pt-1 sm:pt-2.5 sm:border-t sm:border-[#EBDCE0]/70">
+                            <span className="text-sm sm:text-base font-bold text-[#350B19] tabular-nums">
                               {formatBRL(svc.price)}
                             </span>
 
@@ -476,29 +433,24 @@ export const ClientPortal: React.FC<ClientPortalProps> = ({
                                     ? `Remover ${svc.name} do combo`
                                     : `Adicionar ${svc.name} ao combo`
                                 }
-                                className={`min-h-[40px] min-w-[40px] sm:px-3 inline-flex items-center justify-center gap-1 rounded-xl text-xs font-medium transition-colors border ${
+                                title={inCombo ? 'No combo' : 'Adicionar ao combo'}
+                                className={`min-h-[36px] min-w-[36px] inline-flex items-center justify-center rounded-xl text-xs font-medium transition-colors border ${
                                   inCombo
                                     ? 'bg-[#F7E2EA] border-[#D83F79] text-[#350B19]'
                                     : 'bg-white border-[#EBDCE0] text-[#350B19] hover:border-[#D83F79]'
                                 }`}
                               >
                                 {inCombo ? (
-                                  <>
-                                    <Check className="w-3.5 h-3.5 text-[#D83F79]" />
-                                    <span className="hidden sm:inline">No Combo</span>
-                                  </>
+                                  <Check className="w-3.5 h-3.5 text-[#D83F79]" />
                                 ) : (
-                                  <>
-                                    <Plus className="w-3.5 h-3.5" />
-                                    <span className="hidden sm:inline">Combo</span>
-                                  </>
+                                  <Plus className="w-3.5 h-3.5" />
                                 )}
                               </button>
 
                               <button
                                 type="button"
                                 onClick={() => quickBookService(svc)}
-                                className="min-h-[40px] rounded-xl bg-[#350B19] px-3.5 py-2 text-xs font-semibold text-white hover:bg-[#4F172A] transition-colors whitespace-nowrap"
+                                className="min-h-[36px] rounded-xl bg-[#350B19] px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-[#4F172A] transition-colors whitespace-nowrap"
                               >
                                 Agendar
                               </button>
