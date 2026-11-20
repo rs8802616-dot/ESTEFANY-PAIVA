@@ -34,11 +34,13 @@ import {
   subscribeAllServicesAdmin,
   subscribeClientTechNotesAdmin,
   subscribePersonalBlocksAdmin,
+  syncPendingLocalChangesToCloud,
 } from '../../lib/db';
 import {
   resendVerificationEmail,
   resetAdminPassword,
   signInWithEmail,
+  signInWithGoogle,
   signOutUser,
 } from '../../lib/firebase';
 import {
@@ -149,6 +151,12 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       unsubs.forEach((fn) => fn());
     };
   }, [authReady, effectiveAdmin]);
+
+  useEffect(() => {
+    if (user && isAdmin) {
+      void syncPendingLocalChangesToCloud();
+    }
+  }, [user, isAdmin]);
 
   const today = todayISO();
   const currentMonth = today.slice(0, 7);
@@ -594,7 +602,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   }
 
   return (
-    <div className="min-h-screen bg-[#FAF6F1] text-[#594943] flex flex-col">
+    <div className="min-h-screen w-full max-w-full overflow-x-hidden bg-[#FAF6F1] text-[#594943] flex flex-col">
       {/* Backdrop escuro suave quando o Menu 2 Traços (Aba Lateral) está aberto */}
       {sidebarOpen && (
         <div
@@ -768,8 +776,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             </div>
           </div>
 
-          {/* Navegação Horizontal Rápida em Tablet Horizontal / Desktop (>= 1024px) */}
-          <div className="hidden lg:flex items-center gap-1.5 bg-[#FAF6F1] p-1 rounded-2xl border border-[#E8D6CB]">
+          {/* Navegação Horizontal Rápida em Desktop (>= 1280px) — evita vazamento no tablet horizontal */}
+          <div className="hidden xl:flex items-center gap-1.5 bg-[#FAF6F1] p-1 rounded-2xl border border-[#E8D6CB]">
             {NAV_ITEMS.map((item) => {
               const Icon = item.icon;
               const active = activeTab === item.id;
@@ -818,7 +826,36 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           </div>
         </header>
 
-        <main className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-10 py-6 sm:py-8 space-y-6">
+        <main className="w-full max-w-[1600px] min-w-0 mx-auto px-3 sm:px-6 lg:px-10 py-5 sm:py-8 space-y-6 overflow-x-hidden">
+          {/* Aviso de Sincronização na Nuvem quando conectada apenas pelo cofre local */}
+          {!user && (
+            <div className="rounded-2xl bg-[#FFF8EE] border border-[#C4A477] p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 no-print">
+              <div className="min-w-0">
+                <p className="text-xs sm:text-sm font-semibold text-[#594943]">
+                  Sincronização na nuvem desconectada
+                </p>
+                <p className="text-xs text-[#95847C]">
+                  Suas fotos e alterações estão salvas só neste aparelho. Conecte sua conta Google para atualizar no celular das clientes e em outros aparelhos.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  void signInWithGoogle()
+                    .then(async () => {
+                      await syncPendingLocalChangesToCloud();
+                      showToast('Nuvem conectada e alterações enviadas para todos os aparelhos!', 'success');
+                    })
+                    .catch(() => {
+                      showToast('Não foi possível conectar com o Google agora.', 'error');
+                    });
+                }}
+                className="min-h-[42px] px-4 py-2 rounded-xl bg-[#594943] text-white text-xs font-semibold hover:bg-[#433631] transition-colors shrink-0 cursor-pointer"
+              >
+                Conectar Google e Sincronizar
+              </button>
+            </div>
+          )}
           {/* Interactive 33-Screen Quick Jumper (Sem scroll interno cortando cards e sem duplicar na Tela 33) */}
           {show33Explorer && !(activeTab === 'perfil' && profileSubScreen === 33) && (
             <section className="bg-white rounded-3xl border border-[#C4A477] p-5 sm:p-6 shadow-lg space-y-4 no-print">
@@ -1346,10 +1383,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
         </main>
       </div>
 
-      {/* Mobile & Tablet Vertical Floating Glassmorphic Bottom Navigation — 5 Official Tabs */}
+      {/* Mobile & Tablet Floating Glassmorphic Bottom Navigation — 5 Official Tabs */}
       <nav
         aria-label="Menu inferior principal"
-        className="lg:hidden fixed bottom-3 left-3 right-3 z-40 mb-safe no-print"
+        className="xl:hidden fixed bottom-3 left-3 right-3 z-40 mb-safe no-print"
       >
         <div className="glass-nav rounded-2xl border border-white/15 shadow-xl px-1.5 py-1.5 grid grid-cols-5 items-center">
           {NAV_ITEMS.map((item) => {

@@ -47,7 +47,7 @@ export default defineConfig(() => {
           ],
         },
         workbox: {
-          cacheId: 'estefany-nails-v55-fix-photo-revert-dirty-guard',
+          cacheId: 'estefany-nails-v56-cloud-sync-and-overflow-fix',
           skipWaiting: true,
           clientsClaim: true,
           cleanupOutdatedCaches: true,

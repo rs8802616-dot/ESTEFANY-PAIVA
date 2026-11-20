@@ -237,3 +237,13 @@ O projeto foi migrado para a arquitetura completa em **React 19 + TypeScript + V
   - Adicionado controle de alterações locais pendentes (`isSettingsDirtyLocal`, `getDirtyServiceIds`, `getDeletedServiceIds`) em `src/lib/localClientStore.ts` e `src/lib/db.ts`: snapshots antigos do Firestore **nunca** sobrescrevem fotos, textos ou serviços editados localmente até que a gravação na nuvem seja confirmada com sucesso.
   - Reforçada a compressão em `compressImageToDataUrl` (`src/lib/utils.ts`) com redução progressiva de escala e qualidade para garantir imagens sempre `<= 220.000` bytes (dentro do limite de `250.000` bytes do Firestore).
   - Cache do Workbox PWA elevado para `estefany-nails-v55-fix-photo-revert-dirty-guard`.
+
+
+### v56 — Sincronização na Nuvem entre Aparelhos + Fim do Vazamento Lateral no Celular e Tablet
+- **Sincronização em Todos os Aparelhos (`db.ts` e `AdminPanel.tsx`)**:
+  - Criada a função `syncPendingLocalChangesToCloud()` em `src/lib/db.ts` para enviar automaticamente alterações locais pendentes (fotos de capa/perfil, configurações e procedimentos) para o Cloud Firestore assim que a sessão Firebase Auth estiver ativa.
+  - Adicionado aviso claro no topo do Painel Admin quando a sessão está apenas no cofre local (sem token do Firebase Auth), com botão de 1 clique **"Conectar Google e Sincronizar"** (`signInWithGoogle()`), liberando imediatamente a gravação em nuvem para celulares de clientes e outros aparelhos.
+- **Fim do Vazamento Horizontal no Tablet e Celular (`index.css`, `ClientPortal.tsx`, `AdminPanel.tsx`)**:
+  - Adicionado `overflow-x: hidden; max-width: 100%;` global em `html, body` e nos containers principais do Portal da Cliente e do Painel Admin.
+  - Ajustada a barra superior do Admin para `hidden xl:flex` (e barra inferior `xl:hidden`), impedindo que a barra de 5 abas estoure a largura em tablets horizontais (`1024px`).
+  - Cache do Workbox PWA elevado para `estefany-nails-v56-cloud-sync-and-overflow-fix`.

@@ -29,6 +29,12 @@
 }
 
 @layer base {
+  html,
+  body {
+    overflow-x: hidden;
+    max-width: 100%;
+  }
+
   html {
     font-family: var(--font-sans);
     background-color: var(--color-creme);

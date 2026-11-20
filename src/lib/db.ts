@@ -1281,3 +1281,71 @@ export async function adminSaveSettings(settings: SalonSettings): Promise<void> 
     // Already saved and broadcast in local reactive store
   }
 }
+
+/**
+ * Sincroniza quaisquer alterações locais pendentes (fotos, configurações, serviços)
+ * com o Cloud Firestore assim que a administradora estiver autenticada no Firebase.
+ */
+export async function syncPendingLocalChangesToCloud(): Promise<boolean> {
+  if (!auth.currentUser) return false;
+  let allSynced = true;
+
+  if (isSettingsDirtyLocal()) {
+    try {
+      const localSettings = loadCachedSettingsSync();
+      const { closedMonths: _omit, updatedAt: _omitU, ...firestoreSafe } = localSettings;
+      await setDoc(doc(db, 'salon_settings', 'main'), {
+        ...firestoreSafe,
+        updatedAt: serverTimestamp(),
+      });
+      setSettingsDirtyLocal(false);
+    } catch {
+      allSynced = false;
+    }
+  }
+
+  const dirtySvcIds = Array.from(getDirtyServiceIds());
+  if (dirtySvcIds.length > 0) {
+    const localSvcs = loadLocalServices();
+    for (const id of dirtySvcIds) {
+      const svc = localSvcs.find((s) => s.id === id);
+      if (!svc) {
+        clearServiceDirty(id);
+        continue;
+      }
+      try {
+        await setDoc(
+          doc(db, 'services', id),
+          {
+            name: svc.name,
+            categoryId: svc.categoryId,
+            description: svc.description,
+            price: svc.price,
+            durationMinutes: svc.durationMinutes,
+            imageUrl: svc.imageUrl,
+            featured: svc.featured,
+            active: svc.active,
+            order: svc.order,
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp(),
+          },
+          { merge: true },
+        );
+        clearServiceDirty(id);
+      } catch {
+        allSynced = false;
+      }
+    }
+  }
+
+  const deletedSvcIds = Array.from(getDeletedServiceIds());
+  for (const id of deletedSvcIds) {
+    try {
+      await deleteDoc(doc(db, 'services', id));
+    } catch {
+      // ignore if already absent or rejected
+    }
+  }
+
+  return allSynced;
+}
