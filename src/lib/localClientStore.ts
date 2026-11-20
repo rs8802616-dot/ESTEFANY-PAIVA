@@ -27,15 +27,9 @@ export interface SavedClientIdentity {
 
 type StoreListener = () => void;
 const listeners = new Set<StoreListener>();
+let crossTabBound = false;
 
-export function subscribeLocalStoreChanges(fn: StoreListener): () => void {
-  listeners.add(fn);
-  return () => {
-    listeners.delete(fn);
-  };
-}
-
-export function notifyLocalStoreChanges(): void {
+function emitLocalListeners(): void {
   listeners.forEach((fn) => {
     try {
       fn();
@@ -43,6 +37,45 @@ export function notifyLocalStoreChanges(): void {
       // ignore listener errors
     }
   });
+}
+
+function ensureCrossTabSync(): void {
+  if (crossTabBound || typeof window === 'undefined') return;
+  crossTabBound = true;
+  window.addEventListener('storage', (e) => {
+    if (e.key && e.key.startsWith('ep_nails_')) {
+      emitLocalListeners();
+    }
+  });
+  if ('BroadcastChannel' in window) {
+    try {
+      const bc = new BroadcastChannel('epn_local_sync_v1');
+      bc.onmessage = () => emitLocalListeners();
+    } catch {
+      // ignore BroadcastChannel errors
+    }
+  }
+}
+
+export function subscribeLocalStoreChanges(fn: StoreListener): () => void {
+  ensureCrossTabSync();
+  listeners.add(fn);
+  return () => {
+    listeners.delete(fn);
+  };
+}
+
+export function notifyLocalStoreChanges(): void {
+  emitLocalListeners();
+  if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
+    try {
+      const bc = new BroadcastChannel('epn_local_sync_v1');
+      bc.postMessage({ ts: Date.now() });
+      bc.close();
+    } catch {
+      // ignore
+    }
+  }
 }
 
 // ------------------------------------------------------------------

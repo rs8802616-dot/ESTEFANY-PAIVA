@@ -878,10 +878,48 @@ export function subscribeAllAppointmentsAdmin(
     },
   );
 
+  const refreshFromCloud = () => {
+    void Promise.all([
+      getDocs(qSlots)
+        .then((snap) => {
+          slotDecodedAppointments = snap.docs
+            .map((d) =>
+              decodeAppointmentFromSlot({
+                id: d.id,
+                ...(d.data() as Omit<AvailabilitySlot, 'id'>),
+              }),
+            )
+            .filter((a): a is Appointment => Boolean(a));
+        })
+        .catch(() => {}),
+      getDocs(collection(db, 'appointments'))
+        .then((snap) => {
+          cloudAppointments = snap.docs.map((d) =>
+            normalizeAppointmentDoc(d.id, d.data() as Partial<Appointment>),
+          );
+        })
+        .catch(() => {}),
+    ]).then(() => emitMerged());
+  };
+
+  const onFocusOrVisible = () => {
+    if (typeof document === 'undefined' || document.visibilityState === 'visible') {
+      refreshFromCloud();
+    }
+  };
+  if (typeof window !== 'undefined') {
+    window.addEventListener('focus', onFocusOrVisible);
+    document.addEventListener('visibilitychange', onFocusOrVisible);
+  }
+
   return () => {
     unsubLocal();
     unsubSlots();
     unsubCloud();
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('focus', onFocusOrVisible);
+      document.removeEventListener('visibilitychange', onFocusOrVisible);
+    }
   };
 }
 

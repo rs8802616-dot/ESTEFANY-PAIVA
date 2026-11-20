@@ -47,7 +47,7 @@ export default defineConfig(() => {
           ],
         },
         workbox: {
-          cacheId: 'estefany-nails-v66-docked-bottom-nav-and-mobile-login',
+          cacheId: 'estefany-nails-v67-realtime-tab-and-focus-sync',
           skipWaiting: true,
           clientsClaim: true,
           cleanupOutdatedCaches: true,
