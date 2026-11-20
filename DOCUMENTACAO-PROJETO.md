@@ -213,3 +213,10 @@ O projeto foi migrado para a arquitetura completa em **React 19 + TypeScript + V
 - **Prévia e Upload Simplificado (`AdminCatalogTab.tsx`)**:
   - Ao editar qualquer procedimento, agora aparece a prévia da foto atual selecionada e o botão **"Escolher foto do celular / PC"** em destaque.
   - Cache do Workbox PWA elevado para `estefany-nails-v52-easy-edit-services-photos`.
+
+
+### v53 — Central Única de Configurações do Studio (Tudo em Um Só Lugar)
+- **Unificação das Telas 28, 29, 30 e 31 (`AdminProfileSuite.tsx`)**:
+  - Antes espalhadas em 4 abas e 4 formulários separados (`Perfil`, `Horários`, `Config. Agenda`, `Página Pública`), agora todas as configurações do aplicativo ficam em uma **única tela contínua** chamada **Configurações do Studio**.
+  - Barra superior com atalhos internos (`1. Perfil e Foto`, `2. Horários`, `3. Pix, Sinal e Folgas`, `4. Capa e Textos do Site`) e **1 único botão "Salvar Tudo" / "Salvar Todas as Configurações"**.
+  - Cache do Workbox PWA elevado para `estefany-nails-v53-unified-settings`.

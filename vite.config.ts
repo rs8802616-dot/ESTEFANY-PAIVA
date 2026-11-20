@@ -47,7 +47,7 @@ export default defineConfig(() => {
           ],
         },
         workbox: {
-          cacheId: 'estefany-nails-v52-easy-edit-services-photos',
+          cacheId: 'estefany-nails-v53-unified-settings',
           skipWaiting: true,
           clientsClaim: true,
           cleanupOutdatedCaches: true,

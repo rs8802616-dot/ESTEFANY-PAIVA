@@ -12,7 +12,7 @@ if ('serviceWorker' in navigator) {
   });
 
   // Limpa qualquer Service Worker antigo (v38/v39/v40) que ainda estivesse preso no cache do navegador
-  const SW_MIGRATION_KEY = 'epn_sw_v52_easy_edit_services_photos';
+  const SW_MIGRATION_KEY = 'epn_sw_v53_unified_settings';
   if (!localStorage.getItem(SW_MIGRATION_KEY)) {
     localStorage.setItem(SW_MIGRATION_KEY, '1');
     void navigator.serviceWorker.getRegistrations().then((regs) => {

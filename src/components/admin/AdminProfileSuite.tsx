@@ -79,15 +79,12 @@ interface Props {
 }
 
 const PROFILE_SCREENS: { id: ProfileScreenId; number: number; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
+  { id: 28, number: 28, label: 'Configurações do Studio', icon: Sliders },
   { id: 25, number: 25, label: 'Galeria', icon: Camera },
   { id: 26, number: 26, label: 'Adicionar Foto', icon: Plus },
-  { id: 27, number: 27, label: 'Comunicação', icon: MessageSquare },
-  { id: 28, number: 28, label: 'Perfil', icon: User },
-  { id: 29, number: 29, label: 'Horários', icon: Clock },
-  { id: 30, number: 30, label: 'Config. Agenda', icon: Sliders },
-  { id: 31, number: 31, label: 'Página Pública', icon: Palette },
+  { id: 27, number: 27, label: 'WhatsApp', icon: MessageSquare },
   { id: 32, number: 32, label: 'Segurança', icon: ShieldCheck },
-  { id: 33, number: 33, label: 'Ajuda & 33 Telas', icon: HelpCircle },
+  { id: 33, number: 33, label: 'Ajuda e 33 Telas', icon: HelpCircle },
 ];
 
 const WEEKDAYS = [
@@ -111,6 +108,24 @@ export const AdminProfileSuite: React.FC<Props> = ({
   const { showToast } = useToast();
   const [internalScreen, setInternalScreen] = useState<ProfileScreenId>(28);
   const currentScreen = activeSubScreen || internalScreen;
+
+  const isUnifiedSettings = currentScreen === 28 || currentScreen === 29 || currentScreen === 30 || currentScreen === 31;
+
+  useEffect(() => {
+    const targetId =
+      currentScreen === 29
+        ? 'cfg-horarios'
+        : currentScreen === 30
+          ? 'cfg-agenda-pix'
+          : currentScreen === 31
+            ? 'cfg-pagina-publica'
+            : null;
+    if (targetId) {
+      setTimeout(() => {
+        document.getElementById(targetId)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 60);
+    }
+  }, [currentScreen]);
 
   const setScreen = (id: ProfileScreenId) => {
     setInternalScreen(id);
@@ -263,26 +278,26 @@ export const AdminProfileSuite: React.FC<Props> = ({
 
   return (
     <div className="space-y-6">
-      {/* Sub-navigation bar for Screens 25 to 33 */}
+      {/* Sub-navigation bar */}
       <div className="bg-white rounded-3xl p-4 border border-[#E8D6CB] shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
           <div>
             <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#C4A477] block">
-              Portfólio, Marca, Comunicação & Segurança • Telas 25 a 33
+              Configurações, Fotos e WhatsApp
             </span>
             <h2 className="font-serif text-xl sm:text-2xl font-bold text-[#594943]">
-              Gestão do Studio & Identidade Luxury Nude
+              Gestão do Studio
             </h2>
           </div>
           <span className="px-3 py-1 rounded-full bg-[#F2EAE4] text-[#594943] text-xs font-semibold border border-[#E8D6CB]">
-            Tela #{currentScreen} de 33
+            Tudo em um só lugar
           </span>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 xl:grid-cols-9 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
           {PROFILE_SCREENS.map(scr => {
             const Icon = scr.icon;
-            const active = currentScreen === scr.id;
+            const active = scr.id === 28 ? isUnifiedSettings : currentScreen === scr.id;
             return (
               <button
                 key={scr.id}
@@ -294,7 +309,7 @@ export const AdminProfileSuite: React.FC<Props> = ({
                 }`}
               >
                 <Icon className={`w-3.5 h-3.5 shrink-0 ${active ? 'text-[#C4A477]' : 'text-[#95847C]'}`} />
-                <span className="truncate">{scr.number}. {scr.label}</span>
+                <span className="truncate">{scr.label}</span>
               </button>
             );
           })}
@@ -602,17 +617,59 @@ export const AdminProfileSuite: React.FC<Props> = ({
         </div>
       )}
 
-      {/* SCREEN 28: PERFIL DA PROFISSIONAL */}
-      {currentScreen === 28 && (
-        <form onSubmit={handleSaveSettings} className="bg-white rounded-3xl p-6 border border-[#E8D6CB] shadow-sm space-y-5 w-full">
-          <div className="flex items-center justify-between">
-            <div>
-              <span className="text-[10px] font-bold uppercase tracking-widest text-[#C4A477] block">
-                Tela 28 • Perfil da Especialista
-              </span>
-              <h3 className="font-serif text-xl font-bold text-[#594943]">Dados da Profissional & Bio</h3>
+      {/* CONFIGURAÇÕES UNIFICADAS DO STUDIO (TELAS 28, 29, 30 e 31 EM UM ÚNICO LUGAR) */}
+      {isUnifiedSettings && (
+        <form onSubmit={handleSaveSettings} className="space-y-6 w-full">
+          {/* Barra fixa de atalhos internos + Botão Único de Salvar */}
+          <div className="bg-white rounded-3xl p-4 sm:p-5 border border-[#E8D6CB] shadow-sm flex flex-wrap items-center justify-between gap-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => document.getElementById('cfg-perfil')?.scrollIntoView({ behavior: 'smooth' })}
+                className="px-3 py-1.5 rounded-xl bg-[#FAF6F1] hover:bg-[#F2EAE4] border border-[#E8D6CB] text-xs font-semibold text-[#594943] cursor-pointer"
+              >
+                1. Perfil e Foto
+              </button>
+              <button
+                type="button"
+                onClick={() => document.getElementById('cfg-horarios')?.scrollIntoView({ behavior: 'smooth' })}
+                className="px-3 py-1.5 rounded-xl bg-[#FAF6F1] hover:bg-[#F2EAE4] border border-[#E8D6CB] text-xs font-semibold text-[#594943] cursor-pointer"
+              >
+                2. Horários
+              </button>
+              <button
+                type="button"
+                onClick={() => document.getElementById('cfg-agenda-pix')?.scrollIntoView({ behavior: 'smooth' })}
+                className="px-3 py-1.5 rounded-xl bg-[#FAF6F1] hover:bg-[#F2EAE4] border border-[#E8D6CB] text-xs font-semibold text-[#594943] cursor-pointer"
+              >
+                3. Pix, Sinal e Folgas
+              </button>
+              <button
+                type="button"
+                onClick={() => document.getElementById('cfg-pagina-publica')?.scrollIntoView({ behavior: 'smooth' })}
+                className="px-3 py-1.5 rounded-xl bg-[#FAF6F1] hover:bg-[#F2EAE4] border border-[#E8D6CB] text-xs font-semibold text-[#594943] cursor-pointer"
+              >
+                4. Capa e Textos do Site
+              </button>
             </div>
+            <button
+              type="submit"
+              disabled={saving}
+              className="px-5 py-2.5 rounded-xl bg-[#594943] text-white text-xs font-semibold hover:bg-[#433631] transition-colors cursor-pointer disabled:opacity-50"
+            >
+              {saving ? 'Salvando...' : 'Salvar Tudo'}
+            </button>
           </div>
+
+          <div id="cfg-perfil" className="bg-white rounded-3xl p-6 border border-[#E8D6CB] shadow-sm space-y-5 w-full scroll-mt-20">
+            <div className="flex items-center justify-between">
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-widest text-[#C4A477] block">
+                  1. Perfil da Profissional
+                </span>
+                <h3 className="font-serif text-xl font-bold text-[#594943]">Dados do Studio e Bio</h3>
+              </div>
+            </div>
 
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 p-4 rounded-2xl bg-[#FAF6F1] border border-[#E8D6CB]">
             <img
@@ -680,25 +737,16 @@ export const AdminProfileSuite: React.FC<Props> = ({
             />
           </div>
 
-          <button
-            type="submit"
-            disabled={saving}
-            className="px-6 py-3 rounded-xl bg-[#594943] text-white text-xs font-semibold hover:bg-[#433631] transition-colors cursor-pointer disabled:opacity-50"
-          >
-            {saving ? 'Salvando...' : 'Salvar Perfil da Profissional'}
-          </button>
-        </form>
-      )}
-
-      {/* SCREEN 29: HORÁRIOS DE FUNCIONAMENTO */}
-      {currentScreen === 29 && (
-        <form onSubmit={handleSaveSettings} className="bg-white rounded-3xl p-6 border border-[#E8D6CB] shadow-sm space-y-5 w-full">
-          <div>
-            <span className="text-[10px] font-bold uppercase tracking-widest text-[#C4A477] block">
-              Tela 29 • Grade de Atendimento
-            </span>
-            <h3 className="font-serif text-xl font-bold text-[#594943]">Horários de Funcionamento</h3>
           </div>
+
+          {/* 2. HORÁRIOS DE FUNCIONAMENTO */}
+          <div id="cfg-horarios" className="bg-white rounded-3xl p-6 border border-[#E8D6CB] shadow-sm space-y-5 w-full scroll-mt-20">
+            <div>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-[#C4A477] block">
+                2. Grade de Atendimento
+              </span>
+              <h3 className="font-serif text-xl font-bold text-[#594943]">Horários de Funcionamento</h3>
+            </div>
 
           <div>
             <label className="block text-xs font-semibold text-[#594943] mb-2">Dias de Atendimento na Semana</label>
@@ -776,25 +824,16 @@ export const AdminProfileSuite: React.FC<Props> = ({
             />
           </div>
 
-          <button
-            type="submit"
-            disabled={saving}
-            className="px-6 py-3 rounded-xl bg-[#594943] text-white text-xs font-semibold hover:bg-[#433631] transition-colors cursor-pointer"
-          >
-            {saving ? 'Salvando...' : 'Salvar Horários de Funcionamento'}
-          </button>
-        </form>
-      )}
-
-      {/* SCREEN 30: CONFIGURAÇÕES DE AGENDAMENTO */}
-      {currentScreen === 30 && (
-        <form onSubmit={handleSaveSettings} className="bg-white rounded-3xl p-6 border border-[#E8D6CB] shadow-sm space-y-5 w-full">
-          <div>
-            <span className="text-[10px] font-bold uppercase tracking-widest text-[#C4A477] block">
-              Tela 30 • Regras de Negócio, Sinal Pix & Folgas
-            </span>
-            <h3 className="font-serif text-xl font-bold text-[#594943]">Configurações de Agendamento</h3>
           </div>
+
+          {/* 3. PIX, SINAL E FOLGAS */}
+          <div id="cfg-agenda-pix" className="bg-white rounded-3xl p-6 border border-[#E8D6CB] shadow-sm space-y-5 w-full scroll-mt-20">
+            <div>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-[#C4A477] block">
+                3. Regras, Sinal Pix e Folgas
+              </span>
+              <h3 className="font-serif text-xl font-bold text-[#594943]">Configurações de Agendamento e Pix</h3>
+            </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <div>
@@ -931,25 +970,16 @@ export const AdminProfileSuite: React.FC<Props> = ({
             )}
           </div>
 
-          <button
-            type="submit"
-            disabled={saving}
-            className="px-6 py-3 rounded-xl bg-[#594943] text-white text-xs font-semibold hover:bg-[#433631] transition-colors cursor-pointer"
-          >
-            {saving ? 'Salvando...' : 'Salvar Regras de Agendamento'}
-          </button>
-        </form>
-      )}
-
-      {/* SCREEN 31: PERSONALIZAÇÃO DA PÁGINA PÚBLICA */}
-      {currentScreen === 31 && (
-        <form onSubmit={handleSaveSettings} className="bg-white rounded-3xl p-6 border border-[#E8D6CB] shadow-sm space-y-5 w-full">
-          <div>
-            <span className="text-[10px] font-bold uppercase tracking-widest text-[#C4A477] block">
-              Tela 31 • Vitrine Online da Cliente (Tela 7)
-            </span>
-            <h3 className="font-serif text-xl font-bold text-[#594943]">Personalização da Página Pública</h3>
           </div>
+
+          {/* 4. PERSONALIZAÇÃO DA PÁGINA PÚBLICA */}
+          <div id="cfg-pagina-publica" className="bg-white rounded-3xl p-6 border border-[#E8D6CB] shadow-sm space-y-5 w-full scroll-mt-20">
+            <div>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-[#C4A477] block">
+                4. Vitrine Online da Cliente
+              </span>
+              <h3 className="font-serif text-xl font-bold text-[#594943]">Capa, Endereço e Textos do Site</h3>
+            </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="sm:col-span-2">
@@ -1006,22 +1036,23 @@ export const AdminProfileSuite: React.FC<Props> = ({
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
-            <button
-              type="submit"
-              disabled={saving}
-              className="px-6 py-3 rounded-xl bg-[#594943] text-white text-xs font-semibold hover:bg-[#433631] transition-colors cursor-pointer"
-            >
-              {saving ? 'Salvando...' : 'Publicar Alterações na Página Pública'}
-            </button>
-            <button
-              type="button"
-              onClick={() => onJumpToAnyScreen?.(7)}
-              className="inline-flex items-center gap-1.5 px-4 py-3 rounded-xl bg-[#FAF6F1] text-[#594943] text-xs font-semibold border border-[#E8D6CB] cursor-pointer"
-            >
-              <ExternalLink className="w-3.5 h-3.5 text-[#C4A477]" />
-              Visualizar Página Pública (Tela 7)
-            </button>
+            <div className="flex flex-wrap items-center gap-3 pt-2">
+              <button
+                type="submit"
+                disabled={saving}
+                className="px-6 py-3 rounded-xl bg-[#594943] text-white text-xs font-semibold hover:bg-[#433631] transition-colors cursor-pointer disabled:opacity-50"
+              >
+                {saving ? 'Salvando...' : 'Salvar Todas as Configurações'}
+              </button>
+              <button
+                type="button"
+                onClick={() => onJumpToAnyScreen?.(7)}
+                className="inline-flex items-center gap-1.5 px-4 py-3 rounded-xl bg-[#FAF6F1] text-[#594943] text-xs font-semibold border border-[#E8D6CB] cursor-pointer"
+              >
+                <ExternalLink className="w-3.5 h-3.5 text-[#C4A477]" />
+                Visualizar Site da Cliente
+              </button>
+            </div>
           </div>
         </form>
       )}
