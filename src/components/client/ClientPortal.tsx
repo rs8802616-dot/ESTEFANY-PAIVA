@@ -261,7 +261,7 @@ export const ClientPortal: React.FC<ClientPortalProps> = ({
         {activeTab === 'catalog' && (
           <>
             {/* Clean Luxury Hero Banner */}
-            <section className="relative overflow-hidden rounded-3xl bg-[#594943] min-h-[190px] sm:min-h-[260px] lg:min-h-[300px] flex items-end">
+            <section className="relative overflow-hidden rounded-3xl bg-[#594943] min-h-[220px] sm:min-h-[320px] lg:min-h-[380px] flex items-end">
               <SafeImage
                 src={settings.heroImageUrl}
                 alt={settings.studioName}
@@ -401,12 +401,12 @@ export const ClientPortal: React.FC<ClientPortalProps> = ({
                       >
                         <div
                           onClick={() => quickBookService(svc)}
-                          className="w-24 sm:w-full sm:aspect-[16/10] shrink-0 overflow-hidden bg-[#FAF6F1] cursor-pointer"
+                          className="w-28 h-28 sm:w-full sm:h-auto sm:aspect-[4/3] shrink-0 overflow-hidden bg-[#FAF6F1] cursor-pointer"
                         >
                           <SafeImage
                             src={svc.imageUrl}
                             alt={svc.name}
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-cover object-center"
                           />
                         </div>
 

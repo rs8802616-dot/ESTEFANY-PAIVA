@@ -47,7 +47,7 @@ export default defineConfig(() => {
           ],
         },
         workbox: {
-          cacheId: 'estefany-nails-v63-fix-heading-squeeze',
+          cacheId: 'estefany-nails-v64-card-image-aspect',
           skipWaiting: true,
           clientsClaim: true,
           cleanupOutdatedCaches: true,
