@@ -766,7 +766,11 @@ function addDeletedAptId(id: string): void {
   }
 }
 
-function normalizeAppointmentDoc(id: string, raw: Partial<Appointment>): Appointment {
+function normalizeAppointmentDoc(
+  id: string,
+  raw: Partial<Appointment> & { serviceName?: string },
+): Appointment {
+  const fallbackNames = raw.serviceName ? [String(raw.serviceName)] : [];
   return {
     id,
     clientUid: String(raw.clientUid || `guest_${id}`),
@@ -774,7 +778,7 @@ function normalizeAppointmentDoc(id: string, raw: Partial<Appointment>): Appoint
     clientPhone: String(raw.clientPhone || ''),
     clientEmail: String(raw.clientEmail || ''),
     serviceIds: Array.isArray(raw.serviceIds) ? raw.serviceIds : [],
-    serviceNames: Array.isArray(raw.serviceNames) ? raw.serviceNames : [],
+    serviceNames: Array.isArray(raw.serviceNames) ? raw.serviceNames : fallbackNames,
     totalPrice: Number(raw.totalPrice) || 0,
     totalDurationMinutes: Number(raw.totalDurationMinutes) || 60,
     date: String(raw.date || ''),

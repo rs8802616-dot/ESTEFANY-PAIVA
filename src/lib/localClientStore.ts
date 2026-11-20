@@ -142,7 +142,27 @@ export function loadLocalBookings(): Appointment[] {
     if (!raw) return [];
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
-    return parsed as Appointment[];
+    return (parsed as Partial<Appointment>[]).map((a) => ({
+      id: String(a.id || ''),
+      clientUid: String(a.clientUid || ''),
+      clientName: String(a.clientName || 'Cliente'),
+      clientPhone: String(a.clientPhone || ''),
+      clientEmail: String(a.clientEmail || ''),
+      serviceIds: Array.isArray(a.serviceIds) ? a.serviceIds : [],
+      serviceNames: Array.isArray(a.serviceNames) ? a.serviceNames : [],
+      totalPrice: Number(a.totalPrice) || 0,
+      totalDurationMinutes: Number(a.totalDurationMinutes) || 60,
+      date: String(a.date || ''),
+      startTime: String(a.startTime || '09:00'),
+      endTime: String(a.endTime || '10:00'),
+      status: a.status || 'pending',
+      paymentMethod: a.paymentMethod || 'presencial',
+      pixPaid: Boolean(a.pixPaid),
+      notes: String(a.notes || ''),
+      rescheduleCount: Number(a.rescheduleCount) || 0,
+      bookingToken: String(a.bookingToken || a.id || ''),
+      lastVerifiedToken: String(a.lastVerifiedToken || ''),
+    }));
   } catch {
     return [];
   }

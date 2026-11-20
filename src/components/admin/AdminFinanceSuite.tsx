@@ -382,7 +382,7 @@ export const AdminFinanceSuite: React.FC<{
   const servicePerformance = useMemo(() => {
     const map = new Map<string, { name: string; count: number; revenue: number }>();
     realizedAppointments.forEach((apt) => {
-      const name = apt.serviceNames.join(' + ') || 'Procedimento';
+      const name = (apt.serviceNames || []).join(' + ') || 'Procedimento';
       const cur = map.get(name) || { name, count: 0, revenue: 0 };
       cur.count += 1;
       cur.revenue += Number(apt.totalPrice) || 0;
@@ -1739,7 +1739,7 @@ export const AdminFinanceSuite: React.FC<{
                       {formatDateBR(a.date)} {a.startTime}
                     </td>
                     <td className="py-2.5 px-3 font-medium text-[#594943]">{a.clientName}</td>
-                    <td className="py-2.5 px-3 text-[#95847C]">{a.serviceNames.join(' + ')}</td>
+                    <td className="py-2.5 px-3 text-[#95847C]">{(a.serviceNames || []).join(' + ')}</td>
                     <td className="py-2.5 px-3 whitespace-nowrap">{statusLabelPT(a.status)}</td>
                     <td className="py-2.5 px-3 text-right font-semibold tabular-nums whitespace-nowrap">
                       {formatBRL(a.totalPrice)}

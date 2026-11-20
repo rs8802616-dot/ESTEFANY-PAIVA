@@ -263,7 +263,7 @@ export const AdminClientsTab: React.FC<AdminClientsTabProps> = ({
                             client.clientName,
                             client.clientPhone,
                             client.daysUntilMaintenance ?? 5,
-                            client.lastServices.join(' + ') || 'manutenção',
+                            (client.lastServices || []).join(' + ') || 'manutenção',
                             settings,
                           )
                         : buildReturnAlertWhatsAppUrl(

@@ -281,3 +281,11 @@ O projeto foi migrado para a arquitetura completa em **React 19 + TypeScript + V
 - **Proteções Defensivas (`AdminPanel.tsx`, `AdminAgendaTab.tsx`, `CalendarPicker.tsx`, `utils.ts`)**:
   - Protegidas todas as chamadas `.includes(...)` em listas de serviços e dias úteis contra valores `undefined`.
   - Cache do Workbox PWA elevado para `estefany-nails-v60-fix-undefined-includes-crash`.
+
+
+### v61 — Correção do Erro `Cannot read properties of undefined (reading 'join')`
+- **Normalização no `localClientStore.ts` e `db.ts`**:
+  - `loadLocalBookings()` e `normalizeAppointmentDoc()` garantem que `serviceIds`, `serviceNames` e `lastServices` sempre sejam arrays válidos (incluindo fallback para campo legado `serviceName` de documentos antigos no `studio-de-beleza-8045a`).
+- **Proteções Defensivas em `.join()`**:
+  - Adicionado `(array || []).join(...)` em `AdminPanel.tsx`, `AdminAgendaTab.tsx`, `AdminClientsTab.tsx` e `AdminFinanceSuite.tsx`.
+  - Cache do Workbox PWA elevado para `estefany-nails-v61-fix-undefined-join-crash`.

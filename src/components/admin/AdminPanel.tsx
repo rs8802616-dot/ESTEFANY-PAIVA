@@ -209,7 +209,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           daysUntilMaintenance: until,
           needsUpcomingMaintenance: !hasUpcoming && until !== null && until >= 0 && until <= 5,
           maintenanceCycleDays: cycleDays,
-          lastServices: apt.serviceNames,
+          lastServices: Array.isArray(apt.serviceNames) ? apt.serviceNames : [],
           techNote: noteByPhone.get(phoneDigits),
         });
       } else {
@@ -224,7 +224,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           existing.daysUntilMaintenance = until;
           existing.needsUpcomingMaintenance = !hasUpcoming && until >= 0 && until <= 5;
           existing.maintenanceCycleDays = cycleDays;
-          existing.lastServices = apt.serviceNames;
+          existing.lastServices = Array.isArray(apt.serviceNames) ? apt.serviceNames : [];
         }
       }
     });
@@ -1163,7 +1163,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                                   {apt.clientName}
                                 </div>
                                 <div className="text-xs text-[#95847C] truncate">
-                                  {apt.serviceNames.join(' + ')} · {statusLabelPT(apt.status)}
+                                  {(apt.serviceNames || []).join(' + ')} · {statusLabelPT(apt.status)}
                                 </div>
                               </div>
                               <span className="text-sm font-semibold text-[#594943] tabular-nums shrink-0">
@@ -1206,7 +1206,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                                   client.clientName,
                                   client.clientPhone,
                                   daysLeft,
-                                  client.lastServices.join(' + ') || 'manutenção',
+                                  (client.lastServices || []).join(' + ') || 'manutenção',
                                   settings,
                                 )
                               : buildReturnAlertWhatsAppUrl(
@@ -1241,7 +1241,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                                     </span>
                                   </div>
                                   <div className="text-xs text-[#95847C] tabular-nums">
-                                    {client.lastServices.join(' + ') || 'Procedimento'} ·{' '}
+                                    {(client.lastServices || []).join(' + ') || 'Procedimento'} ·{' '}
                                     {client.daysSinceLastVisit} dias desde a última visita
                                   </div>
                                 </div>

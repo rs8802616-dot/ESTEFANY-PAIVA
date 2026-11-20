@@ -614,7 +614,7 @@ export const AdminAgendaTab: React.FC<AdminAgendaTabProps> = ({
               <div className="pt-3 border-t border-[#E8D6CB]">
                 <div className="text-xs font-medium text-[#95847C] mb-1">Procedimentos</div>
                 <div className="text-sm font-medium text-[#594943]">
-                  {selectedAppointment.serviceNames.join(' + ')}
+                  {(selectedAppointment.serviceNames || []).join(' + ')}
                 </div>
                 {selectedAppointment.notes && (
                   <p className="mt-2 text-xs text-[#95847C] bg-[#FAF6F1] rounded-xl p-2.5">
@@ -819,7 +819,7 @@ export const AdminAgendaTab: React.FC<AdminAgendaTabProps> = ({
                       : settings.returnAlertDays || 21;
                   if (cycleDays <= 0) return null;
                   const nextDate = addDaysISO(selectedAppointment.date, cycleDays);
-                  const askMsg = `Oi, ${selectedAppointment.clientName}! Tudo bem? O prazo de manutenção de ${selectedAppointment.serviceNames.join(' + ')} é de ${cycleDays} dias (por volta de ${formatDateBR(nextDate)}). Quer que eu já deixe seu horário reservado?`;
+                  const askMsg = `Oi, ${selectedAppointment.clientName}! Tudo bem? O prazo de manutenção de ${(selectedAppointment.serviceNames || []).join(' + ')} é de ${cycleDays} dias (por volta de ${formatDateBR(nextDate)}). Quer que eu já deixe seu horário reservado?`;
 
                   return (
                     <div className="mt-4 pt-4 border-t border-[#E8D6CB] space-y-2.5 bg-[#FAF6F1] p-3.5 rounded-2xl border">
