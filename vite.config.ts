@@ -47,7 +47,7 @@ export default defineConfig(() => {
           ],
         },
         workbox: {
-          cacheId: 'estefany-nails-v67-realtime-tab-and-focus-sync',
+          cacheId: 'estefany-nails-v68-clear-stale-local-bookings',
           skipWaiting: true,
           clientsClaim: true,
           cleanupOutdatedCaches: true,
