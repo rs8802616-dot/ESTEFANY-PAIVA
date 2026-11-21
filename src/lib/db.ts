@@ -246,7 +246,7 @@ export function subscribePublicCategories(onData: (categories: Category[]) => vo
   const unsubCloud = onSnapshot(
     q,
     (snap) => {
-      if (snap.empty) {
+      if (snap.empty && snap.metadata.fromCache) {
         emitLocal();
         return;
       }
@@ -277,7 +277,7 @@ function mergeCloudAndLocalServices(cloudList: Service[]): Service[] {
     if (!deletedIds.has(s.id)) map.set(s.id, s);
   });
   localSvcs.forEach((s) => {
-    if (!deletedIds.has(s.id) && (dirtyIds.has(s.id) || !map.has(s.id))) {
+    if (!deletedIds.has(s.id) && dirtyIds.has(s.id)) {
       map.set(s.id, s);
     }
   });
@@ -295,7 +295,7 @@ export function subscribePublicServices(onData: (services: Service[]) => void): 
   const unsubCloud = onSnapshot(
     q,
     (snap) => {
-      if (snap.empty) {
+      if (snap.empty && snap.metadata.fromCache) {
         emitLocal();
         return;
       }
@@ -622,7 +622,7 @@ export function subscribeAllCategoriesAdmin(onData: (cats: Category[]) => void):
   const unsubCloud = onSnapshot(
     q,
     (snap) => {
-      if (snap.empty) {
+      if (snap.empty && snap.metadata.fromCache) {
         emitLocal();
         return;
       }
@@ -658,7 +658,7 @@ export function subscribeAllServicesAdmin(onData: (svcs: Service[]) => void): Un
   const unsubCloud = onSnapshot(
     q,
     (snap) => {
-      if (snap.empty) {
+      if (snap.empty && snap.metadata.fromCache) {
         emitLocal();
         return;
       }
