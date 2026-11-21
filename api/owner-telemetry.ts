@@ -119,6 +119,26 @@ export default async function handler(req: ApiReq, res: ApiRes) {
     } catch {
       body = {};
     }
+    if (body.action === 'update_issue') {
+      const fp = String(body.fingerprint || '').trim();
+      const status = String(body.status || '').trim();
+      const allowed = ['new', 'investigating', 'resolved', 'ignored', 'regression'];
+      if (!fp || !allowed.includes(status)) {
+        return res.status(400).json({ ok: false, error: 'Invalid issue update' });
+      }
+      const patchResp = await fetch(
+        `${FIRESTORE_BASE}/telemetry_issues/${fp}?updateMask.fieldPaths=status`,
+        {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            fields: { status: { stringValue: status } },
+          }),
+        },
+      );
+      return res.status(patchResp.ok ? 200 : 500).json({ ok: patchResp.ok });
+    }
+
     if (body.action === 'test_telegram') {
       const botToken = getEnv('TELEGRAM_BOT_TOKEN');
       const chatId = getEnv('TELEGRAM_CHAT_ID');
@@ -174,6 +194,9 @@ export default async function handler(req: ApiReq, res: ApiRes) {
     blocksDocs,
     dailyDocs,
     errorDocs,
+    issueDocs,
+    screenDocs,
+    releaseDocs,
     incidentDocs,
     monitorChecksDocs,
     alertConfigDoc,
@@ -187,6 +210,9 @@ export default async function handler(req: ApiReq, res: ApiRes) {
     listCollectionDocs('personal_blocks', 200),
     listCollectionDocs('telemetry_daily', 30),
     listCollectionDocs('telemetry_errors', 30),
+    listCollectionDocs('telemetry_issues', 50),
+    listCollectionDocs('telemetry_screens', 30),
+    listCollectionDocs('telemetry_releases', 20),
     listCollectionDocs('monitor_incidents', 40),
     listCollectionDocs('monitor_checks', 200),
     readDoc('telemetry_meta/alert_config'),
@@ -309,6 +335,59 @@ export default async function handler(req: ApiReq, res: ApiRes) {
     : '';
   const alertsMuted = mutedUntilStr ? Date.parse(mutedUntilStr) > Date.now() : false;
 
+  const issues = issueDocs
+    .map((d) => ({ id: d.id, ...d.data }))
+    .sort((a, b) =>
+      String((b as { lastSeen?: string }).lastSeen || '').localeCompare(
+        String((a as { lastSeen?: string }).lastSeen || ''),
+      ),
+    );
+
+  const screens = screenDocs.map((d) => ({
+    screen: d.id,
+    views: Number(d.data.views || 0),
+    errors: Number(d.data.errors || 0),
+    apiFailures: Number(d.data.apiFailures || 0),
+    longTasks: Number(d.data.longTasks || 0),
+    rageClicks: Number(d.data.rageClicks || 0),
+  }));
+
+  const releases = releaseDocs
+    .map((d) => {
+      const sessions = Number(d.data.sessions || 0);
+      const crashes = Number(d.data.crashes || 0);
+      const crashFreePct =
+        sessions > 0
+          ? Math.max(0, Math.round(((sessions - crashes) / sessions) * 1000) / 10)
+          : 100;
+      return {
+        version: d.id,
+        sessions,
+        crashes,
+        crashFreePct,
+      };
+    })
+    .sort((a, b) => b.version.localeCompare(a.version));
+
+  // SLO 99.9% (43.2 min monthly error budget)
+  const monthPrefix = today.slice(0, 7);
+  const monthlyDowntimeMin = incidents
+    .filter(
+      (inc) =>
+        (inc as { severity?: string }).severity === 'critical' &&
+        String((inc as { startedAt?: string }).startedAt || '').startsWith(monthPrefix),
+    )
+    .reduce(
+      (acc, inc) => acc + Number((inc as { durationMinutes?: number }).durationMinutes || 0),
+      0,
+    );
+  const monthlyBudgetMin = 43.2;
+  const remainingBudgetMin = Math.max(0, Math.round((monthlyBudgetMin - monthlyDowntimeMin) * 10) / 10);
+  const remainingBudgetPct = Math.max(
+    0,
+    Math.round((remainingBudgetMin / monthlyBudgetMin) * 1000) / 10,
+  );
+
   // Estimated daily Firestore usage vs Spark free quota (50,000 reads / 20,000 writes)
   const todayStats = dailyTelemetry.find((d) => d.date === today) as
     | Record<string, number | string>
@@ -367,6 +446,16 @@ export default async function handler(req: ApiReq, res: ApiRes) {
     },
     dailyTelemetry,
     recentErrors,
+    issues,
+    screens,
+    releases,
+    slo: {
+      targetPct: 99.9,
+      monthlyBudgetMin,
+      consumedMin: monthlyDowntimeMin,
+      remainingBudgetMin,
+      remainingBudgetPct,
+    },
     incidents,
     recentChecks: sortedChecks.slice(0, 80),
     serverMonitorStats: {

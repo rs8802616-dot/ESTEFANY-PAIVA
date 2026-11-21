@@ -67,6 +67,8 @@ interface OwnerMonitoringPanelProps {
 
 type OwnerSection =
   | 'status'
+  | 'issues'
+  | 'screens'
   | 'incidents'
   | 'funnel'
   | 'simulator'
@@ -120,6 +122,39 @@ interface DailyTelemetryRow {
   errors_total?: number;
   auth_fail_painel?: number;
   auth_fail_owner?: number;
+}
+
+interface IssueRecord {
+  id: string;
+  fingerprint?: string;
+  message?: string;
+  route?: string;
+  screen?: string;
+  status?: 'new' | 'investigating' | 'resolved' | 'ignored' | 'regression';
+  count?: number;
+  firstSeen?: string;
+  lastSeen?: string;
+  appVersion?: string;
+  deviceType?: string;
+  connectionType?: string;
+  componentStack?: string;
+  sampleBreadcrumbs?: string;
+}
+
+interface ScreenHealthRow {
+  screen: string;
+  views: number;
+  errors: number;
+  apiFailures: number;
+  longTasks: number;
+  rageClicks: number;
+}
+
+interface ReleaseRow {
+  version: string;
+  sessions: number;
+  crashes: number;
+  crashFreePct: number;
 }
 
 interface ServerErrorRecord {
@@ -187,6 +222,16 @@ interface ServerTelemetryPayload {
   };
   dailyTelemetry?: DailyTelemetryRow[];
   recentErrors?: ServerErrorRecord[];
+  issues?: IssueRecord[];
+  screens?: ScreenHealthRow[];
+  releases?: ReleaseRow[];
+  slo?: {
+    targetPct: number;
+    monthlyBudgetMin: number;
+    consumedMin: number;
+    remainingBudgetMin: number;
+    remainingBudgetPct: number;
+  };
   incidents?: ServerIncidentRecord[];
   recentChecks?: MonitorCheckRow[];
   serverMonitorStats?: {
@@ -230,7 +275,7 @@ interface TechnicalLogEntry {
   message: string;
 }
 
-const APP_VERSION = 'v84-noc-console';
+const APP_VERSION = 'v85-sentry-noc';
 const TELEMETRY_HISTORY_KEY = 'epn_owner_telemetry_history_v1';
 
 function loadSavedTelemetry(): LatencySample[] {
@@ -271,6 +316,8 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
   const [runningCron, setRunningCron] = useState(false);
   const [testingTelegram, setTestingTelegram] = useState(false);
   const [telegramFeedback, setTelegramFeedback] = useState<string | null>(null);
+  const [issueFilter, setIssueFilter] = useState<string>('all');
+  const [expandedIssueId, setExpandedIssueId] = useState<string | null>(null);
 
   const [simDate, setSimDate] = useState<string>(() => todayISO());
   const [simDuration, setSimDuration] = useState<number>(120);
@@ -555,6 +602,29 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
     }, 1000);
     return () => window.clearInterval(timer);
   }, [authenticated, autoRefresh, runHealthCheck]);
+
+  const handleUpdateIssueStatus = async (
+    fingerprint: string,
+    status: 'new' | 'investigating' | 'resolved' | 'ignored',
+  ) => {
+    const ownerToken = getOwnerSessionToken();
+    try {
+      const resp = await fetch('/api/owner-telemetry', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(ownerToken ? { 'x-owner-auth': ownerToken } : {}),
+        },
+        body: JSON.stringify({ action: 'update_issue', fingerprint, status }),
+      });
+      if (resp.ok) {
+        pushLog('ok', 'ISSUE', `Issue ${fingerprint} marcada como ${status}.`);
+        await runHealthCheck();
+      }
+    } catch {
+      pushLog('warn', 'ISSUE', 'Falha ao atualizar status da issue.');
+    }
+  };
 
   const handleToggleMuteAlerts = async (muteMinutes: number) => {
     const ownerToken = getOwnerSessionToken();
@@ -1074,11 +1144,29 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
   }> = [
     { id: 'status', label: 'Status & Uptime', group: 'Monitoramento', icon: Gauge },
     {
+      id: 'issues',
+      label: 'Issues (Erros)',
+      group: 'Monitoramento',
+      icon: AlertTriangle,
+      badge:
+        (srv?.issues || []).filter(
+          (i) => i.status === 'new' || i.status === 'regression',
+        ).length || undefined,
+    },
+    {
+      id: 'screens',
+      label: 'Telas & Releases',
+      group: 'Monitoramento',
+      icon: BarChart3,
+    },
+    {
       id: 'incidents',
       label: 'Incidentes & Alertas',
       group: 'Monitoramento',
       icon: Bell,
-      badge: (srv?.incidents || []).filter((i) => i.status === 'open').length || undefined,
+      badge:
+        (srv?.incidents || []).filter((i) => i.status === 'open').length ||
+        undefined,
     },
     {
       id: 'funnel',
@@ -1355,14 +1443,14 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
 
                 <div className="rounded-xl bg-[#111114] border border-zinc-800/80 p-4">
                   <div className="text-[11px] font-mono uppercase text-zinc-400">
-                    Conversão (7d)
+                    SLO Error Budget (99,9%)
                   </div>
                   <div className="text-2xl font-mono font-bold text-sky-400 mt-1">
-                    {funnelAndVitals.conversionRate}%
+                    {srv?.slo?.remainingBudgetPct ?? 100}%
                   </div>
                   <div className="text-[11px] text-zinc-500 mt-1">
-                    {funnelAndVitals.confirmed} de {funnelAndVitals.visits}{' '}
-                    visitas
+                    Restam {srv?.slo?.remainingBudgetMin ?? 43.2}m de{' '}
+                    {srv?.slo?.monthlyBudgetMin ?? 43.2}m/mês
                   </div>
                 </div>
               </section>
@@ -1496,6 +1584,307 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
                 )}
               </section>
             </>
+          )}
+
+          {section === 'issues' && (
+            <section className="space-y-4">
+              <div className="rounded-xl bg-[#111114] border border-zinc-800/80 p-5 space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div>
+                    <h2 className="text-sm font-semibold text-white">
+                      Issues Agrupadas por Fingerprint (Sentry-Style)
+                    </h2>
+                    <p className="text-xs text-zinc-400">
+                      Erros idênticos são agrupados automaticamente com
+                      breadcrumbs (últimos 20 passos sem PII).
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {(
+                      [
+                        { id: 'all', label: 'Todas' },
+                        { id: 'new', label: 'Novas' },
+                        { id: 'regression', label: 'Regressão' },
+                        { id: 'investigating', label: 'Investigando' },
+                        { id: 'resolved', label: 'Resolvidas' },
+                        { id: 'ignored', label: 'Ignoradas' },
+                      ] as const
+                    ).map((f) => (
+                      <button
+                        key={f.id}
+                        type="button"
+                        onClick={() => setIssueFilter(f.id)}
+                        className={`px-2.5 py-1 rounded-lg text-[11px] font-mono cursor-pointer ${
+                          issueFilter === f.id
+                            ? 'bg-zinc-100 text-zinc-950 font-bold'
+                            : 'bg-zinc-950 text-zinc-400 border border-zinc-800'
+                        }`}
+                      >
+                        {f.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {(() => {
+                  const list = (srv?.issues || []).filter(
+                    (i) => issueFilter === 'all' || i.status === issueFilter,
+                  );
+                  if (list.length === 0) {
+                    return (
+                      <div className="rounded-lg bg-zinc-950 border border-zinc-800/80 p-6 text-center text-xs text-zinc-500">
+                        Nenhuma issue encontrada neste filtro.
+                      </div>
+                    );
+                  }
+                  return (
+                    <div className="space-y-2.5">
+                      {list.map((iss) => {
+                        const fp = iss.fingerprint || iss.id;
+                        const expanded = expandedIssueId === fp;
+                        let crumbs: Array<{ t: string; cat: string; msg: string }> =
+                          [];
+                        try {
+                          crumbs = JSON.parse(iss.sampleBreadcrumbs || '[]');
+                        } catch {
+                          crumbs = [];
+                        }
+                        return (
+                          <div
+                            key={fp}
+                            className="rounded-lg bg-zinc-950 border border-zinc-800/80 p-4 space-y-3"
+                          >
+                            <div className="flex flex-wrap items-start justify-between gap-3">
+                              <div className="space-y-1 min-w-0">
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <span
+                                    className={`px-1.5 py-0.5 rounded text-[10px] font-mono uppercase ${
+                                      iss.status === 'regression'
+                                        ? 'bg-rose-500/20 text-rose-300'
+                                        : iss.status === 'resolved'
+                                          ? 'bg-emerald-500/15 text-emerald-300'
+                                          : iss.status === 'investigating'
+                                            ? 'bg-sky-500/15 text-sky-300'
+                                            : 'bg-amber-500/15 text-amber-300'
+                                    }`}
+                                  >
+                                    {iss.status || 'new'}
+                                  </span>
+                                  <span className="font-mono text-[11px] text-zinc-500">
+                                    {fp}
+                                  </span>
+                                  <span className="font-semibold text-sm text-rose-300">
+                                    {iss.message}
+                                  </span>
+                                </div>
+                                <div className="text-[11px] font-mono text-zinc-500">
+                                  Rota: {iss.route} · Ocorrências:{' '}
+                                  <strong className="text-zinc-200">
+                                    {iss.count || 1}
+                                  </strong>{' '}
+                                  · Versão: {iss.appVersion} · {iss.deviceType} (
+                                  {iss.connectionType})
+                                </div>
+                              </div>
+
+                              <div className="flex flex-wrap items-center gap-1.5">
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    setExpandedIssueId(expanded ? null : fp)
+                                  }
+                                  className="px-2.5 py-1 rounded bg-zinc-900 border border-zinc-700 text-[11px] text-zinc-200 cursor-pointer"
+                                >
+                                  {expanded
+                                    ? 'Ocultar Trilha'
+                                    : `Breadcrumbs (${crumbs.length})`}
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    void handleUpdateIssueStatus(
+                                      fp,
+                                      'investigating',
+                                    )
+                                  }
+                                  className="px-2 py-1 rounded bg-sky-500/15 text-sky-300 text-[11px] cursor-pointer"
+                                >
+                                  Investigar
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    void handleUpdateIssueStatus(fp, 'resolved')
+                                  }
+                                  className="px-2 py-1 rounded bg-emerald-500/15 text-emerald-300 text-[11px] cursor-pointer"
+                                >
+                                  Resolver
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    void handleUpdateIssueStatus(fp, 'ignored')
+                                  }
+                                  className="px-2 py-1 rounded bg-zinc-800 text-zinc-400 text-[11px] cursor-pointer"
+                                >
+                                  Ignorar
+                                </button>
+                              </div>
+                            </div>
+
+                            {expanded && (
+                              <div className="pt-2 border-t border-zinc-800/80 space-y-2">
+                                {iss.componentStack && (
+                                  <pre className="text-[11px] font-mono text-zinc-400 bg-[#09090B] p-2.5 rounded overflow-x-auto">
+                                    {iss.componentStack}
+                                  </pre>
+                                )}
+                                <div className="text-[11px] font-mono text-zinc-400 space-y-1">
+                                  {crumbs.length === 0 ? (
+                                    <div>Sem breadcrumbs registrados.</div>
+                                  ) : (
+                                    crumbs.map((c, idx) => (
+                                      <div key={idx} className="flex gap-2">
+                                        <span className="text-zinc-500">
+                                          {c.t}
+                                        </span>
+                                        <span className="text-sky-400">
+                                          [{c.cat}]
+                                        </span>
+                                        <span className="text-zinc-200">
+                                          {c.msg}
+                                        </span>
+                                      </div>
+                                    ))
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })()}
+              </div>
+            </section>
+          )}
+
+          {section === 'screens' && (
+            <section className="space-y-4">
+              <div className="rounded-xl bg-[#111114] border border-zinc-800/80 p-5 space-y-3">
+                <h2 className="text-sm font-semibold text-white">
+                  Saúde por Tela (Erros, APIs, Long Tasks & Rage Clicks)
+                </h2>
+                {(srv?.screens || []).length === 0 ? (
+                  <div className="rounded-lg bg-zinc-950 border border-zinc-800/80 p-6 text-center text-xs text-zinc-500">
+                    Aguardando acessos para popular métricas por tela.
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {(srv?.screens || []).map((sc) => {
+                      const errRate =
+                        sc.views > 0
+                          ? Math.round((sc.errors / sc.views) * 1000) / 10
+                          : 0;
+                      const healthLabel =
+                        errRate >= 3 || sc.errors >= 5
+                          ? 'Crítica'
+                          : errRate > 0 || sc.apiFailures > 0
+                            ? 'Atenção'
+                            : 'Saudável';
+                      return (
+                        <div
+                          key={sc.screen}
+                          className="rounded-lg bg-zinc-950 border border-zinc-800/80 p-4 space-y-2 text-xs"
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="font-mono font-semibold text-zinc-100">
+                              {sc.screen}
+                            </span>
+                            <span
+                              className={`px-2 py-0.5 rounded text-[10px] font-mono ${
+                                healthLabel === 'Saudável'
+                                  ? 'bg-emerald-500/15 text-emerald-300'
+                                  : healthLabel === 'Atenção'
+                                    ? 'bg-amber-500/15 text-amber-300'
+                                    : 'bg-rose-500/20 text-rose-300'
+                              }`}
+                            >
+                              {healthLabel}
+                            </span>
+                          </div>
+                          <div className="grid grid-cols-3 gap-2 font-mono text-[11px] text-zinc-400">
+                            <div>
+                              Views: <strong className="text-white">{sc.views}</strong>
+                            </div>
+                            <div>
+                              Erros:{' '}
+                              <strong className="text-rose-300">
+                                {sc.errors} ({errRate}%)
+                              </strong>
+                            </div>
+                            <div>
+                              APIs Falhas:{' '}
+                              <strong className="text-amber-300">
+                                {sc.apiFailures}
+                              </strong>
+                            </div>
+                            <div>
+                              Long Tasks:{' '}
+                              <strong className="text-zinc-200">
+                                {sc.longTasks}
+                              </strong>
+                            </div>
+                            <div>
+                              Rage Clicks:{' '}
+                              <strong className="text-zinc-200">
+                                {sc.rageClicks}
+                              </strong>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              <div className="rounded-xl bg-[#111114] border border-zinc-800/80 p-5 space-y-3">
+                <h2 className="text-sm font-semibold text-white">
+                  Releases & Crash-Free Sessions (Crashlytics-Style)
+                </h2>
+                {(srv?.releases || []).length === 0 ? (
+                  <div className="rounded-lg bg-zinc-950 border border-zinc-800/80 p-6 text-center text-xs text-zinc-500">
+                    Nenhuma sessão de release registrada ainda.
+                  </div>
+                ) : (
+                  <div className="divide-y divide-zinc-800/80 rounded-lg bg-zinc-950 border border-zinc-800/80">
+                    {(srv?.releases || []).map((rel) => (
+                      <div
+                        key={rel.version}
+                        className="p-3.5 flex flex-wrap items-center justify-between gap-3 text-xs font-mono"
+                      >
+                        <span className="font-semibold text-zinc-100">
+                          {rel.version}
+                        </span>
+                        <div className="flex items-center gap-4">
+                          <span className="text-zinc-400">
+                            Sessões: <strong className="text-white">{rel.sessions}</strong>
+                          </span>
+                          <span className="text-zinc-400">
+                            Crashes: <strong className="text-rose-300">{rel.crashes}</strong>
+                          </span>
+                          <span className="text-emerald-400 font-bold">
+                            {rel.crashFreePct}% Crash-Free
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </section>
           )}
 
           {section === 'incidents' && (

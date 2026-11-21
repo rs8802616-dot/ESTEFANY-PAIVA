@@ -1,4 +1,5 @@
 import React from 'react';
+import { trackClientError } from '../lib/telemetry';
 
 interface State {
   hasError: boolean;
@@ -31,8 +32,13 @@ export class ErrorBoundary extends React.Component<{ children: React.ReactNode }
     return { hasError: true, message };
   }
 
-  componentDidCatch(error: Error): void {
+  componentDidCatch(error: Error, info: React.ErrorInfo): void {
     console.error('App ErrorBoundary:', error);
+    trackClientError(
+      error.message || 'React ErrorBoundary',
+      window.location.pathname,
+      info.componentStack || '',
+    );
   }
 
   render() {
