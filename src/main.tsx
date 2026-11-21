@@ -12,7 +12,7 @@ if ('serviceWorker' in navigator) {
   });
 
   // Limpa qualquer Service Worker antigo (v38/v39/v40) que ainda estivesse preso no cache do navegador
-  const SW_MIGRATION_KEY = 'epn_sw_v76_google_calendar_api_sync';
+  const SW_MIGRATION_KEY = 'epn_sw_v77_sw_denylist_api_and_select_account';
   if (!localStorage.getItem(SW_MIGRATION_KEY)) {
     localStorage.setItem(SW_MIGRATION_KEY, '1');
     try {

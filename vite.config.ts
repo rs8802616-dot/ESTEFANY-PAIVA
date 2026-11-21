@@ -47,7 +47,8 @@ export default defineConfig(() => {
           ],
         },
         workbox: {
-          cacheId: 'estefany-nails-v76-google-calendar-api-sync',
+          cacheId: 'estefany-nails-v77-sw-denylist-api-and-select-account',
+          navigateFallbackDenylist: [/^\/api\//],
           skipWaiting: true,
           clientsClaim: true,
           cleanupOutdatedCaches: true,

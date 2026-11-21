@@ -142,7 +142,7 @@ export default async function handler(req: ApiReq, res: ApiRes): Promise<void> {
       response_type: 'code',
       scope: 'https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/userinfo.email',
       access_type: 'offline',
-      prompt: 'consent',
+      prompt: 'select_account consent',
       include_granted_scopes: 'true',
     });
     res.redirect(302, `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`);
