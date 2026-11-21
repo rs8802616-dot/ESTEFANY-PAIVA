@@ -26,9 +26,11 @@ import {
   Server,
   ShieldAlert,
   ShieldCheck,
+  Smartphone,
   Sparkles,
   Terminal,
   Trash2,
+  TrendingUp,
   Wifi,
   WifiOff,
   Wrench,
@@ -36,11 +38,13 @@ import {
 } from 'lucide-react';
 import {
   clearOwnerGateSession,
+  getOwnerSessionToken,
   getVaultOwnerEmail,
   isVaultOwnerAuthenticated,
   verifyOwnerVaultCredentials,
 } from '../../lib/adminRoute';
 import { subscribeAllAppointmentsAdmin } from '../../lib/db';
+import { trackAuthFailure } from '../../lib/telemetry';
 import {
   addDaysISO,
   formatBRL,
@@ -82,6 +86,54 @@ interface EndpointProbe {
   detail: string;
 }
 
+interface DailyTelemetryRow {
+  date: string;
+  funnel_visit?: number;
+  funnel_service?: number;
+  funnel_slot?: number;
+  funnel_confirmed?: number;
+  funnel_failed?: number;
+  booking_duration_sum_sec?: number;
+  booking_duration_count?: number;
+  device_mobile?: number;
+  device_desktop?: number;
+  src_instagram?: number;
+  src_whatsapp?: number;
+  src_direct?: number;
+  src_other?: number;
+  lcp_sum_ms?: number;
+  lcp_count?: number;
+  inp_sum_ms?: number;
+  inp_count?: number;
+  cls_sum_milli?: number;
+  cls_count?: number;
+  pwa_installs?: number;
+  offline_events?: number;
+  errors_total?: number;
+  auth_fail_painel?: number;
+  auth_fail_owner?: number;
+}
+
+interface ServerErrorRecord {
+  id: string;
+  message?: string;
+  route?: string;
+  appVersion?: string;
+  deviceType?: string;
+  connectionType?: string;
+  createdAt?: string;
+}
+
+interface ServerIncidentRecord {
+  id: string;
+  title?: string;
+  detail?: string;
+  status?: string;
+  startedAt?: string;
+  resolvedAt?: string;
+  updatedAt?: string;
+}
+
 interface ServerTelemetryPayload {
   ok: boolean;
   serverTimestamp: string;
@@ -101,6 +153,14 @@ interface ServerTelemetryPayload {
       availabilitySlots: number | null;
       personalBlocks: number | null;
     };
+    quotaEstimate?: {
+      estimatedReadsToday: number;
+      freeReadsLimit: number;
+      readsPct: number;
+      estimatedWritesToday: number;
+      freeWritesLimit: number;
+      writesPct: number;
+    };
   };
   googleCalendar: {
     configured: boolean;
@@ -110,7 +170,14 @@ interface ServerTelemetryPayload {
     latencyMs: number | null;
     accountMasked: string | null;
     updatedAt: string | null;
+    futureAppointmentsCount?: number;
+    syncedToGoogleCount?: number;
+    divergentCount?: number;
   };
+  dailyTelemetry?: DailyTelemetryRow[];
+  recentErrors?: ServerErrorRecord[];
+  incidents?: ServerIncidentRecord[];
+  latestProbe?: Record<string, unknown> | null;
 }
 
 interface HealthCheckResult {
@@ -142,7 +209,7 @@ interface TechnicalLogEntry {
   message: string;
 }
 
-const APP_VERSION = 'v81-noc-suite';
+const APP_VERSION = 'v82-observability-pro';
 const TELEMETRY_HISTORY_KEY = 'epn_owner_telemetry_history_v1';
 
 function loadSavedTelemetry(): LatencySample[] {
@@ -172,14 +239,16 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
   const [loginPassword, setLoginPassword] = useState('');
   const [loginError, setLoginError] = useState('');
   const [loggingIn, setLoggingIn] = useState(false);
+  const [failedAttempts, setFailedAttempts] = useState(0);
+  const [lockUntil, setLockUntil] = useState(0);
 
   const [activeTab, setActiveTab] = useState<OwnerTab>('overview');
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [countdown, setCountdown] = useState(30);
   const [logFilter, setLogFilter] = useState<'all' | LogLevel>('all');
   const [copiedReport, setCopiedReport] = useState(false);
+  const [runningCron, setRunningCron] = useState(false);
 
-  // Simulator state (Zero PII)
   const [simDate, setSimDate] = useState<string>(() => todayISO());
   const [simDuration, setSimDuration] = useState<number>(120);
 
@@ -193,7 +262,6 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
   );
   const [logs, setLogs] = useState<TechnicalLogEntry[]>([]);
 
-  // Apenas contagens agregadas (NUNCA armazena PII: nome, telefone, notas)
   const [statusCounts, setStatusCounts] = useState<Record<string, number> | null>(
     null,
   );
@@ -221,26 +289,11 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
       setIsOnline(false);
       pushLog('warn', 'NETWORK', 'Dispositivo entrou em modo offline.');
     };
-    const onRuntimeError = (event: ErrorEvent) => {
-      pushLog('err', 'RUNTIME', event.message || 'Erro JS capturado.');
-    };
-    const onUnhandledRejection = (event: PromiseRejectionEvent) => {
-      const reason =
-        event.reason instanceof Error
-          ? event.reason.message
-          : String(event.reason || 'Promise rejeitada');
-      pushLog('err', 'PROMISE', reason);
-    };
-
     window.addEventListener('online', onOnline);
     window.addEventListener('offline', onOffline);
-    window.addEventListener('error', onRuntimeError);
-    window.addEventListener('unhandledrejection', onUnhandledRejection);
     return () => {
       window.removeEventListener('online', onOnline);
       window.removeEventListener('offline', onOffline);
-      window.removeEventListener('error', onRuntimeError);
-      window.removeEventListener('unhandledrejection', onUnhandledRejection);
     };
   }, [pushLog]);
 
@@ -270,6 +323,7 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
     pushLog('info', 'PROBE', 'Executando varredura completa (Client + Server)...');
 
     const probes: EndpointProbe[] = [];
+    const ownerToken = getOwnerSessionToken();
 
     // 1. Firestore Settings
     let firestoreOk = false;
@@ -290,11 +344,6 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
         latencyMs: firestoreLatencyMs,
         detail: resp.ok ? 'Leitura pública íntegra' : 'Falha na leitura',
       });
-      pushLog(
-        resp.ok ? 'ok' : 'warn',
-        'FIRESTORE',
-        `salon_settings/main -> HTTP ${resp.status} (${firestoreLatencyMs}ms)`,
-      );
     } catch {
       probes.push({
         id: 'firestore_settings',
@@ -305,14 +354,15 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
         latencyMs: 0,
         detail: 'Timeout ou erro de rede',
       });
-      pushLog('err', 'FIRESTORE', 'Erro de rede em salon_settings/main');
     }
 
-    // 2. Owner Server Telemetry API
+    // 2. Owner Server Telemetry API (autenticado via x-owner-auth)
     let serverTelemetry: ServerTelemetryPayload | null = null;
     try {
       const t0 = performance.now();
-      const resp = await fetch('/api/owner-telemetry');
+      const resp = await fetch('/api/owner-telemetry', {
+        headers: ownerToken ? { 'x-owner-auth': ownerToken } : {},
+      });
       const ms = Math.round(performance.now() - t0);
       if (resp.ok) {
         serverTelemetry = (await resp.json()) as ServerTelemetryPayload;
@@ -323,12 +373,12 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
           ok: true,
           statusCode: resp.status,
           latencyMs: ms,
-          detail: `Região ${serverTelemetry.runtime.vercelRegion} · Node ${serverTelemetry.runtime.nodeVersion}`,
+          detail: `Região ${serverTelemetry.runtime.vercelRegion} · Auth OK`,
         });
         pushLog(
           'ok',
           'SERVER',
-          `Telemetria servidor OK (${ms}ms) · Região: ${serverTelemetry.runtime.vercelRegion}`,
+          `Telemetria servidor OK (${ms}ms) · Divergência GCal: ${serverTelemetry.googleCalendar.divergentCount ?? 0}`,
         );
       } else {
         probes.push({
@@ -338,7 +388,10 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
           ok: false,
           statusCode: resp.status,
           latencyMs: ms,
-          detail: 'Endpoint de telemetria indisponível',
+          detail:
+            resp.status === 401
+              ? 'Sessão não autorizada no servidor'
+              : 'Endpoint indisponível',
         });
         pushLog('warn', 'SERVER', `/api/owner-telemetry HTTP ${resp.status}`);
       }
@@ -378,24 +431,7 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
           latencyMs: gcalLatencyMs,
           detail: gcalConnected
             ? 'OAuth ativo e conectado'
-            : gcalConfigured
-              ? 'OAuth configurado (aguardando vínculo)'
-              : 'Credenciais ausentes no servidor',
-        });
-        pushLog(
-          gcalConnected ? 'ok' : 'warn',
-          'GCAL_API',
-          `status=${resp.status}, configurada=${gcalConfigured}, conectada=${gcalConnected} (${gcalLatencyMs}ms)`,
-        );
-      } else {
-        probes.push({
-          id: 'gcal_api',
-          name: 'Google Calendar API (/api/google-calendar)',
-          target: '/api/google-calendar?action=status',
-          ok: false,
-          statusCode: resp.status,
-          latencyMs: gcalLatencyMs,
-          detail: 'Endpoint retornou erro HTTP',
+            : 'OAuth aguardando vínculo',
         });
       }
     } catch {
@@ -488,7 +524,7 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
       try {
         localStorage.setItem(TELEMETRY_HISTORY_KEY, JSON.stringify(next));
       } catch {
-        // ignore storage quota errors
+        // ignore
       }
       return next;
     });
@@ -516,16 +552,49 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
     return () => window.clearInterval(timer);
   }, [authenticated, autoRefresh, runHealthCheck]);
 
+  const handleRunServerCronAudit = async () => {
+    setRunningCron(true);
+    pushLog('info', 'CRON', 'Executando auditoria de incidentes no servidor...');
+    try {
+      const resp = await fetch('/api/cron-monitor');
+      if (resp.ok) {
+        pushLog('ok', 'CRON', 'Auditoria concluída e incidentes atualizados.');
+        await runHealthCheck();
+      } else {
+        pushLog('warn', 'CRON', `HTTP ${resp.status} ao rodar auditoria.`);
+      }
+    } catch {
+      pushLog('err', 'CRON', 'Falha ao acionar /api/cron-monitor.');
+    } finally {
+      setRunningCron(false);
+    }
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (Date.now() < lockUntil) {
+      const secs = Math.ceil((lockUntil - Date.now()) / 1000);
+      setLoginError(`Muitas tentativas. Aguarde ${secs}s para tentar novamente.`);
+      return;
+    }
     setLoginError('');
     setLoggingIn(true);
     try {
       const ok = await verifyOwnerVaultCredentials(loginEmail, loginPassword);
       if (!ok) {
-        setLoginError('Credenciais inválidas para o Console do Dono.');
+        const nextFails = failedAttempts + 1;
+        setFailedAttempts(nextFails);
+        trackAuthFailure('owner');
+        if (nextFails >= 5) {
+          setLockUntil(Date.now() + 60_000);
+          setFailedAttempts(0);
+          setLoginError('5 tentativas falhas. Bloqueado por 60 segundos.');
+        } else {
+          setLoginError('Credenciais inválidas para o Console do Dono.');
+        }
         return;
       }
+      setFailedAttempts(0);
       setAuthenticated(true);
       setOwnerEmail(getVaultOwnerEmail() || loginEmail.trim().toLowerCase());
       setLoginPassword('');
@@ -545,6 +614,63 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
     () => Array.from({ length: 14 }, (_, i) => addDaysISO(today, i)),
     [today],
   );
+
+  // Aggregate 7-day server telemetry (Funnel, Web Vitals, Security, PWA)
+  const funnelAndVitals = useMemo(() => {
+    const rows = health?.serverTelemetry?.dailyTelemetry || [];
+    const sum = (key: keyof DailyTelemetryRow) =>
+      rows.reduce((acc, r) => acc + (Number(r[key]) || 0), 0);
+
+    const visits = sum('funnel_visit');
+    const servicesChosen = sum('funnel_service');
+    const slotsChosen = sum('funnel_slot');
+    const confirmed = sum('funnel_confirmed');
+    const failedBookings = sum('funnel_failed');
+
+    const conversionRate =
+      visits > 0 ? Math.round((confirmed / visits) * 1000) / 10 : 0;
+
+    const durSum = sum('booking_duration_sum_sec');
+    const durCnt = sum('booking_duration_count');
+    const avgBookingSec = durCnt > 0 ? Math.round(durSum / durCnt) : null;
+
+    const lcpSum = sum('lcp_sum_ms');
+    const lcpCnt = sum('lcp_count');
+    const avgLcpMs = lcpCnt > 0 ? Math.round(lcpSum / lcpCnt) : null;
+
+    const inpSum = sum('inp_sum_ms');
+    const inpCnt = sum('inp_count');
+    const avgInpMs = inpCnt > 0 ? Math.round(inpSum / inpCnt) : null;
+
+    const clsSum = sum('cls_sum_milli');
+    const clsCnt = sum('cls_count');
+    const avgCls =
+      clsCnt > 0 ? (clsSum / clsCnt / 1000).toFixed(3) : null;
+
+    return {
+      visits,
+      servicesChosen,
+      slotsChosen,
+      confirmed,
+      failedBookings,
+      conversionRate,
+      avgBookingSec,
+      mobile: sum('device_mobile'),
+      desktop: sum('device_desktop'),
+      ig: sum('src_instagram'),
+      wa: sum('src_whatsapp'),
+      direct: sum('src_direct'),
+      other: sum('src_other'),
+      avgLcpMs,
+      avgInpMs,
+      avgCls,
+      pwaInstalls: sum('pwa_installs'),
+      offlineEvents: sum('offline_events'),
+      clientErrors7d: sum('errors_total'),
+      authFailPainel: sum('auth_fail_painel'),
+      authFailOwner: sum('auth_fail_owner'),
+    };
+  }, [health?.serverTelemetry?.dailyTelemetry]);
 
   const metrics = useMemo(() => {
     const activeAppointments = busySlots.filter(
@@ -568,7 +694,14 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
       label: formatDateBR(date).slice(0, 5),
       appointments: activeAppointments.filter((s) => s.date === date).length,
       blocks: activeBlocks.filter((s) => s.date === date).length,
+      availableSlots: generateTimeSlotsForDate(date, 60, settings, busySlots).filter(
+        (sl) => sl.available,
+      ).length,
     }));
+
+    const daysWithZeroFreeSlots = byDay14.filter(
+      (d) => d.availableSlots === 0,
+    ).length;
 
     const maxDaily = Math.max(
       1,
@@ -590,14 +723,6 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
     }
     const maxHourBucket = Math.max(1, ...hourBuckets.map((b) => b.count));
 
-    const durationBuckets = {
-      short: services.filter((s) => s.durationMinutes <= 45).length,
-      medium: services.filter(
-        (s) => s.durationMinutes > 45 && s.durationMinutes <= 90,
-      ).length,
-      long: services.filter((s) => s.durationMinutes > 90).length,
-    };
-
     const avgServicePrice =
       services.length > 0
         ? services.reduce((acc, s) => acc + (s.price || 0), 0) / services.length
@@ -617,13 +742,6 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
       dbLatencies.length > 0
         ? Math.round(dbLatencies.reduce((a, b) => a + b, 0) / dbLatencies.length)
         : health?.firestoreLatencyMs ?? null;
-    const sortedDb = [...dbLatencies].sort((a, b) => a - b);
-    const p95DbMs =
-      sortedDb.length > 0
-        ? sortedDb[
-            Math.min(sortedDb.length - 1, Math.floor(sortedDb.length * 0.95))
-          ]
-        : null;
 
     const uptimePct =
       latencyHistory.length > 0
@@ -642,14 +760,13 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
       next7Count,
       next14Count,
       byDay14,
+      daysWithZeroFreeSlots,
       maxDaily,
       hourBuckets,
       maxHourBucket,
-      durationBuckets,
       avgServicePrice,
       avgServiceDuration,
       avgDbMs,
-      p95DbMs,
       uptimePct,
       scheduleMode:
         settings.configuredSlots && settings.configuredSlots.length > 0
@@ -668,13 +785,12 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
   ]);
 
   const simulatedSlots = useMemo(
-    () =>
-      generateTimeSlotsForDate(simDate, simDuration, settings, busySlots),
+    () => generateTimeSlotsForDate(simDate, simDuration, settings, busySlots),
     [simDate, simDuration, settings, busySlots],
   );
 
   const alerts = useMemo(() => {
-    const list: { level: 'warn' | 'err' | 'info'; title: string; detail: string }[] = [];
+    const list: { level: 'warn' | 'err'; title: string; detail: string }[] = [];
     if (!isOnline) {
       list.push({
         level: 'err',
@@ -689,41 +805,38 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
         detail: 'A consulta ao banco de dados retornou erro.',
       });
     }
-    if (health?.firestoreLatencyMs && health.firestoreLatencyMs > 600) {
+    const gcalDiv = health?.serverTelemetry?.googleCalendar.divergentCount || 0;
+    if (gcalDiv > 0) {
       list.push({
         level: 'warn',
-        title: 'Latência Elevada no Banco',
-        detail: `Firestore respondeu em ${health.firestoreLatencyMs}ms (ideal < 400ms).`,
+        title: `Divergência Firestore ↔ Google Agenda (${gcalDiv})`,
+        detail: `${gcalDiv} agendamento(s) futuro(s) ainda não sincronizado(s) no Google Agenda.`,
       });
     }
     if (health && !health.gcalConnected) {
       list.push({
         level: 'warn',
         title: 'Google Agenda Desconectado',
-        detail:
-          'A sincronização automática aguarda vínculo Google no /painel.',
+        detail: 'Sincronização automática aguarda vínculo Google no /painel.',
       });
     }
-    if (
-      health?.serverTelemetry?.googleCalendar.connected &&
-      !health.serverTelemetry.googleCalendar.tokenValid
-    ) {
+    const quota = health?.serverTelemetry?.firestore.quotaEstimate;
+    if (quota && (quota.readsPct >= 70 || quota.writesPct >= 70)) {
       list.push({
         level: 'warn',
-        title: 'Token Google Agenda Expirado/Pendente Renovação',
-        detail:
-          'Será renovado automaticamente no próximo evento via refresh_token.',
+        title: 'Uso de Cota Firebase > 70%',
+        detail: `Leituras: ${quota.readsPct}% · Escritas: ${quota.writesPct}% do plano gratuito.`,
       });
     }
-    if ((settings.workDays?.length || 0) === 0) {
+    if (funnelAndVitals.authFailPainel + funnelAndVitals.authFailOwner >= 5) {
       list.push({
         level: 'warn',
-        title: 'Nenhum dia útil configurado',
-        detail: 'A agenda pública não exibirá horários disponíveis.',
+        title: 'Tentativas de Login Falhas Detectadas',
+        detail: `${funnelAndVitals.authFailPainel} no /painel e ${funnelAndVitals.authFailOwner} no /owner (7d).`,
       });
     }
     return list;
-  }, [health, isOnline, settings.workDays]);
+  }, [funnelAndVitals.authFailOwner, funnelAndVitals.authFailPainel, health, isOnline]);
 
   const allSystemsHealthy =
     isOnline && alerts.length === 0 && Boolean(health?.firestoreOk);
@@ -733,48 +846,24 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
     return logs.filter((l) => l.level === logFilter);
   }, [logs, logFilter]);
 
-  const buildReportPayload = () => ({
-    generatedAt: new Date().toISOString(),
-    appVersion: APP_VERSION,
-    lgpdCompliance: 'NO_PII_INCLUDED',
-    environment: {
-      host: typeof window !== 'undefined' ? window.location.host : '',
-      online: isOnline,
-      platform: typeof navigator !== 'undefined' ? navigator.platform : '',
-      language: typeof navigator !== 'undefined' ? navigator.language : '',
-    },
-    health,
-    uptimePct: metrics.uptimePct,
-    latencyStats: {
-      avgFirestoreMs: metrics.avgDbMs,
-      p95FirestoreMs: metrics.p95DbMs,
-      samplesCount: latencyHistory.length,
-    },
-    activeAlerts: alerts,
-    aggregatedMetrics: {
-      activeServices: services.length,
-      avgServiceDurationMin: metrics.avgServiceDuration,
-      durationBuckets: metrics.durationBuckets,
-      activeAppointmentsInAgenda: metrics.totalActiveAppointments,
-      activePersonalBlocks: metrics.totalActiveBlocks,
-      appointmentsToday: metrics.todayCount,
-      appointmentsNext7Days: metrics.next7Count,
-      appointmentsNext14Days: metrics.next14Count,
-      peakHoursDistribution: metrics.hourBuckets.map((b) => ({
-        window: b.label,
-        count: b.count,
-      })),
-      scheduleMode: metrics.scheduleMode,
-      workDaysCount: settings.workDays?.length || 0,
-      closedMonthsCount: settings.closedMonths?.length || 0,
-      blockedDatesCount: settings.blockedDates?.length || 0,
-      statusCounts: statusCounts || 'requires_firebase_admin_session',
-    },
-    recentTechnicalLogs: logs.slice(0, 30),
-  });
-
   const handleExportReport = () => {
-    const report = buildReportPayload();
+    const report = {
+      generatedAt: new Date().toISOString(),
+      appVersion: APP_VERSION,
+      lgpdCompliance: 'NO_PII_INCLUDED',
+      health,
+      funnelAndVitals,
+      aggregatedMetrics: {
+        todayCount: metrics.todayCount,
+        next7Count: metrics.next7Count,
+        next14Count: metrics.next14Count,
+        daysWithZeroFreeSlots: metrics.daysWithZeroFreeSlots,
+        scheduleMode: metrics.scheduleMode,
+        statusCounts,
+      },
+      alerts,
+      recentTechnicalLogs: logs.slice(0, 30),
+    };
     const blob = new Blob([JSON.stringify(report, null, 2)], {
       type: 'application/json',
     });
@@ -791,26 +880,23 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
     const srv = health?.serverTelemetry;
     const summary = [
       `=== TELEMETRIA ${APP_VERSION} (${today}) ===`,
-      `Host: ${window.location.host} | Env: ${srv?.runtime.vercelEnv ?? 'web'} | Região: ${srv?.runtime.vercelRegion ?? '—'} | Commit: ${srv?.runtime.commitSha ?? '—'}`,
-      `Uptime: ${metrics.uptimePct}% | DB Client: ${health?.firestoreLatencyMs ?? '—'}ms (Média ${metrics.avgDbMs ?? '—'}ms / P95 ${metrics.p95DbMs ?? '—'}ms) | DB Server: ${srv?.firestore.latencyMs ?? '—'}ms`,
-      `Google Agenda: ${health?.gcalConnected ? 'Conectada' : 'Desconectada'} | Token Válido: ${srv?.googleCalendar.tokenValid ? 'Sim' : 'Não'} (${srv?.googleCalendar.accountMasked ?? '—'})`,
-      `Agenda: ${metrics.totalActiveAppointments} ativos | Hoje: ${metrics.todayCount} | 7d: ${metrics.next7Count} | 14d: ${metrics.next14Count}`,
-      `Modelo: ${metrics.scheduleMode} | Serviços: ${services.length}`,
-      `Alertas: ${alerts.length === 0 ? 'Nenhum' : alerts.map((a) => a.title).join('; ')}`,
+      `Host: ${window.location.host} | Env: ${srv?.runtime.vercelEnv ?? 'web'} | Região: ${srv?.runtime.vercelRegion ?? '—'}`,
+      `Uptime Sessão: ${metrics.uptimePct}% | DB Server: ${srv?.firestore.latencyMs ?? '—'}ms`,
+      `GCal: ${health?.gcalConnected ? 'Conectada' : 'Desconectada'} | Futuros: ${srv?.googleCalendar.futureAppointmentsCount ?? 0} | Sincronizados: ${srv?.googleCalendar.syncedToGoogleCount ?? 0} | Divergentes: ${srv?.googleCalendar.divergentCount ?? 0}`,
+      `Funil (7d): ${funnelAndVitals.visits} visitas -> ${funnelAndVitals.confirmed} confirmados (${funnelAndVitals.conversionRate}%)`,
+      `Web Vitals (7d): LCP ${funnelAndVitals.avgLcpMs ?? '—'}ms | INP ${funnelAndVitals.avgInpMs ?? '—'}ms | CLS ${funnelAndVitals.avgCls ?? '—'}`,
       `LGPD: ZERO PII`,
     ].join('\n');
     try {
       await navigator.clipboard.writeText(summary);
       setCopiedReport(true);
-      pushLog('ok', 'CLIPBOARD', 'Resumo técnico copiado.');
       window.setTimeout(() => setCopiedReport(false), 2200);
     } catch {
-      pushLog('warn', 'CLIPBOARD', 'Falha ao copiar automaticamente.');
+      // ignore
     }
   };
 
   const handleForceRefreshPWA = async () => {
-    pushLog('info', 'PWA', 'Limpando caches do Service Worker...');
     try {
       if ('caches' in window) {
         const keys = await caches.keys();
@@ -822,14 +908,8 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
       }
       window.location.reload();
     } catch {
-      pushLog('warn', 'PWA', 'Não foi possível limpar o cache.');
+      // ignore
     }
-  };
-
-  const handleClearTelemetryHistory = () => {
-    localStorage.removeItem(TELEMETRY_HISTORY_KEY);
-    setLatencyHistory([]);
-    pushLog('info', 'STORAGE', 'Histórico local de latência reiniciado.');
   };
 
   const sparkline = useMemo(() => {
@@ -842,7 +922,6 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
       ...latencyHistory.map((s) => Math.max(s.firestoreMs, s.gcalMs)),
     );
     const stepX = (width - pad * 2) / Math.max(1, latencyHistory.length - 1);
-
     const toPoints = (getter: (s: LatencySample) => number) =>
       latencyHistory
         .map((s, i) => {
@@ -851,7 +930,6 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
           return `${x.toFixed(1)},${y.toFixed(1)}`;
         })
         .join(' ');
-
     return {
       width,
       height,
@@ -871,7 +949,7 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
             </div>
             <div>
               <span className="text-[10px] font-bold uppercase tracking-widest text-[#C4A477]">
-                NOC & Observability Suite
+                Observability Pro
               </span>
               <h1 className="text-xl font-bold tracking-tight">
                 Área Exclusiva do Dono
@@ -882,9 +960,8 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
           <div className="mb-5 rounded-2xl bg-[#0D0B0A] border border-emerald-500/20 p-3.5 text-xs text-[#E8D6CB]/85 leading-relaxed flex items-start gap-2.5">
             <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
             <span>
-              Console técnico para monitoramento de SLA, servidor Vercel, APIs e
-              diagnóstico de agenda. Conformidade total{' '}
-              <strong>LGPD (Zero PII)</strong>.
+              Console técnico com telemetria real de clientes, Web Vitals, funil
+              e auditoria Google Agenda. <strong>Zero PII (LGPD)</strong>.
             </span>
           </div>
 
@@ -926,7 +1003,7 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
               disabled={loggingIn}
               className="w-full min-h-[46px] rounded-xl bg-[#C4A477] text-[#0D0B0A] font-bold text-sm hover:bg-[#E8D6CB] transition-colors cursor-pointer disabled:opacity-60"
             >
-              {loggingIn ? 'Autenticando...' : 'Abrir NOC Command Center'}
+              {loggingIn ? 'Autenticando...' : 'Abrir Observability Console'}
             </button>
           </form>
         </div>
@@ -942,7 +1019,6 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
 
   return (
     <div className="min-h-screen bg-[#0D0B0A] text-[#FAF6F1] pb-16">
-      {/* Topbar */}
       <header className="sticky top-0 z-30 bg-[#151210]/90 backdrop-blur-xl border-b border-white/10 px-4 sm:px-6 py-3.5">
         <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
@@ -952,7 +1028,7 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
             <div>
               <div className="flex items-center gap-2 flex-wrap">
                 <h1 className="text-base sm:text-lg font-bold tracking-tight">
-                  NOC Command Center · Estefany Paiva Nails
+                  NOC Observability · Estefany Paiva Nails
                 </h1>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#C4A477]/15 text-[#C4A477] border border-[#C4A477]/30">
                   {APP_VERSION}
@@ -962,15 +1038,24 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
                 </span>
               </div>
               <p className="text-xs text-[#E8D6CB]/60">
-                Operador: {ownerEmail || 'Dono'} · Env:{' '}
-                {srv?.runtime.vercelEnv || 'web'} · Região:{' '}
-                {srv?.runtime.vercelRegion || '—'}
+                {ownerEmail || 'Dono'} · Env: {srv?.runtime.vercelEnv || 'web'}{' '}
+                · Região: {srv?.runtime.vercelRegion || '—'}
                 {srv?.runtime.commitSha ? ` · #${srv.runtime.commitSha}` : ''}
               </p>
             </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => void handleRunServerCronAudit()}
+              disabled={runningCron}
+              className="min-h-[36px] inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sky-500/15 text-sky-300 border border-sky-500/30 text-xs font-semibold hover:bg-sky-500/25 transition-colors cursor-pointer disabled:opacity-60"
+            >
+              <Server className="w-3.5 h-3.5" />
+              <span>{runningCron ? 'Auditando...' : 'Auditoria Servidor'}</span>
+            </button>
+
             <button
               type="button"
               onClick={() => setAutoRefresh((v) => !v)}
@@ -997,7 +1082,7 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
               <RefreshCw
                 className={`w-3.5 h-3.5 ${checkingHealth ? 'animate-spin' : ''}`}
               />
-              <span>Sondar Agora</span>
+              <span>Sondar</span>
             </button>
 
             <button
@@ -1010,7 +1095,7 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
               ) : (
                 <Copy className="w-3.5 h-3.5 text-[#C4A477]" />
               )}
-              <span>{copiedReport ? 'Copiado' : 'Copiar Resumo'}</span>
+              <span>{copiedReport ? 'Copiado' : 'Copiar'}</span>
             </button>
 
             <button
@@ -1033,15 +1118,14 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
           </div>
         </div>
 
-        {/* Navigation Tabs */}
         <div className="max-w-7xl mx-auto mt-3 flex items-center gap-1.5 overflow-x-auto pb-0.5">
           {(
             [
-              { id: 'overview', label: 'Visão Geral & Servidor', icon: Gauge },
+              { id: 'overview', label: 'Visão Geral & Incidentes', icon: Gauge },
               {
                 id: 'analytics',
-                label: 'Demanda & Ocupação',
-                icon: BarChart3,
+                label: 'Funil, Web Vitals & Ocupação',
+                icon: TrendingUp,
               },
               {
                 id: 'simulator',
@@ -1060,7 +1144,7 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
               },
               {
                 id: 'logs',
-                label: `Logs (${logs.length})`,
+                label: `Erros Reais & Logs (${srv?.recentErrors?.length || 0})`,
                 icon: Terminal,
               },
             ] as const
@@ -1130,55 +1214,53 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
                   : `${alerts.length} alerta(s) operacional(is) detectado(s)`}
               </div>
               <div className="text-xs text-[#E8D6CB]/70 mt-0.5">
-                Última sondagem: {health?.checkedAt || 'executando...'} ·
-                Servidor: {srv?.runtime.vercelRegion || 'local'} (Node{' '}
-                {srv?.runtime.nodeVersion || '—'})
+                Sondagem: {health?.checkedAt || 'em andamento...'} · Conversão
+                7d: <strong>{funnelAndVitals.conversionRate}%</strong> ·
+                Divergência GCal:{' '}
+                <strong>{srv?.googleCalendar.divergentCount ?? 0}</strong>
               </div>
             </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-2 text-xs">
             <span className="px-2.5 py-1 rounded-lg bg-black/30 border border-white/10 text-[#E8D6CB]">
-              DB Client: <strong>{metrics.avgDbMs ?? '—'}ms</strong>
-            </span>
-            <span className="px-2.5 py-1 rounded-lg bg-black/30 border border-white/10 text-[#E8D6CB]">
               DB Server: <strong>{srv?.firestore.latencyMs ?? '—'}ms</strong>
             </span>
             <span className="px-2.5 py-1 rounded-lg bg-black/30 border border-white/10 text-[#E8D6CB]">
-              P95: <strong>{metrics.p95DbMs ?? '—'}ms</strong>
+              LCP 7d:{' '}
+              <strong>
+                {funnelAndVitals.avgLcpMs !== null
+                  ? `${funnelAndVitals.avgLcpMs}ms`
+                  : '—'}
+              </strong>
             </span>
           </div>
         </section>
 
         {activeTab === 'overview' && (
           <>
-            {/* 4 Executive KPI Cards */}
+            {/* 4 Executive Cards */}
             <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="rounded-2xl bg-[#181412] border border-white/10 p-4 space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-semibold text-[#E8D6CB]/75 flex items-center gap-1.5">
                     <Database className="w-4 h-4 text-[#C4A477]" />
-                    Firestore DB
+                    Firestore & Cotas
                   </span>
-                  <span
-                    className={`text-[11px] font-bold ${
-                      health?.firestoreOk
-                        ? 'text-emerald-400'
-                        : 'text-amber-400'
-                    }`}
-                  >
-                    {health?.firestoreOk ? 'Online' : 'Verificando'}
+                  <span className="text-[11px] font-bold text-emerald-400">
+                    {srv?.firestore.quotaEstimate?.readsPct ?? 0}% cota
                   </span>
                 </div>
                 <div className="text-2xl font-bold tabular-nums">
-                  {health?.firestoreLatencyMs !== null &&
-                  health?.firestoreLatencyMs !== undefined
-                    ? `${health.firestoreLatencyMs} ms`
-                    : '—'}
+                  {srv?.firestore.latencyMs ?? health?.firestoreLatencyMs ?? '—'}{' '}
+                  ms
                 </div>
                 <p className="text-[11px] text-[#E8D6CB]/55">
-                  Docs: {srv?.firestore.counts.availabilitySlots ?? '—'} slots ·{' '}
-                  {srv?.firestore.counts.services ?? '—'} serviços
+                  Est. hoje:{' '}
+                  {srv?.firestore.quotaEstimate?.estimatedReadsToday ?? '—'}{' '}
+                  leituras /{' '}
+                  {srv?.firestore.quotaEstimate?.estimatedWritesToday ?? '—'}{' '}
+                  escritas
                 </p>
               </div>
 
@@ -1186,25 +1268,24 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-semibold text-[#E8D6CB]/75 flex items-center gap-1.5">
                     <Server className="w-4 h-4 text-[#C4A477]" />
-                    Google Agenda API
+                    Google Agenda Sync
                   </span>
                   <span
                     className={`text-[11px] font-bold ${
-                      srv?.googleCalendar.tokenValid || health?.gcalConnected
+                      (srv?.googleCalendar.divergentCount || 0) === 0 &&
+                      srv?.googleCalendar.tokenValid
                         ? 'text-emerald-400'
                         : 'text-amber-400'
                     }`}
                   >
-                    {srv?.googleCalendar.tokenValid
-                      ? 'Token Válido'
-                      : health?.gcalConnected
-                        ? 'Conectada'
-                        : 'Desconectada'}
+                    {(srv?.googleCalendar.divergentCount || 0) === 0
+                      ? 'Sincronizado'
+                      : `${srv?.googleCalendar.divergentCount} pendente(s)`}
                   </span>
                 </div>
                 <div className="text-2xl font-bold tabular-nums">
-                  {srv?.googleCalendar.latencyMs ?? health?.gcalLatencyMs ?? '—'}{' '}
-                  ms
+                  {srv?.googleCalendar.syncedToGoogleCount ?? 0}/
+                  {srv?.googleCalendar.futureAppointmentsCount ?? 0}
                 </div>
                 <p className="text-[11px] text-[#E8D6CB]/55 truncate">
                   Conta: {srv?.googleCalendar.accountMasked || 'Não vinculada'}
@@ -1214,56 +1295,63 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
               <div className="rounded-2xl bg-[#181412] border border-white/10 p-4 space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-semibold text-[#E8D6CB]/75 flex items-center gap-1.5">
-                    <Cloud className="w-4 h-4 text-[#C4A477]" />
-                    Vercel Serverless
+                    <Smartphone className="w-4 h-4 text-[#C4A477]" />
+                    PWA & Clientes (7d)
                   </span>
                   <span className="text-[11px] font-bold text-emerald-400">
-                    {srv?.ok ? 'Operacional' : 'Verificando'}
+                    {health?.swActive ? 'SW Ativo' : 'Web'}
                   </span>
                 </div>
                 <div className="text-2xl font-bold tabular-nums">
-                  {srv ? `${srv.totalDurationMs} ms` : '—'}
+                  {funnelAndVitals.pwaInstalls} installs
                 </div>
-                <p className="text-[11px] text-[#E8D6CB]/55 truncate">
-                  {srv?.runtime.vercelRegion || 'local'} ·{' '}
-                  {srv?.runtime.nodeVersion || 'Node'}
+                <p className="text-[11px] text-[#E8D6CB]/55">
+                  Offline: {funnelAndVitals.offlineEvents} · Erros:{' '}
+                  {funnelAndVitals.clientErrors7d}
                 </p>
               </div>
 
               <div className="rounded-2xl bg-[#181412] border border-white/10 p-4 space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-semibold text-[#E8D6CB]/75 flex items-center gap-1.5">
-                    {isOnline ? (
-                      <Wifi className="w-4 h-4 text-emerald-400" />
-                    ) : (
-                      <WifiOff className="w-4 h-4 text-rose-400" />
-                    )}
-                    PWA & Motor
+                    <Cpu className="w-4 h-4 text-[#C4A477]" />
+                    Segurança & Login
                   </span>
-                  <span className="text-[11px] font-bold text-[#C4A477]">
-                    {metrics.todayCount} hoje
+                  <span
+                    className={`text-[11px] font-bold ${
+                      funnelAndVitals.authFailPainel +
+                        funnelAndVitals.authFailOwner ===
+                      0
+                        ? 'text-emerald-400'
+                        : 'text-amber-400'
+                    }`}
+                  >
+                    Rate Limit Ativo
                   </span>
                 </div>
                 <div className="text-2xl font-bold tabular-nums">
-                  {health?.storageUsedMB ? `${health.storageUsedMB} MB` : 'Web'}
+                  {funnelAndVitals.authFailPainel +
+                    funnelAndVitals.authFailOwner}{' '}
+                  falhas
                 </div>
-                <p className="text-[11px] text-[#E8D6CB]/55 truncate">
-                  {metrics.scheduleMode}
+                <p className="text-[11px] text-[#E8D6CB]/55">
+                  /painel: {funnelAndVitals.authFailPainel} · /owner:{' '}
+                  {funnelAndVitals.authFailOwner} (7d)
                 </p>
               </div>
             </section>
 
-            {/* Latency Sparkline + Active Alerts & Maintenance */}
+            {/* Latency Sparkline + Server Incident History */}
             <section className="grid grid-cols-1 lg:grid-cols-3 gap-4">
               <div className="lg:col-span-2 rounded-2xl bg-[#181412] border border-white/10 p-5 space-y-4">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div>
                     <h2 className="text-sm font-bold flex items-center gap-2">
                       <Clock className="w-4 h-4 text-[#C4A477]" />
-                      <span>Telemetria de Latência em Tempo Real (ms)</span>
+                      <span>Latência em Tempo Real (ms)</span>
                     </h2>
                     <p className="text-[11px] text-[#E8D6CB]/60">
-                      Últimas {latencyHistory.length} medições salvas
+                      Últimas {latencyHistory.length} medições
                     </p>
                   </div>
                   <div className="flex items-center gap-3 text-[11px]">
@@ -1275,15 +1363,6 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
                       <span className="w-2.5 h-2.5 rounded-full bg-[#C4A477]" />
                       Google Agenda API
                     </span>
-                    {latencyHistory.length > 0 && (
-                      <button
-                        type="button"
-                        onClick={handleClearTelemetryHistory}
-                        className="text-[#E8D6CB]/50 hover:text-white underline cursor-pointer"
-                      >
-                        Zerar
-                      </button>
-                    )}
                   </div>
                 </div>
 
@@ -1329,43 +1408,54 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
                   </div>
                 ) : (
                   <div className="rounded-xl bg-[#0D0B0A] border border-white/5 p-8 text-center text-xs text-[#E8D6CB]/55">
-                    Aguardando 2 medições para traçar o gráfico de latência...
+                    Aguardando 2 medições...
                   </div>
                 )}
               </div>
 
-              {/* Alerts & Maintenance */}
+              {/* Server-Persisted Incidents + Maintenance */}
               <div className="rounded-2xl bg-[#181412] border border-white/10 p-5 flex flex-col justify-between gap-4">
                 <div className="space-y-3">
                   <h2 className="text-sm font-bold flex items-center gap-2">
                     <Sparkles className="w-4 h-4 text-[#C4A477]" />
-                    <span>Detector de Anomalias</span>
+                    <span>Incidentes no Servidor</span>
                   </h2>
-                  {alerts.length === 0 ? (
+                  {(srv?.incidents || []).length === 0 ? (
                     <div className="rounded-xl bg-emerald-950/30 border border-emerald-500/20 p-3.5 text-xs text-emerald-200 flex items-start gap-2.5">
                       <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                       <div>
-                        <div className="font-bold">0 incidentes ativos</div>
+                        <div className="font-bold">Sem incidentes gravados</div>
                         <p className="text-emerald-200/75 mt-0.5">
-                          Banco, Vercel e Google Agenda operando normalmente.
+                          Clique em &quot;Auditoria Servidor&quot; para rodar uma
+                          checagem persistente.
                         </p>
                       </div>
                     </div>
                   ) : (
-                    <div className="space-y-2">
-                      {alerts.map((al, i) => (
+                    <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                      {(srv?.incidents || []).map((inc) => (
                         <div
-                          key={i}
-                          className={`rounded-xl p-3 border text-xs flex items-start gap-2 ${
-                            al.level === 'err'
-                              ? 'bg-rose-950/35 border-rose-500/30 text-rose-200'
-                              : 'bg-amber-950/35 border-amber-500/30 text-amber-100'
+                          key={inc.id}
+                          className={`rounded-xl p-3 border text-xs ${
+                            inc.status === 'open'
+                              ? 'bg-amber-950/35 border-amber-500/30 text-amber-100'
+                              : 'bg-[#0D0B0A] border-white/10 text-[#E8D6CB]/75'
                           }`}
                         >
-                          <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
-                          <div>
-                            <div className="font-bold">{al.title}</div>
-                            <div className="opacity-80 mt-0.5">{al.detail}</div>
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="font-bold">{inc.title}</span>
+                            <span
+                              className={`px-1.5 py-0.5 rounded text-[10px] font-bold uppercase ${
+                                inc.status === 'open'
+                                  ? 'bg-amber-500/20 text-amber-300'
+                                  : 'bg-emerald-500/20 text-emerald-300'
+                              }`}
+                            >
+                              {inc.status === 'open' ? 'Aberto' : 'Resolvido'}
+                            </span>
+                          </div>
+                          <div className="text-[11px] opacity-80 mt-1">
+                            {inc.detail}
                           </div>
                         </div>
                       ))}
@@ -1383,7 +1473,7 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
                     onClick={() => void handleForceRefreshPWA()}
                     className="w-full min-h-[36px] rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-[#FAF6F1] transition-colors cursor-pointer"
                   >
-                    Limpar Cache PWA & Recarregar App
+                    Limpar Cache PWA & Recarregar
                   </button>
                 </div>
               </div>
@@ -1393,39 +1483,120 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
 
         {activeTab === 'analytics' && (
           <section className="space-y-6">
+            {/* Conversion Funnel (Last 7 days) */}
+            <div className="rounded-2xl bg-[#181412] border border-white/10 p-5 space-y-4">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <h2 className="text-sm font-bold flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4 text-[#C4A477]" />
+                  <span>Funil de Conversão do Agendamento (Últimos 7 dias)</span>
+                </h2>
+                <span className="text-xs text-[#C4A477] font-semibold">
+                  Conversão: {funnelAndVitals.conversionRate}% · Tempo médio:{' '}
+                  {funnelAndVitals.avgBookingSec !== null
+                    ? `${funnelAndVitals.avgBookingSec}s`
+                    : '—'}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                {[
+                  { label: '1. Visitas no Site', val: funnelAndVitals.visits },
+                  {
+                    label: '2. Escolheu Serviço',
+                    val: funnelAndVitals.servicesChosen,
+                  },
+                  {
+                    label: '3. Escolheu Horário',
+                    val: funnelAndVitals.slotsChosen,
+                  },
+                  {
+                    label: '4. Confirmou',
+                    val: funnelAndVitals.confirmed,
+                    highlight: true,
+                  },
+                  {
+                    label: 'Falhas no Checkout',
+                    val: funnelAndVitals.failedBookings,
+                    danger: funnelAndVitals.failedBookings > 0,
+                  },
+                ].map((step) => (
+                  <div
+                    key={step.label}
+                    className="rounded-xl bg-[#0D0B0A] border border-white/10 p-3.5"
+                  >
+                    <div className="text-[11px] text-[#E8D6CB]/65">
+                      {step.label}
+                    </div>
+                    <div
+                      className={`text-2xl font-bold tabular-nums mt-1 ${
+                        step.highlight
+                          ? 'text-emerald-400'
+                          : step.danger
+                            ? 'text-rose-400'
+                            : 'text-white'
+                      }`}
+                    >
+                      {step.val}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs pt-1">
+                <div className="rounded-xl bg-[#0D0B0A] border border-white/5 p-3.5 flex flex-wrap items-center justify-between gap-2">
+                  <span className="text-[#E8D6CB]/70">Dispositivos (7d):</span>
+                  <span className="font-semibold">
+                    Mobile: <strong>{funnelAndVitals.mobile}</strong> · Desktop:{' '}
+                    <strong>{funnelAndVitals.desktop}</strong>
+                  </span>
+                </div>
+                <div className="rounded-xl bg-[#0D0B0A] border border-white/5 p-3.5 flex flex-wrap items-center justify-between gap-2">
+                  <span className="text-[#E8D6CB]/70">Origem Tráfego (7d):</span>
+                  <span className="font-semibold">
+                    IG: <strong>{funnelAndVitals.ig}</strong> · WA:{' '}
+                    <strong>{funnelAndVitals.wa}</strong> · Direto:{' '}
+                    <strong>{funnelAndVitals.direct}</strong>
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Real User Web Vitals + Operational Agenda KPIs */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="rounded-2xl bg-[#181412] border border-white/10 p-4">
-                <div className="text-xs text-[#E8D6CB]/65">Hoje / 7 dias</div>
+                <div className="text-xs text-[#E8D6CB]/65">LCP Médio (7d)</div>
+                <div className="text-2xl font-bold tabular-nums mt-1 text-emerald-400">
+                  {funnelAndVitals.avgLcpMs !== null
+                    ? `${funnelAndVitals.avgLcpMs} ms`
+                    : '—'}
+                </div>
+                <div className="text-[11px] text-[#E8D6CB]/50 mt-1">
+                  Ideal &lt; 2500ms
+                </div>
+              </div>
+
+              <div className="rounded-2xl bg-[#181412] border border-white/10 p-4">
+                <div className="text-xs text-[#E8D6CB]/65">INP / CLS (7d)</div>
+                <div className="text-2xl font-bold tabular-nums mt-1">
+                  {funnelAndVitals.avgInpMs !== null
+                    ? `${funnelAndVitals.avgInpMs}ms`
+                    : '—'}{' '}
+                  / {funnelAndVitals.avgCls ?? '—'}
+                </div>
+                <div className="text-[11px] text-[#E8D6CB]/50 mt-1">
+                  Ideal CLS &lt; 0.100
+                </div>
+              </div>
+
+              <div className="rounded-2xl bg-[#181412] border border-white/10 p-4">
+                <div className="text-xs text-[#E8D6CB]/65">
+                  Dias Lotados (14d)
+                </div>
                 <div className="text-2xl font-bold tabular-nums mt-1 text-[#C4A477]">
-                  {metrics.todayCount} / {metrics.next7Count}
+                  {metrics.daysWithZeroFreeSlots} / 14
                 </div>
                 <div className="text-[11px] text-[#E8D6CB]/50 mt-1">
-                  14 dias: {metrics.next14Count} reservas
-                </div>
-              </div>
-
-              <div className="rounded-2xl bg-[#181412] border border-white/10 p-4">
-                <div className="text-xs text-[#E8D6CB]/65">
-                  Bloqueios & Folgas
-                </div>
-                <div className="text-2xl font-bold tabular-nums mt-1">
-                  {metrics.totalActiveBlocks}
-                </div>
-                <div className="text-[11px] text-[#E8D6CB]/50 mt-1">
-                  Datas fechadas: {settings.blockedDates?.length || 0} · Meses:{' '}
-                  {settings.closedMonths?.length || 0}
-                </div>
-              </div>
-
-              <div className="rounded-2xl bg-[#181412] border border-white/10 p-4">
-                <div className="text-xs text-[#E8D6CB]/65">
-                  Serviços no Catálogo
-                </div>
-                <div className="text-2xl font-bold tabular-nums mt-1">
-                  {services.length}
-                </div>
-                <div className="text-[11px] text-[#E8D6CB]/50 mt-1">
-                  Duração média: {metrics.avgServiceDuration} min
+                  dias sem horário livre
                 </div>
               </div>
 
@@ -1437,11 +1608,12 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
                   {formatBRL(metrics.avgServicePrice)}
                 </div>
                 <div className="text-[11px] text-[#E8D6CB]/50 mt-1">
-                  Média agregada de serviços
+                  {services.length} serviços · {metrics.avgServiceDuration}m
                 </div>
               </div>
             </div>
 
+            {/* 14-Day Forecast + Peak Hours */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
               <div className="lg:col-span-2 rounded-2xl bg-[#181412] border border-white/10 p-5 space-y-4">
                 <div className="flex flex-wrap items-center justify-between gap-2">
@@ -1450,7 +1622,8 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
                     <span>Projeção de Demanda · Próximos 14 Dias</span>
                   </h2>
                   <span className="text-[11px] text-[#E8D6CB]/60">
-                    Expediente {settings.openTime}–{settings.closeTime}
+                    Hoje: {metrics.todayCount} · 7d: {metrics.next7Count} · 14d:{' '}
+                    {metrics.next14Count}
                   </span>
                 </div>
 
@@ -1464,7 +1637,7 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
                     return (
                       <div
                         key={day.date}
-                        title={`${day.label}: ${day.appointments} atend., ${day.blocks} bloq.`}
+                        title={`${day.label}: ${day.appointments} atend., ${day.availableSlots} livres`}
                         className="flex flex-col items-center justify-end h-full gap-1.5"
                       >
                         <span className="text-[10px] font-bold tabular-nums text-[#C4A477]">
@@ -1472,9 +1645,7 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
                         </span>
                         <div className="w-full flex-1 bg-[#0D0B0A] rounded-lg border border-white/5 flex items-end overflow-hidden p-0.5">
                           <div
-                            style={{
-                              height: `${total === 0 ? 6 : pct}%`,
-                            }}
+                            style={{ height: `${total === 0 ? 6 : pct}%` }}
                             className={`w-full rounded-md ${
                               day.appointments > 0
                                 ? 'bg-gradient-to-t from-[#C4A477] to-[#E8D6CB]'
@@ -1639,7 +1810,9 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
                       {slot.startTime} → {slot.endTime}
                     </div>
                     <div className="text-[11px] mt-1 font-medium">
-                      {slot.available ? 'Livre no site' : slot.reason || 'Bloqueado'}
+                      {slot.available
+                        ? 'Livre no site'
+                        : slot.reason || 'Bloqueado'}
                     </div>
                   </div>
                 ))}
@@ -1657,8 +1830,8 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
                   <span>Monitoramento de Endpoints & Infraestrutura</span>
                 </h2>
                 <p className="text-xs text-[#E8D6CB]/60">
-                  Sondagem ao vivo contra Firestore, Vercel Telemetry, Google
-                  Agenda e PWA.
+                  Sondagem autenticada contra Firestore, Vercel Telemetry,
+                  Google Agenda e PWA.
                 </p>
               </div>
               <button
@@ -1719,11 +1892,11 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
                 <span>Permitido ao Dono do App (Telemetria)</span>
               </h2>
               <ul className="space-y-2 text-xs text-[#E8D6CB]/85">
-                <li>• Monitorar disponibilidade, SLA e latência Client/Server</li>
-                <li>• Auditar status OAuth e validade do token Google Agenda</li>
-                <li>• Simular disponibilidade técnica da agenda sem PII</li>
-                <li>• Acompanhar contagens agregadas e horários de pico</li>
-                <li>• Capturar erros de runtime e exportar logs sem PII</li>
+                <li>• Funil agregado de conversão, Web Vitals e instalações PWA</li>
+                <li>• Divergência técnica Firestore ↔ Google Agenda (sem nomes)</li>
+                <li>• Histórico de incidentes e erros sanitizados no servidor</li>
+                <li>• Simulador técnico de disponibilidade e cotas Firebase</li>
+                <li>• Contagem de tentativas falhas de login (/painel e /owner)</li>
               </ul>
             </div>
 
@@ -1748,19 +1921,19 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                 <div className="rounded-xl bg-[#0D0B0A] p-3.5 border border-white/5 flex items-center justify-between">
-                  <span>Rota Admin (/painel) com SHA-256 + PBKDF2</span>
+                  <span>/api/owner-telemetry autenticado no servidor</span>
                   <span className="text-emerald-400 font-bold">Ativo</span>
                 </div>
                 <div className="rounded-xl bg-[#0D0B0A] p-3.5 border border-white/5 flex items-center justify-between">
-                  <span>Rota Dono (/owner) isolada e sem PII</span>
+                  <span>Rate Limit + Auditoria de login (/owner & /painel)</span>
                   <span className="text-emerald-400 font-bold">Ativo</span>
                 </div>
                 <div className="rounded-xl bg-[#0D0B0A] p-3.5 border border-white/5 flex items-center justify-between">
-                  <span>Endpoint /api/owner-telemetry mascarado (Zero PII)</span>
+                  <span>Sanitização automática de e-mail/telefone nos logs</span>
                   <span className="text-emerald-400 font-bold">Ativo</span>
                 </div>
                 <div className="rounded-xl bg-[#0D0B0A] p-3.5 border border-white/5 flex items-center justify-between">
-                  <span>Validação de escopo calendar no OAuth Google</span>
+                  <span>Cron Vercel (/api/cron-monitor) ativo</span>
                   <span className="text-emerald-400 font-bold">Ativo</span>
                 </div>
               </div>
@@ -1769,72 +1942,110 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
         )}
 
         {activeTab === 'logs' && (
-          <section className="rounded-2xl bg-[#181412] border border-white/10 p-5 space-y-4">
-            <div className="flex flex-wrap items-center justify-between gap-2">
+          <section className="space-y-6">
+            {/* Persistent Client Errors from Firestore */}
+            <div className="rounded-2xl bg-[#181412] border border-white/10 p-5 space-y-3">
               <h2 className="text-sm font-bold flex items-center gap-2">
-                <Terminal className="w-4 h-4 text-[#C4A477]" />
-                <span>Console de Logs & Erros de Runtime</span>
+                <AlertTriangle className="w-4 h-4 text-rose-400" />
+                <span>Erros Reais de Clientes (Persistidos no Servidor)</span>
               </h2>
-
-              <div className="flex flex-wrap items-center gap-1.5">
-                {(['all', 'ok', 'info', 'warn', 'err'] as const).map((lvl) => (
-                  <button
-                    key={lvl}
-                    type="button"
-                    onClick={() => setLogFilter(lvl)}
-                    className={`px-2.5 py-1 rounded-lg text-[11px] font-bold uppercase cursor-pointer ${
-                      logFilter === lvl
-                        ? 'bg-[#C4A477] text-[#0D0B0A]'
-                        : 'bg-white/5 text-[#E8D6CB]/70 hover:bg-white/10'
-                    }`}
-                  >
-                    {lvl === 'all' ? 'Todos' : lvl}
-                  </button>
-                ))}
-                <button
-                  type="button"
-                  onClick={() => setLogs([])}
-                  className="ml-2 inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-rose-500/15 text-rose-300 hover:bg-rose-500/25 cursor-pointer"
-                >
-                  <Trash2 className="w-3 h-3" />
-                  Limpar
-                </button>
-              </div>
+              {(srv?.recentErrors || []).length === 0 ? (
+                <div className="rounded-xl bg-[#0D0B0A] border border-white/5 p-5 text-center text-xs text-[#E8D6CB]/55">
+                  Nenhum erro de cliente registrado no servidor até o momento.
+                </div>
+              ) : (
+                <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+                  {(srv?.recentErrors || []).map((err) => (
+                    <div
+                      key={err.id}
+                      className="rounded-xl bg-[#0D0B0A] border border-rose-500/20 p-3 text-xs space-y-1"
+                    >
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <span className="font-bold text-rose-300">
+                          {err.message}
+                        </span>
+                        <span className="text-[10px] text-[#E8D6CB]/50 font-mono">
+                          {err.createdAt?.slice(0, 19).replace('T', ' ')}
+                        </span>
+                      </div>
+                      <div className="text-[11px] text-[#E8D6CB]/65 font-mono">
+                        Rota: {err.route} · Versão: {err.appVersion} ·{' '}
+                        {err.deviceType} · {err.connectionType}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
-            {filteredLogs.length === 0 ? (
-              <div className="rounded-xl bg-[#0D0B0A] border border-white/5 p-6 text-center text-xs text-[#E8D6CB]/55">
-                Nenhum registro encontrado para este filtro.
-              </div>
-            ) : (
-              <div className="space-y-1.5 max-h-96 overflow-y-auto pr-1">
-                {filteredLogs.map((entry) => (
-                  <div
-                    key={entry.id}
-                    className="text-xs font-mono bg-[#0D0B0A] rounded-xl px-3 py-2 border border-white/5 flex flex-wrap items-start gap-2"
-                  >
-                    <span className="text-[#E8D6CB]/45 shrink-0">
-                      {entry.time}
-                    </span>
-                    <span
-                      className={
-                        entry.level === 'ok'
-                          ? 'text-emerald-400 font-bold'
-                          : entry.level === 'warn'
-                            ? 'text-amber-400 font-bold'
-                            : entry.level === 'err'
-                              ? 'text-rose-400 font-bold'
-                              : 'text-[#C4A477] font-bold'
-                      }
+            {/* Session Runtime Logs */}
+            <div className="rounded-2xl bg-[#181412] border border-white/10 p-5 space-y-4">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <h2 className="text-sm font-bold flex items-center gap-2">
+                  <Terminal className="w-4 h-4 text-[#C4A477]" />
+                  <span>Logs da Sessão Atual</span>
+                </h2>
+
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {(['all', 'ok', 'info', 'warn', 'err'] as const).map((lvl) => (
+                    <button
+                      key={lvl}
+                      type="button"
+                      onClick={() => setLogFilter(lvl)}
+                      className={`px-2.5 py-1 rounded-lg text-[11px] font-bold uppercase cursor-pointer ${
+                        logFilter === lvl
+                          ? 'bg-[#C4A477] text-[#0D0B0A]'
+                          : 'bg-white/5 text-[#E8D6CB]/70 hover:bg-white/10'
+                      }`}
                     >
-                      [{entry.level.toUpperCase()}]
-                    </span>
-                    <span className="text-sky-300/80">[{entry.source}]</span>
-                    <span className="text-[#FAF6F1]/90">{entry.message}</span>
-                  </div>
-                ))}
+                      {lvl === 'all' ? 'Todos' : lvl}
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => setLogs([])}
+                    className="ml-2 inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-rose-500/15 text-rose-300 hover:bg-rose-500/25 cursor-pointer"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                    Limpar
+                  </button>
+                </div>
               </div>
-            )}
+
+              {filteredLogs.length === 0 ? (
+                <div className="rounded-xl bg-[#0D0B0A] border border-white/5 p-6 text-center text-xs text-[#E8D6CB]/55">
+                  Nenhum registro encontrado para este filtro.
+                </div>
+              ) : (
+                <div className="space-y-1.5 max-h-80 overflow-y-auto pr-1">
+                  {filteredLogs.map((entry) => (
+                    <div
+                      key={entry.id}
+                      className="text-xs font-mono bg-[#0D0B0A] rounded-xl px-3 py-2 border border-white/5 flex flex-wrap items-start gap-2"
+                    >
+                      <span className="text-[#E8D6CB]/45 shrink-0">
+                        {entry.time}
+                      </span>
+                      <span
+                        className={
+                          entry.level === 'ok'
+                            ? 'text-emerald-400 font-bold'
+                            : entry.level === 'warn'
+                              ? 'text-amber-400 font-bold'
+                              : entry.level === 'err'
+                                ? 'text-rose-400 font-bold'
+                                : 'text-[#C4A477] font-bold'
+                        }
+                      >
+                        [{entry.level.toUpperCase()}]
+                      </span>
+                      <span className="text-sky-300/80">[{entry.source}]</span>
+                      <span className="text-[#FAF6F1]/90">{entry.message}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </section>
         )}
       </main>

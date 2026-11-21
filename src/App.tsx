@@ -12,6 +12,7 @@ import {
   resolveAdminRouteAccess,
   resolveOwnerRouteAccess,
 } from './lib/adminRoute';
+import { initClientTelemetry } from './lib/telemetry';
 import {
   checkIsAdminUser,
   subscribeActiveAvailabilitySlots,
@@ -90,6 +91,12 @@ function SalonAppShell() {
       window.removeEventListener('popstate', onNav);
     };
   }, []);
+
+  useEffect(() => {
+    if (routeChecked) {
+      initClientTelemetry(mode);
+    }
+  }, [routeChecked, mode]);
 
   useEffect(() => {
     const unsubAuth = onAuthStateChanged(auth, async (nextUser) => {

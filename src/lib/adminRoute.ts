@@ -226,6 +226,19 @@ export function getVaultOwnerEmail(): string | null {
   }
 }
 
+export function getOwnerSessionToken(): string {
+  try {
+    if (!isVaultOwnerAuthenticated()) return '';
+    return (
+      sessionStorage.getItem(OWNER_AUTH_SESSION_KEY) ||
+      localStorage.getItem(OWNER_AUTH_SESSION_KEY) ||
+      ''
+    );
+  } catch {
+    return '';
+  }
+}
+
 export async function verifyOwnerVaultCredentials(
   email: string,
   password: string,

@@ -49,6 +49,7 @@ import {
   getVaultAdminEmail,
   verifyAdminVaultCredentials,
 } from '../../lib/adminRoute';
+import { trackAuthFailure } from '../../lib/telemetry';
 import {
   disconnectGoogleCalendar,
   fetchGoogleCalendarStatus,
@@ -467,6 +468,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       await signInWithEmail(loginEmail, loginPassword);
       setLoginPassword('');
     } catch (err: unknown) {
+      trackAuthFailure('painel');
       const code = (err as { code?: string })?.code || '';
       if (
         code === 'auth/invalid-credential' ||

@@ -17,6 +17,7 @@ import { BottomSheet } from '../BottomSheet';
 import { CalendarPicker } from '../CalendarPicker';
 import { useToast } from '../Toast';
 import { createAppointmentAtomic } from '../../lib/db';
+import { trackClientError, trackFunnelStep } from '../../lib/telemetry';
 import { signInWithGoogle } from '../../lib/firebase';
 import { loadSavedClientIdentity, saveClientIdentity } from '../../lib/localClientStore';
 import {
@@ -98,11 +99,15 @@ export const BookingSheet: React.FC<BookingSheetProps> = ({
       setConfirmedApt(null);
       setPixCopied(false);
     } else {
+      if (combo.length > 0) {
+        trackFunnelStep('service_selected');
+      }
       const saved = loadSavedClientIdentity();
       if (saved.name && !clientName) setClientName(saved.name);
       if (saved.phone && !clientPhone) setClientPhone(saved.phone);
     }
-  }, [open, clientName, clientPhone]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   const totalPrice = useMemo(
     () => combo.reduce((sum, item) => sum + item.price, 0),
@@ -186,8 +191,14 @@ export const BookingSheet: React.FC<BookingSheetProps> = ({
       setConfirmedApt(created);
       onClearCombo();
       setStep('confirmed');
+      trackFunnelStep('booking_confirmed');
       showToast('Agendamento confirmado na agenda do estúdio.');
-    } catch {
+    } catch (err) {
+      trackFunnelStep('booking_failed');
+      trackClientError(
+        err instanceof Error ? err.message : 'Erro ao gravar agendamento',
+        '/booking',
+      );
       showToast('Erro ao gravar agendamento. Tente novamente.', 'error');
     } finally {
       setSubmitting(false);
@@ -402,7 +413,10 @@ export const BookingSheet: React.FC<BookingSheetProps> = ({
                 selectedDate={selectedDate}
                 selectedTime={selectedTime}
                 onSelectDate={setSelectedDate}
-                onSelectTime={setSelectedTime}
+                onSelectTime={(t) => {
+                  setSelectedTime(t);
+                  if (t) trackFunnelStep('slot_selected');
+                }}
                 durationMinutes={totalDuration}
                 settings={settings}
                 busySlots={busySlots}
