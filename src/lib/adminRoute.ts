@@ -16,9 +16,14 @@ const VAULT_AUTH_SESSION_KEY = 'epn_admin_vault_auth_v43';
 const VAULT_AUTH_EMAIL_KEY = 'epn_admin_vault_email_v43';
 const VAULT_PERSISTENT_MODE_KEY = 'epn_admin_persistent_mode_v43';
 
+const OWNER_AUTH_SESSION_KEY = 'epn_owner_vault_auth_v1';
+const OWNER_AUTH_EMAIL_KEY = 'epn_owner_vault_email_v1';
+
 // Hash SHA-256 irreversível de 256 bits do token secreto da URL
 const DEFAULT_ADMIN_TOKEN_SHA256 =
   'e790c64d6957da727ad0485ea49ea5db7614f06ad6623f4562a34b399dd3b954';
+const DEFAULT_OWNER_TOKEN_SHA256 =
+  '511a21db899a276537e0aceaa0ad09d4e329680fc97a92a2511831147b07ed01';
 
 // Salt e Hashes PBKDF2-HMAC-SHA256 (250.000 iterações, 256-bit) das credenciais administrativas
 const PBKDF2_SALT = 'epn-luxury-vault-salt-2026-v42';
@@ -195,4 +200,102 @@ export function clearAdminGateSession(): void {
   } catch {
     // ignore
   }
+}
+
+export function isVaultOwnerAuthenticated(): boolean {
+  try {
+    const stored =
+      sessionStorage.getItem(OWNER_AUTH_SESSION_KEY) ||
+      localStorage.getItem(OWNER_AUTH_SESSION_KEY) ||
+      '';
+    return ALLOWED_PBKDF2_HASHES.includes(stored);
+  } catch {
+    return false;
+  }
+}
+
+export function getVaultOwnerEmail(): string | null {
+  try {
+    if (!isVaultOwnerAuthenticated()) return null;
+    return (
+      sessionStorage.getItem(OWNER_AUTH_EMAIL_KEY) ||
+      localStorage.getItem(OWNER_AUTH_EMAIL_KEY)
+    );
+  } catch {
+    return null;
+  }
+}
+
+export async function verifyOwnerVaultCredentials(
+  email: string,
+  password: string,
+): Promise<boolean> {
+  const cleanEmailInput = email.toLowerCase().trim();
+  const derived = await pbkdf2Hex(cleanEmailInput, password);
+  const derivedTrimmed =
+    password !== password.trim() ? await pbkdf2Hex(cleanEmailInput, password.trim()) : '';
+
+  if (
+    ALLOWED_PBKDF2_HASHES.includes(derived) ||
+    (derivedTrimmed && ALLOWED_PBKDF2_HASHES.includes(derivedTrimmed))
+  ) {
+    const matchedHash = ALLOWED_PBKDF2_HASHES.includes(derived) ? derived : derivedTrimmed;
+    try {
+      sessionStorage.setItem(OWNER_AUTH_SESSION_KEY, matchedHash);
+      sessionStorage.setItem(OWNER_AUTH_EMAIL_KEY, cleanEmailInput);
+      localStorage.setItem(OWNER_AUTH_SESSION_KEY, matchedHash);
+      localStorage.setItem(OWNER_AUTH_EMAIL_KEY, cleanEmailInput);
+      window.history.replaceState({}, '', '/owner');
+    } catch {
+      // ignore
+    }
+    return true;
+  }
+  return false;
+}
+
+export function clearOwnerGateSession(): void {
+  try {
+    sessionStorage.removeItem(OWNER_AUTH_SESSION_KEY);
+    sessionStorage.removeItem(OWNER_AUTH_EMAIL_KEY);
+    localStorage.removeItem(OWNER_AUTH_SESSION_KEY);
+    localStorage.removeItem(OWNER_AUTH_EMAIL_KEY);
+  } catch {
+    // ignore
+  }
+}
+
+export async function resolveOwnerRouteAccess(): Promise<boolean> {
+  if (typeof window === 'undefined') return false;
+
+  const pathname = window.location.pathname.toLowerCase();
+  const hash = window.location.hash.toLowerCase();
+  const isOwnerRoute = pathname.startsWith('/owner') || hash.startsWith('#/owner');
+  if (!isOwnerRoute) {
+    return false;
+  }
+
+  if (isVaultOwnerAuthenticated()) {
+    return true;
+  }
+
+  const fromEnv = (import.meta.env.VITE_OWNER_TOKEN_HASH || '').trim().toLowerCase();
+  const expectedHash = fromEnv || DEFAULT_OWNER_TOKEN_SHA256;
+
+  let providedToken = new URLSearchParams(window.location.search).get('k') || '';
+  if (!providedToken && window.location.hash.includes('?')) {
+    const hashQuery = window.location.hash.split('?')[1] || '';
+    providedToken = new URLSearchParams(hashQuery).get('k') || '';
+  }
+
+  if (providedToken) {
+    const computedHash = await sha256Hex(providedToken.trim());
+    if (computedHash === expectedHash) {
+      return true;
+    }
+  }
+
+  clearOwnerGateSession();
+  window.history.replaceState({}, '', '/');
+  return false;
 }

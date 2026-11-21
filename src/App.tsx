@@ -6,8 +6,12 @@ import { ToastProvider } from './components/Toast';
 import { OfflineIndicator } from './components/PWAInstallButton';
 import { ClientPortal } from './components/client/ClientPortal';
 import { AdminPanel } from './components/admin/AdminPanel';
+import { OwnerMonitoringPanel } from './components/owner/OwnerMonitoringPanel';
 import { auth } from './lib/firebase';
-import { resolveAdminRouteAccess } from './lib/adminRoute';
+import {
+  resolveAdminRouteAccess,
+  resolveOwnerRouteAccess,
+} from './lib/adminRoute';
 import {
   checkIsAdminUser,
   subscribeActiveAvailabilitySlots,
@@ -31,7 +35,7 @@ import type {
   Service,
 } from './types/salon';
 
-type AppMode = 'client' | 'admin';
+type AppMode = 'client' | 'admin' | 'owner';
 
 function SalonAppShell() {
   const [mode, setMode] = useState<AppMode>('client');
@@ -62,6 +66,13 @@ function SalonAppShell() {
   useEffect(() => {
     let active = true;
     const syncRoute = async () => {
+      const allowedOwner = await resolveOwnerRouteAccess();
+      if (!active) return;
+      if (allowedOwner) {
+        setMode('owner');
+        setRouteChecked(true);
+        return;
+      }
       const allowedAdmin = await resolveAdminRouteAccess();
       if (!active) return;
       setMode(allowedAdmin ? 'admin' : 'client');
@@ -169,7 +180,14 @@ function SalonAppShell() {
         </div>
       )}
       <OfflineIndicator />
-      {mode === 'admin' && !adminPreviewClient ? (
+      {mode === 'owner' ? (
+        <OwnerMonitoringPanel
+          settings={settings}
+          services={services}
+          busySlots={busySlots}
+          isFirebaseAdmin={isAdmin}
+        />
+      ) : mode === 'admin' && !adminPreviewClient ? (
         <AdminPanel
           user={user}
           isAdmin={isAdmin}
