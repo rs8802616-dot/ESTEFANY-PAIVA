@@ -3,38 +3,36 @@ import {
   Activity,
   AlertTriangle,
   BarChart3,
+  Bell,
+  BellOff,
   Calendar,
   Check,
   CheckCircle2,
   Clock,
-  Cloud,
   Compass,
   Copy,
-  Cpu,
   Database,
   Download,
   Flame,
   Gauge,
   Globe,
   HardDrive,
-  Layers,
   Lock,
   LogOut,
   Pause,
   Play,
   RefreshCw,
+  Send,
   Server,
   ShieldAlert,
   ShieldCheck,
   Smartphone,
-  Sparkles,
   Terminal,
   Trash2,
   TrendingUp,
   Wifi,
   WifiOff,
   Wrench,
-  Zap,
 } from 'lucide-react';
 import {
   clearOwnerGateSession,
@@ -67,13 +65,15 @@ interface OwnerMonitoringPanelProps {
   isFirebaseAdmin: boolean;
 }
 
-type OwnerTab =
-  | 'overview'
-  | 'analytics'
+type OwnerSection =
+  | 'status'
+  | 'incidents'
+  | 'funnel'
   | 'simulator'
-  | 'endpoints'
-  | 'compliance'
-  | 'logs';
+  | 'quotas'
+  | 'logs'
+  | 'lgpd';
+
 type LogLevel = 'info' | 'ok' | 'warn' | 'err';
 
 interface EndpointProbe {
@@ -84,6 +84,14 @@ interface EndpointProbe {
   statusCode: number | string;
   latencyMs: number;
   detail: string;
+}
+
+interface MonitorCheckRow {
+  timestamp?: string;
+  service?: string;
+  ok?: boolean;
+  latencyMs?: number;
+  statusCode?: number;
 }
 
 interface DailyTelemetryRow {
@@ -180,6 +188,7 @@ interface ServerTelemetryPayload {
   dailyTelemetry?: DailyTelemetryRow[];
   recentErrors?: ServerErrorRecord[];
   incidents?: ServerIncidentRecord[];
+  recentChecks?: MonitorCheckRow[];
   serverMonitorStats?: {
     totalChecks: number;
     serverUptimePct: number | null;
@@ -221,7 +230,7 @@ interface TechnicalLogEntry {
   message: string;
 }
 
-const APP_VERSION = 'v83-monitor-engine';
+const APP_VERSION = 'v84-noc-console';
 const TELEMETRY_HISTORY_KEY = 'epn_owner_telemetry_history_v1';
 
 function loadSavedTelemetry(): LatencySample[] {
@@ -254,12 +263,14 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
   const [failedAttempts, setFailedAttempts] = useState(0);
   const [lockUntil, setLockUntil] = useState(0);
 
-  const [activeTab, setActiveTab] = useState<OwnerTab>('overview');
+  const [section, setSection] = useState<OwnerSection>('status');
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [countdown, setCountdown] = useState(30);
   const [logFilter, setLogFilter] = useState<'all' | LogLevel>('all');
   const [copiedReport, setCopiedReport] = useState(false);
   const [runningCron, setRunningCron] = useState(false);
+  const [testingTelegram, setTestingTelegram] = useState(false);
+  const [telegramFeedback, setTelegramFeedback] = useState<string | null>(null);
 
   const [simDate, setSimDate] = useState<string>(() => todayISO());
   const [simDuration, setSimDuration] = useState<number>(120);
@@ -273,7 +284,6 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
     loadSavedTelemetry(),
   );
   const [logs, setLogs] = useState<TechnicalLogEntry[]>([]);
-
   const [statusCounts, setStatusCounts] = useState<Record<string, number> | null>(
     null,
   );
@@ -295,11 +305,11 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
   useEffect(() => {
     const onOnline = () => {
       setIsOnline(true);
-      pushLog('ok', 'NETWORK', 'Conexão de rede restaurada.');
+      pushLog('ok', 'NET', 'Conexão restaurada.');
     };
     const onOffline = () => {
       setIsOnline(false);
-      pushLog('warn', 'NETWORK', 'Dispositivo entrou em modo offline.');
+      pushLog('warn', 'NET', 'Dispositivo offline.');
     };
     window.addEventListener('online', onOnline);
     window.addEventListener('offline', onOffline);
@@ -332,12 +342,9 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
   const runHealthCheck = useCallback(async () => {
     setCheckingHealth(true);
     setCountdown(30);
-    pushLog('info', 'PROBE', 'Executando varredura completa (Client + Server)...');
-
     const probes: EndpointProbe[] = [];
     const ownerToken = getOwnerSessionToken();
 
-    // 1. Firestore Settings
     let firestoreOk = false;
     let firestoreLatencyMs: number | null = null;
     try {
@@ -349,26 +356,25 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
       firestoreOk = resp.ok;
       probes.push({
         id: 'firestore_settings',
-        name: 'Firestore Config (salon_settings)',
-        target: 'firestore.googleapis.com/.../salon_settings/main',
+        name: 'Firestore Config',
+        target: '/salon_settings/main',
         ok: resp.ok,
         statusCode: resp.status,
         latencyMs: firestoreLatencyMs,
-        detail: resp.ok ? 'Leitura pública íntegra' : 'Falha na leitura',
+        detail: resp.ok ? 'Leitura pública OK' : 'Falha na leitura',
       });
     } catch {
       probes.push({
         id: 'firestore_settings',
-        name: 'Firestore Config (salon_settings)',
-        target: 'firestore.googleapis.com/.../salon_settings/main',
+        name: 'Firestore Config',
+        target: '/salon_settings/main',
         ok: false,
         statusCode: 'ERR',
         latencyMs: 0,
-        detail: 'Timeout ou erro de rede',
+        detail: 'Sem resposta',
       });
     }
 
-    // 2. Owner Server Telemetry API (autenticado via x-owner-auth)
     let serverTelemetry: ServerTelemetryPayload | null = null;
     try {
       const t0 = performance.now();
@@ -380,46 +386,37 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
         serverTelemetry = (await resp.json()) as ServerTelemetryPayload;
         probes.push({
           id: 'owner_telemetry',
-          name: 'Vercel Telemetry (/api/owner-telemetry)',
+          name: 'Owner Telemetry API',
           target: '/api/owner-telemetry',
           ok: true,
           statusCode: resp.status,
           latencyMs: ms,
-          detail: `Região ${serverTelemetry.runtime.vercelRegion} · Auth OK`,
+          detail: `${serverTelemetry.runtime.vercelRegion} · Auth OK`,
         });
-        pushLog(
-          'ok',
-          'SERVER',
-          `Telemetria servidor OK (${ms}ms) · Divergência GCal: ${serverTelemetry.googleCalendar.divergentCount ?? 0}`,
-        );
+        pushLog('ok', 'API', `Telemetria servidor atualizada (${ms}ms)`);
       } else {
         probes.push({
           id: 'owner_telemetry',
-          name: 'Vercel Telemetry (/api/owner-telemetry)',
+          name: 'Owner Telemetry API',
           target: '/api/owner-telemetry',
           ok: false,
           statusCode: resp.status,
           latencyMs: ms,
-          detail:
-            resp.status === 401
-              ? 'Sessão não autorizada no servidor'
-              : 'Endpoint indisponível',
+          detail: 'HTTP ' + resp.status,
         });
-        pushLog('warn', 'SERVER', `/api/owner-telemetry HTTP ${resp.status}`);
       }
     } catch {
       probes.push({
         id: 'owner_telemetry',
-        name: 'Vercel Telemetry (/api/owner-telemetry)',
+        name: 'Owner Telemetry API',
         target: '/api/owner-telemetry',
         ok: false,
         statusCode: 'ERR',
         latencyMs: 0,
-        detail: 'Sem resposta do servidor',
+        detail: 'Inacessível',
       });
     }
 
-    // 3. Google Calendar Serverless API
     let gcalConfigured = false;
     let gcalConnected = false;
     let gcalLatencyMs: number | null = null;
@@ -436,51 +433,48 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
         gcalConnected = Boolean(data.connected);
         probes.push({
           id: 'gcal_api',
-          name: 'Google Calendar API (/api/google-calendar)',
+          name: 'Google Calendar API',
           target: '/api/google-calendar?action=status',
           ok: gcalConfigured,
           statusCode: resp.status,
           latencyMs: gcalLatencyMs,
-          detail: gcalConnected
-            ? 'OAuth ativo e conectado'
-            : 'OAuth aguardando vínculo',
+          detail: gcalConnected ? 'OAuth conectado' : 'Aguardando vínculo',
         });
       }
     } catch {
       probes.push({
         id: 'gcal_api',
-        name: 'Google Calendar API (/api/google-calendar)',
+        name: 'Google Calendar API',
         target: '/api/google-calendar?action=status',
         ok: false,
         statusCode: 'ERR',
         latencyMs: 0,
-        detail: 'Endpoint inacessível',
+        detail: 'Inacessível',
       });
     }
 
-    // 4. PWA Manifest
     try {
       const t0 = performance.now();
       const resp = await fetch('/manifest.webmanifest');
       const ms = Math.round(performance.now() - t0);
       probes.push({
         id: 'pwa_manifest',
-        name: 'Manifesto PWA (/manifest.webmanifest)',
+        name: 'PWA Manifest',
         target: '/manifest.webmanifest',
         ok: resp.ok,
         statusCode: resp.status,
         latencyMs: ms,
-        detail: resp.ok ? 'Instalável (Android/iOS/Desktop)' : 'Manifesto ausente',
+        detail: resp.ok ? 'Instalável' : 'Ausente',
       });
     } catch {
       probes.push({
         id: 'pwa_manifest',
-        name: 'Manifesto PWA (/manifest.webmanifest)',
+        name: 'PWA Manifest',
         target: '/manifest.webmanifest',
         ok: false,
         statusCode: 'ERR',
         latencyMs: 0,
-        detail: 'Erro ao carregar manifesto',
+        detail: 'Erro',
       });
     }
 
@@ -545,9 +539,7 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
   }, [pushLog]);
 
   useEffect(() => {
-    if (authenticated) {
-      void runHealthCheck();
-    }
+    if (authenticated) void runHealthCheck();
   }, [authenticated, runHealthCheck]);
 
   useEffect(() => {
@@ -580,29 +572,57 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
           'info',
           'ALERTS',
           muteMinutes > 0
-            ? `Alertas silenciados por ${muteMinutes} min (manutenção).`
-            : 'Alertas externos reativados.',
+            ? `Alertas silenciados por ${muteMinutes} min.`
+            : 'Alertas reativados.',
         );
         await runHealthCheck();
       }
     } catch {
-      pushLog('warn', 'ALERTS', 'Erro ao atualizar silenciamento.');
+      pushLog('warn', 'ALERTS', 'Erro ao alternar silenciamento.');
+    }
+  };
+
+  const handleTestTelegram = async () => {
+    setTestingTelegram(true);
+    setTelegramFeedback(null);
+    const ownerToken = getOwnerSessionToken();
+    try {
+      const resp = await fetch('/api/owner-telemetry', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(ownerToken ? { 'x-owner-auth': ownerToken } : {}),
+        },
+        body: JSON.stringify({ action: 'test_telegram' }),
+      });
+      const data = (await resp.json()) as { ok?: boolean; error?: string };
+      if (resp.ok && data.ok) {
+        setTelegramFeedback('Mensagem de teste enviada no Telegram!');
+        pushLog('ok', 'TELEGRAM', 'Teste de alerta enviado com sucesso.');
+      } else {
+        setTelegramFeedback(
+          data.error || 'Falha ao enviar teste (verifique variáveis na Vercel).',
+        );
+        pushLog('warn', 'TELEGRAM', data.error || 'Não configurado.');
+      }
+    } catch {
+      setTelegramFeedback('Erro de rede ao testar Telegram.');
+    } finally {
+      setTestingTelegram(false);
     }
   };
 
   const handleRunServerCronAudit = async () => {
     setRunningCron(true);
-    pushLog('info', 'CRON', 'Executando auditoria de incidentes no servidor...');
+    pushLog('info', 'CRON', 'Rodando auditoria de incidentes no servidor...');
     try {
       const resp = await fetch('/api/cron-monitor');
       if (resp.ok) {
-        pushLog('ok', 'CRON', 'Auditoria concluída e incidentes atualizados.');
+        pushLog('ok', 'CRON', 'Checagem gravada em monitor_checks.');
         await runHealthCheck();
-      } else {
-        pushLog('warn', 'CRON', `HTTP ${resp.status} ao rodar auditoria.`);
       }
     } catch {
-      pushLog('err', 'CRON', 'Falha ao acionar /api/cron-monitor.');
+      pushLog('err', 'CRON', 'Falha ao chamar /api/cron-monitor.');
     } finally {
       setRunningCron(false);
     }
@@ -612,7 +632,7 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
     e.preventDefault();
     if (Date.now() < lockUntil) {
       const secs = Math.ceil((lockUntil - Date.now()) / 1000);
-      setLoginError(`Muitas tentativas. Aguarde ${secs}s para tentar novamente.`);
+      setLoginError(`Bloqueado por segurança. Aguarde ${secs}s.`);
       return;
     }
     setLoginError('');
@@ -626,9 +646,9 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
         if (nextFails >= 5) {
           setLockUntil(Date.now() + 60_000);
           setFailedAttempts(0);
-          setLoginError('5 tentativas falhas. Bloqueado por 60 segundos.');
+          setLoginError('5 falhas seguidas. Bloqueado por 60 segundos.');
         } else {
-          setLoginError('Credenciais inválidas para o Console do Dono.');
+          setLoginError('Credenciais inválidas.');
         }
         return;
       }
@@ -653,7 +673,6 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
     [today],
   );
 
-  // Aggregate 7-day server telemetry (Funnel, Web Vitals, Security, PWA)
   const funnelAndVitals = useMemo(() => {
     const rows = health?.serverTelemetry?.dailyTelemetry || [];
     const sum = (key: keyof DailyTelemetryRow) =>
@@ -664,7 +683,6 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
     const slotsChosen = sum('funnel_slot');
     const confirmed = sum('funnel_confirmed');
     const failedBookings = sum('funnel_failed');
-
     const conversionRate =
       visits > 0 ? Math.round((confirmed / visits) * 1000) / 10 : 0;
 
@@ -682,8 +700,7 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
 
     const clsSum = sum('cls_sum_milli');
     const clsCnt = sum('cls_count');
-    const avgCls =
-      clsCnt > 0 ? (clsSum / clsCnt / 1000).toFixed(3) : null;
+    const avgCls = clsCnt > 0 ? (clsSum / clsCnt / 1000).toFixed(3) : null;
 
     return {
       visits,
@@ -698,7 +715,6 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
       ig: sum('src_instagram'),
       wa: sum('src_whatsapp'),
       direct: sum('src_direct'),
-      other: sum('src_other'),
       avgLcpMs,
       avgInpMs,
       avgCls,
@@ -732,9 +748,12 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
       label: formatDateBR(date).slice(0, 5),
       appointments: activeAppointments.filter((s) => s.date === date).length,
       blocks: activeBlocks.filter((s) => s.date === date).length,
-      availableSlots: generateTimeSlotsForDate(date, 60, settings, busySlots).filter(
-        (sl) => sl.available,
-      ).length,
+      availableSlots: generateTimeSlotsForDate(
+        date,
+        60,
+        settings,
+        busySlots,
+      ).filter((sl) => sl.available).length,
     }));
 
     const daysWithZeroFreeSlots = byDay14.filter(
@@ -776,6 +795,8 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
     const dbLatencies = latencyHistory
       .map((s) => s.firestoreMs)
       .filter((n) => n > 0);
+    const minDbMs = dbLatencies.length > 0 ? Math.min(...dbLatencies) : null;
+    const maxDbMs = dbLatencies.length > 0 ? Math.max(...dbLatencies) : null;
     const avgDbMs =
       dbLatencies.length > 0
         ? Math.round(dbLatencies.reduce((a, b) => a + b, 0) / dbLatencies.length)
@@ -804,12 +825,14 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
       maxHourBucket,
       avgServicePrice,
       avgServiceDuration,
+      minDbMs,
+      maxDbMs,
       avgDbMs,
       uptimePct,
       scheduleMode:
         settings.configuredSlots && settings.configuredSlots.length > 0
-          ? `Horários Fixos (${settings.configuredSlots.length} slots)`
-          : `Horários Corridos (${settings.slotIntervalMinutes || 30} min)`,
+          ? `Horários Fixos (${settings.configuredSlots.length})`
+          : `Intervalo (${settings.slotIntervalMinutes || 30}m)`,
     };
   }, [
     busySlots,
@@ -827,20 +850,41 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
     [simDate, simDuration, settings, busySlots],
   );
 
+  // StatusPage check bars grouped by service from monitor_checks
+  const checksByService = useMemo(() => {
+    const all = health?.serverTelemetry?.recentChecks || [];
+    const defs = [
+      { id: 'firestore', label: 'Firestore Database' },
+      { id: 'site_root', label: 'Site Principal (Vercel)' },
+      { id: 'google_calendar', label: 'Google Agenda API' },
+      { id: 'pwa_manifest', label: 'PWA Manifest' },
+    ];
+    return defs.map((def) => {
+      const items = all
+        .filter((c) => c.service === def.id)
+        .slice(0, 24)
+        .reverse();
+      const okCount = items.filter((i) => i.ok).length;
+      const pct =
+        items.length > 0 ? Math.round((okCount / items.length) * 1000) / 10 : null;
+      return { ...def, items, pct };
+    });
+  }, [health?.serverTelemetry?.recentChecks]);
+
   const alerts = useMemo(() => {
     const list: { level: 'warn' | 'err'; title: string; detail: string }[] = [];
     if (!isOnline) {
       list.push({
         level: 'err',
         title: 'Dispositivo Offline',
-        detail: 'Sem conexão com a internet no momento.',
+        detail: 'Sem conexão com a internet.',
       });
     }
     if (health && !health.firestoreOk) {
       list.push({
         level: 'err',
-        title: 'Falha de Leitura no Firestore',
-        detail: 'A consulta ao banco de dados retornou erro.',
+        title: 'Firestore Inacessível',
+        detail: 'Falha na leitura do banco.',
       });
     }
     const gcalDiv = health?.serverTelemetry?.googleCalendar.divergentCount || 0;
@@ -848,33 +892,11 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
       list.push({
         level: 'warn',
         title: `Divergência Firestore ↔ Google Agenda (${gcalDiv})`,
-        detail: `${gcalDiv} agendamento(s) futuro(s) ainda não sincronizado(s) no Google Agenda.`,
-      });
-    }
-    if (health && !health.gcalConnected) {
-      list.push({
-        level: 'warn',
-        title: 'Google Agenda Desconectado',
-        detail: 'Sincronização automática aguarda vínculo Google no /painel.',
-      });
-    }
-    const quota = health?.serverTelemetry?.firestore.quotaEstimate;
-    if (quota && (quota.readsPct >= 70 || quota.writesPct >= 70)) {
-      list.push({
-        level: 'warn',
-        title: 'Uso de Cota Firebase > 70%',
-        detail: `Leituras: ${quota.readsPct}% · Escritas: ${quota.writesPct}% do plano gratuito.`,
-      });
-    }
-    if (funnelAndVitals.authFailPainel + funnelAndVitals.authFailOwner >= 5) {
-      list.push({
-        level: 'warn',
-        title: 'Tentativas de Login Falhas Detectadas',
-        detail: `${funnelAndVitals.authFailPainel} no /painel e ${funnelAndVitals.authFailOwner} no /owner (7d).`,
+        detail: `${gcalDiv} agendamento(s) futuro(s) sem evento sincronizado.`,
       });
     }
     return list;
-  }, [funnelAndVitals.authFailOwner, funnelAndVitals.authFailPainel, health, isOnline]);
+  }, [health, isOnline]);
 
   const allSystemsHealthy =
     isOnline && alerts.length === 0 && Boolean(health?.firestoreOk);
@@ -891,16 +913,7 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
       lgpdCompliance: 'NO_PII_INCLUDED',
       health,
       funnelAndVitals,
-      aggregatedMetrics: {
-        todayCount: metrics.todayCount,
-        next7Count: metrics.next7Count,
-        next14Count: metrics.next14Count,
-        daysWithZeroFreeSlots: metrics.daysWithZeroFreeSlots,
-        scheduleMode: metrics.scheduleMode,
-        statusCounts,
-      },
       alerts,
-      recentTechnicalLogs: logs.slice(0, 30),
     };
     const blob = new Blob([JSON.stringify(report, null, 2)], {
       type: 'application/json',
@@ -908,27 +921,23 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `owner-telemetry-${today}.json`;
+    a.download = `noc-report-${today}.json`;
     a.click();
     URL.revokeObjectURL(url);
-    pushLog('ok', 'EXPORT', 'Relatório técnico JSON (sem PII) exportado.');
   };
 
   const handleCopyDiagnostic = async () => {
     const srv = health?.serverTelemetry;
     const summary = [
-      `=== TELEMETRIA ${APP_VERSION} (${today}) ===`,
-      `Host: ${window.location.host} | Env: ${srv?.runtime.vercelEnv ?? 'web'} | Região: ${srv?.runtime.vercelRegion ?? '—'}`,
-      `Uptime Sessão: ${metrics.uptimePct}% | DB Server: ${srv?.firestore.latencyMs ?? '—'}ms`,
-      `GCal: ${health?.gcalConnected ? 'Conectada' : 'Desconectada'} | Futuros: ${srv?.googleCalendar.futureAppointmentsCount ?? 0} | Sincronizados: ${srv?.googleCalendar.syncedToGoogleCount ?? 0} | Divergentes: ${srv?.googleCalendar.divergentCount ?? 0}`,
-      `Funil (7d): ${funnelAndVitals.visits} visitas -> ${funnelAndVitals.confirmed} confirmados (${funnelAndVitals.conversionRate}%)`,
-      `Web Vitals (7d): LCP ${funnelAndVitals.avgLcpMs ?? '—'}ms | INP ${funnelAndVitals.avgInpMs ?? '—'}ms | CLS ${funnelAndVitals.avgCls ?? '—'}`,
-      `LGPD: ZERO PII`,
+      `NOC ${APP_VERSION} (${today}) | Uptime: ${srv?.serverMonitorStats?.serverUptimePct ?? metrics.uptimePct}%`,
+      `DB Server: ${srv?.firestore.latencyMs ?? '—'}ms | P95: ${srv?.serverMonitorStats?.serverP95Ms ?? '—'}ms | MTTR: ${srv?.serverMonitorStats?.mttrMinutes ?? '—'}m`,
+      `GCal: ${srv?.googleCalendar.syncedToGoogleCount ?? 0}/${srv?.googleCalendar.futureAppointmentsCount ?? 0} sincronizados (Divergentes: ${srv?.googleCalendar.divergentCount ?? 0})`,
+      `Funil 7d: ${funnelAndVitals.visits} visitas -> ${funnelAndVitals.confirmed} confirmados (${funnelAndVitals.conversionRate}%)`,
     ].join('\n');
     try {
       await navigator.clipboard.writeText(summary);
       setCopiedReport(true);
-      window.setTimeout(() => setCopiedReport(false), 2200);
+      window.setTimeout(() => setCopiedReport(false), 2000);
     } catch {
       // ignore
     }
@@ -952,9 +961,9 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
 
   const sparkline = useMemo(() => {
     if (latencyHistory.length < 2) return null;
-    const width = 560;
-    const height = 110;
-    const pad = 10;
+    const width = 640;
+    const height = 140;
+    const pad = 12;
     const maxVal = Math.max(
       120,
       ...latencyHistory.map((s) => Math.max(s.firestoreMs, s.gcalMs)),
@@ -968,45 +977,48 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
           return `${x.toFixed(1)},${y.toFixed(1)}`;
         })
         .join(' ');
+    const dbPts = toPoints((s) => s.firestoreMs);
+    const areaPts = `${pad},${height - pad} ${dbPts} ${pad + (latencyHistory.length - 1) * stepX},${height - pad}`;
     return {
       width,
       height,
       maxVal,
-      dbPoints: toPoints((s) => s.firestoreMs),
+      dbPoints: dbPts,
+      dbAreaPoints: areaPts,
       gcalPoints: toPoints((s) => s.gcalMs),
     };
   }, [latencyHistory]);
 
   if (!authenticated) {
     return (
-      <div className="min-h-screen bg-[#0D0B0A] text-[#FAF6F1] flex items-center justify-center p-4">
-        <div className="w-full max-w-md rounded-3xl bg-[#181412] border border-[#C4A477]/30 p-6 sm:p-8 shadow-2xl">
-          <div className="flex items-center gap-3.5 mb-5">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#C4A477]/30 to-[#C4A477]/5 border border-[#C4A477]/35 text-[#C4A477] flex items-center justify-center">
+      <div className="min-h-screen bg-[#09090B] text-zinc-100 flex items-center justify-center p-4">
+        <div className="w-full max-w-md rounded-2xl bg-[#111114] border border-zinc-800 p-7 shadow-2xl">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-700 text-emerald-400 flex items-center justify-center">
               <Lock className="w-5 h-5" />
             </div>
             <div>
-              <span className="text-[10px] font-bold uppercase tracking-widest text-[#C4A477]">
-                Observability Pro
-              </span>
-              <h1 className="text-xl font-bold tracking-tight">
-                Área Exclusiva do Dono
+              <div className="text-[11px] font-mono uppercase tracking-wider text-zinc-400">
+                Observability Console
+              </div>
+              <h1 className="text-lg font-semibold text-white">
+                Acesso do Proprietário
               </h1>
             </div>
           </div>
 
-          <div className="mb-5 rounded-2xl bg-[#0D0B0A] border border-emerald-500/20 p-3.5 text-xs text-[#E8D6CB]/85 leading-relaxed flex items-start gap-2.5">
+          <div className="mb-5 rounded-xl bg-zinc-950 border border-zinc-800 p-3.5 text-xs text-zinc-400 flex items-start gap-2.5">
             <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
             <span>
-              Console técnico com telemetria real de clientes, Web Vitals, funil
-              e auditoria Google Agenda. <strong>Zero PII (LGPD)</strong>.
+              Painel técnico isolado em conformidade <strong>LGPD</strong>.
+              Zero dados pessoais de clientes são exibidos.
             </span>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-[#E8D6CB] mb-1.5">
-                E-mail do Proprietário / Dev
+              <label className="block text-xs font-medium text-zinc-400 mb-1.5">
+                E-mail
               </label>
               <input
                 type="email"
@@ -1014,13 +1026,13 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
                 value={loginEmail}
                 onChange={(e) => setLoginEmail(e.target.value)}
                 placeholder="seu-email@dominio.com"
-                className="w-full px-4 py-3 rounded-xl bg-[#0D0B0A] border border-white/10 text-sm text-white focus:border-[#C4A477] focus:outline-none"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-zinc-950 border border-zinc-800 text-sm text-white focus:border-emerald-500 focus:outline-none"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-[#E8D6CB] mb-1.5">
-                Senha de Acesso
+              <label className="block text-xs font-medium text-zinc-400 mb-1.5">
+                Senha
               </label>
               <input
                 type="password"
@@ -1028,7 +1040,7 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
                 value={loginPassword}
                 onChange={(e) => setLoginPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full px-4 py-3 rounded-xl bg-[#0D0B0A] border border-white/10 text-sm text-white focus:border-[#C4A477] focus:outline-none"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-zinc-950 border border-zinc-800 text-sm text-white focus:border-emerald-500 focus:outline-none"
               />
             </div>
 
@@ -1039,9 +1051,9 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
             <button
               type="submit"
               disabled={loggingIn}
-              className="w-full min-h-[46px] rounded-xl bg-[#C4A477] text-[#0D0B0A] font-bold text-sm hover:bg-[#E8D6CB] transition-colors cursor-pointer disabled:opacity-60"
+              className="w-full min-h-[42px] rounded-xl bg-zinc-100 text-zinc-950 font-semibold text-sm hover:bg-white transition-colors cursor-pointer disabled:opacity-60"
             >
-              {loggingIn ? 'Autenticando...' : 'Abrir Observability Console'}
+              {loggingIn ? 'Autenticando...' : 'Entrar no Console'}
             </button>
           </form>
         </div>
@@ -1052,37 +1064,157 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
   const srv = health?.serverTelemetry;
   const effectiveUptimePct =
     srv?.serverMonitorStats?.serverUptimePct ?? metrics.uptimePct;
-  const ringRadius = 28;
-  const ringCircumference = 2 * Math.PI * ringRadius;
-  const ringOffset =
-    ringCircumference - (effectiveUptimePct / 100) * ringCircumference;
+
+  const navItems: Array<{
+    id: OwnerSection;
+    label: string;
+    group: string;
+    icon: React.FC<{ className?: string }>;
+    badge?: string | number;
+  }> = [
+    { id: 'status', label: 'Status & Uptime', group: 'Monitoramento', icon: Gauge },
+    {
+      id: 'incidents',
+      label: 'Incidentes & Alertas',
+      group: 'Monitoramento',
+      icon: Bell,
+      badge: (srv?.incidents || []).filter((i) => i.status === 'open').length || undefined,
+    },
+    {
+      id: 'funnel',
+      label: 'Funil & Web Vitals',
+      group: 'Telemetria',
+      icon: TrendingUp,
+    },
+    {
+      id: 'simulator',
+      label: 'Simulador Agenda',
+      group: 'Telemetria',
+      icon: Compass,
+    },
+    { id: 'quotas', label: 'Cotas & Infra', group: 'Telemetria', icon: HardDrive },
+    {
+      id: 'logs',
+      label: 'Erros & Logs',
+      group: 'Auditoria',
+      icon: Terminal,
+      badge: srv?.recentErrors?.length || undefined,
+    },
+    { id: 'lgpd', label: 'Segurança & LGPD', group: 'Auditoria', icon: ShieldCheck },
+  ];
 
   return (
-    <div className="min-h-screen bg-[#0D0B0A] text-[#FAF6F1] pb-16">
-      <header className="sticky top-0 z-30 bg-[#151210]/90 backdrop-blur-xl border-b border-white/10 px-4 sm:px-6 py-3.5">
-        <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#C4A477]/30 to-[#C4A477]/5 border border-[#C4A477]/35 text-[#C4A477] flex items-center justify-center shrink-0">
-              <Activity className="w-5 h-5" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="text-base sm:text-lg font-bold tracking-tight">
-                  NOC Observability · Estefany Paiva Nails
-                </h1>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#C4A477]/15 text-[#C4A477] border border-[#C4A477]/30">
-                  {APP_VERSION}
-                </span>
-                <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
-                  <ShieldCheck className="w-3 h-3" /> LGPD Zero-PII
-                </span>
+    <div className="min-h-screen bg-[#09090B] text-zinc-100 flex flex-col lg:flex-row">
+      {/* Desktop Sidebar */}
+      <aside className="hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-0 bg-[#111114] border-r border-zinc-800/80">
+        <div className="h-14 px-4 border-b border-zinc-800/80 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
+            <span className="font-semibold text-sm tracking-tight">
+              EPN Observability
+            </span>
+          </div>
+          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-300">
+            {APP_VERSION.split('-')[0]}
+          </span>
+        </div>
+
+        <nav className="flex-1 p-3 space-y-5 overflow-y-auto">
+          {['Monitoramento', 'Telemetria', 'Auditoria'].map((group) => (
+            <div key={group}>
+              <div className="px-2.5 mb-1.5 text-[10px] font-mono uppercase tracking-wider text-zinc-500">
+                {group}
               </div>
-              <p className="text-xs text-[#E8D6CB]/60">
-                {ownerEmail || 'Dono'} · Env: {srv?.runtime.vercelEnv || 'web'}{' '}
-                · Região: {srv?.runtime.vercelRegion || '—'}
-                {srv?.runtime.commitSha ? ` · #${srv.runtime.commitSha}` : ''}
-              </p>
+              <div className="space-y-0.5">
+                {navItems
+                  .filter((n) => n.group === group)
+                  .map((item) => {
+                    const Icon = item.icon;
+                    const active = section === item.id;
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => setSection(item.id)}
+                        className={`w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
+                          active
+                            ? 'bg-zinc-800/90 text-white'
+                            : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900'
+                        }`}
+                      >
+                        <span className="flex items-center gap-2.5">
+                          <Icon
+                            className={`w-4 h-4 ${
+                              active ? 'text-emerald-400' : 'text-zinc-500'
+                            }`}
+                          />
+                          {item.label}
+                        </span>
+                        {item.badge !== undefined && (
+                          <span className="px-1.5 py-0.5 rounded-md text-[10px] font-mono bg-amber-500/15 text-amber-300">
+                            {item.badge}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+              </div>
             </div>
+          ))}
+        </nav>
+
+        <div className="p-3 border-t border-zinc-800/80 space-y-2">
+          <div className="px-2.5 py-2 rounded-lg bg-zinc-950 border border-zinc-800/80 text-[11px] font-mono text-zinc-400 space-y-1">
+            <div className="flex justify-between">
+              <span>Env</span>
+              <span className="text-zinc-200">
+                {srv?.runtime.vercelEnv || 'prod'}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span>Região</span>
+              <span className="text-zinc-200">
+                {srv?.runtime.vercelRegion || '—'}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span>Commit</span>
+              <span className="text-zinc-200">
+                {srv?.runtime.commitSha || '—'}
+              </span>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-zinc-900 hover:bg-rose-500/15 text-zinc-300 hover:text-rose-300 border border-zinc-800 text-xs font-medium transition-colors cursor-pointer"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span>Encerrar Sessão</span>
+          </button>
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <div className="flex-1 lg:pl-64 flex flex-col min-w-0">
+        {/* Top Action Bar */}
+        <header className="sticky top-0 z-20 h-auto min-h-[56px] bg-[#09090B]/90 backdrop-blur-md border-b border-zinc-800/80 px-4 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <span
+                className={`w-2 h-2 rounded-full ${
+                  allSystemsHealthy ? 'bg-emerald-400' : 'bg-amber-400'
+                }`}
+              />
+              <span className="text-sm font-semibold">
+                {allSystemsHealthy
+                  ? 'Sistemas Operacionais'
+                  : `${alerts.length} Alerta(s) Ativo(s)`}
+              </span>
+            </div>
+            <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+              LGPD ZERO-PII
+            </span>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
@@ -1090,758 +1222,519 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
               type="button"
               onClick={() => void handleRunServerCronAudit()}
               disabled={runningCron}
-              className="min-h-[36px] inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sky-500/15 text-sky-300 border border-sky-500/30 text-xs font-semibold hover:bg-sky-500/25 transition-colors cursor-pointer disabled:opacity-60"
+              className="h-8 inline-flex items-center gap-1.5 px-2.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-xs font-medium text-zinc-200 cursor-pointer disabled:opacity-50"
             >
-              <Server className="w-3.5 h-3.5" />
-              <span>{runningCron ? 'Auditando...' : 'Auditoria Servidor'}</span>
+              <Server className="w-3.5 h-3.5 text-sky-400" />
+              <span>{runningCron ? 'Auditando...' : 'Gravar Check'}</span>
             </button>
 
             <button
               type="button"
               onClick={() => setAutoRefresh((v) => !v)}
-              className={`min-h-[36px] inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-colors cursor-pointer ${
+              className={`h-8 inline-flex items-center gap-1.5 px-2.5 rounded-lg border text-xs font-mono cursor-pointer ${
                 autoRefresh
-                  ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
-                  : 'bg-white/5 text-[#E8D6CB]/80 border-white/10 hover:bg-white/10'
+                  ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
+                  : 'bg-zinc-900 border-zinc-800 text-zinc-400'
               }`}
             >
               {autoRefresh ? (
-                <Pause className="w-3.5 h-3.5" />
+                <Pause className="w-3 h-3" />
               ) : (
-                <Play className="w-3.5 h-3.5" />
+                <Play className="w-3 h-3" />
               )}
-              <span>{autoRefresh ? `Ao Vivo (${countdown}s)` : 'Pausado'}</span>
+              <span>{autoRefresh ? `${countdown}s` : 'Pausado'}</span>
             </button>
 
             <button
               type="button"
               onClick={() => void runHealthCheck()}
               disabled={checkingHealth}
-              className="min-h-[36px] inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#C4A477] text-[#0D0B0A] text-xs font-bold hover:bg-[#E8D6CB] transition-colors cursor-pointer disabled:opacity-60"
+              className="h-8 inline-flex items-center gap-1.5 px-3 rounded-lg bg-zinc-100 hover:bg-white text-zinc-950 text-xs font-semibold cursor-pointer disabled:opacity-50"
             >
               <RefreshCw
                 className={`w-3.5 h-3.5 ${checkingHealth ? 'animate-spin' : ''}`}
               />
-              <span>Sondar</span>
+              <span>Atualizar</span>
             </button>
 
             <button
               type="button"
               onClick={() => void handleCopyDiagnostic()}
-              className="min-h-[36px] inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-[#FAF6F1] text-xs font-semibold hover:bg-white/10 transition-colors cursor-pointer"
+              className="h-8 inline-flex items-center gap-1.5 px-2.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-xs text-zinc-300 cursor-pointer"
             >
               {copiedReport ? (
                 <Check className="w-3.5 h-3.5 text-emerald-400" />
               ) : (
-                <Copy className="w-3.5 h-3.5 text-[#C4A477]" />
+                <Copy className="w-3.5 h-3.5" />
               )}
-              <span>{copiedReport ? 'Copiado' : 'Copiar'}</span>
             </button>
 
             <button
               type="button"
               onClick={handleExportReport}
-              className="min-h-[36px] inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-[#FAF6F1] text-xs font-semibold hover:bg-white/10 transition-colors cursor-pointer"
+              className="h-8 inline-flex items-center gap-1.5 px-2.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-xs text-zinc-300 cursor-pointer"
+              title="Exportar JSON"
             >
-              <Download className="w-3.5 h-3.5 text-[#C4A477]" />
-              <span>JSON</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={handleLogout}
-              className="min-h-[36px] inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-500/15 text-rose-300 border border-rose-500/30 text-xs font-semibold hover:bg-rose-500/25 transition-colors cursor-pointer"
-            >
-              <LogOut className="w-3.5 h-3.5" />
-              <span>Sair</span>
+              <Download className="w-3.5 h-3.5" />
             </button>
           </div>
-        </div>
 
-        <div className="max-w-7xl mx-auto mt-3 flex items-center gap-1.5 overflow-x-auto pb-0.5">
-          {(
-            [
-              { id: 'overview', label: 'Visão Geral & Incidentes', icon: Gauge },
-              {
-                id: 'analytics',
-                label: 'Funil, Web Vitals & Ocupação',
-                icon: TrendingUp,
-              },
-              {
-                id: 'simulator',
-                label: 'Simulador de Agenda',
-                icon: Compass,
-              },
-              {
-                id: 'endpoints',
-                label: `Endpoints (${health?.probes.length || 4})`,
-                icon: Zap,
-              },
-              {
-                id: 'compliance',
-                label: 'Segurança & LGPD',
-                icon: ShieldCheck,
-              },
-              {
-                id: 'logs',
-                label: `Erros Reais & Logs (${srv?.recentErrors?.length || 0})`,
-                icon: Terminal,
-              },
-            ] as const
-          ).map((tab) => {
-            const Icon = tab.icon;
-            const active = activeTab === tab.id;
-            return (
+          {/* Mobile Nav */}
+          <div className="w-full flex lg:hidden items-center gap-1.5 overflow-x-auto pt-1">
+            {navItems.map((item) => (
               <button
-                key={tab.id}
+                key={item.id}
                 type="button"
-                onClick={() => setActiveTab(tab.id)}
-                className={`min-h-[36px] inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-colors whitespace-nowrap cursor-pointer ${
-                  active
-                    ? 'bg-[#C4A477]/20 text-[#C4A477] border border-[#C4A477]/40'
-                    : 'text-[#E8D6CB]/70 hover:text-white hover:bg-white/5 border border-transparent'
+                onClick={() => setSection(item.id)}
+                className={`px-2.5 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap cursor-pointer ${
+                  section === item.id
+                    ? 'bg-zinc-800 text-white'
+                    : 'text-zinc-400 hover:text-zinc-200'
                 }`}
               >
-                <Icon className="w-3.5 h-3.5" />
-                <span>{tab.label}</span>
+                {item.label}
               </button>
-            );
-          })}
-        </div>
-      </header>
-
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 space-y-6">
-        {/* Global Status + SVG SLA Ring */}
-        <section
-          className={`rounded-2xl p-4 border flex flex-wrap items-center justify-between gap-4 ${
-            allSystemsHealthy
-              ? 'bg-emerald-950/30 border-emerald-500/30'
-              : 'bg-amber-950/30 border-amber-500/30'
-          }`}
-        >
-          <div className="flex items-center gap-4">
-            <div className="relative w-16 h-16 flex items-center justify-center shrink-0">
-              <svg className="w-16 h-16 -rotate-90" viewBox="0 0 68 68">
-                <circle
-                  cx="34"
-                  cy="34"
-                  r={ringRadius}
-                  fill="none"
-                  stroke="rgba(255,255,255,0.08)"
-                  strokeWidth="6"
-                />
-                <circle
-                  cx="34"
-                  cy="34"
-                  r={ringRadius}
-                  fill="none"
-                  stroke={allSystemsHealthy ? '#34d399' : '#fbbf24'}
-                  strokeWidth="6"
-                  strokeLinecap="round"
-                  strokeDasharray={ringCircumference}
-                  strokeDashoffset={ringOffset}
-                />
-              </svg>
-              <span className="absolute text-xs font-bold tabular-nums">
-                {effectiveUptimePct}%
-              </span>
-            </div>
-
-            <div>
-              <div className="text-sm sm:text-base font-bold">
-                {allSystemsHealthy
-                  ? 'Todos os subsistemas operando normalmente'
-                  : `${alerts.length} alerta(s) operacional(is) detectado(s)`}
-              </div>
-              <div className="text-xs text-[#E8D6CB]/70 mt-0.5">
-                {srv?.serverMonitorStats?.totalChecks
-                  ? `Uptime Servidor (${srv.serverMonitorStats.totalChecks} checks) · `
-                  : 'Uptime Sessão · '}
-                P95: <strong>{srv?.serverMonitorStats?.serverP95Ms ?? '—'}ms</strong>{' '}
-                · MTTR:{' '}
-                <strong>
-                  {srv?.serverMonitorStats?.mttrMinutes !== null &&
-                  srv?.serverMonitorStats?.mttrMinutes !== undefined
-                    ? `${srv.serverMonitorStats.mttrMinutes}m`
-                    : '—'}
-                </strong>{' '}
-                · Telegram:{' '}
-                <strong>
-                  {srv?.serverMonitorStats?.telegramConfigured
-                    ? srv.serverMonitorStats.alertsMuted
-                      ? 'Silenciado'
-                      : 'Ativo'
-                    : 'Não configurado'}
-                </strong>
-              </div>
-            </div>
+            ))}
           </div>
+        </header>
 
-          <div className="flex flex-wrap items-center gap-2 text-xs">
-            <button
-              type="button"
-              onClick={() =>
-                void handleToggleMuteAlerts(
-                  srv?.serverMonitorStats?.alertsMuted ? 0 : 120,
-                )
-              }
-              className={`px-3 py-1.5 rounded-lg border font-semibold cursor-pointer ${
-                srv?.serverMonitorStats?.alertsMuted
-                  ? 'bg-amber-500/20 text-amber-200 border-amber-500/40'
-                  : 'bg-black/30 border-white/10 text-[#E8D6CB] hover:bg-white/10'
-              }`}
-            >
-              {srv?.serverMonitorStats?.alertsMuted
-                ? 'Reativar Alertas'
-                : 'Silenciar Alertas (2h)'}
-            </button>
-          </div>
-        </section>
-
-        {activeTab === 'overview' && (
-          <>
-            {/* 4 Executive Cards */}
-            <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="rounded-2xl bg-[#181412] border border-white/10 p-4 space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold text-[#E8D6CB]/75 flex items-center gap-1.5">
-                    <Database className="w-4 h-4 text-[#C4A477]" />
-                    Firestore & Cotas
-                  </span>
-                  <span className="text-[11px] font-bold text-emerald-400">
-                    {srv?.firestore.quotaEstimate?.readsPct ?? 0}% cota
-                  </span>
+        <main className="p-4 sm:p-6 max-w-6xl w-full mx-auto space-y-6">
+          {section === 'status' && (
+            <>
+              {/* 4 Compact NOC KPIs */}
+              <section className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                <div className="rounded-xl bg-[#111114] border border-zinc-800/80 p-4">
+                  <div className="text-[11px] font-mono uppercase text-zinc-400">
+                    Uptime Servidor
+                  </div>
+                  <div className="text-2xl font-mono font-bold text-emerald-400 mt-1">
+                    {effectiveUptimePct}%
+                  </div>
+                  <div className="text-[11px] text-zinc-500 mt-1">
+                    {srv?.serverMonitorStats?.totalChecks || 0} checks gravados
+                  </div>
                 </div>
-                <div className="text-2xl font-bold tabular-nums">
-                  {srv?.firestore.latencyMs ?? health?.firestoreLatencyMs ?? '—'}{' '}
-                  ms
-                </div>
-                <p className="text-[11px] text-[#E8D6CB]/55">
-                  Est. hoje:{' '}
-                  {srv?.firestore.quotaEstimate?.estimatedReadsToday ?? '—'}{' '}
-                  leituras /{' '}
-                  {srv?.firestore.quotaEstimate?.estimatedWritesToday ?? '—'}{' '}
-                  escritas
-                </p>
-              </div>
 
-              <div className="rounded-2xl bg-[#181412] border border-white/10 p-4 space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold text-[#E8D6CB]/75 flex items-center gap-1.5">
-                    <Server className="w-4 h-4 text-[#C4A477]" />
+                <div className="rounded-xl bg-[#111114] border border-zinc-800/80 p-4">
+                  <div className="text-[11px] font-mono uppercase text-zinc-400">
+                    Latência P95 / MTTR
+                  </div>
+                  <div className="text-2xl font-mono font-bold text-white mt-1">
+                    {srv?.serverMonitorStats?.serverP95Ms ??
+                      health?.firestoreLatencyMs ??
+                      '—'}
+                    ms
+                  </div>
+                  <div className="text-[11px] text-zinc-500 mt-1">
+                    MTTR:{' '}
+                    {srv?.serverMonitorStats?.mttrMinutes !== null &&
+                    srv?.serverMonitorStats?.mttrMinutes !== undefined
+                      ? `${srv.serverMonitorStats.mttrMinutes} min`
+                      : '0 incidentes'}
+                  </div>
+                </div>
+
+                <div className="rounded-xl bg-[#111114] border border-zinc-800/80 p-4">
+                  <div className="text-[11px] font-mono uppercase text-zinc-400">
                     Google Agenda Sync
-                  </span>
-                  <span
-                    className={`text-[11px] font-bold ${
-                      (srv?.googleCalendar.divergentCount || 0) === 0 &&
-                      srv?.googleCalendar.tokenValid
+                  </div>
+                  <div
+                    className={`text-2xl font-mono font-bold mt-1 ${
+                      (srv?.googleCalendar.divergentCount || 0) === 0
                         ? 'text-emerald-400'
                         : 'text-amber-400'
                     }`}
                   >
-                    {(srv?.googleCalendar.divergentCount || 0) === 0
-                      ? 'Sincronizado'
-                      : `${srv?.googleCalendar.divergentCount} pendente(s)`}
-                  </span>
+                    {srv?.googleCalendar.syncedToGoogleCount ?? 0}/
+                    {srv?.googleCalendar.futureAppointmentsCount ?? 0}
+                  </div>
+                  <div className="text-[11px] text-zinc-500 mt-1 truncate">
+                    {srv?.googleCalendar.accountMasked || 'Não vinculada'}
+                  </div>
                 </div>
-                <div className="text-2xl font-bold tabular-nums">
-                  {srv?.googleCalendar.syncedToGoogleCount ?? 0}/
-                  {srv?.googleCalendar.futureAppointmentsCount ?? 0}
-                </div>
-                <p className="text-[11px] text-[#E8D6CB]/55 truncate">
-                  Conta: {srv?.googleCalendar.accountMasked || 'Não vinculada'}
-                </p>
-              </div>
 
-              <div className="rounded-2xl bg-[#181412] border border-white/10 p-4 space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold text-[#E8D6CB]/75 flex items-center gap-1.5">
-                    <Smartphone className="w-4 h-4 text-[#C4A477]" />
-                    PWA & Clientes (7d)
-                  </span>
-                  <span className="text-[11px] font-bold text-emerald-400">
-                    {health?.swActive ? 'SW Ativo' : 'Web'}
-                  </span>
+                <div className="rounded-xl bg-[#111114] border border-zinc-800/80 p-4">
+                  <div className="text-[11px] font-mono uppercase text-zinc-400">
+                    Conversão (7d)
+                  </div>
+                  <div className="text-2xl font-mono font-bold text-sky-400 mt-1">
+                    {funnelAndVitals.conversionRate}%
+                  </div>
+                  <div className="text-[11px] text-zinc-500 mt-1">
+                    {funnelAndVitals.confirmed} de {funnelAndVitals.visits}{' '}
+                    visitas
+                  </div>
                 </div>
-                <div className="text-2xl font-bold tabular-nums">
-                  {funnelAndVitals.pwaInstalls} installs
-                </div>
-                <p className="text-[11px] text-[#E8D6CB]/55">
-                  Offline: {funnelAndVitals.offlineEvents} · Erros:{' '}
-                  {funnelAndVitals.clientErrors7d}
-                </p>
-              </div>
+              </section>
 
-              <div className="rounded-2xl bg-[#181412] border border-white/10 p-4 space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold text-[#E8D6CB]/75 flex items-center gap-1.5">
-                    <Cpu className="w-4 h-4 text-[#C4A477]" />
-                    Segurança & Login
-                  </span>
-                  <span
-                    className={`text-[11px] font-bold ${
-                      funnelAndVitals.authFailPainel +
-                        funnelAndVitals.authFailOwner ===
-                      0
-                        ? 'text-emerald-400'
-                        : 'text-amber-400'
-                    }`}
-                  >
-                    Rate Limit Ativo
-                  </span>
-                </div>
-                <div className="text-2xl font-bold tabular-nums">
-                  {funnelAndVitals.authFailPainel +
-                    funnelAndVitals.authFailOwner}{' '}
-                  falhas
-                </div>
-                <p className="text-[11px] text-[#E8D6CB]/55">
-                  /painel: {funnelAndVitals.authFailPainel} · /owner:{' '}
-                  {funnelAndVitals.authFailOwner} (7d)
-                </p>
-              </div>
-            </section>
-
-            {/* Latency Sparkline + Server Incident History */}
-            <section className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-              <div className="lg:col-span-2 rounded-2xl bg-[#181412] border border-white/10 p-5 space-y-4">
+              {/* StatusPage Bars per Service */}
+              <section className="rounded-xl bg-[#111114] border border-zinc-800/80 p-5 space-y-4">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div>
-                    <h2 className="text-sm font-bold flex items-center gap-2">
-                      <Clock className="w-4 h-4 text-[#C4A477]" />
-                      <span>Latência em Tempo Real (ms)</span>
+                    <h2 className="text-sm font-semibold text-white">
+                      Histórico de Disponibilidade por Serviço (monitor_checks)
                     </h2>
-                    <p className="text-[11px] text-[#E8D6CB]/60">
-                      Últimas {latencyHistory.length} medições
+                    <p className="text-xs text-zinc-400">
+                      Cada barra representa uma sondagem real gravada no servidor
                     </p>
                   </div>
-                  <div className="flex items-center gap-3 text-[11px]">
-                    <span className="inline-flex items-center gap-1.5 text-emerald-300">
-                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
+                  <span className="text-[11px] font-mono text-zinc-500">
+                    Últimas 24 checagens / serviço
+                  </span>
+                </div>
+
+                <div className="space-y-3">
+                  {checksByService.map((svc) => (
+                    <div
+                      key={svc.id}
+                      className="rounded-lg bg-zinc-950 border border-zinc-800/80 p-3 space-y-2"
+                    >
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="font-medium text-zinc-200">
+                          {svc.label}
+                        </span>
+                        <span className="font-mono text-emerald-400">
+                          {svc.pct !== null ? `${svc.pct}%` : 'Sem histórico'}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1 h-5">
+                        {svc.items.length === 0 ? (
+                          <div className="text-[11px] text-zinc-500">
+                            Clique em &quot;Gravar Check&quot; para iniciar o
+                            histórico.
+                          </div>
+                        ) : (
+                          svc.items.map((chk, idx) => (
+                            <div
+                              key={idx}
+                              title={`${chk.timestamp?.slice(11, 19) || ''} · ${chk.ok ? 'OK' : 'FALHA'} · ${chk.latencyMs ?? 0}ms`}
+                              className={`flex-1 max-w-[14px] h-full rounded-[3px] ${
+                                chk.ok ? 'bg-emerald-500/85' : 'bg-rose-500/85'
+                              }`}
+                            />
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+              {/* Latency Area Chart */}
+              <section className="rounded-xl bg-[#111114] border border-zinc-800/80 p-5 space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div>
+                    <h2 className="text-sm font-semibold text-white">
+                      Latência de Resposta (ms)
+                    </h2>
+                    <p className="text-xs text-zinc-400">
+                      Min: {metrics.minDbMs ?? '—'}ms · Média:{' '}
+                      {metrics.avgDbMs ?? '—'}ms · Máx: {metrics.maxDbMs ?? '—'}
+                      ms
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-4 text-xs font-mono">
+                    <span className="flex items-center gap-1.5 text-emerald-400">
+                      <span className="w-2 h-2 rounded-full bg-emerald-400" />
                       Firestore
                     </span>
-                    <span className="inline-flex items-center gap-1.5 text-[#C4A477]">
-                      <span className="w-2.5 h-2.5 rounded-full bg-[#C4A477]" />
-                      Google Agenda API
+                    <span className="flex items-center gap-1.5 text-sky-400">
+                      <span className="w-2 h-2 rounded-full bg-sky-400" />
+                      GCal API
                     </span>
                   </div>
                 </div>
 
                 {sparkline ? (
-                  <div className="w-full overflow-hidden rounded-xl bg-[#0D0B0A] border border-white/5 p-3">
+                  <div className="rounded-lg bg-zinc-950 border border-zinc-800/80 p-3">
                     <svg
                       viewBox={`0 0 ${sparkline.width} ${sparkline.height}`}
                       className="w-full h-36"
                       preserveAspectRatio="none"
                     >
+                      <defs>
+                        <linearGradient id="dbGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#34d399" stopOpacity="0.25" />
+                          <stop offset="100%" stopColor="#34d399" stopOpacity="0" />
+                        </linearGradient>
+                      </defs>
                       <line
-                        x1="10"
-                        y1={sparkline.height / 2}
-                        x2={sparkline.width - 10}
-                        y2={sparkline.height / 2}
-                        stroke="rgba(255,255,255,0.06)"
-                        strokeDasharray="4 4"
+                        x1="12"
+                        y1={sparkline.height * 0.33}
+                        x2={sparkline.width - 12}
+                        y2={sparkline.height * 0.33}
+                        stroke="rgba(255,255,255,0.05)"
+                        strokeDasharray="3 3"
                       />
+                      <line
+                        x1="12"
+                        y1={sparkline.height * 0.66}
+                        x2={sparkline.width - 12}
+                        y2={sparkline.height * 0.66}
+                        stroke="rgba(255,255,255,0.05)"
+                        strokeDasharray="3 3"
+                      />
+                      <polygon fill="url(#dbGrad)" points={sparkline.dbAreaPoints} />
                       <polyline
                         fill="none"
                         stroke="#34d399"
-                        strokeWidth="2.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
+                        strokeWidth="2"
                         points={sparkline.dbPoints}
                       />
                       <polyline
                         fill="none"
-                        stroke="#C4A477"
-                        strokeWidth="2.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
+                        stroke="#38bdf8"
+                        strokeWidth="2"
                         points={sparkline.gcalPoints}
                       />
                     </svg>
-                    <div className="flex justify-between text-[10px] text-[#E8D6CB]/50 tabular-nums mt-1">
-                      <span>{latencyHistory[0]?.time}</span>
-                      <span>Escala máx: {sparkline.maxVal}ms</span>
-                      <span>
-                        {latencyHistory[latencyHistory.length - 1]?.time}
-                      </span>
-                    </div>
                   </div>
                 ) : (
-                  <div className="rounded-xl bg-[#0D0B0A] border border-white/5 p-8 text-center text-xs text-[#E8D6CB]/55">
-                    Aguardando 2 medições...
+                  <div className="rounded-lg bg-zinc-950 border border-zinc-800/80 p-8 text-center text-xs text-zinc-500">
+                    Aguardando 2 medições para traçar o gráfico...
                   </div>
                 )}
-              </div>
+              </section>
+            </>
+          )}
 
-              {/* Server-Persisted Incidents + Maintenance */}
-              <div className="rounded-2xl bg-[#181412] border border-white/10 p-5 flex flex-col justify-between gap-4">
-                <div className="space-y-3">
-                  <h2 className="text-sm font-bold flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-[#C4A477]" />
-                    <span>Incidentes no Servidor</span>
+          {section === 'incidents' && (
+            <section className="space-y-4">
+              {/* Alert Controls + Telegram Tester */}
+              <div className="rounded-xl bg-[#111114] border border-zinc-800/80 p-5 flex flex-wrap items-center justify-between gap-4">
+                <div>
+                  <h2 className="text-sm font-semibold text-white">
+                    Alertas Externos (Telegram Bot) & Manutenção
                   </h2>
-                  {(srv?.incidents || []).length === 0 ? (
-                    <div className="rounded-xl bg-emerald-950/30 border border-emerald-500/20 p-3.5 text-xs text-emerald-200 flex items-start gap-2.5">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                      <div>
-                        <div className="font-bold">Sem incidentes gravados</div>
-                        <p className="text-emerald-200/75 mt-0.5">
-                          Clique em &quot;Auditoria Servidor&quot; para rodar uma
-                          checagem persistente.
-                        </p>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
-                      {(srv?.incidents || []).map((inc) => (
-                        <div
-                          key={inc.id}
-                          className={`rounded-xl p-3 border text-xs ${
-                            inc.status === 'open'
-                              ? 'bg-amber-950/35 border-amber-500/30 text-amber-100'
-                              : 'bg-[#0D0B0A] border-white/10 text-[#E8D6CB]/75'
-                          }`}
-                        >
-                          <div className="flex items-center justify-between gap-2">
-                            <span className="font-bold">{inc.title}</span>
-                            <span
-                              className={`px-1.5 py-0.5 rounded text-[10px] font-bold uppercase ${
-                                inc.status === 'open'
-                                  ? 'bg-amber-500/20 text-amber-300'
-                                  : 'bg-emerald-500/20 text-emerald-300'
-                              }`}
-                            >
-                              {inc.status === 'open' ? 'Aberto' : 'Resolvido'}
-                            </span>
-                          </div>
-                          <div className="text-[11px] opacity-80 mt-1">
-                            {inc.detail}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                  <p className="text-xs text-zinc-400 mt-0.5">
+                    Status:{' '}
+                    {srv?.serverMonitorStats?.telegramConfigured
+                      ? 'Bot configurado'
+                      : 'Configure TELEGRAM_BOT_TOKEN e TELEGRAM_CHAT_ID na Vercel'}
+                  </p>
+                  {telegramFeedback && (
+                    <p className="text-xs text-sky-400 mt-1.5 font-medium">
+                      {telegramFeedback}
+                    </p>
                   )}
                 </div>
 
-                <div className="pt-3 border-t border-white/10 space-y-2">
-                  <div className="text-[11px] font-semibold text-[#E8D6CB]/65 flex items-center gap-1.5">
-                    <Wrench className="w-3.5 h-3.5 text-[#C4A477]" />
-                    <span>Manutenção Rápida</span>
-                  </div>
+                <div className="flex flex-wrap items-center gap-2">
                   <button
                     type="button"
-                    onClick={() => void handleForceRefreshPWA()}
-                    className="w-full min-h-[36px] rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-[#FAF6F1] transition-colors cursor-pointer"
+                    onClick={() => void handleTestTelegram()}
+                    disabled={testingTelegram}
+                    className="h-9 inline-flex items-center gap-1.5 px-3 rounded-lg bg-sky-500/15 hover:bg-sky-500/25 text-sky-300 border border-sky-500/30 text-xs font-medium cursor-pointer disabled:opacity-50"
                   >
-                    Limpar Cache PWA & Recarregar
+                    <Send className="w-3.5 h-3.5" />
+                    <span>
+                      {testingTelegram ? 'Enviando...' : 'Testar Telegram'}
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      void handleToggleMuteAlerts(
+                        srv?.serverMonitorStats?.alertsMuted ? 0 : 120,
+                      )
+                    }
+                    className={`h-9 inline-flex items-center gap-1.5 px-3 rounded-lg border text-xs font-medium cursor-pointer ${
+                      srv?.serverMonitorStats?.alertsMuted
+                        ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
+                        : 'bg-zinc-900 text-zinc-300 border-zinc-700 hover:bg-zinc-800'
+                    }`}
+                  >
+                    <BellOff className="w-3.5 h-3.5" />
+                    <span>
+                      {srv?.serverMonitorStats?.alertsMuted
+                        ? 'Reativar Alertas'
+                        : 'Silenciar 2h'}
+                    </span>
                   </button>
                 </div>
               </div>
-            </section>
-          </>
-        )}
 
-        {activeTab === 'analytics' && (
-          <section className="space-y-6">
-            {/* Conversion Funnel (Last 7 days) */}
-            <div className="rounded-2xl bg-[#181412] border border-white/10 p-5 space-y-4">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <h2 className="text-sm font-bold flex items-center gap-2">
-                  <TrendingUp className="w-4 h-4 text-[#C4A477]" />
-                  <span>Funil de Conversão do Agendamento (Últimos 7 dias)</span>
+              {/* Incidents Table */}
+              <div className="rounded-xl bg-[#111114] border border-zinc-800/80 p-5 space-y-3">
+                <h2 className="text-sm font-semibold text-white">
+                  Linha do Tempo de Incidentes (monitor_incidents)
                 </h2>
-                <span className="text-xs text-[#C4A477] font-semibold">
-                  Conversão: {funnelAndVitals.conversionRate}% · Tempo médio:{' '}
-                  {funnelAndVitals.avgBookingSec !== null
-                    ? `${funnelAndVitals.avgBookingSec}s`
-                    : '—'}
-                </span>
-              </div>
-
-              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-                {[
-                  { label: '1. Visitas no Site', val: funnelAndVitals.visits },
-                  {
-                    label: '2. Escolheu Serviço',
-                    val: funnelAndVitals.servicesChosen,
-                  },
-                  {
-                    label: '3. Escolheu Horário',
-                    val: funnelAndVitals.slotsChosen,
-                  },
-                  {
-                    label: '4. Confirmou',
-                    val: funnelAndVitals.confirmed,
-                    highlight: true,
-                  },
-                  {
-                    label: 'Falhas no Checkout',
-                    val: funnelAndVitals.failedBookings,
-                    danger: funnelAndVitals.failedBookings > 0,
-                  },
-                ].map((step) => (
-                  <div
-                    key={step.label}
-                    className="rounded-xl bg-[#0D0B0A] border border-white/10 p-3.5"
-                  >
-                    <div className="text-[11px] text-[#E8D6CB]/65">
-                      {step.label}
-                    </div>
-                    <div
-                      className={`text-2xl font-bold tabular-nums mt-1 ${
-                        step.highlight
-                          ? 'text-emerald-400'
-                          : step.danger
-                            ? 'text-rose-400'
-                            : 'text-white'
-                      }`}
-                    >
-                      {step.val}
-                    </div>
+                {(srv?.incidents || []).length === 0 ? (
+                  <div className="rounded-lg bg-zinc-950 border border-zinc-800/80 p-6 text-center text-xs text-zinc-500">
+                    Nenhum incidente registrado no servidor.
                   </div>
-                ))}
+                ) : (
+                  <div className="divide-y divide-zinc-800/80 rounded-lg bg-zinc-950 border border-zinc-800/80">
+                    {(srv?.incidents || []).map((inc) => (
+                      <div
+                        key={inc.id}
+                        className="p-3.5 flex flex-wrap items-center justify-between gap-3 text-xs"
+                      >
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <span
+                              className={`px-1.5 py-0.5 rounded text-[10px] font-mono uppercase ${
+                                inc.status === 'open'
+                                  ? 'bg-rose-500/20 text-rose-300'
+                                  : 'bg-emerald-500/15 text-emerald-300'
+                              }`}
+                            >
+                              {inc.status === 'open' ? 'ABERTO' : 'RESOLVIDO'}
+                            </span>
+                            <span className="font-semibold text-zinc-100">
+                              {inc.title}
+                            </span>
+                          </div>
+                          <div className="text-zinc-400">{inc.detail}</div>
+                        </div>
+                        <div className="text-right font-mono text-[11px] text-zinc-500">
+                          <div>{inc.startedAt?.slice(0, 16).replace('T', ' ')}</div>
+                          <div>
+                            {inc.durationMinutes
+                              ? `Duração: ${inc.durationMinutes}m`
+                              : 'Em andamento'}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
+            </section>
+          )}
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs pt-1">
-                <div className="rounded-xl bg-[#0D0B0A] border border-white/5 p-3.5 flex flex-wrap items-center justify-between gap-2">
-                  <span className="text-[#E8D6CB]/70">Dispositivos (7d):</span>
-                  <span className="font-semibold">
-                    Mobile: <strong>{funnelAndVitals.mobile}</strong> · Desktop:{' '}
-                    <strong>{funnelAndVitals.desktop}</strong>
-                  </span>
-                </div>
-                <div className="rounded-xl bg-[#0D0B0A] border border-white/5 p-3.5 flex flex-wrap items-center justify-between gap-2">
-                  <span className="text-[#E8D6CB]/70">Origem Tráfego (7d):</span>
-                  <span className="font-semibold">
-                    IG: <strong>{funnelAndVitals.ig}</strong> · WA:{' '}
-                    <strong>{funnelAndVitals.wa}</strong> · Direto:{' '}
-                    <strong>{funnelAndVitals.direct}</strong>
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Real User Web Vitals + Operational Agenda KPIs */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="rounded-2xl bg-[#181412] border border-white/10 p-4">
-                <div className="text-xs text-[#E8D6CB]/65">LCP Médio (7d)</div>
-                <div className="text-2xl font-bold tabular-nums mt-1 text-emerald-400">
-                  {funnelAndVitals.avgLcpMs !== null
-                    ? `${funnelAndVitals.avgLcpMs} ms`
-                    : '—'}
-                </div>
-                <div className="text-[11px] text-[#E8D6CB]/50 mt-1">
-                  Ideal &lt; 2500ms
-                </div>
-              </div>
-
-              <div className="rounded-2xl bg-[#181412] border border-white/10 p-4">
-                <div className="text-xs text-[#E8D6CB]/65">INP / CLS (7d)</div>
-                <div className="text-2xl font-bold tabular-nums mt-1">
-                  {funnelAndVitals.avgInpMs !== null
-                    ? `${funnelAndVitals.avgInpMs}ms`
-                    : '—'}{' '}
-                  / {funnelAndVitals.avgCls ?? '—'}
-                </div>
-                <div className="text-[11px] text-[#E8D6CB]/50 mt-1">
-                  Ideal CLS &lt; 0.100
-                </div>
-              </div>
-
-              <div className="rounded-2xl bg-[#181412] border border-white/10 p-4">
-                <div className="text-xs text-[#E8D6CB]/65">
-                  Dias Lotados (14d)
-                </div>
-                <div className="text-2xl font-bold tabular-nums mt-1 text-[#C4A477]">
-                  {metrics.daysWithZeroFreeSlots} / 14
-                </div>
-                <div className="text-[11px] text-[#E8D6CB]/50 mt-1">
-                  dias sem horário livre
-                </div>
-              </div>
-
-              <div className="rounded-2xl bg-[#181412] border border-white/10 p-4">
-                <div className="text-xs text-[#E8D6CB]/65">
-                  Ticket Médio Catálogo
-                </div>
-                <div className="text-2xl font-bold tabular-nums mt-1 text-emerald-400">
-                  {formatBRL(metrics.avgServicePrice)}
-                </div>
-                <div className="text-[11px] text-[#E8D6CB]/50 mt-1">
-                  {services.length} serviços · {metrics.avgServiceDuration}m
-                </div>
-              </div>
-            </div>
-
-            {/* 14-Day Forecast + Peak Hours */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-              <div className="lg:col-span-2 rounded-2xl bg-[#181412] border border-white/10 p-5 space-y-4">
+          {section === 'funnel' && (
+            <section className="space-y-4">
+              <div className="rounded-xl bg-[#111114] border border-zinc-800/80 p-5 space-y-4">
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <h2 className="text-sm font-bold flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-[#C4A477]" />
-                    <span>Projeção de Demanda · Próximos 14 Dias</span>
+                  <h2 className="text-sm font-semibold text-white">
+                    Funil de Conversão & Web Vitals Reais (7 dias)
                   </h2>
-                  <span className="text-[11px] text-[#E8D6CB]/60">
-                    Hoje: {metrics.todayCount} · 7d: {metrics.next7Count} · 14d:{' '}
-                    {metrics.next14Count}
+                  <span className="text-xs font-mono text-zinc-400">
+                    Tempo médio: {funnelAndVitals.avgBookingSec ?? '—'}s
                   </span>
                 </div>
 
-                <div className="grid grid-cols-7 sm:grid-cols-14 gap-1.5 items-end h-44 pt-4">
-                  {metrics.byDay14.map((day) => {
-                    const total = day.appointments + day.blocks;
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                  {[
+                    { label: 'Visitas', val: funnelAndVitals.visits },
+                    { label: 'Serviço', val: funnelAndVitals.servicesChosen },
+                    { label: 'Horário', val: funnelAndVitals.slotsChosen },
+                    { label: 'Confirmados', val: funnelAndVitals.confirmed },
+                    { label: 'Falhas', val: funnelAndVitals.failedBookings },
+                  ].map((s) => (
+                    <div
+                      key={s.label}
+                      className="rounded-lg bg-zinc-950 border border-zinc-800/80 p-3.5"
+                    >
+                      <div className="text-[11px] text-zinc-400">{s.label}</div>
+                      <div className="text-xl font-mono font-bold text-white mt-1">
+                        {s.val}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                  <div className="rounded-lg bg-zinc-950 border border-zinc-800/80 p-3.5 flex justify-between">
+                    <span className="text-zinc-400">LCP / INP / CLS</span>
+                    <span className="font-mono text-emerald-400">
+                      {funnelAndVitals.avgLcpMs ?? '—'}ms /{' '}
+                      {funnelAndVitals.avgInpMs ?? '—'}ms /{' '}
+                      {funnelAndVitals.avgCls ?? '—'}
+                    </span>
+                  </div>
+                  <div className="rounded-lg bg-zinc-950 border border-zinc-800/80 p-3.5 flex justify-between">
+                    <span className="text-zinc-400">Mobile / Desktop</span>
+                    <span className="font-mono text-zinc-200">
+                      {funnelAndVitals.mobile} / {funnelAndVitals.desktop}
+                    </span>
+                  </div>
+                  <div className="rounded-lg bg-zinc-950 border border-zinc-800/80 p-3.5 flex justify-between">
+                    <span className="text-zinc-400">IG / WA / Direto</span>
+                    <span className="font-mono text-zinc-200">
+                      {funnelAndVitals.ig} / {funnelAndVitals.wa} /{' '}
+                      {funnelAndVitals.direct}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* 14-day demand */}
+              <div className="rounded-xl bg-[#111114] border border-zinc-800/80 p-5 space-y-3">
+                <div className="flex justify-between text-xs">
+                  <span className="font-semibold text-white">
+                    Ocupação Próximos 14 Dias
+                  </span>
+                  <span className="font-mono text-zinc-400">
+                    Dias lotados: {metrics.daysWithZeroFreeSlots}/14
+                  </span>
+                </div>
+                <div className="grid grid-cols-7 sm:grid-cols-14 gap-1.5 items-end h-36 pt-2">
+                  {metrics.byDay14.map((d) => {
+                    const total = d.appointments + d.blocks;
                     const pct = Math.max(
                       8,
                       Math.round((total / metrics.maxDaily) * 100),
                     );
                     return (
                       <div
-                        key={day.date}
-                        title={`${day.label}: ${day.appointments} atend., ${day.availableSlots} livres`}
-                        className="flex flex-col items-center justify-end h-full gap-1.5"
+                        key={d.date}
+                        className="flex flex-col items-center justify-end h-full gap-1"
                       >
-                        <span className="text-[10px] font-bold tabular-nums text-[#C4A477]">
-                          {day.appointments}
+                        <span className="text-[10px] font-mono text-zinc-300">
+                          {d.appointments}
                         </span>
-                        <div className="w-full flex-1 bg-[#0D0B0A] rounded-lg border border-white/5 flex items-end overflow-hidden p-0.5">
+                        <div className="w-full flex-1 bg-zinc-950 rounded border border-zinc-800/80 flex items-end p-0.5">
                           <div
                             style={{ height: `${total === 0 ? 6 : pct}%` }}
-                            className={`w-full rounded-md ${
-                              day.appointments > 0
-                                ? 'bg-gradient-to-t from-[#C4A477] to-[#E8D6CB]'
-                                : day.blocks > 0
-                                  ? 'bg-amber-500/50'
-                                  : 'bg-white/10'
+                            className={`w-full rounded-sm ${
+                              d.appointments > 0
+                                ? 'bg-emerald-400'
+                                : 'bg-zinc-800'
                             }`}
                           />
                         </div>
-                        <span className="text-[9px] text-[#E8D6CB]/65 tabular-nums">
-                          {day.label}
+                        <span className="text-[9px] font-mono text-zinc-500">
+                          {d.label}
                         </span>
                       </div>
                     );
                   })}
                 </div>
               </div>
+            </section>
+          )}
 
-              <div className="rounded-2xl bg-[#181412] border border-white/10 p-5 space-y-3">
-                <h2 className="text-sm font-bold flex items-center gap-2">
-                  <Flame className="w-4 h-4 text-[#C4A477]" />
-                  <span>Mapa de Horários de Pico</span>
-                </h2>
-                <div className="space-y-2.5">
-                  {metrics.hourBuckets.map((b) => {
-                    const pct = Math.round(
-                      (b.count / metrics.maxHourBucket) * 100,
-                    );
-                    return (
-                      <div key={b.label} className="space-y-1">
-                        <div className="flex justify-between text-xs">
-                          <span className="text-[#E8D6CB]/80 tabular-nums">
-                            {b.label}
-                          </span>
-                          <span className="font-bold text-[#C4A477] tabular-nums">
-                            {b.count}
-                          </span>
-                        </div>
-                        <div className="h-2 rounded-full bg-[#0D0B0A] overflow-hidden">
-                          <div
-                            style={{
-                              width: `${b.count === 0 ? 0 : Math.max(8, pct)}%`,
-                            }}
-                            className="h-full rounded-full bg-gradient-to-r from-[#C4A477] to-amber-300"
-                          />
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-
-            {statusCounts && (
-              <div className="rounded-2xl bg-[#181412] border border-white/10 p-5 space-y-3">
-                <h2 className="text-sm font-bold flex items-center gap-2">
-                  <Layers className="w-4 h-4 text-[#C4A477]" />
-                  <span>Totais Históricos por Status (Anonimizado)</span>
-                </h2>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-                  <div className="rounded-xl bg-[#0D0B0A] p-3.5 border border-white/5">
-                    <span className="text-[#E8D6CB]/65">Pendentes</span>
-                    <div className="text-2xl font-bold mt-1">
-                      {statusCounts.pending || 0}
-                    </div>
-                  </div>
-                  <div className="rounded-xl bg-[#0D0B0A] p-3.5 border border-white/5">
-                    <span className="text-[#E8D6CB]/65">Confirmados</span>
-                    <div className="text-2xl font-bold mt-1 text-emerald-400">
-                      {statusCounts.confirmed || 0}
-                    </div>
-                  </div>
-                  <div className="rounded-xl bg-[#0D0B0A] p-3.5 border border-white/5">
-                    <span className="text-[#E8D6CB]/65">Concluídos</span>
-                    <div className="text-2xl font-bold mt-1 text-[#C4A477]">
-                      {statusCounts.completed || 0}
-                    </div>
-                  </div>
-                  <div className="rounded-xl bg-[#0D0B0A] p-3.5 border border-white/5">
-                    <span className="text-[#E8D6CB]/65">Cancelados</span>
-                    <div className="text-2xl font-bold mt-1 text-rose-400">
-                      {statusCounts.cancelled || 0}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </section>
-        )}
-
-        {activeTab === 'simulator' && (
-          <section className="rounded-2xl bg-[#181412] border border-white/10 p-5 space-y-5">
-            <div className="flex flex-wrap items-center justify-between gap-3">
+          {section === 'simulator' && (
+            <section className="rounded-xl bg-[#111114] border border-zinc-800/80 p-5 space-y-4">
               <div>
-                <h2 className="text-sm font-bold flex items-center gap-2">
-                  <Compass className="w-4 h-4 text-[#C4A477]" />
-                  <span>Simulador Técnico de Disponibilidade (Sem PII)</span>
+                <h2 className="text-sm font-semibold text-white">
+                  Simulador Técnico de Disponibilidade (Zero PII)
                 </h2>
-                <p className="text-xs text-[#E8D6CB]/60 mt-0.5">
-                  Audite exatamente quais horários o algoritmo libera ou bloqueia
-                  para qualquer data e duração, sem exibir dados de clientes.
+                <p className="text-xs text-zinc-400">
+                  Audite os horários livres/bloqueados para qualquer data e
+                  duração ({metrics.scheduleMode}).
                 </p>
               </div>
-              <span className="text-xs px-3 py-1 rounded-lg bg-[#0D0B0A] border border-white/10 text-[#C4A477] font-semibold">
-                {metrics.scheduleMode}
-              </span>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-semibold text-[#E8D6CB] mb-1.5">
-                  Data para Simulação
-                </label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <input
                   type="date"
                   value={simDate}
                   onChange={(e) => setSimDate(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl bg-[#0D0B0A] border border-white/10 text-sm text-white focus:border-[#C4A477] focus:outline-none"
+                  className="px-3.5 py-2 rounded-lg bg-zinc-950 border border-zinc-800 text-sm text-white"
                 />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-[#E8D6CB] mb-1.5">
-                  Duração Simulada do Procedimento
-                </label>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1.5">
                   {[30, 60, 90, 120, 150, 180].map((min) => (
                     <button
                       key={min}
                       type="button"
                       onClick={() => setSimDuration(min)}
-                      className={`px-3 py-2 rounded-xl text-xs font-bold border transition-colors cursor-pointer ${
+                      className={`px-3 py-1.5 rounded-lg text-xs font-mono border cursor-pointer ${
                         simDuration === min
-                          ? 'bg-[#C4A477] text-[#0D0B0A] border-[#C4A477]'
-                          : 'bg-[#0D0B0A] text-[#E8D6CB]/80 border-white/10 hover:border-[#C4A477]/50'
+                          ? 'bg-zinc-100 text-zinc-950 border-zinc-100 font-bold'
+                          : 'bg-zinc-950 text-zinc-400 border-zinc-800'
                       }`}
                     >
                       {min}m
@@ -1849,267 +1742,190 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
                   ))}
                 </div>
               </div>
-            </div>
 
-            {simulatedSlots.length === 0 ? (
-              <div className="rounded-xl bg-[#0D0B0A] border border-white/5 p-6 text-center text-xs text-[#E8D6CB]/65">
-                Dia fechado ou sem atendimento configurado para{' '}
-                {formatDateBR(simDate)}.
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-2.5">
+              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-2">
                 {simulatedSlots.map((slot) => (
                   <div
                     key={slot.startTime}
-                    className={`rounded-xl p-3 border text-xs ${
+                    className={`rounded-lg p-2.5 border text-xs ${
                       slot.available
-                        ? 'bg-emerald-950/30 border-emerald-500/30 text-emerald-200'
-                        : 'bg-[#0D0B0A] border-white/10 text-[#E8D6CB]/55'
+                        ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
+                        : 'bg-zinc-950 border-zinc-800 text-zinc-500'
                     }`}
                   >
-                    <div className="font-bold tabular-nums text-sm">
-                      {slot.startTime} → {slot.endTime}
+                    <div className="font-mono font-semibold">
+                      {slot.startTime}–{slot.endTime}
                     </div>
-                    <div className="text-[11px] mt-1 font-medium">
-                      {slot.available
-                        ? 'Livre no site'
-                        : slot.reason || 'Bloqueado'}
+                    <div className="text-[11px] mt-0.5">
+                      {slot.available ? 'Livre' : slot.reason || 'Bloqueado'}
                     </div>
                   </div>
                 ))}
               </div>
-            )}
-          </section>
-        )}
+            </section>
+          )}
 
-        {activeTab === 'endpoints' && (
-          <section className="rounded-2xl bg-[#181412] border border-white/10 p-5 space-y-4">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <div>
-                <h2 className="text-sm font-bold flex items-center gap-2">
-                  <HardDrive className="w-4 h-4 text-[#C4A477]" />
-                  <span>Monitoramento de Endpoints & Infraestrutura</span>
-                </h2>
-                <p className="text-xs text-[#E8D6CB]/60">
-                  Sondagem autenticada contra Firestore, Vercel Telemetry,
-                  Google Agenda e PWA.
-                </p>
+          {section === 'quotas' && (
+            <section className="space-y-4">
+              <div className="rounded-xl bg-[#111114] border border-zinc-800/80 p-5 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-sm font-semibold text-white">
+                    Consumo Estimado & Cotas (Plano Gratuito Spark / Vercel)
+                  </h2>
+                  <button
+                    type="button"
+                    onClick={() => void handleForceRefreshPWA()}
+                    className="h-8 inline-flex items-center gap-1.5 px-3 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-xs text-zinc-200 cursor-pointer"
+                  >
+                    <Wrench className="w-3.5 h-3.5" />
+                    <span>Limpar Cache PWA</span>
+                  </button>
+                </div>
+
+                <div className="space-y-3 text-xs">
+                  {[
+                    {
+                      label: 'Firestore Leituras / dia (limite 50.000)',
+                      val: srv?.firestore.quotaEstimate?.estimatedReadsToday || 0,
+                      pct: srv?.firestore.quotaEstimate?.readsPct || 0,
+                    },
+                    {
+                      label: 'Firestore Escritas / dia (limite 20.000)',
+                      val: srv?.firestore.quotaEstimate?.estimatedWritesToday || 0,
+                      pct: srv?.firestore.quotaEstimate?.writesPct || 0,
+                    },
+                  ].map((q) => (
+                    <div key={q.label} className="space-y-1.5">
+                      <div className="flex justify-between font-mono">
+                        <span className="text-zinc-300">{q.label}</span>
+                        <span className="text-emerald-400">
+                          {q.val} ({q.pct}%)
+                        </span>
+                      </div>
+                      <div className="h-2 rounded-full bg-zinc-950 overflow-hidden">
+                        <div
+                          style={{ width: `${Math.max(2, q.pct)}%` }}
+                          className={`h-full rounded-full ${
+                            q.pct >= 70 ? 'bg-amber-400' : 'bg-emerald-400'
+                          }`}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
-              <button
-                type="button"
-                onClick={() => void runHealthCheck()}
-                disabled={checkingHealth}
-                className="min-h-[34px] inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#C4A477]/20 text-[#C4A477] border border-[#C4A477]/35 text-xs font-bold hover:bg-[#C4A477]/30 cursor-pointer"
-              >
-                <RefreshCw
-                  className={`w-3.5 h-3.5 ${checkingHealth ? 'animate-spin' : ''}`}
-                />
-                <span>Re-testar Todos</span>
-              </button>
-            </div>
 
-            <div className="space-y-2.5">
-              {(health?.probes || []).map((probe) => (
-                <div
-                  key={probe.id}
-                  className="rounded-xl bg-[#0D0B0A] border border-white/10 p-4 flex flex-wrap items-center justify-between gap-3"
-                >
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2">
+              <div className="rounded-xl bg-[#111114] border border-zinc-800/80 p-5 space-y-2.5">
+                <h3 className="text-sm font-semibold text-white">
+                  Endpoints Monitorados
+                </h3>
+                {(health?.probes || []).map((p) => (
+                  <div
+                    key={p.id}
+                    className="rounded-lg bg-zinc-950 border border-zinc-800/80 px-3.5 py-2.5 flex items-center justify-between text-xs"
+                  >
+                    <div>
+                      <span className="font-medium text-zinc-200">{p.name}</span>
+                      <span className="ml-2 font-mono text-zinc-500">
+                        {p.target}
+                      </span>
+                    </div>
+                    <div className="font-mono flex items-center gap-2">
                       <span
-                        className={`w-2.5 h-2.5 rounded-full shrink-0 ${
-                          probe.ok ? 'bg-emerald-400' : 'bg-amber-400'
-                        }`}
-                      />
-                      <span className="text-sm font-bold">{probe.name}</span>
-                    </div>
-                    <div className="text-[11px] font-mono text-[#E8D6CB]/55 mt-1 truncate">
-                      {probe.target}
-                    </div>
-                    <div className="text-xs text-[#E8D6CB]/80 mt-1">
-                      {probe.detail}
+                        className={p.ok ? 'text-emerald-400' : 'text-rose-400'}
+                      >
+                        HTTP {p.statusCode}
+                      </span>
+                      <span className="text-zinc-400">{p.latencyMs}ms</span>
                     </div>
                   </div>
-
-                  <div className="flex items-center gap-2 shrink-0">
-                    <span className="px-2.5 py-1 rounded-lg text-xs font-mono bg-white/5 border border-white/10">
-                      HTTP {probe.statusCode}
-                    </span>
-                    <span className="px-2.5 py-1 rounded-lg text-xs font-bold tabular-nums bg-[#C4A477]/15 text-[#C4A477] border border-[#C4A477]/30">
-                      {probe.latencyMs} ms
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {activeTab === 'compliance' && (
-          <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="rounded-2xl bg-[#181412] border border-emerald-500/25 p-5 space-y-3">
-              <h2 className="text-sm font-bold text-emerald-300 flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4" />
-                <span>Permitido ao Dono do App (Telemetria)</span>
-              </h2>
-              <ul className="space-y-2 text-xs text-[#E8D6CB]/85">
-                <li>• Funil agregado de conversão, Web Vitals e instalações PWA</li>
-                <li>• Divergência técnica Firestore ↔ Google Agenda (sem nomes)</li>
-                <li>• Histórico de incidentes e erros sanitizados no servidor</li>
-                <li>• Simulador técnico de disponibilidade e cotas Firebase</li>
-                <li>• Contagem de tentativas falhas de login (/painel e /owner)</li>
-              </ul>
-            </div>
-
-            <div className="rounded-2xl bg-[#181412] border border-rose-500/25 p-5 space-y-3">
-              <h2 className="text-sm font-bold text-rose-300 flex items-center gap-2">
-                <ShieldAlert className="w-4 h-4" />
-                <span>Bloqueado por Lei (LGPD / Privacidade)</span>
-              </h2>
-              <ul className="space-y-2 text-xs text-[#E8D6CB]/85">
-                <li>• Nomes completos, e-mails ou dados cadastrais de clientes</li>
-                <li>• Números de telefone / WhatsApp e histórico de mensagens</li>
-                <li>• Anotações técnicas individuais de atendimento</li>
-                <li>• Chaves Pix, comprovantes ou dados financeiros individuais</li>
-                <li>• Alteração ou criação manual de agendamentos da profissional</li>
-              </ul>
-            </div>
-
-            <div className="md:col-span-2 rounded-2xl bg-[#181412] border border-white/10 p-5 space-y-3">
-              <h2 className="text-sm font-bold flex items-center gap-2">
-                <Globe className="w-4 h-4 text-[#C4A477]" />
-                <span>Controles Técnicos de Segurança Ativos</span>
-              </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                <div className="rounded-xl bg-[#0D0B0A] p-3.5 border border-white/5 flex items-center justify-between">
-                  <span>/api/owner-telemetry autenticado no servidor</span>
-                  <span className="text-emerald-400 font-bold">Ativo</span>
-                </div>
-                <div className="rounded-xl bg-[#0D0B0A] p-3.5 border border-white/5 flex items-center justify-between">
-                  <span>Rate Limit + Auditoria de login (/owner & /painel)</span>
-                  <span className="text-emerald-400 font-bold">Ativo</span>
-                </div>
-                <div className="rounded-xl bg-[#0D0B0A] p-3.5 border border-white/5 flex items-center justify-between">
-                  <span>Sanitização automática de e-mail/telefone nos logs</span>
-                  <span className="text-emerald-400 font-bold">Ativo</span>
-                </div>
-                <div className="rounded-xl bg-[#0D0B0A] p-3.5 border border-white/5 flex items-center justify-between">
-                  <span>Cron Vercel (/api/cron-monitor) ativo</span>
-                  <span className="text-emerald-400 font-bold">Ativo</span>
-                </div>
+                ))}
               </div>
-            </div>
-          </section>
-        )}
+            </section>
+          )}
 
-        {activeTab === 'logs' && (
-          <section className="space-y-6">
-            {/* Persistent Client Errors from Firestore */}
-            <div className="rounded-2xl bg-[#181412] border border-white/10 p-5 space-y-3">
-              <h2 className="text-sm font-bold flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4 text-rose-400" />
-                <span>Erros Reais de Clientes (Persistidos no Servidor)</span>
-              </h2>
-              {(srv?.recentErrors || []).length === 0 ? (
-                <div className="rounded-xl bg-[#0D0B0A] border border-white/5 p-5 text-center text-xs text-[#E8D6CB]/55">
-                  Nenhum erro de cliente registrado no servidor até o momento.
-                </div>
-              ) : (
-                <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
-                  {(srv?.recentErrors || []).map((err) => (
-                    <div
-                      key={err.id}
-                      className="rounded-xl bg-[#0D0B0A] border border-rose-500/20 p-3 text-xs space-y-1"
-                    >
-                      <div className="flex flex-wrap items-center justify-between gap-2">
-                        <span className="font-bold text-rose-300">
-                          {err.message}
-                        </span>
-                        <span className="text-[10px] text-[#E8D6CB]/50 font-mono">
-                          {err.createdAt?.slice(0, 19).replace('T', ' ')}
-                        </span>
-                      </div>
-                      <div className="text-[11px] text-[#E8D6CB]/65 font-mono">
-                        Rota: {err.route} · Versão: {err.appVersion} ·{' '}
-                        {err.deviceType} · {err.connectionType}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Session Runtime Logs */}
-            <div className="rounded-2xl bg-[#181412] border border-white/10 p-5 space-y-4">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <h2 className="text-sm font-bold flex items-center gap-2">
-                  <Terminal className="w-4 h-4 text-[#C4A477]" />
-                  <span>Logs da Sessão Atual</span>
+          {section === 'logs' && (
+            <section className="space-y-4">
+              <div className="rounded-xl bg-[#111114] border border-zinc-800/80 p-5 space-y-3">
+                <h2 className="text-sm font-semibold text-white">
+                  Erros Reais dos Clientes (telemetry_errors)
                 </h2>
+                {(srv?.recentErrors || []).length === 0 ? (
+                  <div className="rounded-lg bg-zinc-950 border border-zinc-800/80 p-6 text-center text-xs text-zinc-500">
+                    Nenhum erro de cliente registrado.
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {(srv?.recentErrors || []).map((e) => (
+                      <div
+                        key={e.id}
+                        className="rounded-lg bg-zinc-950 border border-rose-500/20 p-3 text-xs font-mono"
+                      >
+                        <div className="text-rose-300 font-semibold">
+                          {e.message}
+                        </div>
+                        <div className="text-zinc-500 mt-1">
+                          {e.createdAt} · {e.route} · {e.deviceType} ·{' '}
+                          {e.connectionType}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
 
-                <div className="flex flex-wrap items-center gap-1.5">
-                  {(['all', 'ok', 'info', 'warn', 'err'] as const).map((lvl) => (
-                    <button
-                      key={lvl}
-                      type="button"
-                      onClick={() => setLogFilter(lvl)}
-                      className={`px-2.5 py-1 rounded-lg text-[11px] font-bold uppercase cursor-pointer ${
-                        logFilter === lvl
-                          ? 'bg-[#C4A477] text-[#0D0B0A]'
-                          : 'bg-white/5 text-[#E8D6CB]/70 hover:bg-white/10'
-                      }`}
-                    >
-                      {lvl === 'all' ? 'Todos' : lvl}
-                    </button>
-                  ))}
+              <div className="rounded-xl bg-[#111114] border border-zinc-800/80 p-5 space-y-3">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-sm font-semibold text-white">
+                    Console da Sessão
+                  </h2>
                   <button
                     type="button"
                     onClick={() => setLogs([])}
-                    className="ml-2 inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-rose-500/15 text-rose-300 hover:bg-rose-500/25 cursor-pointer"
+                    className="text-xs text-zinc-400 hover:text-white cursor-pointer"
                   >
-                    <Trash2 className="w-3 h-3" />
                     Limpar
                   </button>
                 </div>
-              </div>
-
-              {filteredLogs.length === 0 ? (
-                <div className="rounded-xl bg-[#0D0B0A] border border-white/5 p-6 text-center text-xs text-[#E8D6CB]/55">
-                  Nenhum registro encontrado para este filtro.
-                </div>
-              ) : (
-                <div className="space-y-1.5 max-h-80 overflow-y-auto pr-1">
-                  {filteredLogs.map((entry) => (
+                <div className="space-y-1 max-h-64 overflow-y-auto font-mono text-xs">
+                  {filteredLogs.map((l) => (
                     <div
-                      key={entry.id}
-                      className="text-xs font-mono bg-[#0D0B0A] rounded-xl px-3 py-2 border border-white/5 flex flex-wrap items-start gap-2"
+                      key={l.id}
+                      className="rounded bg-zinc-950 px-3 py-1.5 border border-zinc-800/70 flex gap-2"
                     >
-                      <span className="text-[#E8D6CB]/45 shrink-0">
-                        {entry.time}
-                      </span>
-                      <span
-                        className={
-                          entry.level === 'ok'
-                            ? 'text-emerald-400 font-bold'
-                            : entry.level === 'warn'
-                              ? 'text-amber-400 font-bold'
-                              : entry.level === 'err'
-                                ? 'text-rose-400 font-bold'
-                                : 'text-[#C4A477] font-bold'
-                        }
-                      >
-                        [{entry.level.toUpperCase()}]
-                      </span>
-                      <span className="text-sky-300/80">[{entry.source}]</span>
-                      <span className="text-[#FAF6F1]/90">{entry.message}</span>
+                      <span className="text-zinc-500">{l.time}</span>
+                      <span className="text-emerald-400">[{l.source}]</span>
+                      <span className="text-zinc-200">{l.message}</span>
                     </div>
                   ))}
                 </div>
-              )}
-            </div>
-          </section>
-        )}
-      </main>
+              </div>
+            </section>
+          )}
+
+          {section === 'lgpd' && (
+            <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="rounded-xl bg-[#111114] border border-emerald-500/20 p-5 space-y-2.5 text-xs text-zinc-300">
+                <h2 className="text-sm font-semibold text-emerald-400">
+                  Permitido ao Dono (Telemetria)
+                </h2>
+                <p>• Uptime, P95, MTTR e histórico em monitor_checks</p>
+                <p>• Funil agregado, Web Vitals e instalações PWA</p>
+                <p>• Divergência Firestore ↔ Google Agenda (sem nomes)</p>
+                <p>• Simulador técnico de disponibilidade e cotas</p>
+              </div>
+              <div className="rounded-xl bg-[#111114] border border-rose-500/20 p-5 space-y-2.5 text-xs text-zinc-300">
+                <h2 className="text-sm font-semibold text-rose-400">
+                  Bloqueado por Lei (LGPD)
+                </h2>
+                <p>• Nomes, e-mails, telefones/WhatsApp de clientes</p>
+                <p>• Notas técnicas individuais e histórico financeiro/Pix</p>
+                <p>• Edição/criação manual de agendamentos</p>
+              </div>
+            </section>
+          )}
+        </main>
+      </div>
     </div>
   );
 };

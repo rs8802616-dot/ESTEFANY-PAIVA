@@ -119,6 +119,30 @@ export default async function handler(req: ApiReq, res: ApiRes) {
     } catch {
       body = {};
     }
+    if (body.action === 'test_telegram') {
+      const botToken = getEnv('TELEGRAM_BOT_TOKEN');
+      const chatId = getEnv('TELEGRAM_CHAT_ID');
+      if (!botToken || !chatId) {
+        return res.status(400).json({
+          ok: false,
+          error: 'TELEGRAM_BOT_TOKEN ou TELEGRAM_CHAT_ID não configurados na Vercel.',
+        });
+      }
+      const tgResp = await fetch(
+        `https://api.telegram.org/bot${botToken}/sendMessage`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: chatId,
+            text: `✅ <b>[TESTE NOC]</b>\nAlerta de teste disparado pelo Console do Dono em ${new Date().toISOString()}.`,
+            parse_mode: 'HTML',
+          }),
+        },
+      );
+      return res.status(tgResp.ok ? 200 : 502).json({ ok: tgResp.ok });
+    }
+
     const minutes = Math.max(0, Math.min(1440, Number(body.muteMinutes || 0)));
     const mutedUntil =
       minutes > 0 ? new Date(Date.now() + minutes * 60_000).toISOString() : '';
@@ -344,6 +368,7 @@ export default async function handler(req: ApiReq, res: ApiRes) {
     dailyTelemetry,
     recentErrors,
     incidents,
+    recentChecks: sortedChecks.slice(0, 80),
     serverMonitorStats: {
       totalChecks,
       serverUptimePct,
