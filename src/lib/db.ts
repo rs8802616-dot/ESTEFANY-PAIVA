@@ -425,10 +425,8 @@ export async function createAppointmentAtomic(
       .replace(/\s+/g, '-')
       .slice(0, 26) || 'Cliente';
 
-  // Encodes metadata inside guest_ UID (matches ^guest_[a-zA-Z0-9_\-]+$ and <= 80 chars in firestore.rules)
-  // so availability_slots syncs full appointment info across cell phone, tablet, and PC in real time!
-  const guestFormattedUid =
-    `guest_${cleanPhoneDigits}_${priceInt}_${payCode}_${svcIdxList}_${nameSlug}`.slice(0, 76);
+  // LGPD hardening: never encode client phone or name inside public availability_slots.ownerUid
+  const guestFormattedUid = 'guest_reserved';
 
   const isFirebaseSignedIn = Boolean(auth.currentUser?.uid);
   const resolvedClientUid =
