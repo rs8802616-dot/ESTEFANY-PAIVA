@@ -1,4 +1,5 @@
 import type { Appointment, SalonSettings } from '../types/salon';
+import { getAdminSessionToken } from './adminRoute';
 
 export interface GoogleCalendarStatus {
   configured: boolean;
@@ -8,7 +9,10 @@ export interface GoogleCalendarStatus {
 
 export async function fetchGoogleCalendarStatus(): Promise<GoogleCalendarStatus> {
   try {
-    const resp = await fetch('/api/google-calendar?action=status');
+    const token = getAdminSessionToken();
+    const resp = await fetch('/api/google-calendar?action=status', {
+      headers: token ? { 'x-admin-auth': token } : {},
+    });
     if (!resp.ok) return { configured: false, connected: false, email: null };
     return (await resp.json()) as GoogleCalendarStatus;
   } catch {
@@ -18,7 +22,11 @@ export async function fetchGoogleCalendarStatus(): Promise<GoogleCalendarStatus>
 
 export async function disconnectGoogleCalendar(): Promise<boolean> {
   try {
-    const resp = await fetch('/api/google-calendar?action=disconnect', { method: 'POST' });
+    const token = getAdminSessionToken();
+    const resp = await fetch('/api/google-calendar?action=disconnect', {
+      method: 'POST',
+      headers: token ? { 'x-admin-auth': token } : {},
+    });
     return resp.ok;
   } catch {
     return false;

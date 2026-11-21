@@ -243,15 +243,32 @@ export async function resolveAdminRouteAccess(): Promise<boolean> {
     providedToken = new URLSearchParams(hashQuery).get('k') || '';
   }
 
-  // 5. Se tem token na URL, valida o hash SHA-256 imediatamente para liberar a tela de Login
+  // 5. Se tem token na URL, valida o hash SHA-256 imediatamente e limpa ?k= da barra
   if (providedToken) {
     const computedHash = await sha256Hex(providedToken.trim());
     if (computedHash === expectedHash) {
+      try {
+        sessionStorage.setItem('epn_painel_gate_v1', expectedHash);
+        if (window.location.search.includes('k=')) {
+          window.history.replaceState({}, '', '/painel');
+        }
+      } catch {
+        // ignore
+      }
       return true;
     }
     clearAdminGateSession();
     window.history.replaceState({}, '', '/');
     return false;
+  }
+
+  // 5b. Se já desbloqueou nesta aba, mantém o acesso à tela de login sem ?k= na URL
+  try {
+    if (sessionStorage.getItem('epn_painel_gate_v1') === expectedHash) {
+      return true;
+    }
+  } catch {
+    // ignore
   }
 
   // 6. Sem token na URL e sem sessão autenticada: bloqueia e redireciona para o site da cliente (/)
@@ -295,6 +312,19 @@ export function getVaultOwnerEmail(): string | null {
     );
   } catch {
     return null;
+  }
+}
+
+export function getAdminSessionToken(): string {
+  try {
+    if (!isVaultAdminAuthenticated()) return '';
+    return (
+      localStorage.getItem(VAULT_AUTH_SESSION_KEY) ||
+      sessionStorage.getItem(VAULT_AUTH_SESSION_KEY) ||
+      ''
+    );
+  } catch {
+    return '';
   }
 }
 
