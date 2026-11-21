@@ -47,7 +47,8 @@ import {
 import {
   clearAdminGateSession,
   getVaultAdminEmail,
-  verifyAdminVaultCredentials,
+  getVaultLockStatus,
+  verifyAdminVaultCredentialsWithLock,
 } from '../../lib/adminRoute';
 import { trackAuthFailure } from '../../lib/telemetry';
 import {
@@ -443,20 +444,45 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     }
   };
 
+  const [painelLockSec, setPainelLockSec] = useState(0);
+  const [painelAttempts, setPainelAttempts] = useState(0);
+
+  useEffect(() => {
+    if (vaultEmail) return;
+    void getVaultLockStatus('painel').then((st) => {
+      if (st.locked && st.remainingSeconds > 0) {
+        setPainelLockSec(st.remainingSeconds);
+      }
+      setPainelAttempts(st.attempts || 0);
+    });
+  }, [vaultEmail]);
+
+  useEffect(() => {
+    if (painelLockSec <= 0) return;
+    const t = window.setInterval(() => {
+      setPainelLockSec((prev) => (prev <= 1 ? 0 : prev - 1));
+    }, 1000);
+    return () => window.clearInterval(t);
+  }, [painelLockSec]);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (painelLockSec > 0) {
+      showToast('Painel temporariamente bloqueado. Aguarde o contador ou peça ao dono para revogar.', 'error');
+      return;
+    }
     if (!loginEmail.trim() || !loginPassword) {
       showToast('Informe seu e-mail e sua senha.', 'error');
       return;
     }
     setLoginBusy(true);
     try {
-      // 1. Verifica via PBKDF2-HMAC-SHA256 (250.000 iterações Web Crypto API)
-      const vaultOk = await verifyAdminVaultCredentials(loginEmail, loginPassword);
-      if (vaultOk) {
+      const vaultRes = await verifyAdminVaultCredentialsWithLock(loginEmail, loginPassword);
+      if (vaultRes.ok) {
+        setPainelAttempts(0);
+        setPainelLockSec(0);
         setVaultEmail(getVaultAdminEmail());
         setLoginPassword('');
-        // Autentica no Firebase Auth em background (ou cria o usuário no novo projeto) e sincroniza as fotos pendentes
         void ensureEmailUserSignedIn(loginEmail, loginPassword).then((u) => {
           if (u) void syncPendingLocalChangesToCloud();
         });
@@ -464,23 +490,19 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
         return;
       }
 
-      // 2. Fallback para contas adicionais cadastradas no Firebase Auth
-      await signInWithEmail(loginEmail, loginPassword);
-      setLoginPassword('');
-    } catch (err: unknown) {
       trackAuthFailure('painel');
-      const code = (err as { code?: string })?.code || '';
-      if (
-        code === 'auth/invalid-credential' ||
-        code === 'auth/wrong-password' ||
-        code === 'auth/user-not-found'
-      ) {
-        showToast('E-mail ou senha incorretos.', 'error');
-      } else if (code === 'auth/too-many-requests') {
-        showToast('Muitas tentativas. Aguarde alguns minutos e tente novamente.', 'error');
+      if (vaultRes.locked) {
+        setPainelLockSec(vaultRes.remainingSeconds || 900);
+        setPainelAttempts(5);
+        showToast('5 tentativas incorretas. Painel bloqueado por 15 minutos!', 'error');
       } else {
-        showToast('E-mail ou senha incorretos.', 'error');
+        const att = vaultRes.attempts || 1;
+        setPainelAttempts(att);
+        showToast(`E-mail ou senha incorretos. (Tentativa ${att} de 5)`, 'error');
       }
+    } catch {
+      trackAuthFailure('painel');
+      showToast('E-mail ou senha incorretos.', 'error');
     } finally {
       setLoginBusy(false);
     }
@@ -583,12 +605,31 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 </div>
               </div>
 
+              {painelLockSec > 0 && (
+                <div className="rounded-xl bg-rose-50 border border-rose-200 p-3 text-xs text-rose-700 font-medium text-center">
+                  Tela bloqueada por 15 minutos (5 tentativas incorretas).
+                  <div className="mt-1 font-mono text-sm font-bold">
+                    Tempo restante: {String(Math.floor(painelLockSec / 60)).padStart(2, '0')}:
+                    {String(painelLockSec % 60).padStart(2, '0')}
+                  </div>
+                </div>
+              )}
+              {painelLockSec === 0 && painelAttempts > 0 && (
+                <p className="text-xs text-amber-700 text-center font-medium">
+                  Tentativas falhas: {painelAttempts} de 5
+                </p>
+              )}
+
               <button
                 type="submit"
-                disabled={loginBusy}
+                disabled={loginBusy || painelLockSec > 0}
                 className="w-full min-h-[48px] rounded-xl bg-[#594943] text-white text-sm font-semibold hover:bg-[#433631] transition-colors disabled:opacity-60"
               >
-                {loginBusy ? 'Entrando...' : 'Entrar no Painel'}
+                {painelLockSec > 0
+                  ? 'Bloqueado (aguarde ou peça ao dono)'
+                  : loginBusy
+                    ? 'Entrando...'
+                    : 'Entrar no Painel'}
               </button>
 
               <button

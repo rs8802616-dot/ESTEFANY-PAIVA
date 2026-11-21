@@ -100,12 +100,21 @@ async function readDoc(path: string): Promise<Record<string, unknown> | null> {
 export default async function handler(req: ApiReq, res: ApiRes) {
   res.setHeader('Cache-Control', 'no-store');
 
-  // Server-side owner session verification
+  // Server-side owner session verification (supports default + custom vault_owner hash)
   const rawAuthHeader = req.headers['x-owner-auth'];
-  const ownerAuth = Array.isArray(rawAuthHeader)
-    ? rawAuthHeader[0]
-    : rawAuthHeader || '';
-  if (!ALLOWED_OWNER_HASHES.includes(ownerAuth.trim())) {
+  const ownerAuth = (
+    Array.isArray(rawAuthHeader) ? rawAuthHeader[0] : rawAuthHeader || ''
+  )
+    .trim()
+    .toLowerCase();
+  const customOwnerVault = await readDoc('telemetry_meta/vault_owner');
+  const validOwnerHashes = [
+    ...ALLOWED_OWNER_HASHES,
+    ...(customOwnerVault?.hash
+      ? [String(customOwnerVault.hash).trim().toLowerCase()]
+      : []),
+  ];
+  if (!validOwnerHashes.includes(ownerAuth)) {
     return res.status(401).json({ error: 'Unauthorized owner telemetry request' });
   }
 
@@ -119,6 +128,24 @@ export default async function handler(req: ApiReq, res: ApiRes) {
     } catch {
       body = {};
     }
+    if (body.action === 'unlock_painel') {
+      const unlockResp = await fetch(
+        `${FIRESTORE_BASE}/telemetry_meta/lock_painel`,
+        {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            fields: {
+              attempts: { integerValue: '0' },
+              lockedUntil: { integerValue: '0' },
+              updatedAt: { stringValue: new Date().toISOString() },
+            },
+          }),
+        },
+      );
+      return res.status(unlockResp.ok ? 200 : 500).json({ ok: unlockResp.ok });
+    }
+
     if (body.action === 'update_issue') {
       const fp = String(body.fingerprint || '').trim();
       const status = String(body.status || '').trim();
@@ -162,7 +189,18 @@ export default async function handler(req: ApiReq, res: ApiRes) {
         },
       );
       if (tgResp.ok) {
-        return res.status(200).json({ ok: true });
+        const parseLock = (doc: Record<string, unknown> | null) => {
+    const lockedUntil = Number(doc?.lockedUntil || 0);
+    const now = Date.now();
+    const locked = lockedUntil > now;
+    return {
+      locked,
+      remainingSeconds: locked ? Math.ceil((lockedUntil - now) / 1000) : 0,
+      attempts: locked ? 5 : Number(doc?.attempts || 0),
+    };
+  };
+
+  return res.status(200).json({ ok: true });
       }
       let tgDesc = `HTTP ${tgResp.status}`;
       try {
@@ -193,7 +231,18 @@ export default async function handler(req: ApiReq, res: ApiRes) {
         },
       }),
     });
-    return res.status(200).json({ ok: true, mutedUntil });
+    const parseLock = (doc: Record<string, unknown> | null) => {
+    const lockedUntil = Number(doc?.lockedUntil || 0);
+    const now = Date.now();
+    const locked = lockedUntil > now;
+    return {
+      locked,
+      remainingSeconds: locked ? Math.ceil((lockedUntil - now) / 1000) : 0,
+      attempts: locked ? 5 : Number(doc?.attempts || 0),
+    };
+  };
+
+  return res.status(200).json({ ok: true, mutedUntil });
   }
 
   if (req.method && req.method !== 'GET') {
@@ -219,6 +268,9 @@ export default async function handler(req: ApiReq, res: ApiRes) {
     monitorChecksDocs,
     alertConfigDoc,
     latestProbe,
+    adminVaultDoc,
+    painelLockDoc,
+    ownerLockDoc,
     gcalDoc,
     eventsMapDoc,
   ] = await Promise.all([
@@ -236,6 +288,9 @@ export default async function handler(req: ApiReq, res: ApiRes) {
     listCollectionDocs('monitor_checks', 200),
     readDoc('telemetry_meta/alert_config'),
     readDoc('telemetry_meta/latest_probe'),
+    readDoc('telemetry_meta/vault_admin'),
+    readDoc('telemetry_meta/lock_painel'),
+    readDoc('telemetry_meta/lock_owner'),
     readDoc('integrations/google_calendar'),
     readDoc('integrations/google_calendar_events'),
   ]);
@@ -525,6 +580,17 @@ export default async function handler(req: ApiReq, res: ApiRes) {
     visitsToday * 2 + bookingsToday * 6,
   );
 
+  const parseLock = (doc: Record<string, unknown> | null) => {
+    const lockedUntil = Number(doc?.lockedUntil || 0);
+    const now = Date.now();
+    const locked = lockedUntil > now;
+    return {
+      locked,
+      remainingSeconds: locked ? Math.ceil((lockedUntil - now) / 1000) : 0,
+      attempts: locked ? 5 : Number(doc?.attempts || 0),
+    };
+  };
+
   return res.status(200).json({
     ok: true,
     lgpdMode: 'ZERO_PII_SERVER_TELEMETRY',
@@ -593,6 +659,19 @@ export default async function handler(req: ApiReq, res: ApiRes) {
     },
     incidents,
     recentChecks: sortedChecks.slice(0, 80),
+    vaultAccess: {
+      adminEmail: adminVaultDoc?.email
+        ? String(adminVaultDoc.email)
+        : 'Padrão inicial (ainda não alterado)',
+      adminUpdatedAt: adminVaultDoc?.updatedAt
+        ? String(adminVaultDoc.updatedAt)
+        : null,
+      ownerEmail: customOwnerVault?.email
+        ? String(customOwnerVault.email)
+        : null,
+      painelLock: parseLock(painelLockDoc),
+      ownerLock: parseLock(ownerLockDoc),
+    },
     serverMonitorStats: {
       totalChecks,
       serverUptimePct,

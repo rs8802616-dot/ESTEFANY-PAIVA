@@ -37,9 +37,11 @@ import {
 import {
   clearOwnerGateSession,
   getOwnerSessionToken,
+  getVaultLockStatus,
   getVaultOwnerEmail,
   isVaultOwnerAuthenticated,
-  verifyOwnerVaultCredentials,
+  updateVaultCredentials,
+  verifyOwnerVaultCredentialsWithLock,
 } from '../../lib/adminRoute';
 import { subscribeAllAppointmentsAdmin } from '../../lib/db';
 import { trackAuthFailure } from '../../lib/telemetry';
@@ -257,6 +259,13 @@ interface ServerTelemetryPayload {
   };
   incidents?: ServerIncidentRecord[];
   recentChecks?: MonitorCheckRow[];
+  vaultAccess?: {
+    adminEmail: string;
+    adminUpdatedAt: string | null;
+    ownerEmail: string | null;
+    painelLock: { locked: boolean; remainingSeconds: number; attempts: number };
+    ownerLock: { locked: boolean; remainingSeconds: number; attempts: number };
+  };
   serverMonitorStats?: {
     totalChecks: number;
     serverUptimePct: number | null;
@@ -298,7 +307,7 @@ interface TechnicalLogEntry {
   message: string;
 }
 
-const APP_VERSION = 'v87-presence-split';
+const APP_VERSION = 'v88-vault-security';
 
 function formatDwell(sec: number | null | undefined): string {
   if (sec === null || sec === undefined || sec <= 0) return '—';
@@ -335,8 +344,16 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
   const [loginPassword, setLoginPassword] = useState('');
   const [loginError, setLoginError] = useState('');
   const [loggingIn, setLoggingIn] = useState(false);
-  const [failedAttempts, setFailedAttempts] = useState(0);
-  const [lockUntil, setLockUntil] = useState(0);
+  const [ownerLockSec, setOwnerLockSec] = useState(0);
+  const [ownerAttempts, setOwnerAttempts] = useState(0);
+
+  // Vault credential management inside /owner
+  const [adminNewEmail, setAdminNewEmail] = useState('');
+  const [adminNewPass, setAdminNewPass] = useState('');
+  const [ownerNewEmail, setOwnerNewEmail] = useState(() => getVaultOwnerEmail() || '');
+  const [ownerNewPass, setOwnerNewPass] = useState('');
+  const [vaultFeedback, setVaultFeedback] = useState<string | null>(null);
+  const [savingVault, setSavingVault] = useState(false);
 
   const [section, setSection] = useState<OwnerSection>('status');
   const [autoRefresh, setAutoRefresh] = useState(true);
@@ -728,36 +745,81 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
     }
   };
 
+  useEffect(() => {
+    if (authenticated) return;
+    void getVaultLockStatus('owner').then((st) => {
+      if (st.locked && st.remainingSeconds > 0) setOwnerLockSec(st.remainingSeconds);
+      setOwnerAttempts(st.attempts || 0);
+    });
+  }, [authenticated]);
+
+  useEffect(() => {
+    if (ownerLockSec <= 0) return;
+    const t = window.setInterval(() => {
+      setOwnerLockSec((prev) => (prev <= 1 ? 0 : prev - 1));
+    }, 1000);
+    return () => window.clearInterval(t);
+  }, [ownerLockSec]);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (Date.now() < lockUntil) {
-      const secs = Math.ceil((lockUntil - Date.now()) / 1000);
-      setLoginError(`Bloqueado por segurança. Aguarde ${secs}s.`);
+    if (ownerLockSec > 0) {
+      setLoginError(
+        `Bloqueado por 15 minutos. Aguarde ${String(Math.floor(ownerLockSec / 60)).padStart(2, '0')}:${String(ownerLockSec % 60).padStart(2, '0')}.`,
+      );
       return;
     }
     setLoginError('');
     setLoggingIn(true);
     try {
-      const ok = await verifyOwnerVaultCredentials(loginEmail, loginPassword);
-      if (!ok) {
-        const nextFails = failedAttempts + 1;
-        setFailedAttempts(nextFails);
+      const res = await verifyOwnerVaultCredentialsWithLock(
+        loginEmail,
+        loginPassword,
+      );
+      if (!res.ok) {
         trackAuthFailure('owner');
-        if (nextFails >= 5) {
-          setLockUntil(Date.now() + 60_000);
-          setFailedAttempts(0);
-          setLoginError('5 falhas seguidas. Bloqueado por 60 segundos.');
+        if (res.locked) {
+          setOwnerLockSec(res.remainingSeconds || 900);
+          setOwnerAttempts(5);
+          setLoginError('5 falhas seguidas. Bloqueado por 15 minutos.');
         } else {
-          setLoginError('Credenciais inválidas.');
+          const att = res.attempts || 1;
+          setOwnerAttempts(att);
+          setLoginError(`Credenciais inválidas. (Tentativa ${att} de 5)`);
         }
         return;
       }
-      setFailedAttempts(0);
+      setOwnerAttempts(0);
+      setOwnerLockSec(0);
       setAuthenticated(true);
-      setOwnerEmail(getVaultOwnerEmail() || loginEmail.trim().toLowerCase());
+      const em = getVaultOwnerEmail() || loginEmail.trim().toLowerCase();
+      setOwnerEmail(em);
+      setOwnerNewEmail(em);
       setLoginPassword('');
     } finally {
       setLoggingIn(false);
+    }
+  };
+
+  const handleUnlockPainel = async () => {
+    const ownerToken = getOwnerSessionToken();
+    setVaultFeedback(null);
+    try {
+      const resp = await fetch('/api/owner-telemetry', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(ownerToken ? { 'x-owner-auth': ownerToken } : {}),
+        },
+        body: JSON.stringify({ action: 'unlock_painel' }),
+      });
+      if (resp.ok) {
+        setVaultFeedback('Bloqueio de 15 minutos do /painel revogado com sucesso!');
+        pushLog('ok', 'SECURITY', 'Bloqueio do /painel revogado pelo dono.');
+        await runHealthCheck();
+      }
+    } catch {
+      setVaultFeedback('Erro ao revogar bloqueio do painel.');
     }
   };
 
@@ -1144,16 +1206,32 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
               />
             </div>
 
+            {ownerLockSec > 0 && (
+              <div className="rounded-xl bg-rose-500/10 border border-rose-500/30 p-3 text-xs text-rose-300 text-center font-mono">
+                Bloqueado por 15 min · Restam{' '}
+                {String(Math.floor(ownerLockSec / 60)).padStart(2, '0')}:
+                {String(ownerLockSec % 60).padStart(2, '0')}
+              </div>
+            )}
+            {ownerLockSec === 0 && ownerAttempts > 0 && (
+              <p className="text-xs text-amber-400 font-mono">
+                Tentativas falhas: {ownerAttempts}/5
+              </p>
+            )}
             {loginError && (
               <p className="text-xs text-rose-400 font-medium">{loginError}</p>
             )}
 
             <button
               type="submit"
-              disabled={loggingIn}
+              disabled={loggingIn || ownerLockSec > 0}
               className="w-full min-h-[42px] rounded-xl bg-zinc-100 text-zinc-950 font-semibold text-sm hover:bg-white transition-colors cursor-pointer disabled:opacity-60"
             >
-              {loggingIn ? 'Autenticando...' : 'Entrar no Console'}
+              {ownerLockSec > 0
+                ? 'Bloqueado (15 min)'
+                : loggingIn
+                  ? 'Autenticando...'
+                  : 'Entrar no Console'}
             </button>
           </form>
         </div>
@@ -2468,23 +2546,194 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
           )}
 
           {section === 'lgpd' && (
-            <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="rounded-xl bg-[#111114] border border-emerald-500/20 p-5 space-y-2.5 text-xs text-zinc-300">
-                <h2 className="text-sm font-semibold text-emerald-400">
-                  Permitido ao Dono (Telemetria)
-                </h2>
-                <p>• Uptime, P95, MTTR e histórico em monitor_checks</p>
-                <p>• Funil agregado, Web Vitals e instalações PWA</p>
-                <p>• Divergência Firestore ↔ Google Agenda (sem nomes)</p>
-                <p>• Simulador técnico de disponibilidade e cotas</p>
+            <section className="space-y-4">
+              {vaultFeedback && (
+                <div className="rounded-xl bg-sky-500/10 border border-sky-500/30 px-4 py-3 text-xs text-sky-300 font-medium">
+                  {vaultFeedback}
+                </div>
+              )}
+
+              {/* Lockout Control (5 tentativas -> 15 min) */}
+              <div className="rounded-xl bg-[#111114] border border-zinc-800/80 p-5 flex flex-wrap items-center justify-between gap-4">
+                <div>
+                  <h2 className="text-sm font-semibold text-white">
+                    Bloqueio do Painel Admin (/painel · 5 tentativas = 15 min)
+                  </h2>
+                  <p className="text-xs text-zinc-400 mt-1 font-mono">
+                    Status:{' '}
+                    {srv?.vaultAccess?.painelLock.locked ? (
+                      <span className="text-rose-400 font-bold">
+                        BLOQUEADO · Restam{' '}
+                        {formatDwell(srv.vaultAccess.painelLock.remainingSeconds)}
+                      </span>
+                    ) : (
+                      <span className="text-emerald-400">
+                        Desbloqueado ({srv?.vaultAccess?.painelLock.attempts ?? 0}
+                        /5 tentativas falhas)
+                      </span>
+                    )}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => void handleUnlockPainel()}
+                  className="h-9 px-4 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 text-xs font-semibold cursor-pointer"
+                >
+                  Revogar Tempo / Desbloquear Painel
+                </button>
               </div>
-              <div className="rounded-xl bg-[#111114] border border-rose-500/20 p-5 space-y-2.5 text-xs text-zinc-300">
-                <h2 className="text-sm font-semibold text-rose-400">
-                  Bloqueado por Lei (LGPD)
-                </h2>
-                <p>• Nomes, e-mails, telefones/WhatsApp de clientes</p>
-                <p>• Notas técnicas individuais e histórico financeiro/Pix</p>
-                <p>• Edição/criação manual de agendamentos</p>
+
+              {/* Admin & Owner Credential Managers (PBKDF2-HMAC-SHA256) */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <form
+                  onSubmit={async (e) => {
+                    e.preventDefault();
+                    setSavingVault(true);
+                    setVaultFeedback(null);
+                    try {
+                      const res = await updateVaultCredentials({
+                        target: 'painel',
+                        callerRole: 'owner',
+                        newEmail: adminNewEmail,
+                        newPassword: adminNewPass,
+                      });
+                      if (res.ok) {
+                        setAdminNewPass('');
+                        setVaultFeedback(
+                          'Login e senha da Admin atualizados (criptografia PBKDF2)!',
+                        );
+                        await runHealthCheck();
+                      } else {
+                        setVaultFeedback(res.error || 'Erro ao salvar.');
+                      }
+                    } finally {
+                      setSavingVault(false);
+                    }
+                  }}
+                  className="rounded-xl bg-[#111114] border border-zinc-800/80 p-5 space-y-3"
+                >
+                  <div>
+                    <h3 className="text-sm font-semibold text-white">
+                      Acesso da Admin (/painel)
+                    </h3>
+                    <p className="text-xs text-zinc-400 mt-0.5 font-mono">
+                      Login atual:{' '}
+                      <strong className="text-emerald-400">
+                        {srv?.vaultAccess?.adminEmail || 'carregando...'}
+                      </strong>
+                    </p>
+                  </div>
+                  <input
+                    type="email"
+                    required
+                    value={adminNewEmail}
+                    onChange={(e) => setAdminNewEmail(e.target.value)}
+                    placeholder="Novo e-mail de login da Admin"
+                    className="w-full px-3 py-2 rounded-lg bg-zinc-950 border border-zinc-800 text-xs text-white"
+                  />
+                  <input
+                    type="password"
+                    required
+                    minLength={6}
+                    value={adminNewPass}
+                    onChange={(e) => setAdminNewPass(e.target.value)}
+                    placeholder="Nova senha da Admin (mín. 6 caracteres)"
+                    className="w-full px-3 py-2 rounded-lg bg-zinc-950 border border-zinc-800 text-xs text-white"
+                  />
+                  <button
+                    type="submit"
+                    disabled={savingVault}
+                    className="h-9 px-4 rounded-lg bg-zinc-100 hover:bg-white text-zinc-950 text-xs font-semibold cursor-pointer disabled:opacity-50"
+                  >
+                    Alterar Login/Senha da Admin
+                  </button>
+                </form>
+
+                <form
+                  onSubmit={async (e) => {
+                    e.preventDefault();
+                    setSavingVault(true);
+                    setVaultFeedback(null);
+                    try {
+                      const res = await updateVaultCredentials({
+                        target: 'owner',
+                        callerRole: 'owner',
+                        newEmail: ownerNewEmail,
+                        newPassword: ownerNewPass,
+                      });
+                      if (res.ok) {
+                        setOwnerNewPass('');
+                        setOwnerEmail(ownerNewEmail.trim().toLowerCase());
+                        setVaultFeedback(
+                          'Seu login e senha de Dono foram atualizados (PBKDF2)!',
+                        );
+                        await runHealthCheck();
+                      } else {
+                        setVaultFeedback(res.error || 'Erro ao salvar.');
+                      }
+                    } finally {
+                      setSavingVault(false);
+                    }
+                  }}
+                  className="rounded-xl bg-[#111114] border border-zinc-800/80 p-5 space-y-3"
+                >
+                  <div>
+                    <h3 className="text-sm font-semibold text-white">
+                      Seu Acesso de Dono (/owner)
+                    </h3>
+                    <p className="text-xs text-zinc-400 mt-0.5 font-mono">
+                      Login atual:{' '}
+                      <strong className="text-sky-400">
+                        {ownerEmail || srv?.vaultAccess?.ownerEmail || '—'}
+                      </strong>
+                    </p>
+                  </div>
+                  <input
+                    type="email"
+                    required
+                    value={ownerNewEmail}
+                    onChange={(e) => setOwnerNewEmail(e.target.value)}
+                    placeholder="Seu novo e-mail de login"
+                    className="w-full px-3 py-2 rounded-lg bg-zinc-950 border border-zinc-800 text-xs text-white"
+                  />
+                  <input
+                    type="password"
+                    required
+                    minLength={6}
+                    value={ownerNewPass}
+                    onChange={(e) => setOwnerNewPass(e.target.value)}
+                    placeholder="Sua nova senha (mín. 6 caracteres)"
+                    className="w-full px-3 py-2 rounded-lg bg-zinc-950 border border-zinc-800 text-xs text-white"
+                  />
+                  <button
+                    type="submit"
+                    disabled={savingVault}
+                    className="h-9 px-4 rounded-lg bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/30 text-xs font-semibold cursor-pointer disabled:opacity-50"
+                  >
+                    Alterar Meu Login/Senha
+                  </button>
+                </form>
+              </div>
+
+              {/* LGPD Matrix */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="rounded-xl bg-[#111114] border border-emerald-500/20 p-5 space-y-2.5 text-xs text-zinc-300">
+                  <h2 className="text-sm font-semibold text-emerald-400">
+                    Permitido ao Dono (Telemetria & Segurança)
+                  </h2>
+                  <p>• Uptime, P95, MTTR e histórico em monitor_checks</p>
+                  <p>• Funil agregado, Web Vitals e instalações PWA</p>
+                  <p>• Divergência Firestore ↔ Google Agenda (sem nomes)</p>
+                  <p>• Ver login da Admin, redefinir senha (PBKDF2) e revogar bloqueio</p>
+                </div>
+                <div className="rounded-xl bg-[#111114] border border-rose-500/20 p-5 space-y-2.5 text-xs text-zinc-300">
+                  <h2 className="text-sm font-semibold text-rose-400">
+                    Bloqueado por Lei (LGPD)
+                  </h2>
+                  <p>• Nomes, e-mails, telefones/WhatsApp de clientes</p>
+                  <p>• Notas técnicas individuais e histórico financeiro/Pix</p>
+                  <p>• Edição/criação manual de agendamentos</p>
+                </div>
               </div>
             </section>
           )}

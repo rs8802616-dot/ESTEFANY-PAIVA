@@ -71,16 +71,41 @@ function getExpectedTokenHash(): string {
   return fromEnv || DEFAULT_ADMIN_TOKEN_SHA256;
 }
 
+export interface VaultVerifyResult {
+  ok: boolean;
+  locked?: boolean;
+  remainingSeconds?: number;
+  attempts?: number;
+}
+
 export function isVaultAdminAuthenticated(): boolean {
   try {
     const stored =
       localStorage.getItem(VAULT_AUTH_SESSION_KEY) ||
       sessionStorage.getItem(VAULT_AUTH_SESSION_KEY) ||
       '';
-    return ALLOWED_PBKDF2_HASHES.includes(stored);
+    return ALLOWED_PBKDF2_HASHES.includes(stored) || /^[a-f0-9]{64}$/.test(stored);
   } catch {
     return false;
   }
+}
+
+export async function getVaultLockStatus(
+  target: 'painel' | 'owner',
+): Promise<{ locked: boolean; remainingSeconds: number; attempts: number }> {
+  try {
+    const resp = await fetch(`/api/auth-vault?target=${target}`);
+    if (resp.ok) {
+      return (await resp.json()) as {
+        locked: boolean;
+        remainingSeconds: number;
+        attempts: number;
+      };
+    }
+  } catch {
+    // ignore
+  }
+  return { locked: false, remainingSeconds: 0, attempts: 0 };
 }
 
 export function getVaultAdminEmail(): string | null {
@@ -95,30 +120,77 @@ export function getVaultAdminEmail(): string | null {
   }
 }
 
-export async function verifyAdminVaultCredentials(
+export async function verifyAdminVaultCredentialsWithLock(
   email: string,
   password: string,
-): Promise<boolean> {
+): Promise<VaultVerifyResult> {
   const cleanEmailInput = email.toLowerCase().trim();
   const derived = await pbkdf2Hex(cleanEmailInput, password);
   const derivedTrimmed =
     password !== password.trim() ? await pbkdf2Hex(cleanEmailInput, password.trim()) : '';
-  if (ALLOWED_PBKDF2_HASHES.includes(derived) || (derivedTrimmed && ALLOWED_PBKDF2_HASHES.includes(derivedTrimmed))) {
-    const matchedHash = ALLOWED_PBKDF2_HASHES.includes(derived) ? derived : derivedTrimmed;
-    try {
-      localStorage.setItem(VAULT_AUTH_SESSION_KEY, matchedHash);
-      localStorage.setItem(VAULT_AUTH_EMAIL_KEY, cleanEmailInput);
-      localStorage.setItem(VAULT_PERSISTENT_MODE_KEY, 'admin');
-      sessionStorage.setItem(VAULT_AUTH_SESSION_KEY, matchedHash);
-      sessionStorage.setItem(VAULT_AUTH_EMAIL_KEY, cleanEmailInput);
-      // Limpa o token da barra de endereços mantendo na rota /painel
-      window.history.replaceState({}, '', '/painel');
-    } catch {
-      // ignore storage errors
+
+  try {
+    const resp = await fetch('/api/auth-vault', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'verify',
+        target: 'painel',
+        email: cleanEmailInput,
+        derivedHash: derived,
+        derivedTrimmed,
+      }),
+    });
+    const data = (await resp.json()) as VaultVerifyResult & { matchedHash?: string };
+    if (resp.ok && data.ok && data.matchedHash) {
+      try {
+        localStorage.setItem(VAULT_AUTH_SESSION_KEY, data.matchedHash);
+        localStorage.setItem(VAULT_AUTH_EMAIL_KEY, cleanEmailInput);
+        localStorage.setItem(VAULT_PERSISTENT_MODE_KEY, 'admin');
+        sessionStorage.setItem(VAULT_AUTH_SESSION_KEY, data.matchedHash);
+        sessionStorage.setItem(VAULT_AUTH_EMAIL_KEY, cleanEmailInput);
+        window.history.replaceState({}, '', '/painel');
+      } catch {
+        // ignore
+      }
+      return { ok: true };
     }
-    return true;
+    return {
+      ok: false,
+      locked: Boolean(data.locked),
+      remainingSeconds: Number(data.remainingSeconds || 0),
+      attempts: Number(data.attempts || 0),
+    };
+  } catch {
+    if (
+      ALLOWED_PBKDF2_HASHES.includes(derived) ||
+      (derivedTrimmed && ALLOWED_PBKDF2_HASHES.includes(derivedTrimmed))
+    ) {
+      const matchedHash = ALLOWED_PBKDF2_HASHES.includes(derived)
+        ? derived
+        : derivedTrimmed;
+      try {
+        localStorage.setItem(VAULT_AUTH_SESSION_KEY, matchedHash);
+        localStorage.setItem(VAULT_AUTH_EMAIL_KEY, cleanEmailInput);
+        localStorage.setItem(VAULT_PERSISTENT_MODE_KEY, 'admin');
+        sessionStorage.setItem(VAULT_AUTH_SESSION_KEY, matchedHash);
+        sessionStorage.setItem(VAULT_AUTH_EMAIL_KEY, cleanEmailInput);
+        window.history.replaceState({}, '', '/painel');
+      } catch {
+        // ignore
+      }
+      return { ok: true };
+    }
+    return { ok: false };
   }
-  return false;
+}
+
+export async function verifyAdminVaultCredentials(
+  email: string,
+  password: string,
+): Promise<boolean> {
+  const res = await verifyAdminVaultCredentialsWithLock(email, password);
+  return res.ok;
 }
 
 export function isAdminGateUnlocked(): boolean {
@@ -208,7 +280,7 @@ export function isVaultOwnerAuthenticated(): boolean {
       sessionStorage.getItem(OWNER_AUTH_SESSION_KEY) ||
       localStorage.getItem(OWNER_AUTH_SESSION_KEY) ||
       '';
-    return ALLOWED_PBKDF2_HASHES.includes(stored);
+    return ALLOWED_PBKDF2_HASHES.includes(stored) || /^[a-f0-9]{64}$/.test(stored);
   } catch {
     return false;
   }
@@ -239,32 +311,131 @@ export function getOwnerSessionToken(): string {
   }
 }
 
-export async function verifyOwnerVaultCredentials(
+export async function verifyOwnerVaultCredentialsWithLock(
   email: string,
   password: string,
-): Promise<boolean> {
+): Promise<VaultVerifyResult> {
   const cleanEmailInput = email.toLowerCase().trim();
   const derived = await pbkdf2Hex(cleanEmailInput, password);
   const derivedTrimmed =
     password !== password.trim() ? await pbkdf2Hex(cleanEmailInput, password.trim()) : '';
 
-  if (
-    ALLOWED_PBKDF2_HASHES.includes(derived) ||
-    (derivedTrimmed && ALLOWED_PBKDF2_HASHES.includes(derivedTrimmed))
-  ) {
-    const matchedHash = ALLOWED_PBKDF2_HASHES.includes(derived) ? derived : derivedTrimmed;
-    try {
-      sessionStorage.setItem(OWNER_AUTH_SESSION_KEY, matchedHash);
-      sessionStorage.setItem(OWNER_AUTH_EMAIL_KEY, cleanEmailInput);
-      localStorage.setItem(OWNER_AUTH_SESSION_KEY, matchedHash);
-      localStorage.setItem(OWNER_AUTH_EMAIL_KEY, cleanEmailInput);
-      window.history.replaceState({}, '', '/owner');
-    } catch {
-      // ignore
+  try {
+    const resp = await fetch('/api/auth-vault', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'verify',
+        target: 'owner',
+        email: cleanEmailInput,
+        derivedHash: derived,
+        derivedTrimmed,
+      }),
+    });
+    const data = (await resp.json()) as VaultVerifyResult & { matchedHash?: string };
+    if (resp.ok && data.ok && data.matchedHash) {
+      try {
+        sessionStorage.setItem(OWNER_AUTH_SESSION_KEY, data.matchedHash);
+        sessionStorage.setItem(OWNER_AUTH_EMAIL_KEY, cleanEmailInput);
+        localStorage.setItem(OWNER_AUTH_SESSION_KEY, data.matchedHash);
+        localStorage.setItem(OWNER_AUTH_EMAIL_KEY, cleanEmailInput);
+        window.history.replaceState({}, '', '/owner');
+      } catch {
+        // ignore
+      }
+      return { ok: true };
     }
-    return true;
+    return {
+      ok: false,
+      locked: Boolean(data.locked),
+      remainingSeconds: Number(data.remainingSeconds || 0),
+      attempts: Number(data.attempts || 0),
+    };
+  } catch {
+    if (
+      ALLOWED_PBKDF2_HASHES.includes(derived) ||
+      (derivedTrimmed && ALLOWED_PBKDF2_HASHES.includes(derivedTrimmed))
+    ) {
+      const matchedHash = ALLOWED_PBKDF2_HASHES.includes(derived)
+        ? derived
+        : derivedTrimmed;
+      try {
+        sessionStorage.setItem(OWNER_AUTH_SESSION_KEY, matchedHash);
+        sessionStorage.setItem(OWNER_AUTH_EMAIL_KEY, cleanEmailInput);
+        localStorage.setItem(OWNER_AUTH_SESSION_KEY, matchedHash);
+        localStorage.setItem(OWNER_AUTH_EMAIL_KEY, cleanEmailInput);
+        window.history.replaceState({}, '', '/owner');
+      } catch {
+        // ignore
+      }
+      return { ok: true };
+    }
+    return { ok: false };
   }
-  return false;
+}
+
+export async function verifyOwnerVaultCredentials(
+  email: string,
+  password: string,
+): Promise<boolean> {
+  const res = await verifyOwnerVaultCredentialsWithLock(email, password);
+  return res.ok;
+}
+
+export async function updateVaultCredentials(params: {
+  target: 'painel' | 'owner';
+  callerRole: 'admin' | 'owner';
+  newEmail: string;
+  newPassword: string;
+}): Promise<{ ok: boolean; error?: string }> {
+  const cleanEmail = params.newEmail.toLowerCase().trim();
+  const cleanPassword = params.newPassword.trim();
+  if (!cleanEmail.includes('@') || cleanPassword.length < 6) {
+    return {
+      ok: false,
+      error: 'Informe um e-mail válido e senha com pelo menos 6 caracteres.',
+    };
+  }
+
+  const callerAuthHash =
+    params.callerRole === 'owner'
+      ? getOwnerSessionToken()
+      : localStorage.getItem(VAULT_AUTH_SESSION_KEY) ||
+        sessionStorage.getItem(VAULT_AUTH_SESSION_KEY) ||
+        '';
+
+  const newHash = await pbkdf2Hex(cleanEmail, cleanPassword);
+
+  const resp = await fetch('/api/auth-vault', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      action: 'update_credentials',
+      target: params.target,
+      callerAuthHash,
+      newEmail: cleanEmail,
+      newHash,
+    }),
+  });
+  const data = (await resp.json()) as { ok?: boolean; error?: string };
+  if (!resp.ok || !data.ok) {
+    return { ok: false, error: data.error || 'Erro ao atualizar credenciais.' };
+  }
+
+  // Atualiza sessão local se alterou as próprias credenciais
+  if (params.target === 'owner' && params.callerRole === 'owner') {
+    sessionStorage.setItem(OWNER_AUTH_SESSION_KEY, newHash);
+    sessionStorage.setItem(OWNER_AUTH_EMAIL_KEY, cleanEmail);
+    localStorage.setItem(OWNER_AUTH_SESSION_KEY, newHash);
+    localStorage.setItem(OWNER_AUTH_EMAIL_KEY, cleanEmail);
+  } else if (params.target === 'painel' && params.callerRole === 'admin') {
+    localStorage.setItem(VAULT_AUTH_SESSION_KEY, newHash);
+    localStorage.setItem(VAULT_AUTH_EMAIL_KEY, cleanEmail);
+    sessionStorage.setItem(VAULT_AUTH_SESSION_KEY, newHash);
+    sessionStorage.setItem(VAULT_AUTH_EMAIL_KEY, cleanEmail);
+  }
+
+  return { ok: true };
 }
 
 export function clearOwnerGateSession(): void {

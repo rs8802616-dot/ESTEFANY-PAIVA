@@ -11,7 +11,7 @@ import { useToast } from '../Toast';
 import { LuxuryStateView } from '../ui/LuxuryDesignSystem';
 import { MANDATORY_SCREENS_33 } from '../../theme/luxuryNudeTheme';
 import { resetAdminPassword, signOutUser } from '../../lib/firebase';
-import { clearAdminGateSession } from '../../lib/adminRoute';
+import { clearAdminGateSession, updateVaultCredentials } from '../../lib/adminRoute';
 
 export type ProfileScreenId = 25 | 26 | 27 | 28 | 29 | 30 | 31 | 32 | 33;
 
@@ -154,6 +154,11 @@ export const AdminProfileSuite: React.FC<Props> = ({
   const [slotsText, setSlotsText] = useState((settings.configuredSlots || []).join(', '));
   const [newBlockedDate, setNewBlockedDate] = useState('');
   const [saving, setSaving] = useState(false);
+
+  // Alterar Login e Senha do Painel (Tela 32)
+  const [newAdminEmail, setNewAdminEmail] = useState(adminEmail || '');
+  const [newAdminPass, setNewAdminPass] = useState('');
+  const [savingCreds, setSavingCreds] = useState(false);
 
   // Sincroniza o formulário sempre que settings atualizar
   useEffect(() => {
@@ -1145,6 +1150,69 @@ export const AdminProfileSuite: React.FC<Props> = ({
               </button>
             </div>
           </div>
+
+          <form
+            onSubmit={async (e) => {
+              e.preventDefault();
+              setSavingCreds(true);
+              try {
+                const res = await updateVaultCredentials({
+                  target: 'painel',
+                  callerRole: 'admin',
+                  newEmail: newAdminEmail,
+                  newPassword: newAdminPass,
+                });
+                if (res.ok) {
+                  setNewAdminPass('');
+                  showToast('Login e senha do painel atualizados com criptografia PBKDF2!', 'success');
+                } else {
+                  showToast(res.error || 'Erro ao atualizar acesso.', 'error');
+                }
+              } finally {
+                setSavingCreds(false);
+              }
+            }}
+            className="p-5 rounded-2xl bg-[#FAF6F1] border border-[#E8D6CB] space-y-4"
+          >
+            <div>
+              <h4 className="text-sm font-bold text-[#594943]">Alterar Login e Senha do Painel</h4>
+              <p className="text-xs text-[#95847C]">
+                A nova senha é criptografada com PBKDF2-HMAC-SHA256 antes de ser salva.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-semibold text-[#594943] mb-1">Novo E-mail de Login</label>
+                <input
+                  type="email"
+                  required
+                  value={newAdminEmail}
+                  onChange={e => setNewAdminEmail(e.target.value)}
+                  placeholder="novo-email@dominio.com"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#E8D6CB] bg-white text-sm text-[#594943]"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-[#594943] mb-1">Nova Senha (mín. 6 caracteres)</label>
+                <input
+                  type="password"
+                  required
+                  minLength={6}
+                  value={newAdminPass}
+                  onChange={e => setNewAdminPass(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#E8D6CB] bg-white text-sm text-[#594943]"
+                />
+              </div>
+            </div>
+            <button
+              type="submit"
+              disabled={savingCreds}
+              className="px-5 py-2.5 rounded-xl bg-[#594943] text-white text-xs font-semibold hover:bg-[#433631] transition-colors cursor-pointer disabled:opacity-60"
+            >
+              {savingCreds ? 'Salvando com criptografia...' : 'Salvar Novo Login e Senha'}
+            </button>
+          </form>
         </div>
       )}
 
