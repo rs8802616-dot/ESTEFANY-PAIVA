@@ -14,6 +14,45 @@ const FIRESTORE_DOC_PREFIX =
 const FIRESTORE_COMMIT_URL = `https://firestore.googleapis.com/v1/${FIRESTORE_DOC_PREFIX}:commit`;
 const FIRESTORE_BASE_URL = `https://firestore.googleapis.com/v1/${FIRESTORE_DOC_PREFIX}`;
 
+function getEnv(name: string): string {
+  const proc = (
+    globalThis as { process?: { env?: Record<string, string | undefined> } }
+  ).process;
+  return (proc?.env?.[name] || '').trim();
+}
+
+async function sendIssueTelegramAlert(text: string): Promise<void> {
+  const botToken = getEnv('TELEGRAM_BOT_TOKEN').replace(/^bot/i, '').trim();
+  const chatId = getEnv('TELEGRAM_CHAT_ID');
+  if (!botToken || !chatId) return;
+
+  try {
+    const muteResp = await fetch(`${FIRESTORE_BASE_URL}/telemetry_meta/alert_config`);
+    if (muteResp.ok) {
+      const mData = (await muteResp.json()) as {
+        fields?: { mutedUntil?: { stringValue?: string } };
+      };
+      const mutedUntil = mData.fields?.mutedUntil?.stringValue
+        ? Date.parse(mData.fields.mutedUntil.stringValue)
+        : 0;
+      if (mutedUntil > Date.now()) return;
+    }
+
+    await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text,
+        parse_mode: 'HTML',
+        disable_web_page_preview: true,
+      }),
+    });
+  } catch {
+    // ignore telegram errors
+  }
+}
+
 function todaySP(): string {
   try {
     return new Intl.DateTimeFormat('en-CA', {
@@ -225,10 +264,12 @@ export default async function handler(req: ApiReq, res: ApiRes) {
       const existingResp = await fetch(
         `${FIRESTORE_BASE_URL}/telemetry_issues/${fp}`,
       );
+      let isNewIssue = true;
       let prevStatus = 'new';
       let prevCount = 0;
       let firstSeen = nowIso;
       if (existingResp.ok) {
+        isNewIssue = false;
         const ex = (await existingResp.json()) as {
           fields?: {
             status?: { stringValue?: string };
@@ -265,6 +306,13 @@ export default async function handler(req: ApiReq, res: ApiRes) {
           },
         }),
       });
+
+      if (isNewIssue || nextStatus === 'regression') {
+        const tag = nextStatus === 'regression' ? '🔁 [REGRESSÃO]' : '🐛 [NOVA ISSUE]';
+        await sendIssueTelegramAlert(
+          `${tag}\nErro: <b>${msg}</b>\nRota: <code>${route}</code> · Versão: ${appVersion}\nAparelho: ${deviceType} (${connectionType})\nID: <code>${fp}</code>`,
+        );
+      }
     } catch {
       // ignore
     }
