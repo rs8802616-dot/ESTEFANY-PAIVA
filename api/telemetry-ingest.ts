@@ -155,6 +155,36 @@ export default async function handler(req: ApiReq, res: ApiRes) {
     const route = safeStr(body.route, 24);
     if (route === 'owner') inc.auth_fail_owner = 1;
     else inc.auth_fail_painel = 1;
+  } else if (type === 'presence_ping' || type === 'presence_leave') {
+    const anonId = safeStr(body.anonDeviceId, 40) || 'dev_anon';
+    const screen = safeStr(body.screen, 40) || 'client_home';
+    const dwellSec = safeInt(body.dwellSec, 7200);
+    const deviceType = safeStr(body.deviceType, 16) || 'mobile';
+    const referrerSource = safeStr(body.referrerSource, 16) || 'direct';
+    const active = type === 'presence_ping';
+
+    await fetch(`${FIRESTORE_BASE_URL}/telemetry_presence/${anonId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fields: {
+          anonId: { stringValue: anonId },
+          screen: { stringValue: screen },
+          deviceType: { stringValue: deviceType },
+          referrerSource: { stringValue: referrerSource },
+          dwellSec: { integerValue: String(dwellSec) },
+          active: { booleanValue: active },
+          lastSeenAt: { stringValue: new Date().toISOString() },
+        },
+      }),
+    }).catch(() => {});
+
+    if (type === 'presence_leave' && dwellSec > 0) {
+      inc.dwell_sum_sec = dwellSec;
+      inc.dwell_count = 1;
+    } else {
+      return res.status(200).json({ ok: true });
+    }
   } else if (type === 'release_session') {
     await incrementDocFields('telemetry_releases', appVersion, { sessions: 1 });
     return res.status(200).json({ ok: true });

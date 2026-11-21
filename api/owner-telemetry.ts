@@ -197,6 +197,7 @@ export default async function handler(req: ApiReq, res: ApiRes) {
     issueDocs,
     screenDocs,
     releaseDocs,
+    presenceDocs,
     incidentDocs,
     monitorChecksDocs,
     alertConfigDoc,
@@ -213,6 +214,7 @@ export default async function handler(req: ApiReq, res: ApiRes) {
     listCollectionDocs('telemetry_issues', 50),
     listCollectionDocs('telemetry_screens', 30),
     listCollectionDocs('telemetry_releases', 20),
+    listCollectionDocs('telemetry_presence', 100),
     listCollectionDocs('monitor_incidents', 40),
     listCollectionDocs('monitor_checks', 200),
     readDoc('telemetry_meta/alert_config'),
@@ -388,11 +390,56 @@ export default async function handler(req: ApiReq, res: ApiRes) {
     Math.round((remainingBudgetMin / monthlyBudgetMin) * 1000) / 10,
   );
 
-  // Estimated daily Firestore usage vs Spark free quota (50,000 reads / 20,000 writes)
+  // Real-Time Presence & Dwell Time (active within last 65 seconds, Zero PII)
+  const nowMs = Date.now();
+  const activeSessions = presenceDocs
+    .map((d) => ({
+      idShort: d.id.slice(-6),
+      screen: String(d.data.screen || 'client_home'),
+      deviceType: String(d.data.deviceType || 'mobile'),
+      referrerSource: String(d.data.referrerSource || 'direct'),
+      dwellSec: Number(d.data.dwellSec || 0),
+      active: d.data.active !== false,
+      lastSeenAt: String(d.data.lastSeenAt || ''),
+    }))
+    .filter((s) => {
+      const ts = s.lastSeenAt ? Date.parse(s.lastSeenAt) : 0;
+      return s.active && nowMs - ts <= 65_000;
+    })
+    .sort((a, b) => b.lastSeenAt.localeCompare(a.lastSeenAt));
+
+  const onlineNow = activeSessions.length;
+  const onlineClientLink = activeSessions.filter(
+    (s) => s.screen === 'client_home' || s.screen === 'booking_flow',
+  ).length;
+  const onlineMobile = activeSessions.filter((s) => s.deviceType === 'mobile').length;
+  const onlineDesktop = activeSessions.filter((s) => s.deviceType === 'desktop').length;
+
   const todayStats = dailyTelemetry.find((d) => d.date === today) as
     | Record<string, number | string>
     | undefined;
   const visitsToday = Number(todayStats?.funnel_visit || 0);
+  const visits7d = dailyTelemetry.reduce(
+    (acc, r) => acc + Number((r as Record<string, unknown>).funnel_visit || 0),
+    0,
+  );
+  const dwellSumToday = Number(todayStats?.dwell_sum_sec || 0);
+  const dwellCntToday = Number(todayStats?.dwell_count || 0);
+  const avgDwellSecToday =
+    dwellCntToday > 0 ? Math.round(dwellSumToday / dwellCntToday) : null;
+
+  const dwellSum7d = dailyTelemetry.reduce(
+    (acc, r) => acc + Number((r as Record<string, unknown>).dwell_sum_sec || 0),
+    0,
+  );
+  const dwellCnt7d = dailyTelemetry.reduce(
+    (acc, r) => acc + Number((r as Record<string, unknown>).dwell_count || 0),
+    0,
+  );
+  const avgDwellSec7d =
+    dwellCnt7d > 0 ? Math.round(dwellSum7d / dwellCnt7d) : null;
+
+  // Estimated daily Firestore usage vs Spark free quota (50,000 reads / 20,000 writes)
   const bookingsToday = Number(todayStats?.funnel_confirmed || 0);
   const estimatedReadsToday = Math.max(
     50,
@@ -449,6 +496,17 @@ export default async function handler(req: ApiReq, res: ApiRes) {
     issues,
     screens,
     releases,
+    realtime: {
+      onlineNow,
+      onlineClientLink,
+      onlineMobile,
+      onlineDesktop,
+      visitsToday,
+      visits7d,
+      avgDwellSecToday,
+      avgDwellSec7d,
+      activeSessions: activeSessions.slice(0, 25),
+    },
     slo: {
       targetPct: 99.9,
       monthlyBudgetMin,

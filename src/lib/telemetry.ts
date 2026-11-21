@@ -1,4 +1,4 @@
-const APP_VERSION = 'v85-sentry-noc';
+const APP_VERSION = 'v86-realtime-noc';
 const ANON_DEVICE_KEY = 'epn_anon_device_id_v1';
 
 let telemetryInitialized = false;
@@ -198,6 +198,37 @@ export function initClientTelemetry(mode: 'client' | 'admin' | 'owner'): void {
       sessionStorage.setItem(visitedKey, '1');
       trackFunnelStep('visit');
     }
+
+    // 1b. Real-Time Presence Heartbeat & Dwell Time (Zero PII)
+    const sessionStartMs = Date.now();
+    const sendPresence = (leaving: boolean) => {
+      const dwellSec = Math.max(1, Math.round((Date.now() - sessionStartMs) / 1000));
+      sendTelemetry({
+        type: leaving ? 'presence_leave' : 'presence_ping',
+        screen: sanitizeScreenName(),
+        dwellSec,
+        referrerSource: getReferrerSource(),
+      });
+    };
+
+    sendPresence(false);
+    const pingTimer = window.setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        sendPresence(false);
+      }
+    }, 25_000);
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') {
+        sendPresence(true);
+      } else {
+        sendPresence(false);
+      }
+    });
+    window.addEventListener('pagehide', () => {
+      window.clearInterval(pingTimer);
+      sendPresence(true);
+    });
   }
 
   // 2. Global errors + Resource load errors (capture phase)
