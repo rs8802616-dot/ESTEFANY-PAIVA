@@ -369,10 +369,50 @@ export default async function handler(req: ApiReq, res: ApiRes) {
   const gcalConnected = Boolean(gcalDoc?.connected);
   let gcalTokenValid = false;
   if (gcalConnected && gcalDoc?.accessToken) {
+    let tokenToTest = String(gcalDoc.accessToken);
+    const expiresAt = Number(gcalDoc.expiresAt || 0);
+    const refreshToken = String(gcalDoc.refreshToken || '');
+    const clientId = getEnv('GOOGLE_CLIENT_ID');
+    const clientSecret = getEnv('GOOGLE_CLIENT_SECRET');
+
+    if (expiresAt <= Date.now() + 60_000 && refreshToken && clientId && clientSecret) {
+      try {
+        const refResp = await fetch('https://oauth2.googleapis.com/token', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({
+            client_id: clientId,
+            client_secret: clientSecret,
+            refresh_token: refreshToken,
+            grant_type: 'refresh_token',
+          }).toString(),
+        });
+        if (refResp.ok) {
+          const refData = (await refResp.json()) as {
+            access_token?: string;
+            expires_in?: number;
+          };
+          if (refData.access_token) {
+            tokenToTest = refData.access_token;
+            await writeDoc(
+              'integrations/google_calendar?updateMask.fieldPaths=accessToken&updateMask.fieldPaths=expiresAt&updateMask.fieldPaths=updatedAt',
+              {
+                accessToken: refData.access_token,
+                expiresAt: Date.now() + (refData.expires_in || 3600) * 1000,
+                updatedAt: nowIso,
+              },
+            );
+          }
+        }
+      } catch {
+        // ignore refresh error, will test existing token
+      }
+    }
+
     try {
       const calResp = await fetch(
         'https://www.googleapis.com/calendar/v3/calendars/primary/events?maxResults=1',
-        { headers: { Authorization: `Bearer ${String(gcalDoc.accessToken)}` } },
+        { headers: { Authorization: `Bearer ${tokenToTest}` } },
       );
       gcalTokenValid = calResp.ok;
     } catch {
