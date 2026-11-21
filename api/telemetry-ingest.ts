@@ -157,20 +157,25 @@ export default async function handler(req: ApiReq, res: ApiRes) {
     else inc.auth_fail_painel = 1;
   } else if (type === 'presence_ping' || type === 'presence_leave') {
     const anonId = safeStr(body.anonDeviceId, 40) || 'dev_anon';
+    const role = safeStr(body.role, 16) || 'client';
     const screen = safeStr(body.screen, 40) || 'client_home';
     const dwellSec = safeInt(body.dwellSec, 7200);
     const deviceType = safeStr(body.deviceType, 16) || 'mobile';
+    const deviceLabel = safeStr(body.deviceLabel, 40) || deviceType;
     const referrerSource = safeStr(body.referrerSource, 16) || 'direct';
     const active = type === 'presence_ping';
+    const docKey = `${anonId}_${role}`;
 
-    await fetch(`${FIRESTORE_BASE_URL}/telemetry_presence/${anonId}`, {
+    await fetch(`${FIRESTORE_BASE_URL}/telemetry_presence/${docKey}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         fields: {
           anonId: { stringValue: anonId },
+          role: { stringValue: role },
           screen: { stringValue: screen },
           deviceType: { stringValue: deviceType },
+          deviceLabel: { stringValue: deviceLabel },
           referrerSource: { stringValue: referrerSource },
           dwellSec: { integerValue: String(dwellSec) },
           active: { booleanValue: active },
@@ -179,7 +184,7 @@ export default async function handler(req: ApiReq, res: ApiRes) {
       }),
     }).catch(() => {});
 
-    if (type === 'presence_leave' && dwellSec > 0) {
+    if (type === 'presence_leave' && role === 'client' && dwellSec > 0) {
       inc.dwell_sum_sec = dwellSec;
       inc.dwell_count = 1;
     } else {

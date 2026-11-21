@@ -390,28 +390,40 @@ export default async function handler(req: ApiReq, res: ApiRes) {
     Math.round((remainingBudgetMin / monthlyBudgetMin) * 1000) / 10,
   );
 
-  // Real-Time Presence & Dwell Time (active within last 65 seconds, Zero PII)
+  // Real-Time Presence & Dwell Time (active within last 120 seconds, Zero PII)
   const nowMs = Date.now();
   const activeSessions = presenceDocs
-    .map((d) => ({
-      idShort: d.id.slice(-6),
-      screen: String(d.data.screen || 'client_home'),
-      deviceType: String(d.data.deviceType || 'mobile'),
-      referrerSource: String(d.data.referrerSource || 'direct'),
-      dwellSec: Number(d.data.dwellSec || 0),
-      active: d.data.active !== false,
-      lastSeenAt: String(d.data.lastSeenAt || ''),
-    }))
+    .map((d) => {
+      const screen = String(d.data.screen || 'client_home');
+      const inferredRole =
+        String(d.data.role || '') ||
+        (screen === 'painel_admin'
+          ? 'admin'
+          : screen === 'owner_console'
+            ? 'owner'
+            : 'client');
+      return {
+        idShort: String(d.data.anonId || d.id).slice(-6),
+        role: inferredRole,
+        screen,
+        deviceType: String(d.data.deviceType || 'mobile'),
+        deviceLabel: String(d.data.deviceLabel || d.data.deviceType || 'mobile'),
+        referrerSource: String(d.data.referrerSource || 'direct'),
+        dwellSec: Number(d.data.dwellSec || 0),
+        active: d.data.active !== false,
+        lastSeenAt: String(d.data.lastSeenAt || ''),
+      };
+    })
     .filter((s) => {
       const ts = s.lastSeenAt ? Date.parse(s.lastSeenAt) : 0;
-      return s.active && nowMs - ts <= 65_000;
+      return s.active && nowMs - ts <= 120_000;
     })
     .sort((a, b) => b.lastSeenAt.localeCompare(a.lastSeenAt));
 
   const onlineNow = activeSessions.length;
-  const onlineClientLink = activeSessions.filter(
-    (s) => s.screen === 'client_home' || s.screen === 'booking_flow',
-  ).length;
+  const onlineClientLink = activeSessions.filter((s) => s.role === 'client').length;
+  const onlineAdminLink = activeSessions.filter((s) => s.role === 'admin').length;
+  const onlineOwnerLink = activeSessions.filter((s) => s.role === 'owner').length;
   const onlineMobile = activeSessions.filter((s) => s.deviceType === 'mobile').length;
   const onlineDesktop = activeSessions.filter((s) => s.deviceType === 'desktop').length;
 
@@ -499,13 +511,15 @@ export default async function handler(req: ApiReq, res: ApiRes) {
     realtime: {
       onlineNow,
       onlineClientLink,
+      onlineAdminLink,
+      onlineOwnerLink,
       onlineMobile,
       onlineDesktop,
       visitsToday,
       visits7d,
       avgDwellSecToday,
       avgDwellSec7d,
-      activeSessions: activeSessions.slice(0, 25),
+      activeSessions: activeSessions.slice(0, 30),
     },
     slo: {
       targetPct: 99.9,

@@ -229,6 +229,8 @@ interface ServerTelemetryPayload {
   realtime?: {
     onlineNow: number;
     onlineClientLink: number;
+    onlineAdminLink: number;
+    onlineOwnerLink: number;
     onlineMobile: number;
     onlineDesktop: number;
     visitsToday: number;
@@ -237,8 +239,10 @@ interface ServerTelemetryPayload {
     avgDwellSec7d: number | null;
     activeSessions: Array<{
       idShort: string;
+      role: string;
       screen: string;
       deviceType: string;
+      deviceLabel: string;
       referrerSource: string;
       dwellSec: number;
       lastSeenAt: string;
@@ -294,7 +298,7 @@ interface TechnicalLogEntry {
   message: string;
 }
 
-const APP_VERSION = 'v86-realtime-noc';
+const APP_VERSION = 'v87-presence-split';
 
 function formatDwell(sec: number | null | undefined): string {
   if (sec === null || sec === undefined || sec <= 0) return '—';
@@ -1174,7 +1178,7 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
       label: 'Ao Vivo (Visitantes)',
       group: 'Monitoramento',
       icon: Activity,
-      badge: srv?.realtime?.onlineClientLink || undefined,
+      badge: srv?.realtime?.onlineNow || undefined,
     },
     {
       id: 'issues',
@@ -1476,15 +1480,16 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
 
                 <div className="rounded-xl bg-[#111114] border border-zinc-800/80 p-4">
                   <div className="text-[11px] font-mono uppercase text-zinc-400 flex items-center justify-between">
-                    <span>Online no Link Cliente</span>
+                    <span>Online Agora (Total)</span>
                     <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                   </div>
                   <div className="text-2xl font-mono font-bold text-emerald-400 mt-1">
-                    {srv?.realtime?.onlineClientLink ?? 0}
+                    {srv?.realtime?.onlineNow ?? 0}
                   </div>
                   <div className="text-[11px] text-zinc-500 mt-1">
-                    Hoje: {srv?.realtime?.visitsToday ?? 0} entraram · Média:{' '}
-                    {formatDwell(srv?.realtime?.avgDwellSecToday)}
+                    Clientes: {srv?.realtime?.onlineClientLink ?? 0} · Admin:{' '}
+                    {srv?.realtime?.onlineAdminLink ?? 0} · Dono:{' '}
+                    {srv?.realtime?.onlineOwnerLink ?? 0}
                   </div>
                 </div>
               </section>
@@ -1622,18 +1627,41 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
 
           {section === 'realtime' && (
             <section className="space-y-4">
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
                 <div className="rounded-xl bg-[#111114] border border-emerald-500/30 p-4">
                   <div className="text-[11px] font-mono uppercase text-zinc-400 flex items-center justify-between">
-                    <span>Online Agora (Clientes)</span>
+                    <span>Link Clientes</span>
                     <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                   </div>
                   <div className="text-3xl font-mono font-bold text-emerald-400 mt-1">
                     {srv?.realtime?.onlineClientLink ?? 0}
                   </div>
                   <div className="text-[11px] text-zinc-500 mt-1">
-                    Mobile: {srv?.realtime?.onlineMobile ?? 0} · Desktop:{' '}
-                    {srv?.realtime?.onlineDesktop ?? 0}
+                    online agora no site
+                  </div>
+                </div>
+
+                <div className="rounded-xl bg-[#111114] border border-sky-500/30 p-4">
+                  <div className="text-[11px] font-mono uppercase text-zinc-400">
+                    Link Admin (/painel)
+                  </div>
+                  <div className="text-3xl font-mono font-bold text-sky-400 mt-1">
+                    {srv?.realtime?.onlineAdminLink ?? 0}
+                  </div>
+                  <div className="text-[11px] text-zinc-500 mt-1">
+                    conectados no painel
+                  </div>
+                </div>
+
+                <div className="rounded-xl bg-[#111114] border border-amber-500/30 p-4">
+                  <div className="text-[11px] font-mono uppercase text-zinc-400">
+                    Link Dono (/owner)
+                  </div>
+                  <div className="text-3xl font-mono font-bold text-amber-400 mt-1">
+                    {srv?.realtime?.onlineOwnerLink ?? 0}
+                  </div>
+                  <div className="text-[11px] text-zinc-500 mt-1">
+                    conectados no NOC
                   </div>
                 </div>
 
@@ -1645,34 +1673,22 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
                     {srv?.realtime?.visitsToday ?? 0}
                   </div>
                   <div className="text-[11px] text-zinc-500 mt-1">
-                    Últimos 7 dias: {srv?.realtime?.visits7d ?? 0} visitas
+                    7 dias: {srv?.realtime?.visits7d ?? 0} visitas
                   </div>
                 </div>
 
                 <div className="rounded-xl bg-[#111114] border border-zinc-800/80 p-4">
                   <div className="text-[11px] font-mono uppercase text-zinc-400">
-                    Tempo Médio no Site
+                    Tempo Médio Site
                   </div>
-                  <div className="text-3xl font-mono font-bold text-sky-400 mt-1">
+                  <div className="text-3xl font-mono font-bold text-zinc-100 mt-1">
                     {formatDwell(
                       srv?.realtime?.avgDwellSecToday ??
                         srv?.realtime?.avgDwellSec7d,
                     )}
                   </div>
                   <div className="text-[11px] text-zinc-500 mt-1">
-                    Média 7d: {formatDwell(srv?.realtime?.avgDwellSec7d)}
-                  </div>
-                </div>
-
-                <div className="rounded-xl bg-[#111114] border border-zinc-800/80 p-4">
-                  <div className="text-[11px] font-mono uppercase text-zinc-400">
-                    SLO & Error Budget
-                  </div>
-                  <div className="text-3xl font-mono font-bold text-zinc-100 mt-1">
-                    {srv?.slo?.remainingBudgetPct ?? 100}%
-                  </div>
-                  <div className="text-[11px] text-zinc-500 mt-1">
-                    Restam {srv?.slo?.remainingBudgetMin ?? 43.2}m/mês
+                    7d: {formatDwell(srv?.realtime?.avgDwellSec7d)}
                   </div>
                 </div>
               </div>
@@ -1681,45 +1697,61 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div>
                     <h2 className="text-sm font-semibold text-white">
-                      Visitantes Ativos Agora no Link das Clientes (Anonimizado)
+                      Aparelhos Conectados Agora (Clientes · Admin · Dono)
                     </h2>
                     <p className="text-xs text-zinc-400">
-                      Atualizado por heartbeat a cada 25s (sem nome, telefone ou
-                      IP).
+                      Heartbeat a cada 20s com janela de 2 min · ID anônimo do
+                      aparelho e navegador, sem PII.
                     </p>
                   </div>
                   <span className="text-xs font-mono text-emerald-400">
-                    {srv?.realtime?.activeSessions.length ?? 0} sessão(ões)
-                    ativa(s)
+                    {srv?.realtime?.activeSessions.length ?? 0} aparelho(s)
+                    online
                   </span>
                 </div>
 
                 {(srv?.realtime?.activeSessions || []).length === 0 ? (
                   <div className="rounded-lg bg-zinc-950 border border-zinc-800/80 p-8 text-center text-xs text-zinc-500">
-                    Nenhuma cliente com a página aberta neste exato momento.
+                    Nenhum aparelho conectado no momento.
                   </div>
                 ) : (
                   <div className="divide-y divide-zinc-800/80 rounded-lg bg-zinc-950 border border-zinc-800/80">
-                    {(srv?.realtime?.activeSessions || []).map((sess) => (
+                    {(srv?.realtime?.activeSessions || []).map((sess, idx) => (
                       <div
-                        key={sess.idShort}
+                        key={`${sess.idShort}_${sess.role}_${idx}`}
                         className="px-4 py-3 flex flex-wrap items-center justify-between gap-3 text-xs font-mono"
                       >
-                        <div className="flex items-center gap-3">
+                        <div className="flex flex-wrap items-center gap-2.5">
                           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                          <span className="text-zinc-200 font-semibold">
-                            #{sess.idShort}
+                          <span className="text-zinc-100 font-bold">
+                            ID #{sess.idShort}
                           </span>
-                          <span className="px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-300">
-                            {sess.deviceType}
+                          <span
+                            className={`px-2 py-0.5 rounded border text-[11px] font-semibold ${
+                              sess.role === 'admin'
+                                ? 'bg-sky-500/15 border-sky-500/30 text-sky-300'
+                                : sess.role === 'owner'
+                                  ? 'bg-amber-500/15 border-amber-500/30 text-amber-300'
+                                  : 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300'
+                            }`}
+                          >
+                            {sess.role === 'admin'
+                              ? 'Link Admin'
+                              : sess.role === 'owner'
+                                ? 'Link Dono'
+                                : 'Link Clientes'}
                           </span>
-                          <span className="px-2 py-0.5 rounded bg-sky-500/10 border border-sky-500/20 text-sky-300">
-                            origem: {sess.referrerSource}
+                          <span className="px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-200">
+                            {sess.deviceLabel}
                           </span>
-                          <span className="text-zinc-400">{sess.screen}</span>
+                          {sess.role === 'client' && (
+                            <span className="px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-400">
+                              origem: {sess.referrerSource}
+                            </span>
+                          )}
                         </div>
                         <div className="text-emerald-400 font-semibold">
-                          {formatDwell(sess.dwellSec)} na página
+                          {formatDwell(sess.dwellSec)} online
                         </div>
                       </div>
                     ))}
