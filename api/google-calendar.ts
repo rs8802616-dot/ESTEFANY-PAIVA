@@ -172,10 +172,16 @@ export default async function handler(req: ApiReq, res: ApiRes): Promise<void> {
         access_token?: string;
         refresh_token?: string;
         expires_in?: number;
+        scope?: string;
         error?: string;
       };
       if (!tokenResp.ok || !tokenData.access_token) {
         res.redirect(302, `/painel?gcal=error&reason=${encodeURIComponent(tokenData.error || 'token_failed')}`);
+        return;
+      }
+
+      if (!String(tokenData.scope || '').includes('calendar')) {
+        res.redirect(302, '/painel?gcal=error&reason=marque_a_caixinha_do_google_agenda');
         return;
       }
 

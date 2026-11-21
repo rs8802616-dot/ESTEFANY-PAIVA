@@ -179,10 +179,11 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
         showToast('Configure GOOGLE_CLIENT_ID e GOOGLE_CLIENT_SECRET na Vercel.', 'error');
         window.history.replaceState({}, '', window.location.pathname);
       } else if (gcalParam === 'error') {
-        showToast(
-          `Não foi possível conectar o Google Agenda${gcalReason ? ` (${gcalReason})` : ''}.`,
-          'error',
-        );
+        const msg =
+          gcalReason === 'marque_a_caixinha_do_google_agenda'
+            ? 'Marque a caixinha de permissão do Google Agenda na tela do Google para sincronizar!'
+            : `Não foi possível conectar o Google Agenda${gcalReason ? ` (${gcalReason})` : ''}.`;
+        showToast(msg, 'error');
         window.history.replaceState({}, '', window.location.pathname);
       }
     }
