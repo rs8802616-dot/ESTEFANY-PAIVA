@@ -103,10 +103,11 @@ export const CalendarPicker: React.FC<CalendarPickerProps> = ({
     );
   }, [selectedDate, durationMinutes, settings, busySlots, ignoreSlotId]);
 
-  const availableCount = useMemo(
-    () => timeSlots.filter((s) => s.available).length,
+  const availableSlots = useMemo(
+    () => timeSlots.filter((s) => s.available),
     [timeSlots],
   );
+  const availableCount = availableSlots.length;
 
   useEffect(() => {
     if (!selectedTime) return;
@@ -238,21 +239,18 @@ export const CalendarPicker: React.FC<CalendarPickerProps> = ({
           </p>
         ) : (
           <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-            {timeSlots.map((slot) => {
+            {availableSlots.map((slot) => {
               const isChosen = selectedTime === slot.startTime;
               return (
                 <button
                   key={slot.startTime}
                   type="button"
-                  disabled={!slot.available}
                   onClick={() => onSelectTime(slot.startTime)}
-                  title={slot.available ? `${slot.startTime} até ${slot.endTime}` : slot.reason}
+                  title={`${slot.startTime} até ${slot.endTime}`}
                   className={`min-h-[44px] rounded-xl px-2 py-2 text-sm font-medium tabular-nums transition-colors border ${
                     isChosen
                       ? 'bg-[#C4A477] text-white border-[#C4A477] shadow-sm'
-                      : slot.available
-                        ? 'bg-[#FAF6F1] text-[#594943] border-[#E8D6CB] hover:border-[#C4A477] hover:bg-white'
-                        : 'bg-[#FAF6F1]/60 text-[#95847C]/35 border-transparent line-through cursor-not-allowed'
+                      : 'bg-[#FAF6F1] text-[#594943] border-[#E8D6CB] hover:border-[#C4A477] hover:bg-white'
                   }`}
                 >
                   {slot.startTime}

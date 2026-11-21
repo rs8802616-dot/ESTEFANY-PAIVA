@@ -148,6 +148,9 @@ export const AdminProfileSuite: React.FC<Props> = ({
 
   // Settings Form State (Screens 28, 29, 30, 31)
   const [form, setForm] = useState<SalonSettings>(settings);
+  const [scheduleMode, setScheduleMode] = useState<'interval' | 'fixed'>(() =>
+    settings.configuredSlots && settings.configuredSlots.length > 0 ? 'fixed' : 'interval',
+  );
   const [slotsText, setSlotsText] = useState((settings.configuredSlots || []).join(', '));
   const [newBlockedDate, setNewBlockedDate] = useState('');
   const [saving, setSaving] = useState(false);
@@ -155,6 +158,7 @@ export const AdminProfileSuite: React.FC<Props> = ({
   // Sincroniza o formulário sempre que settings atualizar
   useEffect(() => {
     setForm(settings);
+    setScheduleMode(settings.configuredSlots && settings.configuredSlots.length > 0 ? 'fixed' : 'interval');
     setSlotsText((settings.configuredSlots || []).join(', '));
   }, [settings]);
 
@@ -211,15 +215,24 @@ export const AdminProfileSuite: React.FC<Props> = ({
     e.preventDefault();
     setSaving(true);
     try {
-      const parsedSlots = slotsText
-        .split(',')
-        .map(s => {
-          const t = s.trim();
-          return /^\d:\d{2}$/.test(t) ? `0${t}` : t;
-        })
-        .filter(s => /^\d{2}:\d{2}$/.test(s));
+      let finalSlots: string[] = [];
+      if (scheduleMode === 'fixed') {
+        const parsedSlots = slotsText
+          .split(',')
+          .map(s => {
+            const t = s.trim();
+            return /^\d:\d{2}$/.test(t) ? `0${t}` : t;
+          })
+          .filter(s => /^\d{2}:\d{2}$/.test(s));
 
-      const finalSlots = parsedSlots.length > 0 ? parsedSlots : form.configuredSlots;
+        if (parsedSlots.length === 0) {
+          showToast('Informe pelo menos um horário fixo válido (ex.: 08:30, 10:30) ou use o modo Horários Corridos.', 'error');
+          setSaving(false);
+          return;
+        }
+        finalSlots = parsedSlots;
+      }
+
       const updatedForm: SalonSettings = {
         ...form,
         configuredSlots: finalSlots,
@@ -761,7 +774,43 @@ export const AdminProfileSuite: React.FC<Props> = ({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="space-y-3 pt-2 border-t border-[#E8D6CB]/70">
+            <label className="block text-xs font-semibold text-[#594943]">
+              Modelo de Horários na Agenda
+            </label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <button
+                type="button"
+                onClick={() => setScheduleMode('interval')}
+                className={`p-3 rounded-xl border text-left transition-colors cursor-pointer ${
+                  scheduleMode === 'interval'
+                    ? 'bg-[#594943] text-white border-[#594943]'
+                    : 'bg-[#FAF6F1] text-[#594943] border-[#E8D6CB] hover:border-[#C4A477]'
+                }`}
+              >
+                <div className="text-xs font-bold">Horários Corridos (Intervalo)</div>
+                <div className={`text-[11px] mt-0.5 ${scheduleMode === 'interval' ? 'text-white/80' : 'text-[#95847C]'}`}>
+                  Gera horários de {form.slotIntervalMinutes || 30} em {form.slotIntervalMinutes || 30} min entre abertura e fechamento.
+                </div>
+              </button>
+              <button
+                type="button"
+                onClick={() => setScheduleMode('fixed')}
+                className={`p-3 rounded-xl border text-left transition-colors cursor-pointer ${
+                  scheduleMode === 'fixed'
+                    ? 'bg-[#594943] text-white border-[#594943]'
+                    : 'bg-[#FAF6F1] text-[#594943] border-[#E8D6CB] hover:border-[#C4A477]'
+                }`}
+              >
+                <div className="text-xs font-bold">Horários Fixos Fechados</div>
+                <div className={`text-[11px] mt-0.5 ${scheduleMode === 'fixed' ? 'text-white/80' : 'text-[#95847C]'}`}>
+                  Você define exatamente quais horários aparecem (ex.: 08:30, 10:30, 13:30).
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <div className={`grid grid-cols-1 ${scheduleMode === 'interval' ? 'sm:grid-cols-3' : 'sm:grid-cols-2'} gap-4`}>
             <div>
               <label className="block text-xs font-semibold text-[#594943] mb-1">Abertura</label>
               <input
@@ -780,39 +829,45 @@ export const AdminProfileSuite: React.FC<Props> = ({
                 className="w-full px-4 py-2.5 rounded-xl border border-[#E8D6CB] bg-[#FAF6F1] text-sm text-[#594943]"
               />
             </div>
-            <div>
-              <label className="block text-xs font-semibold text-[#594943] mb-1">Intervalo Base (min)</label>
+            {scheduleMode === 'interval' && (
+              <div>
+                <label className="block text-xs font-semibold text-[#594943] mb-1">Intervalo Base (min)</label>
+                <input
+                  type="number"
+                  min={15}
+                  step={5}
+                  value={form.slotIntervalMinutes}
+                  onChange={e => setForm({ ...form, slotIntervalMinutes: Number(e.target.value) })}
+                  className="w-full px-4 py-2.5 rounded-xl border border-[#E8D6CB] bg-[#FAF6F1] text-sm text-[#594943]"
+                />
+              </div>
+            )}
+          </div>
+
+          {scheduleMode === 'fixed' && (
+            <div className="space-y-2">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <label className="block text-xs font-semibold text-[#594943]">
+                  Horários Fixos Disponíveis (separados por vírgula)
+                </label>
+                <button
+                  type="button"
+                  onClick={generateSlotsFromWorkHours}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#F2EAE4] hover:bg-[#E8D6CB] text-[#594943] text-xs font-semibold border border-[#E8D6CB] transition-colors cursor-pointer"
+                >
+                  <RefreshCw className="w-3.5 h-3.5 text-[#C4A477]" />
+                  <span>Gerar do Expediente</span>
+                </button>
+              </div>
               <input
-                type="number"
-                value={form.slotIntervalMinutes}
-                onChange={e => setForm({ ...form, slotIntervalMinutes: Number(e.target.value) })}
+                type="text"
+                value={slotsText}
+                onChange={e => setSlotsText(e.target.value)}
+                placeholder="08:30, 10:30, 13:30, 15:30, 17:30"
                 className="w-full px-4 py-2.5 rounded-xl border border-[#E8D6CB] bg-[#FAF6F1] text-sm text-[#594943]"
               />
             </div>
-          </div>
-
-          <div className="space-y-2">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <label className="block text-xs font-semibold text-[#594943]">
-                Horários Padrão Disponíveis (separados por vírgula)
-              </label>
-              <button
-                type="button"
-                onClick={generateSlotsFromWorkHours}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#F2EAE4] hover:bg-[#E8D6CB] text-[#594943] text-xs font-semibold border border-[#E8D6CB] transition-colors cursor-pointer"
-              >
-                <RefreshCw className="w-3.5 h-3.5 text-[#C4A477]" />
-                <span>Gerar do Expediente</span>
-              </button>
-            </div>
-            <input
-              type="text"
-              value={slotsText}
-              onChange={e => setSlotsText(e.target.value)}
-              placeholder="08:00, 09:30, 11:00, 13:30, 15:00, 16:30, 18:00"
-              className="w-full px-4 py-2.5 rounded-xl border border-[#E8D6CB] bg-[#FAF6F1] text-sm text-[#594943]"
-            />
-          </div>
+          )}
 
           </div>
 
