@@ -16,7 +16,7 @@ export default defineConfig(() => {
         manifest: {
           id: '/',
           name: 'Estefany Paiva Nails',
-          short_name: 'E.P. Nails',
+          short_name: 'Estefany Paiva Nails',
           description: 'Portal de agendamentos online e painel administrativo profissional do estúdio Estefany Paiva Nails.',
           theme_color: '#594943',
           background_color: '#FAF6F1',
