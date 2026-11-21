@@ -126,12 +126,15 @@ interface ServerErrorRecord {
 
 interface ServerIncidentRecord {
   id: string;
+  service?: string;
+  label?: string;
+  severity?: 'critical' | 'warning';
   title?: string;
   detail?: string;
   status?: string;
   startedAt?: string;
   resolvedAt?: string;
-  updatedAt?: string;
+  durationMinutes?: number;
 }
 
 interface ServerTelemetryPayload {
@@ -177,6 +180,15 @@ interface ServerTelemetryPayload {
   dailyTelemetry?: DailyTelemetryRow[];
   recentErrors?: ServerErrorRecord[];
   incidents?: ServerIncidentRecord[];
+  serverMonitorStats?: {
+    totalChecks: number;
+    serverUptimePct: number | null;
+    serverP95Ms: number | null;
+    mttrMinutes: number | null;
+    alertsMuted: boolean;
+    mutedUntil: string | null;
+    telegramConfigured: boolean;
+  };
   latestProbe?: Record<string, unknown> | null;
 }
 
@@ -209,7 +221,7 @@ interface TechnicalLogEntry {
   message: string;
 }
 
-const APP_VERSION = 'v82-observability-pro';
+const APP_VERSION = 'v83-monitor-engine';
 const TELEMETRY_HISTORY_KEY = 'epn_owner_telemetry_history_v1';
 
 function loadSavedTelemetry(): LatencySample[] {
@@ -551,6 +563,32 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
     }, 1000);
     return () => window.clearInterval(timer);
   }, [authenticated, autoRefresh, runHealthCheck]);
+
+  const handleToggleMuteAlerts = async (muteMinutes: number) => {
+    const ownerToken = getOwnerSessionToken();
+    try {
+      const resp = await fetch('/api/owner-telemetry', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(ownerToken ? { 'x-owner-auth': ownerToken } : {}),
+        },
+        body: JSON.stringify({ muteMinutes }),
+      });
+      if (resp.ok) {
+        pushLog(
+          'info',
+          'ALERTS',
+          muteMinutes > 0
+            ? `Alertas silenciados por ${muteMinutes} min (manutenção).`
+            : 'Alertas externos reativados.',
+        );
+        await runHealthCheck();
+      }
+    } catch {
+      pushLog('warn', 'ALERTS', 'Erro ao atualizar silenciamento.');
+    }
+  };
 
   const handleRunServerCronAudit = async () => {
     setRunningCron(true);
@@ -1012,10 +1050,12 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
   }
 
   const srv = health?.serverTelemetry;
+  const effectiveUptimePct =
+    srv?.serverMonitorStats?.serverUptimePct ?? metrics.uptimePct;
   const ringRadius = 28;
   const ringCircumference = 2 * Math.PI * ringRadius;
   const ringOffset =
-    ringCircumference - (metrics.uptimePct / 100) * ringCircumference;
+    ringCircumference - (effectiveUptimePct / 100) * ringCircumference;
 
   return (
     <div className="min-h-screen bg-[#0D0B0A] text-[#FAF6F1] pb-16">
@@ -1203,7 +1243,7 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
                 />
               </svg>
               <span className="absolute text-xs font-bold tabular-nums">
-                {metrics.uptimePct}%
+                {effectiveUptimePct}%
               </span>
             </div>
 
@@ -1214,26 +1254,47 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
                   : `${alerts.length} alerta(s) operacional(is) detectado(s)`}
               </div>
               <div className="text-xs text-[#E8D6CB]/70 mt-0.5">
-                Sondagem: {health?.checkedAt || 'em andamento...'} · Conversão
-                7d: <strong>{funnelAndVitals.conversionRate}%</strong> ·
-                Divergência GCal:{' '}
-                <strong>{srv?.googleCalendar.divergentCount ?? 0}</strong>
+                {srv?.serverMonitorStats?.totalChecks
+                  ? `Uptime Servidor (${srv.serverMonitorStats.totalChecks} checks) · `
+                  : 'Uptime Sessão · '}
+                P95: <strong>{srv?.serverMonitorStats?.serverP95Ms ?? '—'}ms</strong>{' '}
+                · MTTR:{' '}
+                <strong>
+                  {srv?.serverMonitorStats?.mttrMinutes !== null &&
+                  srv?.serverMonitorStats?.mttrMinutes !== undefined
+                    ? `${srv.serverMonitorStats.mttrMinutes}m`
+                    : '—'}
+                </strong>{' '}
+                · Telegram:{' '}
+                <strong>
+                  {srv?.serverMonitorStats?.telegramConfigured
+                    ? srv.serverMonitorStats.alertsMuted
+                      ? 'Silenciado'
+                      : 'Ativo'
+                    : 'Não configurado'}
+                </strong>
               </div>
             </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-2 text-xs">
-            <span className="px-2.5 py-1 rounded-lg bg-black/30 border border-white/10 text-[#E8D6CB]">
-              DB Server: <strong>{srv?.firestore.latencyMs ?? '—'}ms</strong>
-            </span>
-            <span className="px-2.5 py-1 rounded-lg bg-black/30 border border-white/10 text-[#E8D6CB]">
-              LCP 7d:{' '}
-              <strong>
-                {funnelAndVitals.avgLcpMs !== null
-                  ? `${funnelAndVitals.avgLcpMs}ms`
-                  : '—'}
-              </strong>
-            </span>
+            <button
+              type="button"
+              onClick={() =>
+                void handleToggleMuteAlerts(
+                  srv?.serverMonitorStats?.alertsMuted ? 0 : 120,
+                )
+              }
+              className={`px-3 py-1.5 rounded-lg border font-semibold cursor-pointer ${
+                srv?.serverMonitorStats?.alertsMuted
+                  ? 'bg-amber-500/20 text-amber-200 border-amber-500/40'
+                  : 'bg-black/30 border-white/10 text-[#E8D6CB] hover:bg-white/10'
+              }`}
+            >
+              {srv?.serverMonitorStats?.alertsMuted
+                ? 'Reativar Alertas'
+                : 'Silenciar Alertas (2h)'}
+            </button>
           </div>
         </section>
 

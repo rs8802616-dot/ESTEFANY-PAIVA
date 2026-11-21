@@ -2,6 +2,7 @@ interface ApiReq {
   method?: string;
   query: Record<string, string | string[] | undefined>;
   headers: Record<string, string | string[] | undefined>;
+  body?: unknown;
 }
 
 interface ApiRes {
@@ -98,9 +99,6 @@ async function readDoc(path: string): Promise<Record<string, unknown> | null> {
 
 export default async function handler(req: ApiReq, res: ApiRes) {
   res.setHeader('Cache-Control', 'no-store');
-  if (req.method && req.method !== 'GET') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
 
   // Server-side owner session verification
   const rawAuthHeader = req.headers['x-owner-auth'];
@@ -109,6 +107,36 @@ export default async function handler(req: ApiReq, res: ApiRes) {
     : rawAuthHeader || '';
   if (!ALLOWED_OWNER_HASHES.includes(ownerAuth.trim())) {
     return res.status(401).json({ error: 'Unauthorized owner telemetry request' });
+  }
+
+  if (req.method === 'POST') {
+    let body: Record<string, unknown> = {};
+    try {
+      body =
+        typeof req.body === 'string'
+          ? (JSON.parse(req.body) as Record<string, unknown>)
+          : ((req.body as Record<string, unknown>) || {});
+    } catch {
+      body = {};
+    }
+    const minutes = Math.max(0, Math.min(1440, Number(body.muteMinutes || 0)));
+    const mutedUntil =
+      minutes > 0 ? new Date(Date.now() + minutes * 60_000).toISOString() : '';
+    await fetch(`${FIRESTORE_BASE}/telemetry_meta/alert_config`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fields: {
+          mutedUntil: { stringValue: mutedUntil },
+          updatedAt: { stringValue: new Date().toISOString() },
+        },
+      }),
+    });
+    return res.status(200).json({ ok: true, mutedUntil });
+  }
+
+  if (req.method && req.method !== 'GET') {
+    return res.status(405).json({ error: 'Method not allowed' });
   }
 
   const startedAt = Date.now();
@@ -123,6 +151,8 @@ export default async function handler(req: ApiReq, res: ApiRes) {
     dailyDocs,
     errorDocs,
     incidentDocs,
+    monitorChecksDocs,
+    alertConfigDoc,
     latestProbe,
     gcalDoc,
     eventsMapDoc,
@@ -133,7 +163,9 @@ export default async function handler(req: ApiReq, res: ApiRes) {
     listCollectionDocs('personal_blocks', 200),
     listCollectionDocs('telemetry_daily', 30),
     listCollectionDocs('telemetry_errors', 30),
-    listCollectionDocs('telemetry_incidents', 30),
+    listCollectionDocs('monitor_incidents', 40),
+    listCollectionDocs('monitor_checks', 200),
+    readDoc('telemetry_meta/alert_config'),
     readDoc('telemetry_meta/latest_probe'),
     readDoc('integrations/google_calendar'),
     readDoc('integrations/google_calendar_events'),
@@ -202,10 +234,56 @@ export default async function handler(req: ApiReq, res: ApiRes) {
   const incidents = incidentDocs
     .map((inc) => ({ id: inc.id, ...inc.data }))
     .sort((a, b) =>
-      String((b as { updatedAt?: string }).updatedAt || '').localeCompare(
-        String((a as { updatedAt?: string }).updatedAt || ''),
+      String((b as { startedAt?: string }).startedAt || '').localeCompare(
+        String((a as { startedAt?: string }).startedAt || ''),
       ),
     );
+
+  // Server-side Uptime %, P95 Latency & MTTR from monitor_checks + monitor_incidents
+  const sortedChecks = monitorChecksDocs
+    .map((c) => c.data)
+    .sort((a, b) =>
+      String(b.timestamp || '').localeCompare(String(a.timestamp || '')),
+    );
+  const totalChecks = sortedChecks.length;
+  const okChecks = sortedChecks.filter((c) => c.ok === true).length;
+  const serverUptimePct =
+    totalChecks > 0 ? Math.round((okChecks / totalChecks) * 1000) / 10 : null;
+
+  const fsCheckLatencies = sortedChecks
+    .filter((c) => c.service === 'firestore' && Number(c.latencyMs) > 0)
+    .map((c) => Number(c.latencyMs))
+    .sort((a, b) => a - b);
+  const serverP95Ms =
+    fsCheckLatencies.length > 0
+      ? fsCheckLatencies[
+          Math.min(
+            fsCheckLatencies.length - 1,
+            Math.floor(fsCheckLatencies.length * 0.95),
+          )
+        ]
+      : null;
+
+  const resolvedIncidents = incidents.filter(
+    (inc) =>
+      (inc as { status?: string }).status === 'resolved' &&
+      Number((inc as { durationMinutes?: number }).durationMinutes || 0) > 0,
+  );
+  const mttrMinutes =
+    resolvedIncidents.length > 0
+      ? Math.round(
+          resolvedIncidents.reduce(
+            (acc, inc) =>
+              acc + Number((inc as { durationMinutes?: number }).durationMinutes || 0),
+            0,
+          ) / resolvedIncidents.length,
+        )
+      : null;
+
+  const mutedUntilStr = alertConfigDoc?.mutedUntil
+    ? String(alertConfigDoc.mutedUntil)
+    : '';
+  const alertsMuted = mutedUntilStr ? Date.parse(mutedUntilStr) > Date.now() : false;
 
   // Estimated daily Firestore usage vs Spark free quota (50,000 reads / 20,000 writes)
   const todayStats = dailyTelemetry.find((d) => d.date === today) as
@@ -266,6 +344,17 @@ export default async function handler(req: ApiReq, res: ApiRes) {
     dailyTelemetry,
     recentErrors,
     incidents,
+    serverMonitorStats: {
+      totalChecks,
+      serverUptimePct,
+      serverP95Ms,
+      mttrMinutes,
+      alertsMuted,
+      mutedUntil: mutedUntilStr || null,
+      telegramConfigured: Boolean(
+        getEnv('TELEGRAM_BOT_TOKEN') && getEnv('TELEGRAM_CHAT_ID'),
+      ),
+    },
     latestProbe,
   });
 }

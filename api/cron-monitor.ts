@@ -1,5 +1,6 @@
 interface ApiReq {
   method?: string;
+  headers?: Record<string, string | string[] | undefined>;
 }
 
 interface ApiRes {
@@ -10,6 +11,16 @@ interface ApiRes {
 
 const FIRESTORE_BASE =
   'https://firestore.googleapis.com/v1/projects/studio-de-beleza-8045a/databases/(default)/documents';
+const SITE_BASE = 'https://estefany-paiva-nails.vercel.app';
+
+type Severity = 'critical' | 'warning';
+
+function getEnv(name: string): string {
+  const proc = (
+    globalThis as { process?: { env?: Record<string, string | undefined> } }
+  ).process;
+  return (proc?.env?.[name] || '').trim();
+}
 
 function todaySP(): string {
   try {
@@ -21,24 +32,41 @@ function todaySP(): string {
   }
 }
 
+function currentHourSP(): number {
+  try {
+    const h = new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'America/Sao_Paulo',
+      hour: '2-digit',
+      hour12: false,
+    }).format(new Date());
+    return Number(h) || 12;
+  } catch {
+    return new Date().getUTCHours();
+  }
+}
+
+type FirestoreFields = Record<
+  string,
+  { stringValue?: string; booleanValue?: boolean; integerValue?: string }
+>;
+
+function parseFields(fields?: FirestoreFields): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  if (!fields) return out;
+  for (const [k, v] of Object.entries(fields)) {
+    if (v.stringValue !== undefined) out[k] = v.stringValue;
+    else if (v.booleanValue !== undefined) out[k] = v.booleanValue;
+    else if (v.integerValue !== undefined) out[k] = Number(v.integerValue);
+  }
+  return out;
+}
+
 async function readDoc(path: string): Promise<Record<string, unknown> | null> {
   try {
     const resp = await fetch(`${FIRESTORE_BASE}/${path}`);
     if (!resp.ok) return null;
-    const data = (await resp.json()) as {
-      fields?: Record<
-        string,
-        { stringValue?: string; booleanValue?: boolean; integerValue?: string }
-      >;
-    };
-    if (!data.fields) return null;
-    const out: Record<string, unknown> = {};
-    for (const [k, v] of Object.entries(data.fields)) {
-      if (v.stringValue !== undefined) out[k] = v.stringValue;
-      else if (v.booleanValue !== undefined) out[k] = v.booleanValue;
-      else if (v.integerValue !== undefined) out[k] = Number(v.integerValue);
-    }
-    return out;
+    const data = (await resp.json()) as { fields?: FirestoreFields };
+    return parseFields(data.fields);
   } catch {
     return null;
   }
@@ -61,44 +89,183 @@ async function writeDoc(
   }).catch(() => {});
 }
 
-async function syncIncident(
-  incidentId: string,
-  hasProblem: boolean,
-  title: string,
-  detail: string,
-): Promise<void> {
-  const existing = await readDoc(`telemetry_incidents/${incidentId}`);
-  const nowIso = new Date().toISOString();
+async function sendTelegramAlert(text: string): Promise<boolean> {
+  const botToken = getEnv('TELEGRAM_BOT_TOKEN');
+  const chatId = getEnv('TELEGRAM_CHAT_ID');
+  if (!botToken || !chatId) return false;
+  try {
+    const resp = await fetch(
+      `https://api.telegram.org/bot${botToken}/sendMessage`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: chatId,
+          text,
+          parse_mode: 'HTML',
+          disable_web_page_preview: true,
+        }),
+      },
+    );
+    return resp.ok;
+  } catch {
+    return false;
+  }
+}
 
-  if (hasProblem) {
-    if (!existing || existing.status !== 'open') {
-      await writeDoc(`telemetry_incidents/${incidentId}`, {
-        title,
-        detail,
+async function runProbe(
+  service: string,
+  url: string,
+  severity: Severity,
+): Promise<{
+  service: string;
+  ok: boolean;
+  latencyMs: number;
+  statusCode: number;
+  severity: Severity;
+}> {
+  const start = Date.now();
+  let ok = false;
+  let statusCode = 0;
+  try {
+    const resp = await fetch(url);
+    statusCode = resp.status;
+    ok = resp.ok;
+  } catch {
+    ok = false;
+    statusCode = 0;
+  }
+  return {
+    service,
+    ok,
+    latencyMs: Date.now() - start,
+    statusCode,
+    severity,
+  };
+}
+
+async function processServiceIncident(params: {
+  service: string;
+  label: string;
+  ok: boolean;
+  severity: Severity;
+  detail: string;
+  muted: boolean;
+}): Promise<void> {
+  const { service, label, ok, severity, detail, muted } = params;
+  const nowIso = new Date().toISOString();
+  const statePath = `monitor_state/${service}`;
+  const state = (await readDoc(statePath)) || {};
+  const prevFails = Number(state.consecutiveFailures || 0);
+  const activeIncidentId = String(state.activeIncidentId || '');
+
+  const hourSP = currentHourSP();
+  const isQuietHours = hourSP >= 22 || hourSP < 7;
+  const allowTelegram = !muted && (severity === 'critical' || !isQuietHours);
+
+  if (!ok) {
+    const nextFails = prevFails + 1;
+    // Regra: abre incidente após 2 falhas consecutivas para evitar falso positivo
+    if (nextFails >= 2 && !activeIncidentId) {
+      const incidentId = `inc_${service}_${Date.now()}`;
+      await writeDoc(`monitor_incidents/${incidentId}`, {
+        service,
+        label,
+        severity,
         status: 'open',
+        title: `${label} indisponível`,
+        detail,
         startedAt: nowIso,
         resolvedAt: '',
+        durationMinutes: 0,
+        lastNotifiedAt: nowIso,
+      });
+      await writeDoc(statePath, {
+        consecutiveFailures: nextFails,
+        activeIncidentId: incidentId,
+        updatedAt: nowIso,
+      });
+      if (allowTelegram) {
+        const icon = severity === 'critical' ? '🚨' : '⚠️';
+        await sendTelegramAlert(
+          `${icon} <b>[INCIDENTE ${severity.toUpperCase()}]</b>\nServiço: <b>${label}</b>\nDetalhe: ${detail}\nInício: ${nowIso}`,
+        );
+      }
+    } else if (activeIncidentId) {
+      // Anti-spam: lembrete apenas se continuar aberto há >= 60 minutos
+      const inc = await readDoc(`monitor_incidents/${activeIncidentId}`);
+      const lastNotif = inc?.lastNotifiedAt
+        ? Date.parse(String(inc.lastNotifiedAt))
+        : 0;
+      const elapsedMin = Math.round((Date.now() - lastNotif) / 60_000);
+      if (allowTelegram && lastNotif > 0 && elapsedMin >= 60) {
+        await writeDoc(`monitor_incidents/${activeIncidentId}`, {
+          service,
+          label,
+          severity,
+          status: 'open',
+          title: String(inc?.title || `${label} indisponível`),
+          detail,
+          startedAt: String(inc?.startedAt || nowIso),
+          resolvedAt: '',
+          durationMinutes: Math.max(
+            1,
+            Math.round((Date.now() - Date.parse(String(inc?.startedAt || nowIso))) / 60_000),
+          ),
+          lastNotifiedAt: nowIso,
+        });
+        await sendTelegramAlert(
+          `⏳ <b>[LEMBRETE INCIDENTE]</b>\n<b>${label}</b> segue fora do ar há ${elapsedMin}+ min.`,
+        );
+      }
+      await writeDoc(statePath, {
+        consecutiveFailures: nextFails,
+        activeIncidentId,
         updatedAt: nowIso,
       });
     } else {
-      await writeDoc(`telemetry_incidents/${incidentId}`, {
-        title,
-        detail,
-        status: 'open',
-        startedAt: String(existing.startedAt || nowIso),
-        resolvedAt: '',
+      await writeDoc(statePath, {
+        consecutiveFailures: nextFails,
+        activeIncidentId: '',
         updatedAt: nowIso,
       });
     }
-  } else if (existing && existing.status === 'open') {
-    await writeDoc(`telemetry_incidents/${incidentId}`, {
-      title: String(existing.title || title),
-      detail: 'Normalizado automaticamente na sondagem do servidor.',
-      status: 'resolved',
-      startedAt: String(existing.startedAt || nowIso),
-      resolvedAt: nowIso,
-      updatedAt: nowIso,
-    });
+  } else {
+    // Serviço voltou ao normal
+    if (activeIncidentId) {
+      const inc = await readDoc(`monitor_incidents/${activeIncidentId}`);
+      const startedMs = inc?.startedAt
+        ? Date.parse(String(inc.startedAt))
+        : Date.now();
+      const durationMinutes = Math.max(
+        1,
+        Math.round((Date.now() - startedMs) / 60_000),
+      );
+      await writeDoc(`monitor_incidents/${activeIncidentId}`, {
+        service,
+        label,
+        severity,
+        status: 'resolved',
+        title: String(inc?.title || `${label} indisponível`),
+        detail: `Recuperado automaticamente em ${durationMinutes} min.`,
+        startedAt: String(inc?.startedAt || nowIso),
+        resolvedAt: nowIso,
+        durationMinutes,
+        lastNotifiedAt: nowIso,
+      });
+      if (!muted) {
+        await sendTelegramAlert(
+          `✅ <b>[RESOLVIDO]</b>\nServiço: <b>${label}</b>\nDuração total: <b>${durationMinutes} min</b>`,
+        );
+      }
+    }
+    if (prevFails > 0 || activeIncidentId) {
+      await writeDoc(statePath, {
+        consecutiveFailures: 0,
+        activeIncidentId: '',
+        updatedAt: nowIso,
+      });
+    }
   }
 }
 
@@ -111,13 +278,49 @@ export default async function handler(req: ApiReq, res: ApiRes) {
   const today = todaySP();
   const nowIso = new Date().toISOString();
 
-  // 1. Firestore probe + future active appointments
-  const fsStart = Date.now();
-  let firestoreOk = false;
+  // Check if alerts are temporarily muted for maintenance
+  const alertCfg = await readDoc('telemetry_meta/alert_config');
+  const mutedUntil = alertCfg?.mutedUntil ? Date.parse(String(alertCfg.mutedUntil)) : 0;
+  const alertsMuted = mutedUntil > Date.now();
+
+  // 1. Run parallel infrastructure probes
+  const [fsProbe, gcalApiProbe, manifestProbe, siteProbe] = await Promise.all([
+    runProbe(
+      'firestore',
+      `${FIRESTORE_BASE}/availability_slots?pageSize=300`,
+      'critical',
+    ),
+    runProbe(
+      'google_calendar',
+      `${SITE_BASE}/api/google-calendar?action=status`,
+      'warning',
+    ),
+    runProbe('pwa_manifest', `${SITE_BASE}/manifest.webmanifest`, 'warning'),
+    runProbe('site_root', `${SITE_BASE}/`, 'critical'),
+  ]);
+
+  const probes = [fsProbe, gcalApiProbe, manifestProbe, siteProbe];
+
+  // Persist individual check records in monitor_checks
+  const checkBatchTs = Date.now();
+  await Promise.all(
+    probes.map((p) =>
+      writeDoc(`monitor_checks/chk_${checkBatchTs}_${p.service}`, {
+        timestamp: nowIso,
+        service: p.service,
+        ok: p.ok,
+        latencyMs: p.latencyMs,
+        statusCode: p.statusCode,
+        severity: p.severity,
+      }),
+    ),
+  );
+
+  // 2. Agenda consistency checks (divergences + duplicates/overlaps)
   const futureAptIds: string[] = [];
+  const slotsByDate: Record<string, Array<{ start: string; end: string }>> = {};
   try {
     const slotsResp = await fetch(`${FIRESTORE_BASE}/availability_slots?pageSize=300`);
-    firestoreOk = slotsResp.ok;
     if (slotsResp.ok) {
       const data = (await slotsResp.json()) as {
         documents?: Array<{
@@ -126,41 +329,51 @@ export default async function handler(req: ApiReq, res: ApiRes) {
             active?: { booleanValue?: boolean };
             kind?: { stringValue?: string };
             date?: { stringValue?: string };
+            startTime?: { stringValue?: string };
+            endTime?: { stringValue?: string };
           };
         }>;
       };
       for (const doc of data.documents || []) {
         const f = doc.fields;
+        const date = f?.date?.stringValue || '';
         if (
           f?.active?.booleanValue === true &&
           f?.kind?.stringValue === 'appointment' &&
-          (f?.date?.stringValue || '') >= today
+          date >= today
         ) {
           futureAptIds.push(doc.name.split('/').pop() || '');
+          if (!slotsByDate[date]) slotsByDate[date] = [];
+          slotsByDate[date].push({
+            start: f?.startTime?.stringValue || '00:00',
+            end: f?.endTime?.stringValue || '00:00',
+          });
         }
       }
     }
   } catch {
-    firestoreOk = false;
+    // ignore
   }
-  const firestoreLatencyMs = Date.now() - fsStart;
 
-  // 2. Google Calendar divergence & token check
+  let overlappingCount = 0;
+  for (const list of Object.values(slotsByDate)) {
+    const sorted = [...list].sort((a, b) => a.start.localeCompare(b.start));
+    for (let i = 1; i < sorted.length; i++) {
+      if (sorted[i].start < sorted[i - 1].end) {
+        overlappingCount += 1;
+      }
+    }
+  }
+
   const gcalDoc = await readDoc('integrations/google_calendar');
   const gcalConnected = Boolean(gcalDoc?.connected);
   let gcalTokenValid = false;
-  let gcalLatencyMs = 0;
-
   if (gcalConnected && gcalDoc?.accessToken) {
     try {
-      const gStart = Date.now();
       const calResp = await fetch(
         'https://www.googleapis.com/calendar/v3/calendars/primary/events?maxResults=1',
-        {
-          headers: { Authorization: `Bearer ${String(gcalDoc.accessToken)}` },
-        },
+        { headers: { Authorization: `Bearer ${String(gcalDoc.accessToken)}` } },
       );
-      gcalLatencyMs = Date.now() - gStart;
       gcalTokenValid = calResp.ok;
     } catch {
       gcalTokenValid = false;
@@ -170,56 +383,66 @@ export default async function handler(req: ApiReq, res: ApiRes) {
   const eventsMap = (await readDoc('integrations/google_calendar_events')) || {};
   let syncedToGoogleCount = 0;
   for (const id of futureAptIds) {
-    if (id && eventsMap[id]) {
-      syncedToGoogleCount += 1;
-    }
+    if (id && eventsMap[id]) syncedToGoogleCount += 1;
   }
   const divergentCount = Math.max(0, futureAptIds.length - syncedToGoogleCount);
 
-  // 3. Persist server probe & update incidents
+  // 3. Process incident engine (2 consecutive failures + Telegram)
+  await Promise.all([
+    processServiceIncident({
+      service: 'firestore',
+      label: 'Firestore Database',
+      ok: fsProbe.ok,
+      severity: 'critical',
+      detail: `HTTP ${fsProbe.statusCode} (${fsProbe.latencyMs}ms)`,
+      muted: alertsMuted,
+    }),
+    processServiceIncident({
+      service: 'site_root',
+      label: 'Site Principal',
+      ok: siteProbe.ok,
+      severity: 'critical',
+      detail: `HTTP ${siteProbe.statusCode} (${siteProbe.latencyMs}ms)`,
+      muted: alertsMuted,
+    }),
+    processServiceIncident({
+      service: 'google_calendar',
+      label: 'Google Agenda Sync',
+      ok: gcalApiProbe.ok && (!gcalConnected || gcalTokenValid),
+      severity: 'warning',
+      detail: !gcalApiProbe.ok
+        ? `API HTTP ${gcalApiProbe.statusCode}`
+        : gcalConnected && !gcalTokenValid
+          ? 'Token OAuth expirado/inválido'
+          : 'OK',
+      muted: alertsMuted,
+    }),
+  ]);
+
   await writeDoc('telemetry_meta/latest_probe', {
     checkedAt: nowIso,
-    firestoreOk,
-    firestoreLatencyMs,
+    firestoreOk: fsProbe.ok,
+    firestoreLatencyMs: fsProbe.latencyMs,
     gcalConnected,
     gcalTokenValid,
-    gcalLatencyMs,
+    gcalLatencyMs: gcalApiProbe.latencyMs,
     futureAppointmentsCount: futureAptIds.length,
     syncedToGoogleCount,
     divergentCount,
+    overlappingCount,
+    alertsMuted,
   });
-
-  await Promise.all([
-    syncIncident(
-      'inc_firestore',
-      !firestoreOk,
-      'Falha de conexão com Firestore',
-      'A sondagem automática do servidor não conseguiu ler availability_slots.',
-    ),
-    syncIncident(
-      'inc_gcal_auth',
-      !gcalConnected,
-      'Google Agenda desconectado',
-      'Sincronização automática pausada até reconexão no /painel.',
-    ),
-    syncIncident(
-      'inc_gcal_divergence',
-      gcalConnected && divergentCount > 0,
-      'Divergência Firestore ↔ Google Agenda',
-      `${divergentCount} agendamento(s) futuro(s) no Firestore ainda sem evento correspondente no Google Agenda.`,
-    ),
-  ]);
 
   return res.status(200).json({
     ok: true,
     checkedAt: nowIso,
-    firestoreOk,
-    firestoreLatencyMs,
-    gcalConnected,
-    gcalTokenValid,
-    gcalLatencyMs,
-    futureAppointmentsCount: futureAptIds.length,
-    syncedToGoogleCount,
-    divergentCount,
+    alertsMuted,
+    probes,
+    consistency: {
+      futureAppointmentsCount: futureAptIds.length,
+      syncedToGoogleCount,
+      divergentCount,
+      overlappingCount,
+    },
   });
 }
