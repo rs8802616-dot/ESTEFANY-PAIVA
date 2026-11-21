@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import type { User } from 'firebase/auth';
+import QRCode from 'qrcode';
 import {
   ArrowLeft,
   ArrowRight,
@@ -85,6 +86,7 @@ export const BookingSheet: React.FC<BookingSheetProps> = ({
   const [authLoading, setAuthLoading] = useState(false);
   const [confirmedApt, setConfirmedApt] = useState<Appointment | null>(null);
   const [pixCopied, setPixCopied] = useState(false);
+  const [pixQrDataUrl, setPixQrDataUrl] = useState('');
 
   useEffect(() => {
     if (user?.displayName && !clientName) {
@@ -139,6 +141,28 @@ export const BookingSheet: React.FC<BookingSheetProps> = ({
       txid: confirmedApt.id.replace(/[^a-zA-Z0-9]/g, '').slice(0, 20),
     });
   }, [confirmedApt, settings]);
+
+  useEffect(() => {
+    if (!pixPayload) {
+      setPixQrDataUrl('');
+      return;
+    }
+    let active = true;
+    void QRCode.toDataURL(pixPayload, {
+      width: 220,
+      margin: 2,
+      color: { dark: '#594943', light: '#FFFFFF' },
+    })
+      .then((url) => {
+        if (active) setPixQrDataUrl(url);
+      })
+      .catch(() => {
+        if (active) setPixQrDataUrl('');
+      });
+    return () => {
+      active = false;
+    };
+  }, [pixPayload]);
 
   const handleOptionalGoogleLogin = async () => {
     setAuthLoading(true);
@@ -514,9 +538,13 @@ export const BookingSheet: React.FC<BookingSheetProps> = ({
               >
                 <div className="flex items-center gap-2 text-sm font-semibold text-[#594943]">
                   <Store className="w-4 h-4 text-[#C4A477]" />
-                  <span>No Estúdio</span>
+                  <span>No Estúdio (Cartão / Dinheiro)</span>
                 </div>
-                <div className="mt-1 text-xs text-[#95847C]">Cartão, dinheiro ou Pix</div>
+                <div className="mt-1 text-xs text-[#95847C]">
+                  {settings.depositPercent > 0 && settings.depositPercent < 100
+                    ? `Sinal ${formatBRL(chargeAmount)} via Pix + restante no estúdio`
+                    : `Requer sinal via Pix (${formatBRL(chargeAmount)})`}
+                </div>
               </button>
             </div>
           </div>
@@ -582,12 +610,16 @@ export const BookingSheet: React.FC<BookingSheetProps> = ({
             </div>
           </div>
 
-          {/* Pix Copia e Cola */}
-          {confirmedApt.paymentMethod === 'pix' && pixPayload && (
-            <div className="bg-white rounded-2xl border border-[#E8D6CB] p-5 space-y-3">
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-sm font-semibold text-[#594943]">Pix Copia e Cola</span>
-                <span className="text-xs font-mono text-[#C4A477] tabular-nums">
+          {/* QR Code & Pix Copia e Cola do Sinal (obrigatório em todas as formas de pagamento) */}
+          {pixPayload && (
+            <div className="bg-white rounded-2xl border border-[#E8D6CB] p-5 space-y-4">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <span className="text-sm font-semibold text-[#594943]">
+                  {confirmedApt.paymentMethod === 'presencial'
+                    ? 'Pix do Sinal (Obrigatório para confirmar)'
+                    : 'Pix QR Code & Copia e Cola'}
+                </span>
+                <span className="text-xs font-mono font-bold text-[#C4A477] tabular-nums">
                   {settings.depositPercent > 0 && settings.depositPercent < 100
                     ? `Sinal ${settings.depositPercent}% · ${formatBRL(
                         calculatePixChargeAmount(confirmedApt.totalPrice, settings.depositPercent),
@@ -595,9 +627,45 @@ export const BookingSheet: React.FC<BookingSheetProps> = ({
                     : formatBRL(confirmedApt.totalPrice)}
                 </span>
               </div>
+
+              {confirmedApt.paymentMethod === 'presencial' &&
+                settings.depositPercent > 0 &&
+                settings.depositPercent < 100 && (
+                  <div className="rounded-xl bg-[#FAF6F1] border border-[#E8D6CB] px-3.5 py-2.5 text-xs text-[#594943]">
+                    Mesmo escolhendo pagar no estúdio, é necessário fazer o{' '}
+                    <strong>Pix do sinal ({formatBRL(calculatePixChargeAmount(confirmedApt.totalPrice, settings.depositPercent))})</strong>{' '}
+                    para garantir sua vaga. O restante (
+                    <strong>
+                      {formatBRL(
+                        Math.max(
+                          0,
+                          confirmedApt.totalPrice -
+                            calculatePixChargeAmount(confirmedApt.totalPrice, settings.depositPercent),
+                        ),
+                      )}
+                    </strong>
+                    ) será pago no atendimento.
+                  </div>
+                )}
+
+              {pixQrDataUrl && (
+                <div className="flex flex-col items-center justify-center gap-2 py-2">
+                  <div className="p-3 rounded-2xl bg-white border border-[#E8D6CB] shadow-sm">
+                    <img
+                      src={pixQrDataUrl}
+                      alt="QR Code Pix do Sinal"
+                      className="w-44 h-44 object-contain"
+                    />
+                  </div>
+                  <span className="text-[11px] text-[#95847C]">
+                    Escaneie o QR Code acima no app do seu banco
+                  </span>
+                </div>
+              )}
+
               <p className="text-xs text-[#95847C] leading-relaxed">
-                Copie o código abaixo e cole no aplicativo do seu banco na opção{' '}
-                <strong>Pix Copia e Cola</strong>.
+                Ou copie o código abaixo e cole no aplicativo do seu banco na opção{' '}
+                <strong>Pix Copia e Cola</strong>:
               </p>
               <div className="rounded-xl bg-[#FAF6F1] border border-[#E8D6CB] p-3 font-mono text-[11px] text-[#594943] break-all select-all">
                 {pixPayload}
@@ -605,7 +673,7 @@ export const BookingSheet: React.FC<BookingSheetProps> = ({
               <button
                 type="button"
                 onClick={handleCopyPix}
-                className="w-full min-h-[44px] inline-flex items-center justify-center gap-2 rounded-xl bg-[#C4A477] text-white text-sm font-semibold hover:bg-[#BE9293] transition-colors"
+                className="w-full min-h-[44px] inline-flex items-center justify-center gap-2 rounded-xl bg-[#C4A477] text-white text-sm font-semibold hover:bg-[#BE9293] transition-colors cursor-pointer"
               >
                 {pixCopied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                 <span>{pixCopied ? 'Código Pix copiado' : 'Copiar código Pix'}</span>
@@ -637,7 +705,7 @@ export const BookingSheet: React.FC<BookingSheetProps> = ({
             <a
               href={buildWhatsAppUrl(
                 settings.whatsapp,
-                `Olá! Acabei de agendar no ${settings.studioName}: ${confirmedApt.serviceNames.join(' + ')} para ${formatDateBR(confirmedApt.date)} às ${confirmedApt.startTime}. Nome: ${confirmedApt.clientName}.${confirmedApt.paymentMethod === 'pix' ? ' Segue meu comprovante do Pix!' : ''}`,
+                `Olá! Acabei de agendar no ${settings.studioName}: ${confirmedApt.serviceNames.join(' + ')} para ${formatDateBR(confirmedApt.date)} às ${confirmedApt.startTime}. Nome: ${confirmedApt.clientName}.${pixPayload ? ' Segue meu comprovante do sinal via Pix!' : ''}`,
               )}
               target="_blank"
               rel="noreferrer"
