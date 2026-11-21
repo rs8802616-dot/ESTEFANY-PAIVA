@@ -271,6 +271,7 @@ export default async function handler(req: ApiReq, res: ApiRes) {
     adminVaultDoc,
     painelLockDoc,
     ownerLockDoc,
+    termsDoc,
     gcalDoc,
     eventsMapDoc,
   ] = await Promise.all([
@@ -291,6 +292,7 @@ export default async function handler(req: ApiReq, res: ApiRes) {
     readDoc('telemetry_meta/vault_admin'),
     readDoc('telemetry_meta/lock_painel'),
     readDoc('telemetry_meta/lock_owner'),
+    readDoc('telemetry_meta/admin_terms_acceptance'),
     readDoc('integrations/google_calendar'),
     readDoc('integrations/google_calendar_events'),
   ]);
@@ -671,6 +673,12 @@ export default async function handler(req: ApiReq, res: ApiRes) {
         : null,
       painelLock: parseLock(painelLockDoc),
       ownerLock: parseLock(ownerLockDoc),
+      termsAcceptance: {
+        accepted: Boolean(termsDoc?.accepted),
+        termsVersion: termsDoc?.termsVersion ? String(termsDoc.termsVersion) : null,
+        acceptedAt: termsDoc?.acceptedAt ? String(termsDoc.acceptedAt) : null,
+        adminEmail: termsDoc?.adminEmail ? String(termsDoc.adminEmail) : null,
+      },
     },
     serverMonitorStats: {
       totalChecks,

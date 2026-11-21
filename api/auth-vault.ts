@@ -87,6 +87,15 @@ export default async function handler(req: ApiReq, res: ApiRes) {
   res.setHeader('Cache-Control', 'no-store');
 
   if (req.method === 'GET') {
+    if (String(req.query?.target || '').toLowerCase() === 'terms') {
+      const termsDoc = await readDoc('telemetry_meta/admin_terms_acceptance');
+      return res.status(200).json({
+        accepted: Boolean(termsDoc?.accepted),
+        termsVersion: String(termsDoc?.termsVersion || ''),
+        adminEmail: String(termsDoc?.adminEmail || ''),
+        acceptedAt: String(termsDoc?.acceptedAt || ''),
+      });
+    }
     const target = normalizeTarget(req.query?.target);
     const lockDoc = await readDoc(`telemetry_meta/lock_${target}`);
     return res.status(200).json(getLockState(lockDoc));
@@ -213,6 +222,36 @@ export default async function handler(req: ApiReq, res: ApiRes) {
       updatedAt: new Date().toISOString(),
     });
     return res.status(ok ? 200 : 500).json({ ok, newHash });
+  }
+
+  if (action === 'accept_terms') {
+    const callerAuth = String(body.callerAuthHash || '').trim().toLowerCase();
+    const adminEmail = String(body.adminEmail || '').trim().toLowerCase();
+    const termsVersion = String(body.termsVersion || '2026-11-v1').trim().slice(0, 32);
+    const userAgent = String(body.userAgent || '').trim().slice(0, 180);
+
+    const [ownerVault, adminVault] = await Promise.all([
+      readDoc('telemetry_meta/vault_owner'),
+      readDoc('telemetry_meta/vault_admin'),
+    ]);
+    const validHashes = [
+      ...DEFAULT_PBKDF2_HASHES,
+      ...(ownerVault?.hash ? [String(ownerVault.hash).toLowerCase()] : []),
+      ...(adminVault?.hash ? [String(adminVault.hash).toLowerCase()] : []),
+    ];
+    if (!validHashes.includes(callerAuth)) {
+      return res.status(401).json({ ok: false, error: 'Não autorizado.' });
+    }
+
+    const acceptedAt = new Date().toISOString();
+    const ok = await writeDoc('telemetry_meta/admin_terms_acceptance', {
+      accepted: true,
+      termsVersion,
+      adminEmail: adminEmail || String(adminVault?.email || ''),
+      acceptedAt,
+      userAgent,
+    });
+    return res.status(ok ? 200 : 500).json({ ok, acceptedAt, termsVersion });
   }
 
   return res.status(400).json({ error: 'Unknown action' });

@@ -265,6 +265,12 @@ interface ServerTelemetryPayload {
     ownerEmail: string | null;
     painelLock: { locked: boolean; remainingSeconds: number; attempts: number };
     ownerLock: { locked: boolean; remainingSeconds: number; attempts: number };
+    termsAcceptance?: {
+      accepted: boolean;
+      termsVersion: string | null;
+      acceptedAt: string | null;
+      adminEmail: string | null;
+    };
   };
   serverMonitorStats?: {
     totalChecks: number;
@@ -2571,6 +2577,21 @@ export const OwnerMonitoringPanel: React.FC<OwnerMonitoringPanelProps> = ({
                         Desbloqueado ({srv?.vaultAccess?.painelLock.attempts ?? 0}
                         /5 tentativas falhas)
                       </span>
+                    )}
+                  </p>
+                  <p className="text-xs text-zinc-400 mt-1 font-mono">
+                    Termo de Uso (LGPD):{' '}
+                    {srv?.vaultAccess?.termsAcceptance?.accepted ? (
+                      <span className="text-emerald-400">
+                        Aceito ({srv.vaultAccess.termsAcceptance.termsVersion}) em{' '}
+                        {srv.vaultAccess.termsAcceptance.acceptedAt
+                          ? new Date(
+                              srv.vaultAccess.termsAcceptance.acceptedAt,
+                            ).toLocaleString('pt-BR')
+                          : '—'}
+                      </span>
+                    ) : (
+                      <span className="text-amber-400">Aguardando aceite da Admin</span>
                     )}
                   </p>
                 </div>

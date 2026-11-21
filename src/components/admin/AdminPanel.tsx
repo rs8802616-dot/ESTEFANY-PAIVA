@@ -52,6 +52,11 @@ import {
 } from '../../lib/adminRoute';
 import { trackAuthFailure } from '../../lib/telemetry';
 import {
+  ADMIN_TERMS_LOCAL_KEY,
+  ADMIN_TERMS_VERSION,
+  AdminTermsModal,
+} from './AdminTermsModal';
+import {
   disconnectGoogleCalendar,
   fetchGoogleCalendarStatus,
   syncAppointmentToGoogleCalendar,
@@ -446,6 +451,49 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
   const [painelLockSec, setPainelLockSec] = useState(0);
   const [painelAttempts, setPainelAttempts] = useState(0);
+  const [termsAccepted, setTermsAccepted] = useState<boolean>(() => {
+    try {
+      return Boolean(localStorage.getItem(ADMIN_TERMS_LOCAL_KEY));
+    } catch {
+      return false;
+    }
+  });
+  const [termsChecked, setTermsChecked] = useState(false);
+
+  useEffect(() => {
+    if (!vaultEmail && !isAdmin) return;
+    let active = true;
+    void fetch('/api/auth-vault?target=terms')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data: { accepted?: boolean; termsVersion?: string; acceptedAt?: string } | null) => {
+        if (!active) return;
+        if (data?.accepted && data.termsVersion === ADMIN_TERMS_VERSION) {
+          setTermsAccepted(true);
+          try {
+            localStorage.setItem(
+              ADMIN_TERMS_LOCAL_KEY,
+              data.acceptedAt || new Date().toISOString(),
+            );
+          } catch {
+            // ignore
+          }
+        } else if (data && data.accepted === false) {
+          setTermsAccepted(false);
+          try {
+            localStorage.removeItem(ADMIN_TERMS_LOCAL_KEY);
+          } catch {
+            // ignore
+          }
+        }
+        setTermsChecked(true);
+      })
+      .catch(() => {
+        if (active) setTermsChecked(true);
+      });
+    return () => {
+      active = false;
+    };
+  }, [vaultEmail, isAdmin]);
 
   useEffect(() => {
     if (vaultEmail) return;
@@ -683,6 +731,15 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
   return (
     <div className="min-h-screen w-full max-w-full overflow-x-hidden bg-[#FAF6F1] text-[#594943] flex flex-col">
+      {termsChecked && !termsAccepted && (
+        <AdminTermsModal
+          adminEmail={effectiveEmail}
+          onAccepted={() => {
+            setTermsAccepted(true);
+            showToast('Termo de Uso e Segurança aceito e registrado!', 'success');
+          }}
+        />
+      )}
       {/* Backdrop escuro suave quando o Menu 2 Traços (Aba Lateral) está aberto */}
       {sidebarOpen && (
         <div

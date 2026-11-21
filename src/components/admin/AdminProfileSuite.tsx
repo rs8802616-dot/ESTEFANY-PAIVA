@@ -12,6 +12,7 @@ import { LuxuryStateView } from '../ui/LuxuryDesignSystem';
 import { MANDATORY_SCREENS_33 } from '../../theme/luxuryNudeTheme';
 import { resetAdminPassword, signOutUser } from '../../lib/firebase';
 import { clearAdminGateSession, updateVaultCredentials } from '../../lib/adminRoute';
+import { ADMIN_TERMS_LOCAL_KEY, AdminTermsModal } from './AdminTermsModal';
 
 export type ProfileScreenId = 25 | 26 | 27 | 28 | 29 | 30 | 31 | 32 | 33;
 
@@ -133,6 +134,7 @@ export const AdminProfileSuite: React.FC<Props> = ({
   const [newAdminEmail, setNewAdminEmail] = useState(adminEmail || '');
   const [newAdminPass, setNewAdminPass] = useState('');
   const [savingCreds, setSavingCreds] = useState(false);
+  const [showTermsReadOnly, setShowTermsReadOnly] = useState(false);
 
   // Sincroniza o formulário sempre que settings atualizar
   useEffect(() => {
@@ -1179,20 +1181,114 @@ export const AdminProfileSuite: React.FC<Props> = ({
                 />
               </div>
             </div>
-            <button
-              type="submit"
-              disabled={savingCreds}
-              className="px-5 py-2.5 rounded-xl bg-[#594943] text-white text-xs font-semibold hover:bg-[#433631] transition-colors cursor-pointer disabled:opacity-60"
-            >
-              {savingCreds ? 'Salvando com criptografia...' : 'Salvar Novo Login e Senha'}
-            </button>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="submit"
+                disabled={savingCreds}
+                className="px-5 py-2.5 rounded-xl bg-[#594943] text-white text-xs font-semibold hover:bg-[#433631] transition-colors cursor-pointer disabled:opacity-60"
+              >
+                {savingCreds ? 'Salvando com criptografia...' : 'Salvar Novo Login e Senha'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowTermsReadOnly(true)}
+                className="px-4 py-2.5 rounded-xl bg-white text-[#594943] text-xs font-semibold border border-[#E8D6CB] hover:border-[#C4A477] transition-colors cursor-pointer"
+              >
+                Ver Termo de Uso e Segurança Aceito
+              </button>
+            </div>
           </form>
+
+          {showTermsReadOnly && (
+            <AdminTermsModal
+              adminEmail={adminEmail || newAdminEmail}
+              readOnly
+              acceptedAt={localStorage.getItem(ADMIN_TERMS_LOCAL_KEY) || undefined}
+              onAccepted={() => setShowTermsReadOnly(false)}
+              onClose={() => setShowTermsReadOnly(false)}
+            />
+          )}
         </div>
       )}
 
-      {/* SCREEN 33: AJUDA E SUPORTE + NAVEGADOR DAS 33 TELAS */}
+      {/* SCREEN 33: AJUDA, MANUAL COMPLETO E SUPORTE */}
       {currentScreen === 33 && (
         <div className="space-y-6">
+          <div className="bg-white rounded-3xl p-6 border border-[#E8D6CB] shadow-sm space-y-5">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-widest text-[#C4A477] block">
+                  Guia Prático da Administradora
+                </span>
+                <h3 className="font-serif text-xl font-bold text-[#594943]">
+                  Manual Completo de Uso do Aplicativo
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowTermsReadOnly(true)}
+                className="px-3.5 py-2 rounded-xl bg-[#FAF6F1] border border-[#E8D6CB] text-xs font-semibold text-[#594943] hover:border-[#C4A477] cursor-pointer"
+              >
+                Ler Termo de Uso & LGPD
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-[#594943]">
+              {[
+                {
+                  title: '1. Acesso, Segurança e Bloqueio',
+                  text: 'Entre sempre pelo seu link administrativo com seu e-mail e senha. Por segurança, após 5 tentativas erradas a tela bloqueia por 15 minutos. Você pode trocar seu e-mail e senha quando quiser em Perfil → Segurança da Conta.',
+                },
+                {
+                  title: '2. Agenda (Dia a Dia)',
+                  text: 'Veja todos os atendimentos em ordem de data. Toque em "Detalhes" para confirmar, concluir, cancelar, remarcar horário ou enviar lembrete pronto no WhatsApp com 1 clique. Use "Novo Horário" para encaixes manuais, "Bloquear Horário" para compromissos pessoais e "Abrir / Fechar Meses" para controlar os meses disponíveis.',
+                },
+                {
+                  title: '3. Google Agenda Automático',
+                  text: 'No topo do painel, clique em "Conectar Google Agenda", escolha sua conta Google e marque a caixinha de permissão da agenda. A partir daí, todo novo agendamento vai automaticamente para o seu Google Agenda. Ao clicar no botão verde com seu e-mail, você também pode sincronizar horários já existentes ou desconectar.',
+                },
+                {
+                  title: '4. Serviços e Categorias (Catálogo)',
+                  text: 'Crie e edite categorias e procedimentos com nome, descrição, valor (R$), duração exata em minutos e foto real do celular/PC. Os horários livres no site da cliente são calculados automaticamente pela duração de cada serviço.',
+                },
+                {
+                  title: '5. Clientes e Notas Técnicas',
+                  text: 'Aba exclusiva para consultar o histórico de cada cliente, quantidade de visitas, tempo desde o último atendimento e salvar anotações técnicas privadas (ex.: formato preferido, cor de gel, alergias).',
+                },
+                {
+                  title: '6. Financeiro e Relatórios',
+                  text: 'Acompanhe entradas por atendimentos concluídos, lance despesas do estúdio, filtre por período, confira formas de pagamento (Pix, Dinheiro, Cartão) e exporte relatórios em CSV.',
+                },
+                {
+                  title: '7. Configurações de Horários e Pix',
+                  text: 'Em Perfil → Configurações Gerais, escolha os dias da semana de atendimento, horário de abertura/fechamento e alterne entre "Horários Corridos (Intervalo automático)" ou "Horários Fixos Fechados". Configure também sua chave Pix, percentual de sinal, dias de folga, foto de perfil, capa e textos do site.',
+                },
+                {
+                  title: '8. Página Pública das Clientes',
+                  text: 'As clientes acessam o link principal do site, escolhem um ou mais procedimentos, visualizam apenas os horários livres compatíveis com a duração total e confirmam informando nome e WhatsApp. Elas também podem consultar ou remarcar em "Meus Agendamentos".',
+                },
+              ].map((item) => (
+                <div
+                  key={item.title}
+                  className="rounded-2xl bg-[#FAF6F1] border border-[#E8D6CB] p-4 space-y-1.5"
+                >
+                  <h4 className="font-bold text-sm text-[#594943]">{item.title}</h4>
+                  <p className="text-[#7B6B64] leading-relaxed">{item.text}</p>
+                </div>
+              ))}
+            </div>
+
+            {showTermsReadOnly && (
+              <AdminTermsModal
+                adminEmail={adminEmail || newAdminEmail}
+                readOnly
+                acceptedAt={localStorage.getItem(ADMIN_TERMS_LOCAL_KEY) || undefined}
+                onAccepted={() => setShowTermsReadOnly(false)}
+                onClose={() => setShowTermsReadOnly(false)}
+              />
+            )}
+          </div>
+
           <div className="bg-white rounded-3xl p-6 border border-[#E8D6CB] shadow-sm space-y-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
