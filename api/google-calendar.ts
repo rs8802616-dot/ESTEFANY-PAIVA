@@ -172,16 +172,17 @@ export default async function handler(req: ApiReq, res: ApiRes): Promise<void> {
         access_token?: string;
         refresh_token?: string;
         expires_in?: number;
+        error?: string;
       };
       if (!tokenResp.ok || !tokenData.access_token) {
-        res.redirect(302, '/painel?gcal=error');
+        res.redirect(302, `/painel?gcal=error&reason=${encodeURIComponent(tokenData.error || 'token_failed')}`);
         return;
       }
 
       const existing = await readFirestoreDoc('integrations/google_calendar').catch(() => null);
       const refreshToken = tokenData.refresh_token || String(existing?.refreshToken || '');
       if (!refreshToken) {
-        res.redirect(302, '/painel?gcal=error');
+        res.redirect(302, '/painel?gcal=error&reason=no_refresh_token');
         return;
       }
 
@@ -190,7 +191,7 @@ export default async function handler(req: ApiReq, res: ApiRes): Promise<void> {
       });
       const userData = (await userResp.json().catch(() => ({}))) as { email?: string };
 
-      await writeFirestoreDoc('integrations/google_calendar', {
+      const savedOk = await writeFirestoreDoc('integrations/google_calendar', {
         connected: true,
         email: String(userData.email || ''),
         refreshToken,
@@ -198,6 +199,11 @@ export default async function handler(req: ApiReq, res: ApiRes): Promise<void> {
         expiresAt: Date.now() + Number(tokenData.expires_in || 3500) * 1000,
         updatedAt: new Date().toISOString(),
       });
+
+      if (!savedOk) {
+        res.redirect(302, '/painel?gcal=error&reason=firestore_save_failed');
+        return;
+      }
 
       res.redirect(302, '/painel?gcal=connected');
     } catch {

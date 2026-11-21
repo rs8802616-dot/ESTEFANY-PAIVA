@@ -171,6 +171,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       const gcalParam = params.get('gcal');
+      const gcalReason = params.get('reason');
       if (gcalParam === 'connected') {
         showToast('Google Agenda conectada! Novos agendamentos irão automaticamente.', 'success');
         window.history.replaceState({}, '', window.location.pathname);
@@ -178,7 +179,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
         showToast('Configure GOOGLE_CLIENT_ID e GOOGLE_CLIENT_SECRET na Vercel.', 'error');
         window.history.replaceState({}, '', window.location.pathname);
       } else if (gcalParam === 'error') {
-        showToast('Não foi possível conectar o Google Agenda.', 'error');
+        showToast(
+          `Não foi possível conectar o Google Agenda${gcalReason ? ` (${gcalReason})` : ''}.`,
+          'error',
+        );
         window.history.replaceState({}, '', window.location.pathname);
       }
     }
