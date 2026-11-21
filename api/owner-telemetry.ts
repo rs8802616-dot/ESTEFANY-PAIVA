@@ -140,7 +140,8 @@ export default async function handler(req: ApiReq, res: ApiRes) {
     }
 
     if (body.action === 'test_telegram') {
-      const botToken = getEnv('TELEGRAM_BOT_TOKEN');
+      const rawToken = getEnv('TELEGRAM_BOT_TOKEN');
+      const botToken = rawToken.replace(/^bot/i, '').trim();
       const chatId = getEnv('TELEGRAM_CHAT_ID');
       if (!botToken || !chatId) {
         return res.status(400).json({
@@ -160,7 +161,23 @@ export default async function handler(req: ApiReq, res: ApiRes) {
           }),
         },
       );
-      return res.status(tgResp.ok ? 200 : 502).json({ ok: tgResp.ok });
+      if (tgResp.ok) {
+        return res.status(200).json({ ok: true });
+      }
+      let tgDesc = `HTTP ${tgResp.status}`;
+      try {
+        const errJson = (await tgResp.json()) as { description?: string };
+        if (errJson.description) tgDesc = errJson.description;
+      } catch {
+        // ignore
+      }
+      if (tgDesc.toLowerCase().includes('chat not found')) {
+        tgDesc =
+          'Chat não encontrado (chat not found): abra seu bot no Telegram, clique em Começar/Start e confira o TELEGRAM_CHAT_ID.';
+      } else if (tgResp.status === 401 || tgResp.status === 404) {
+        tgDesc = `Token do bot inválido (${tgDesc}): confira TELEGRAM_BOT_TOKEN na Vercel.`;
+      }
+      return res.status(502).json({ ok: false, error: tgDesc });
     }
 
     const minutes = Math.max(0, Math.min(1440, Number(body.muteMinutes || 0)));

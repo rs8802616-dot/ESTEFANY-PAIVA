@@ -90,7 +90,7 @@ async function writeDoc(
 }
 
 async function sendTelegramAlert(text: string): Promise<boolean> {
-  const botToken = getEnv('TELEGRAM_BOT_TOKEN');
+  const botToken = getEnv('TELEGRAM_BOT_TOKEN').replace(/^bot/i, '').trim();
   const chatId = getEnv('TELEGRAM_CHAT_ID');
   if (!botToken || !chatId) return false;
   try {
