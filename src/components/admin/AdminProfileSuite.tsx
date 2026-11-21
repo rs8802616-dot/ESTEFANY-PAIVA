@@ -23,36 +23,7 @@ interface GalleryPhoto {
   createdAt: string;
 }
 
-const DEFAULT_GALLERY_PHOTOS: GalleryPhoto[] = [
-  {
-    id: 'gal-1',
-    title: 'Alongamento Fibra Natural Nude',
-    category: 'Alongamento',
-    imageUrl: '/src/assets/images/service-alongamento.jpg',
-    createdAt: '2026-11-01',
-  },
-  {
-    id: 'gal-2',
-    title: 'Banho de Gel Natural',
-    category: 'Banho de Gel',
-    imageUrl: '/src/assets/images/service-banho.jpg',
-    createdAt: '2026-11-03',
-  },
-  {
-    id: 'gal-3',
-    title: 'Esmaltação em Gel Clássica',
-    category: 'Gel',
-    imageUrl: '/src/assets/images/service-esmaltacao.jpg',
-    createdAt: '2026-11-05',
-  },
-  {
-    id: 'gal-4',
-    title: 'Spa dos Pés e Pedicure',
-    category: 'Spa',
-    imageUrl: '/src/assets/images/service-spa.jpg',
-    createdAt: '2026-11-07',
-  },
-];
+const DEFAULT_GALLERY_PHOTOS: GalleryPhoto[] = [];
 
 const GALLERY_STORAGE_KEY = 'ep_nails_luxury_gallery_v1';
 
@@ -61,7 +32,10 @@ function loadGallery(): GalleryPhoto[] {
     const raw = localStorage.getItem(GALLERY_STORAGE_KEY);
     if (!raw) return DEFAULT_GALLERY_PHOTOS;
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) && parsed.length > 0 ? parsed : DEFAULT_GALLERY_PHOTOS;
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter(
+      (p: GalleryPhoto) => p && !/^gal-[1-4]$/.test(String(p.id || '')),
+    );
   } catch {
     return DEFAULT_GALLERY_PHOTOS;
   }

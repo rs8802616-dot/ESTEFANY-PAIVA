@@ -383,17 +383,6 @@ export const AdminAgendaTab: React.FC<AdminAgendaTabProps> = ({
             {showPast ? 'Ocultar anteriores' : 'Ver histórico'}
           </button>
 
-          {testRecordsCount > 0 && (
-            <button
-              type="button"
-              disabled={saving}
-              onClick={() => void handleClearTestRecords()}
-              className="min-h-[40px] rounded-xl border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-100 transition-colors cursor-pointer disabled:opacity-50"
-            >
-              Apagar testes (R$ 0,00)
-            </button>
-          )}
-
           <input
             type="date"
             value={dateFilter}

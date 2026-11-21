@@ -9,7 +9,6 @@ import {
   adminSaveCategory,
   adminSaveService,
 } from '../../lib/db';
-import { STUDIO_IMAGE_PRESETS, STUDIO_IMAGES } from '../../lib/defaults';
 import { compressImageToDataUrl, formatBRL, formatDuration } from '../../lib/utils';
 import type { Category, Service } from '../../types/salon';
 
@@ -55,7 +54,7 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
       description: '',
       price: 120,
       durationMinutes: 90,
-      imageUrl: STUDIO_IMAGES.alongamento,
+      imageUrl: '',
       featured: false,
       active: true,
       order: services.length + 1,
@@ -95,7 +94,7 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
         description: editingSvc.description || '',
         price: Number(editingSvc.price) || 0,
         durationMinutes: Number(editingSvc.durationMinutes) || 60,
-        imageUrl: editingSvc.imageUrl || STUDIO_IMAGES.alongamento,
+        imageUrl: editingSvc.imageUrl || '',
         featured: Boolean(editingSvc.featured),
         active: editingSvc.active !== false,
         order: Number(editingSvc.order) || 1,
@@ -347,23 +346,6 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
                   <span className="text-xs text-[#95847C]">Foto atual selecionada</span>
                 </div>
               )}
-              <div className="grid grid-cols-5 gap-2">
-                {STUDIO_IMAGE_PRESETS.map((preset) => (
-                  <button
-                    key={preset.url}
-                    type="button"
-                    onClick={() => setEditingSvc({ ...editingSvc, imageUrl: preset.url })}
-                    title={preset.label}
-                    className={`aspect-square rounded-xl overflow-hidden border-2 transition-all ${
-                      editingSvc.imageUrl === preset.url
-                        ? 'border-[#C4A477]'
-                        : 'border-transparent opacity-75 hover:opacity-100'
-                    }`}
-                  >
-                    <SafeImage src={preset.url} alt={preset.label} className="w-full h-full object-cover" />
-                  </button>
-                ))}
-              </div>
               <label className="min-h-[42px] inline-flex items-center gap-2 rounded-xl border border-[#E8D6CB] bg-white px-4 py-2 text-xs font-semibold text-[#594943] hover:border-[#C4A477] cursor-pointer">
                 <Upload className="w-4 h-4 text-[#C4A477]" />
                 <span>Escolher foto do celular / PC</span>

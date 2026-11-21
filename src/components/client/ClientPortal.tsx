@@ -487,7 +487,11 @@ export const ClientPortal: React.FC<ClientPortalProps> = ({
                 const raw = typeof window !== 'undefined' ? window.localStorage.getItem('epn_luxury_gallery_v41') : null;
                 if (raw) {
                   const parsed = JSON.parse(raw);
-                  if (Array.isArray(parsed)) photos = parsed;
+                  if (Array.isArray(parsed)) {
+                    photos = parsed.filter(
+                      (p: { id?: string }) => p && !/^gal-[1-4]$/.test(String(p.id || '')),
+                    );
+                  }
                 }
               } catch {
                 photos = [];
